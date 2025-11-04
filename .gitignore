@@ -1,0 +1,28 @@
+# Dependências do Composer
+/vendor/
+
+# Configurações sensíveis
+/.env
+/.env.local
+/config/local.php
+
+# Diretórios de cache/log
+/storage/cache/
+/storage/logs/
+
+# Uploads de usuários (nunca versionar arquivos enviados)
+/storage/uploads/
+/public/uploads/
+
+# Arquivos temporários
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Arquivos do sistema operacional / IDEs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.orig
