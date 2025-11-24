@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Presentation\Controller\Admin\Auth\LoginController;
 use App\Presentation\Controller\Admin\AdminUserController;
+use App\Presentation\Controller\Admin\PortalUserController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -25,6 +26,14 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/admin/users/{id:\d+}/edit', [AdminUserController::class, 'showEditForm']);
     $r->addRoute('POST', '/admin/users/{id:\d+}',     [AdminUserController::class, 'update']);
     $r->addRoute('POST', '/admin/users/{id:\d+}/deactivate', [AdminUserController::class, 'deactivate']);
+
+    // Usuários Finais
+    $r->addRoute('GET',  '/admin/portal-users',                    [PortalUserController::class, 'index']);
+    $r->addRoute('GET',  '/admin/portal-users/create',             [PortalUserController::class, 'showCreateForm']);
+    $r->addRoute('POST', '/admin/portal-users',                    [PortalUserController::class, 'store']);
+    $r->addRoute('GET',  '/admin/portal-users/{id:\d+}/edit',      [PortalUserController::class, 'showEditForm']);
+    $r->addRoute('POST', '/admin/portal-users/{id:\d+}',           [PortalUserController::class, 'update']);
+    $r->addRoute('POST', '/admin/portal-users/{id:\d+}/deactivate', [PortalUserController::class, 'deactivate']);
 
     // Dashboard
     $r->addRoute('GET', '/admin', function () {
