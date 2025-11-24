@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Presentation\Controller\Portal\Auth\PortalLoginController;
+use App\Presentation\Controller\Portal\PortalSubmissionController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -11,19 +12,26 @@ $config = require __DIR__ . '/../bootstrap/app.php';
 
 // Router do portal
 $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
-    // Login portal
+    // Login portal (já existe)
     $r->addRoute('GET',  '/portal/login',  [PortalLoginController::class, 'showLoginForm']);
     $r->addRoute('POST', '/portal/login',  [PortalLoginController::class, 'handleLogin']);
     $r->addRoute('GET',  '/portal/logout', [PortalLoginController::class, 'logout']);
 
-    // Dashboard do usuário final
+    // Submissões do usuário final
+    $r->addRoute('GET',  '/portal/submissions',                [PortalSubmissionController::class, 'index']);
+    $r->addRoute('GET',  '/portal/submissions/create',         [PortalSubmissionController::class, 'showCreateForm']);
+    $r->addRoute('POST', '/portal/submissions',                [PortalSubmissionController::class, 'store']);
+    $r->addRoute('GET',  '/portal/submissions/{id:\d+}',       [PortalSubmissionController::class, 'show']);
+
+    // Dashboard do usuário final (placeholder)
     $r->addRoute('GET', '/portal', function () {
         echo '<div style="font-family:system-ui;padding:2rem">
                 <h2>Portal do Usuário</h2>
-                <p>Login efetuado com sucesso. Aqui vai entrar o envio de informações e documentos.</p>
+                <p>Login efetuado com sucesso. Use o menu para enviar informações.</p>
               </div>';
     });
 });
+
 
 // Método e URI
 $httpMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
