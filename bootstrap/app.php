@@ -3,14 +3,9 @@
 declare(strict_types=1);
 
 use Dotenv\Dotenv;
-
-require __DIR__ . '/../vendor/autoload.php';
-
 use App\Infrastructure\Persistence\Connection;
 
-$pdo = Connection::make($config['db']);
-$config['pdo'] = $pdo; // disponibiliza para controllers
-return $config;
+require __DIR__ . '/../vendor/autoload.php';
 
 // Carrega variáveis de ambiente
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
@@ -36,12 +31,13 @@ if ($appDebug) {
     error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT);
 }
 
-// Carrega config principal
+// 1) Carrega config principal (AGORA criamos $config)
 $config = require __DIR__ . '/../config/config.php';
 
-// Aqui no futuro você pode inicializar:
-// - PDO
-// - Monolog
-// - Container de dependências, etc.
+// 2) Cria conexão PDO usando os dados de $config['db']
+$pdo = Connection::make($config['db']);
+
+// 3) Injeta PDO dentro do array de config para uso pelos controllers
+$config['pdo'] = $pdo;
 
 return $config;
