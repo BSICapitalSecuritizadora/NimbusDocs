@@ -12,4 +12,15 @@ interface PortalAccessTokenRepository
     public function listRecentByUser(int $portalUserId, int $limit = 10): array;
 
     public function revokePendingTokens(int $portalUserId): void;
+
+    /**
+     * Busca um token válido (PENDING, não expirado) pelo código, já com dados do usuário.
+     *
+     * Retorna array com chaves:
+     *  - token_* (id, code, expires_at, status...)
+     *  - user_*  (id, full_name, email, etc.)
+     */
+    public function findValidWithUserByCode(string $code): ?array;
+
+    public function markAsUsed(int $tokenId, string $ip, string $userAgent): void;
 }
