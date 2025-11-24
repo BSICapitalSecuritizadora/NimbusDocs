@@ -48,7 +48,7 @@ final class AdminUserController
             ],
         ];
 
-        require __DIR__ . '/../../../View/admin/layouts/base.php';
+        require __DIR__ . '/../../View/admin/layouts/base.php';
     }
 
     public function showCreateForm(array $vars = []): void
@@ -65,7 +65,7 @@ final class AdminUserController
             'csrfToken' => Csrf::token(),
         ];
 
-        require __DIR__ . '/../../../View/admin/layouts/base.php';
+        require __DIR__ . '/../../View/admin/layouts/base.php';
     }
 
     public function store(array $vars = []): void
@@ -137,7 +137,7 @@ final class AdminUserController
             'csrfToken' => Csrf::token(),
         ];
 
-        require __DIR__ . '/../../../View/admin/layouts/base.php';
+        require __DIR__ . '/../../View/admin/layouts/base.php';
     }
 
     public function update(array $vars = []): void
