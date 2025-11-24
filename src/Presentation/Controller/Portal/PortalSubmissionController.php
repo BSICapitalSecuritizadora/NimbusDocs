@@ -92,13 +92,59 @@ final class PortalSubmissionController
             $errors['title'] = 'Título deve ter pelo menos 3 caracteres.';
         }
 
+        // --- validação básica dos anexos ---
+        $filesArray = $_FILES['attachments'] ?? null;
+        $hasFiles   = $filesArray && isset($filesArray['name']) && is_array($filesArray['name']);
+
+        $maxSize = (int)($this->config['upload_max_file_size'] ?? $this->config['upload']['max_file_size'] ?? 104857600);
+
+        $allowedMimes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'text/plain',
+            'text/csv',
+            'image/jpeg',
+            'image/png',
+        ];
+
+        if ($hasFiles) {
+            $count = count($filesArray['name']);
+            for ($i = 0; $i < $count; $i++) {
+                $error = $filesArray['error'][$i];
+                if ($error === UPLOAD_ERR_NO_FILE) {
+                    continue;
+                }
+                if ($error !== UPLOAD_ERR_OK) {
+                    $errors['attachments'] = 'Erro ao enviar um ou mais arquivos.';
+                    break;
+                }
+
+                $size = (int)$filesArray['size'][$i];
+                if ($size > $maxSize) {
+                    $errors['attachments'] = 'Um dos arquivos excede o tamanho máximo permitido.';
+                    break;
+                }
+
+                $type = $filesArray['type'][$i] ?? '';
+                if ($type && !in_array($type, $allowedMimes, true)) {
+                    $errors['attachments'] = 'Um dos arquivos possui tipo não permitido.';
+                    break;
+                }
+            }
+        }
+
         if ($errors) {
             Session::flash('errors', $errors);
             Session::flash('old', $data);
             $this->redirect('/portal/submissions/create');
         }
 
-        // Gera um código de referência amigável
+        // --- cria submissão ---
         $refCode = sprintf(
             'SUB-%s-%s',
             date('Ymd'),
@@ -116,6 +162,11 @@ final class PortalSubmissionController
             'created_ip'          => $ip,
             'created_user_agent'  => $ua,
         ]);
+
+        // --- salva anexos fisicamente + na tabela ---
+        if ($hasFiles) {
+            $this->saveUploadedFiles($submissionId, $filesArray, $maxSize);
+        }
 
         Session::flash('success', 'Submissão enviada com sucesso.');
         $this->redirect('/portal/submissions/' . $submissionId);
@@ -150,5 +201,62 @@ final class PortalSubmissionController
     {
         header('Location: ' . $path);
         exit;
+    }
+
+    private function saveUploadedFiles(int $submissionId, array $filesArray, int $maxSize): void
+    {
+        $uploadDir = rtrim($this->config['upload_dir'] ?? $this->config['upload']['dir'] ?? dirname(__DIR__, 5) . '/storage/uploads', '/');
+
+        $baseDir = $uploadDir . '/' . date('Y') . '/' . date('m');
+        if (!is_dir($baseDir)) {
+            mkdir($baseDir, 0775, true);
+        }
+
+        $count = count($filesArray['name']);
+
+        for ($i = 0; $i < $count; $i++) {
+            $error = $filesArray['error'][$i];
+            if ($error === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+            if ($error !== UPLOAD_ERR_OK) {
+                continue; // já validamos antes; aqui só pulamos
+            }
+
+            $tmpName      = $filesArray['tmp_name'][$i];
+            $originalName = $filesArray['name'][$i];
+            $size         = (int)$filesArray['size'][$i];
+            $mime         = $filesArray['type'][$i] ?? 'application/octet-stream';
+
+            if (!is_uploaded_file($tmpName) || $size <= 0 || $size > $maxSize) {
+                continue;
+            }
+
+            $ext = pathinfo($originalName, PATHINFO_EXTENSION);
+            $storedName = bin2hex(random_bytes(16)) . ($ext ? ('.' . strtolower($ext)) : '');
+
+            $relativePath = date('Y') . '/' . date('m') . '/' . $storedName;
+            $fullPath     = $uploadDir . '/' . $relativePath;
+
+            $dir = dirname($fullPath);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0775, true);
+            }
+
+            if (!move_uploaded_file($tmpName, $fullPath)) {
+                continue;
+            }
+
+            $checksum = hash_file('sha256', $fullPath);
+
+            $this->fileRepo->create($submissionId, [
+                'original_name' => $originalName,
+                'stored_name'   => $storedName,
+                'mime_type'     => $mime,
+                'size_bytes'    => $size,
+                'storage_path'  => $relativePath,
+                'checksum'      => $checksum,
+            ]);
+        }
     }
 }

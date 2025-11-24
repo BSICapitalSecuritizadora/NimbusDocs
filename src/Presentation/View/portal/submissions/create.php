@@ -13,7 +13,9 @@ $message = $old['message'] ?? '';
 
         <div class="card">
             <div class="card-body">
-                <form method="post" action="/portal/submissions">
+                <form method="post"
+                    action="/portal/submissions"
+                    enctype="multipart/form-data">
                     <input type="hidden" name="_token"
                         value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
@@ -36,7 +38,23 @@ $message = $old['message'] ?? '';
                             id="message" name="message" rows="4"><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></textarea>
                     </div>
 
-                    <!-- Upload de arquivos entra na próxima fase -->
+                    <div class="mb-3">
+                        <label class="form-label" for="attachments">Anexos</label>
+                        <input type="file"
+                            class="form-control <?= isset($errors['attachments']) ? 'is-invalid' : '' ?>"
+                            id="attachments"
+                            name="attachments[]"
+                            multiple>
+                        <div class="form-text">
+                            Tipos permitidos: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, CSV, JPG, PNG.<br>
+                            Tamanho máximo: 100MB por arquivo.
+                        </div>
+                        <?php if (isset($errors['attachments'])): ?>
+                            <div class="invalid-feedback">
+                                <?= htmlspecialchars($errors['attachments'], ENT_QUOTES, 'UTF-8') ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
 
                     <div class="d-flex justify-content-between">
                         <a href="/portal/submissions" class="btn btn-outline-secondary">

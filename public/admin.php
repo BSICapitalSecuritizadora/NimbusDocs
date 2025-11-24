@@ -6,6 +6,7 @@ use App\Presentation\Controller\Admin\Auth\LoginController;
 use App\Presentation\Controller\Admin\AdminUserController;
 use App\Presentation\Controller\Admin\PortalUserController;
 use App\Presentation\Controller\Admin\SubmissionAdminController;
+use App\Presentation\Controller\Admin\FileAdminController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -38,6 +39,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}',           [PortalUserController::class, 'update']);
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}/deactivate', [PortalUserController::class, 'deactivate']);
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}/tokens', [PortalUserController::class, 'generateToken']);
+
+    // Downloads de arquivos de submissão
+    $r->addRoute('GET', '/admin/files/{id:\d+}/download', [FileAdminController::class, 'download']);
 
     // Dashboard
     $r->addRoute('GET', '/admin', function () {

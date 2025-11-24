@@ -34,8 +34,21 @@ return [
     ],
 
     'upload' => [
-        'max_filesize_mb' => (int)($_ENV['UPLOAD_MAX_FILESIZE_MB'] ?? 100),
-        'allowed_mime'    => array_map('trim', explode(',', $_ENV['UPLOAD_ALLOWED_MIME'] ?? '')),
-        'storage_path'    => $_ENV['UPLOAD_STORAGE_PATH'] ?? 'storage/uploads',
+        // tamanho em MB (apenas informativo / para UI)
+        'max_filesize_mb'    => (int)($_ENV['UPLOAD_MAX_FILESIZE_MB'] ?? 100),
+
+        // tamanho em BYTES (para validação no PHP)
+        'max_filesize_bytes' => (int) (($_ENV['UPLOAD_MAX_FILESIZE_MB'] ?? 100) * 1024 * 1024),
+
+        // se quiser controlar via .env, ótimo; se ficar vazio, a gente usa um default no controller
+        'allowed_mime'       => array_filter(
+            array_map('trim', explode(',', $_ENV['UPLOAD_ALLOWED_MIME'] ?? ''))
+        ),
+
+        // transforma em caminho ABSOLUTO: <raiz do projeto>/storage/uploads
+        'storage_path'       => dirname(__DIR__) . '/' . ltrim(
+            $_ENV['UPLOAD_STORAGE_PATH'] ?? 'storage/uploads',
+            '/'
+        ),
     ],
 ];
