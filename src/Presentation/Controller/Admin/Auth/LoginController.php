@@ -115,4 +115,16 @@ final class LoginController
             ':ua'         => $_SERVER['HTTP_USER_AGENT'] ?? null,
         ]);
     }
+
+    public function logout(array $vars = []): void
+    {
+        Session::forget('admin');
+        session_regenerate_id(true);
+
+        Session::flash('error', null);      // limpa msg, se quiser
+        Session::flash('old_email', null);  // limpa email, se quiser
+
+        header('Location: /admin/login');
+        exit;
+    }
 }

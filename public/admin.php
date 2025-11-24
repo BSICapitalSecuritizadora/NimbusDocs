@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Presentation\Controller\Admin\Auth\LoginController;
+use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
 
@@ -11,11 +12,14 @@ $config = require __DIR__ . '/../bootstrap/app.php';
 
 // Dispatcher de rotas (FastRoute)
 $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
-    // Login administrativo
+    // Login
     $r->addRoute('GET',  '/admin/login', [LoginController::class, 'showLoginForm']);
     $r->addRoute('POST', '/admin/login', [LoginController::class, 'handleLogin']);
 
-    // Dashboard simples pós-login (placeholder)
+    // Logout
+    $r->addRoute('GET', '/admin/logout', [LoginController::class, 'logout']);
+
+    // Dashboard
     $r->addRoute('GET', '/admin', function () {
         echo '<div style="font-family:system-ui;padding:2rem">
                 <h2>Bem-vindo ao NimbusDocs Admin</h2>
@@ -24,9 +28,32 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     });
 });
 
+
 // Descobre método e URI
 $httpMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $uri        = $_SERVER['REQUEST_URI']    ?? '/';
+
+// --------------------
+// Proteção de rotas admin
+// --------------------
+$publicRoutes = [
+    ['GET',  '/admin/login'],
+    ['POST', '/admin/login'],
+];
+
+$isPublic = false;
+foreach ($publicRoutes as [$method, $path]) {
+    if ($httpMethod === $method && $uri === $path) {
+        $isPublic = true;
+        break;
+    }
+}
+
+// Se não for rota pública e não tiver admin logado, redireciona
+if (str_starts_with($uri, '/admin') && !$isPublic && !Session::has('admin')) {
+    header('Location: /admin/login');
+    exit;
+}
 
 // Remove query string
 if (false !== $pos = strpos($uri, '?')) {
