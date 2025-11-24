@@ -5,17 +5,24 @@ declare(strict_types=1);
 namespace App\Presentation\Controller\Admin;
 
 use App\Infrastructure\Persistence\MySqlPortalUserRepository;
+use App\Infrastructure\Persistence\MySqlPortalAccessTokenRepository;
 use App\Support\Csrf;
 use App\Support\Session;
+use App\Support\RandomToken;
 use Respect\Validation\Validator as v;
+use DateInterval;
+use DateTimeImmutable;
+
 
 final class PortalUserController
 {
     private MySqlPortalUserRepository $repo;
+    private MySqlPortalAccessTokenRepository $tokenRepo;
 
     public function __construct(private array $config)
     {
-        $this->repo = new MySqlPortalUserRepository($config['pdo']);
+        $this->repo      = new MySqlPortalUserRepository($config['pdo']);
+        $this->tokenRepo = new MySqlPortalAccessTokenRepository($config['pdo']);
     }
 
     private function requireAdmin(): void
@@ -116,11 +123,14 @@ final class PortalUserController
             $this->redirect('/admin/portal-users');
         }
 
+        $tokens = $this->tokenRepo->listRecentByUser($id, 10);
+
         $pageTitle   = 'Editar Usuário Final';
         $contentView = __DIR__ . '/../../View/admin/portal_users/form.php';
         $viewData    = [
             'mode'      => 'edit',
             'user'      => $user,
+            'tokens'    => $tokens,
             'errors'    => Session::getFlash('errors') ?? [],
             'old'       => Session::getFlash('old') ?? [],
             'csrfToken' => Csrf::token(),
@@ -210,5 +220,54 @@ final class PortalUserController
     {
         header('Location: ' . $path);
         exit;
+    }
+
+    public function generateToken(array $vars = []): void
+    {
+        $this->requireAdmin();
+
+        $id   = (int)($vars['id'] ?? 0);
+        $post = $_POST;
+        $token = $post['_token'] ?? '';
+
+        if (!Csrf::validate($token)) {
+            Session::flash('error', 'Sessão expirada. Tente novamente.');
+            $this->redirect("/admin/portal-users/{$id}/edit");
+        }
+
+        $user = $this->repo->findById($id);
+        if (!$user) {
+            Session::flash('error', 'Usuário não encontrado.');
+            $this->redirect('/admin/portal-users');
+        }
+
+        // validade escolhida
+        $validity = $post['validity'] ?? '24h';
+        $intervalSpec = match ($validity) {
+            '1h'  => 'PT1H',
+            '24h' => 'P1D',
+            '7d'  => 'P7D',
+            default => 'P1D',
+        };
+
+        $now        = new DateTimeImmutable('now');
+        $expiresAt  = $now->add(new DateInterval($intervalSpec));
+        $code       = RandomToken::shortCode(12); // 12 caracteres
+
+        // opcional: revogar tokens pendentes anteriores
+        $this->tokenRepo->revokePendingTokens($id);
+
+        $this->tokenRepo->createToken($id, $code, $expiresAt);
+
+        Session::flash(
+            'success',
+            sprintf(
+                'Código de acesso gerado: %s (válido até %s)',
+                $code,
+                $expiresAt->format('d/m/Y H:i')
+            )
+        );
+
+        $this->redirect("/admin/portal-users/{$id}/edit");
     }
 }

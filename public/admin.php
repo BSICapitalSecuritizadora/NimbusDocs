@@ -34,6 +34,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/admin/portal-users/{id:\d+}/edit',      [PortalUserController::class, 'showEditForm']);
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}',           [PortalUserController::class, 'update']);
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}/deactivate', [PortalUserController::class, 'deactivate']);
+    $r->addRoute('POST', '/admin/portal-users/{id:\d+}/tokens', [PortalUserController::class, 'generateToken']);
 
     // Dashboard
     $r->addRoute('GET', '/admin', function () {

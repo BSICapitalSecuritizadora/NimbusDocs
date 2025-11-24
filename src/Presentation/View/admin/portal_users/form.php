@@ -5,6 +5,9 @@
 /** @var array $errors */
 /** @var array $old */
 /** @var string $csrfToken */
+/** @var array $tokens (apenas no modo edit, pode não existir no create) */
+
+$tokens = $tokens ?? [];
 
 $isEdit = ($mode === 'edit');
 $values = [
@@ -112,6 +115,63 @@ $action = $isEdit
                     </div>
                 </form>
             </div>
+            <?php if ($isEdit): ?>
+                <hr class="my-4">
+
+                <h2 class="h5 mb-3">Códigos de acesso</h2>
+
+                <form method="post" action="/admin/portal-users/<?= (int)$user['id'] ?>/tokens" class="row g-2 align-items-end mb-3">
+                    <input type="hidden" name="_token"
+                        value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+
+                    <div class="col-sm-4">
+                        <label class="form-label" for="validity">Validade</label>
+                        <select class="form-select" id="validity" name="validity">
+                            <option value="1h">1 hora</option>
+                            <option value="24h" selected>24 horas</option>
+                            <option value="7d">7 dias</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-4">
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            Gerar novo código
+                        </button>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Código</th>
+                                <th>Status</th>
+                                <th>Criação</th>
+                                <th>Expira em</th>
+                                <th>Usado em</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!$tokens): ?>
+                                <tr>
+                                    <td colspan="5" class="text-muted text-center py-2">
+                                        Nenhum código gerado para este usuário.
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($tokens as $t): ?>
+                                    <tr>
+                                        <td><code><?= htmlspecialchars($t['code'], ENT_QUOTES, 'UTF-8') ?></code></td>
+                                        <td><?= htmlspecialchars($t['status'], ENT_QUOTES, 'UTF-8') ?></td>
+                                        <td><?= htmlspecialchars($t['created_at'], ENT_QUOTES, 'UTF-8') ?></td>
+                                        <td><?= htmlspecialchars($t['expires_at'], ENT_QUOTES, 'UTF-8') ?></td>
+                                        <td><?= $t['used_at'] ? htmlspecialchars($t['used_at'], ENT_QUOTES, 'UTF-8') : '-' ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
