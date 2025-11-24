@@ -6,7 +6,7 @@ use App\Presentation\Controller\Admin\Auth\LoginController;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
 
-// Bootstrap da aplicação (autoload, .env, sessão, config...)
+// Bootstrap da aplicação (autoload, .env, sessão, config, PDO...)
 $config = require __DIR__ . '/../bootstrap/app.php';
 
 // Dispatcher de rotas (FastRoute)
@@ -14,13 +14,14 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     // Login administrativo
     $r->addRoute('GET',  '/admin/login', [LoginController::class, 'showLoginForm']);
     $r->addRoute('POST', '/admin/login', [LoginController::class, 'handleLogin']);
-});
 
-$r->addRoute('GET', '/admin', function () {
-    echo '<div style="font-family:system-ui;padding:2rem">
-            <h2>Bem-vindo ao NimbusDocs Admin</h2>
-            <p>Login efetuado com sucesso.</p>
-          </div>';
+    // Dashboard simples pós-login (placeholder)
+    $r->addRoute('GET', '/admin', function () {
+        echo '<div style="font-family:system-ui;padding:2rem">
+                <h2>Bem-vindo ao NimbusDocs Admin</h2>
+                <p>Login efetuado com sucesso.</p>
+              </div>';
+    });
 });
 
 // Descobre método e URI
@@ -48,15 +49,30 @@ switch ($routeInfo[0]) {
         break;
 
     case FastRoute\Dispatcher::FOUND:
-        [$class, $method] = $routeInfo[1];
-        $vars             = $routeInfo[2];
+        $handler = $routeInfo[1];
+        $vars    = $routeInfo[2];
 
-        $controller = new $class($config);
-        $response   = $controller->$method($vars);
+        // 1) Se o handler for um array [Controller::class, 'method']
+        if (is_array($handler) && isset($handler[0], $handler[1])) {
+            [$class, $method] = $handler;
 
-        // Se o controller retornar algo, exibimos
-        if (is_string($response)) {
-            echo $response;
+            $controller = new $class($config);
+            $response   = $controller->$method($vars);
+
+            if (is_string($response)) {
+                echo $response;
+            }
+            break;
         }
+
+        // 2) Se for uma Closure / callable simples
+        if (is_callable($handler)) {
+            echo $handler(...array_values($vars));
+            break;
+        }
+
+        // 3) Fallback (não deveria chegar aqui)
+        http_response_code(500);
+        echo '500 - Handler inválido';
         break;
 }
