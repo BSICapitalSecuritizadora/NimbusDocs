@@ -25,7 +25,7 @@ if (!empty($viewData) && is_array($viewData)) {
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap 5.3 via CDN -->
+    <!-- Bootstrap 5.3.8 via CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <!-- Espaço para CSS próprio no futuro -->
 </head>
