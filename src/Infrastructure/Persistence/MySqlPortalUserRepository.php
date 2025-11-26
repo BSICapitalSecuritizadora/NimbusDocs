@@ -66,8 +66,8 @@ final class MySqlPortalUserRepository implements PortalUserRepository
     public function create(array $data): int
     {
         $sql = "INSERT INTO portal_users
-                (full_name, email, document_number, phone_number, external_id, notes, status, password_hash)
-                VALUES (:full_name, :email, :document_number, :phone_number, :external_id, :notes, :status, :password_hash)";
+                (full_name, email, document_number, phone_number, external_id, notes, status)
+                VALUES (:full_name, :email, :document_number, :phone_number, :external_id, :notes, :status)";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
@@ -78,7 +78,6 @@ final class MySqlPortalUserRepository implements PortalUserRepository
             ':external_id'     => $data['external_id'] ?? null,
             ':notes'           => $data['notes'] ?? null,
             ':status'          => $data['status'] ?? 'INVITED',
-            ':password_hash'   => $data['password_hash'] ?? null,
         ]);
 
         return (int)$this->pdo->lastInsertId();
@@ -93,9 +92,7 @@ final class MySqlPortalUserRepository implements PortalUserRepository
                     phone_number = :phone_number,
                     external_id = :external_id,
                     notes = :notes,
-                    status = :status,
-                    password_hash = COALESCE(:password_hash, password_hash),
-                    password_changed_at = CASE WHEN :password_hash IS NULL THEN password_changed_at ELSE NOW() END
+                    status = :status
                 WHERE id = :id";
 
         $stmt = $this->pdo->prepare($sql);
@@ -108,23 +105,10 @@ final class MySqlPortalUserRepository implements PortalUserRepository
             ':external_id'     => $data['external_id'] ?? null,
             ':notes'           => $data['notes'] ?? null,
             ':status'          => $data['status'] ?? 'INVITED',
-            ':password_hash'   => $data['password_hash'] ?? null,
         ]);
     }
 
-    public function updatePassword(int $id, string $passwordHash): void
-    {
-        $sql = "UPDATE portal_users
-                SET password_hash = :hash,
-                    password_changed_at = NOW()
-                WHERE id = :id";
-
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([
-            ':id'   => $id,
-            ':hash' => $passwordHash,
-        ]);
-    }
+    // removed password-related updates; portal_users authenticates via access codes
 
     
 
