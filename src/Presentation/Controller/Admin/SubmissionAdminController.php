@@ -155,7 +155,14 @@ final class SubmissionAdminController
 
         // Envia e-mail se serviço estiver disponível e tivermos e-mail do usuário
         if (isset($this->config['mail']) && !empty($submission['user_email'])) {
-            $linkSubmissao = rtrim($this->config['app_url'], '/') . '/portal/submissions/' . $id;
+            $baseUrl = $this->config['app']['url']
+                ?? ($this->config['app_url'] ?? null);
+            if (!$baseUrl) {
+                $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                $baseUrl = $scheme . '://' . $host;
+            }
+            $linkSubmissao = rtrim((string)$baseUrl, '/') . '/portal/submissions/' . $id;
             $nomeUsuario   = $submission['user_full_name'] ?? 'Cliente';
 
             $body = sprintf(
