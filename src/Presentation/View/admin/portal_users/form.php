@@ -18,8 +18,6 @@ $values = [
     'external_id'     => $old['external_id']     ?? ($user['external_id']     ?? ''),
     'notes'           => $old['notes']           ?? ($user['notes']           ?? ''),
     'status'          => $old['status']          ?? ($user['status']          ?? 'INVITED'),
-    'password'        => $old['password']        ?? '',
-    'password_confirmation' => $old['password_confirmation'] ?? '',
 ];
 
 $action = $isEdit
@@ -85,19 +83,7 @@ $action = $isEdit
                                 id="phone_number" name="phone_number"
                                 value="<?= htmlspecialchars($values['phone_number'], ENT_QUOTES, 'UTF-8') ?>">
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label" for="password_confirmation">Confirmar senha <?= $isEdit ? '' : '*' ?></label>
-                            <input type="password"
-                                class="form-control <?= isset($errors['password_confirmation']) ? 'is-invalid' : '' ?>"
-                                id="password_confirmation" name="password_confirmation" <?= $isEdit ? '' : 'required' ?>
-                                value="<?= htmlspecialchars($values['password_confirmation'], ENT_QUOTES, 'UTF-8') ?>"
-                                autocomplete="new-password">
-                            <?php if (isset($errors['password_confirmation'])): ?>
-                                <div class="invalid-feedback">
-                                    <?= htmlspecialchars($errors['password_confirmation'], ENT_QUOTES, 'UTF-8') ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
+                        
                     </div>
 
                     <div class="mb-3">
