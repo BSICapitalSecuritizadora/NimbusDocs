@@ -30,6 +30,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('POST', '/admin/users/{id:\d+}/deactivate', [AdminUserController::class, 'deactivate']);
     $r->addRoute('GET',  '/admin/submissions',          [SubmissionAdminController::class, 'index']);
     $r->addRoute('GET',  '/admin/submissions/{id:\d+}', [SubmissionAdminController::class, 'show']);
+    $r->addRoute('POST', '/admin/submissions/{id:\d+}/status', [SubmissionAdminController::class, 'updateStatus']);
 
     // Usuários Finais
     $r->addRoute('GET',  '/admin/portal-users',                    [PortalUserController::class, 'index']);

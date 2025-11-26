@@ -6,6 +6,7 @@ namespace App\Presentation\Controller\Portal;
 
 use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository;
+use App\Infrastructure\Persistence\MySqlPortalSubmissionNoteRepository;
 use App\Support\Csrf;
 use App\Support\Session;
 use App\Support\RandomToken;
@@ -15,11 +16,13 @@ final class PortalSubmissionController
 {
     private MySqlPortalSubmissionRepository $repo;
     private MySqlPortalSubmissionFileRepository $fileRepo;
+    private MySqlPortalSubmissionNoteRepository $noteRepo;
 
     public function __construct(private array $config)
     {
         $this->repo     = new MySqlPortalSubmissionRepository($config['pdo']);
         $this->fileRepo = new MySqlPortalSubmissionFileRepository($config['pdo']);
+        $this->noteRepo = new MySqlPortalSubmissionNoteRepository($config['pdo']);
     }
 
     private function requireUser(): array
@@ -178,20 +181,21 @@ final class PortalSubmissionController
         $id   = (int)($vars['id'] ?? 0);
 
         $submission = $this->repo->findByIdForUser($id, (int)$user['id']);
-
         if (!$submission) {
             http_response_code(404);
             echo 'Submissão não encontrada.';
             return;
         }
 
-        $files = $this->fileRepo->findBySubmission($id); // por enquanto só exibir (upload depois)
+        $files = $this->fileRepo->findBySubmission($id);
+        $notes = $this->noteRepo->listVisibleForSubmission($id);
 
         $pageTitle   = 'Detalhes da submissão';
         $contentView = __DIR__ . '/../../View/portal/submissions/show.php';
         $viewData    = [
             'submission' => $submission,
             'files'      => $files,
+            'notes'      => $notes,
         ];
 
         require __DIR__ . '/../../View/portal/layouts/base.php';

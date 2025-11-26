@@ -2,6 +2,8 @@
 
 /** @var array $submission */
 /** @var array $files */
+/** @var array $notes */
+
 ?>
 <div class="mb-3">
     <a href="/portal/submissions" class="btn btn-outline-secondary btn-sm">

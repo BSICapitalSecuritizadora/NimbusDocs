@@ -160,4 +160,20 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
     }
+
+    public function updateStatus(int $id, string $status, ?int $adminUserId): void
+    {
+        $sql = "UPDATE portal_submissions
+            SET status = :status,
+                status_updated_at = NOW(),
+                status_updated_by = :admin_user_id
+            WHERE id = :id";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':status'        => $status,
+            ':admin_user_id' => $adminUserId,
+            ':id'            => $id,
+        ]);
+    }
 }
