@@ -8,6 +8,7 @@ use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionNoteRepository;
 use App\Support\Csrf;
+use App\Support\AuditLogger;
 use App\Support\Session;
 use App\Support\RandomToken;
 use Respect\Validation\Validator as v;
@@ -17,12 +18,14 @@ final class PortalSubmissionController
     private MySqlPortalSubmissionRepository $repo;
     private MySqlPortalSubmissionFileRepository $fileRepo;
     private MySqlPortalSubmissionNoteRepository $noteRepo;
+    private AuditLogger $audit;
 
     public function __construct(private array $config)
     {
         $this->repo     = new MySqlPortalSubmissionRepository($config['pdo']);
         $this->fileRepo = new MySqlPortalSubmissionFileRepository($config['pdo']);
         $this->noteRepo = new MySqlPortalSubmissionNoteRepository($config['pdo']);
+        $this->audit    = new AuditLogger($config['pdo']);
     }
 
     private function requireUser(): array
@@ -170,6 +173,10 @@ final class PortalSubmissionController
         if ($hasFiles) {
             $this->saveUploadedFiles($submissionId, $filesArray, $maxSize);
         }
+
+        $this->audit->log('PORTAL_USER', (int)$user['id'], 'SUBMISSION_CREATED', 'PORTAL_SUBMISSION', $submissionId, [
+            'reference_code' => $refCode,
+        ]);
 
         // --- e-mail de confirmação (se serviço estiver configurado) ---
         if (isset($this->config['mail'])) {
