@@ -185,7 +185,16 @@ final class PortalSubmissionController
             if ($emailUsuario) {
                 $nomeUsuario  = $user['full_name'] ?? $user['name'] ?? 'Cliente';
                 $titulo       = $data['title'];
-                $linkSubmissao = rtrim($this->config['app_url'], '/') . '/portal/submissions/' . $submissionId;
+                // Determina a base URL a partir da config moderna (app.url),
+                // mantendo compatibilidade com uma possível chave legada (app_url).
+                $baseUrl = $this->config['app']['url']
+                    ?? ($this->config['app_url'] ?? null);
+                if (!$baseUrl) {
+                    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                    $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                    $baseUrl = $scheme . '://' . $host;
+                }
+                $linkSubmissao = rtrim((string)$baseUrl, '/') . '/portal/submissions/' . $submissionId;
 
                 $body = sprintf(
                     '<p>Olá %s,</p>
