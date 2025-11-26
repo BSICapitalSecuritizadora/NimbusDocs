@@ -37,7 +37,9 @@
     },
     "scripts": {
         "start": "php -S localhost:8000 -t public",
-        "test": "phpunit"
+        "test": "phpunit",
+        "migrate": "php bin/migrate.php",
+        "seed": "php bin/seed.php"
     },
     "config": {
         "optimize-autoloader": true,
