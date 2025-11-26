@@ -104,6 +104,12 @@ final class SubmissionAdminController
         $post   = $_POST;
         $token  = $post['_token'] ?? '';
 
+        $submission = $this->repo->findWithUserById($id);
+        if (!$submission) {
+            Session::flash('error', 'Submissão não encontrada.');
+            $this->redirect('/admin/submissions');
+        }
+
         if (!Csrf::validate($token)) {
             Session::flash('error', 'Sessão expirada. Tente novamente.');
             $this->redirect('/admin/submissions/' . $id);
@@ -137,6 +143,32 @@ final class SubmissionAdminController
                 'visibility'    => $visible,
                 'message'       => $noteText,
             ]);
+        }
+
+        // Envia e-mail se serviço estiver disponível e tivermos e-mail do usuário
+        if (isset($this->config['mail']) && !empty($submission['user_email'])) {
+            $linkSubmissao = rtrim($this->config['app_url'], '/') . '/portal/submissions/' . $id;
+            $nomeUsuario   = $submission['user_full_name'] ?? 'Cliente';
+
+            $body = sprintf(
+                '<p>Olá %s,</p>
+                <p>O status da sua submissão <strong>%s</strong> foi atualizado para:
+                <strong>%s</strong>.</p>%s
+                <p><a href="%s">Ver detalhes</a></p>',
+                htmlspecialchars($nomeUsuario, ENT_QUOTES, 'UTF-8'),
+                htmlspecialchars($submission['title'], ENT_QUOTES, 'UTF-8'),
+                htmlspecialchars($status, ENT_QUOTES, 'UTF-8'),
+                $noteText !== ''
+                    ? '<p>Comentário do analista:</p><blockquote>' . nl2br(htmlspecialchars($noteText, ENT_QUOTES, 'UTF-8')) . '</blockquote>'
+                    : '',
+                htmlspecialchars($linkSubmissao, ENT_QUOTES, 'UTF-8')
+            );
+
+            $this->config['mail']->sendMail(
+                $submission['user_email'],
+                'Status atualizado – ' . $submission['title'],
+                $body
+            );
         }
 
         Session::flash('success', 'Status atualizado com sucesso.');

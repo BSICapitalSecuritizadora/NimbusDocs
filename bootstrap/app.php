@@ -40,4 +40,9 @@ $pdo = Connection::make($config['db']);
 // 3) Injeta PDO dentro do array de config para uso pelos controllers
 $config['pdo'] = $pdo;
 
+$config['mail'] = new \App\Infrastructure\Notification\GraphMailService(
+    $config,
+    $logger
+);
+
 return $config;

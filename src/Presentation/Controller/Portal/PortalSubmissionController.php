@@ -171,6 +171,33 @@ final class PortalSubmissionController
             $this->saveUploadedFiles($submissionId, $filesArray, $maxSize);
         }
 
+        // --- e-mail de confirmação (se serviço estiver configurado) ---
+        if (isset($this->config['mail'])) {
+            $emailUsuario = $user['email'] ?? null;
+
+            if ($emailUsuario) {
+                $nomeUsuario  = $user['full_name'] ?? $user['name'] ?? 'Cliente';
+                $titulo       = $data['title'];
+                $linkSubmissao = rtrim($this->config['app_url'], '/') . '/portal/submissions/' . $submissionId;
+
+                $body = sprintf(
+                    '<p>Olá %s,</p>
+                    <p>Sua submissão <strong>%s</strong> foi recebida com sucesso.</p>
+                    <p>Você pode acompanhar o status em:
+                    <a href="%s">clique aqui</a></p>',
+                    htmlspecialchars($nomeUsuario, ENT_QUOTES, 'UTF-8'),
+                    htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'),
+                    htmlspecialchars($linkSubmissao, ENT_QUOTES, 'UTF-8')
+                );
+
+                $this->config['mail']->sendMail(
+                    $emailUsuario,
+                    'Recebemos sua submissão',
+                    $body
+                );
+            }
+        }
+
         Session::flash('success', 'Submissão enviada com sucesso.');
         $this->redirect('/portal/submissions/' . $submissionId);
     }
