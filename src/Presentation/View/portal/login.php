@@ -4,6 +4,7 @@
 /** @var array $flash */
 $error   = $flash['error']   ?? null;
 $success = $flash['success'] ?? null;
+$oldIdentifier = $flash['old_identifier'] ?? '';
 ?>
 <div class="row justify-content-center">
     <div class="col-md-6 col-lg-5">
@@ -37,9 +38,7 @@ $success = $flash['success'] ?? null;
                             class="form-control"
                             id="access_code"
                             name="access_code"
-                            autocomplete="one-time-code"
-                            required
-                            autofocus>
+                            autocomplete="one-time-code">
                         <div class="form-text">
                             Ex.: ABCD2345EFGH (sem diferenciar maiúsculas/minúsculas).
                         </div>

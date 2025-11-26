@@ -8,6 +8,7 @@ interface PortalUserRepository
 {
     public function paginate(int $page, int $perPage): array;
     public function findById(int $id): ?array;
+    public function findActiveByLogin(string $identifier): ?array;
     public function create(array $data): int;
     public function update(int $id, array $data): void;
     public function updateLastLogin(int $id, string $method): void;

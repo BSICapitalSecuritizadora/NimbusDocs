@@ -48,11 +48,26 @@ final class MySqlPortalUserRepository implements PortalUserRepository
         return $row ?: null;
     }
 
+    public function findActiveByLogin(string $identifier): ?array
+    {
+        $sql = "SELECT *
+                FROM portal_users
+                WHERE (email = :identifier OR document_number = :identifier)
+                  AND status IN ('ACTIVE', 'INVITED')
+                LIMIT 1";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':identifier' => $identifier]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
     public function create(array $data): int
     {
         $sql = "INSERT INTO portal_users
-                (full_name, email, document_number, phone_number, external_id, notes, status)
-                VALUES (:full_name, :email, :document_number, :phone_number, :external_id, :notes, :status)";
+                (full_name, email, document_number, phone_number, external_id, notes, status, password_hash)
+                VALUES (:full_name, :email, :document_number, :phone_number, :external_id, :notes, :status, :password_hash)";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
@@ -63,6 +78,7 @@ final class MySqlPortalUserRepository implements PortalUserRepository
             ':external_id'     => $data['external_id'] ?? null,
             ':notes'           => $data['notes'] ?? null,
             ':status'          => $data['status'] ?? 'INVITED',
+            ':password_hash'   => $data['password_hash'] ?? null,
         ]);
 
         return (int)$this->pdo->lastInsertId();
@@ -77,7 +93,9 @@ final class MySqlPortalUserRepository implements PortalUserRepository
                     phone_number = :phone_number,
                     external_id = :external_id,
                     notes = :notes,
-                    status = :status
+                    status = :status,
+                    password_hash = COALESCE(:password_hash, password_hash),
+                    password_changed_at = CASE WHEN :password_hash IS NULL THEN password_changed_at ELSE NOW() END
                 WHERE id = :id";
 
         $stmt = $this->pdo->prepare($sql);
@@ -90,6 +108,35 @@ final class MySqlPortalUserRepository implements PortalUserRepository
             ':external_id'     => $data['external_id'] ?? null,
             ':notes'           => $data['notes'] ?? null,
             ':status'          => $data['status'] ?? 'INVITED',
+            ':password_hash'   => $data['password_hash'] ?? null,
+        ]);
+    }
+
+    public function updatePassword(int $id, string $passwordHash): void
+    {
+        $sql = "UPDATE portal_users
+                SET password_hash = :hash,
+                    password_changed_at = NOW()
+                WHERE id = :id";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':id'   => $id,
+            ':hash' => $passwordHash,
+        ]);
+    }
+
+    public function updateLastLogin(int $id, string $method): void
+    {
+        $sql = "UPDATE portal_users
+                SET last_login_at = NOW(),
+                    last_login_method = :method
+                WHERE id = :id";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':id'     => $id,
+            ':method' => $method,
         ]);
     }
 
