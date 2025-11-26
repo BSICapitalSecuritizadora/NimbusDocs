@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 use Dotenv\Dotenv;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 use App\Infrastructure\Persistence\Connection;
+use App\Infrastructure\Notification\GraphMailService;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -40,9 +43,27 @@ $pdo = Connection::make($config['db']);
 // 3) Injeta PDO dentro do array de config para uso pelos controllers
 $config['pdo'] = $pdo;
 
-$config['mail'] = new \App\Infrastructure\Notification\GraphMailService(
-    $config,
+// -------------------------------------------------------------------------
+// Logger (Monolog)
+// -------------------------------------------------------------------------
+$logDir = __DIR__ . '/../storage/logs';
+
+if (!is_dir($logDir)) {
+    mkdir($logDir, 0775, true);
+}
+
+$logger = new Logger('nimbusdocs');
+$logger->pushHandler(
+    new StreamHandler($logDir . '/app.log', Logger::DEBUG)
+);
+
+// -------------------------------------------------------------------------
+// Serviço de e-mail via Microsoft Graph
+// -------------------------------------------------------------------------
+$config['mail'] = new GraphMailService(
+    $config,   // passa o array de config completo
     $logger
 );
+
 
 return $config;
