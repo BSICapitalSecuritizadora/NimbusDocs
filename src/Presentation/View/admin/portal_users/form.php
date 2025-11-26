@@ -69,10 +69,15 @@ $action = $isEdit
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label" for="document_number">Documento</label>
-                            <input type="text" class="form-control"
+                            <label class="form-label" for="document_number">CPF</label>
+                            <input type="text" class="form-control <?= isset($errors['document_number']) ? 'is-invalid' : '' ?>"
                                 id="document_number" name="document_number"
                                 value="<?= htmlspecialchars($values['document_number'], ENT_QUOTES, 'UTF-8') ?>">
+                            <?php if (isset($errors['document_number'])): ?>
+                                <div class="invalid-feedback">
+                                    <?= htmlspecialchars($errors['document_number'], ENT_QUOTES, 'UTF-8') ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label" for="password">Senha <?= $isEdit ? '' : '*' ?></label>

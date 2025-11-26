@@ -95,7 +95,7 @@ final class PortalUserController
         $data = [
             'full_name'       => trim($post['full_name'] ?? ''),
             'email'           => trim($post['email'] ?? ''),
-            'document_number' => trim($post['document_number'] ?? ''),
+            'document_number' => $this->normalizeCpf($post['document_number'] ?? ''),
             'phone_number'    => trim($post['phone_number'] ?? ''),
             'external_id'     => trim($post['external_id'] ?? ''),
             'notes'           => trim($post['notes'] ?? ''),
@@ -112,8 +112,6 @@ final class PortalUserController
             $this->redirect('/admin/portal-users/create');
         }
 
-        $passwordHash = password_hash($data['password'], PASSWORD_DEFAULT);
-
         $newId = $this->repo->create([
             'full_name'       => $data['full_name'],
             'email'           => $data['email'],
@@ -122,7 +120,7 @@ final class PortalUserController
             'external_id'     => $data['external_id'],
             'notes'           => $data['notes'],
             'status'          => $data['status'],
-            'password_hash'   => $passwordHash,
+            'password_hash'   => null,
         ]);
 
         $this->audit->log('ADMIN', (int)$admin['id'], 'PORTAL_USER_CREATED', 'PORTAL_USER', $newId);
@@ -175,7 +173,7 @@ final class PortalUserController
         $data = [
             'full_name'       => trim($post['full_name'] ?? ''),
             'email'           => trim($post['email'] ?? ''),
-            'document_number' => trim($post['document_number'] ?? ''),
+            'document_number' => $this->normalizeCpf($post['document_number'] ?? ''),
             'phone_number'    => trim($post['phone_number'] ?? ''),
             'external_id'     => trim($post['external_id'] ?? ''),
             'notes'           => trim($post['notes'] ?? ''),
@@ -201,10 +199,6 @@ final class PortalUserController
             'notes'           => $data['notes'],
             'status'          => $data['status'],
         ];
-
-        if ($data['password'] !== '') {
-            $update['password_hash'] = password_hash($data['password'], PASSWORD_DEFAULT);
-        }
 
         $this->repo->update($id, $update);
         $this->audit->log('ADMIN', (int)$admin['id'], 'PORTAL_USER_UPDATED', 'PORTAL_USER', $id);
@@ -251,15 +245,38 @@ final class PortalUserController
             $errors['status'] = 'Status inválido.';
         }
 
-        if ($isCreate || $data['password'] !== '') {
-            if (!v::stringType()->length(8, null)->validate($data['password'])) {
-                $errors['password'] = 'Senha deve ter ao menos 8 caracteres.';
-            } elseif ($data['password'] !== $data['password_confirmation']) {
-                $errors['password_confirmation'] = 'Confirmação de senha não confere.';
-            }
+        if ($data['document_number'] !== '' && !$this->isValidCpf($data['document_number'])) {
+            $errors['document_number'] = 'CPF inválido.';
         }
 
         return $errors;
+    }
+
+    private function normalizeCpf(string $value): string
+    {
+        return preg_replace('/\D+/', '', $value) ?? '';
+    }
+
+    private function isValidCpf(string $cpf): bool
+    {
+        $cpf = $this->normalizeCpf($cpf);
+
+        if (strlen($cpf) !== 11 || preg_match('/^(\d)\1{10}$/', $cpf)) {
+            return false;
+        }
+
+        for ($t = 9; $t < 11; $t++) {
+            $sum = 0;
+            for ($i = 0; $i < $t; $i++) {
+                $sum += (int)$cpf[$i] * (($t + 1) - $i);
+            }
+            $digit = ((10 * $sum) % 11) % 10;
+            if ((int)$cpf[$t] !== $digit) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function redirect(string $path): void

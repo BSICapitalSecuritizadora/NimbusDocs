@@ -13,7 +13,7 @@ $oldIdentifier = $flash['old_identifier'] ?? '';
             <div class="card-body">
                 <h1 class="h4 mb-3 text-center">Acesso ao Portal</h1>
                 <p class="text-muted small text-center mb-3">
-                    Entre com e-mail/documento e senha previamente cadastrados ou, se preferir, use um código de acesso válido.
+                    Acesse usando apenas o código de acesso enviado pelo administrador.
                 </p>
 
                 <?php if ($error): ?>
@@ -33,31 +33,7 @@ $oldIdentifier = $flash['old_identifier'] ?? '';
                         value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
                     <div class="col-12">
-                        <label for="identifier" class="form-label">E-mail ou documento</label>
-                        <input type="text"
-                            class="form-control"
-                            id="identifier"
-                            name="identifier"
-                            value="<?= htmlspecialchars($oldIdentifier, ENT_QUOTES, 'UTF-8') ?>"
-                            autocomplete="username"
-                            autofocus>
-                    </div>
-
-                    <div class="col-12">
-                        <label for="password" class="form-label">Senha</label>
-                        <input type="password"
-                            class="form-control"
-                            id="password"
-                            name="password"
-                            autocomplete="current-password">
-                    </div>
-
-                    <div class="col-12">
-                        <div class="text-center text-muted small">ou</div>
-                    </div>
-
-                    <div class="col-12">
-                        <label for="access_code" class="form-label">Código de acesso (opcional)</label>
+                        <label for="access_code" class="form-label">Código de acesso</label>
                         <input type="text"
                             class="form-control"
                             id="access_code"
