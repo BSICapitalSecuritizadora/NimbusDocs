@@ -10,9 +10,9 @@ O sistema é dividido em dois módulos principais:
   - Visualização global de todas as submissões.
   - Download de documentos e consulta de logs de auditoria.
 
-- **Módulo de Usuário (Portal do Usuário)**  
+- **Módulo de Usuário (Portal do Usuário)**
   Interface utilizada pelo usuário final para:
-  - Autenticação segura (login/senha pré-cadastrados).
+  - Autenticação segura via **código de acesso** gerado pelo administrador, com validade controlada.
   - Envio de informações via formulários.
   - Upload de arquivos (PDF, XLS/XLSX, DOCX, etc.).
   - Consulta ao histórico de envios próprios.
@@ -50,6 +50,6 @@ O foco do NimbusDocs é garantir **segurança**, **segregação de responsabilid
    ```
 
    - Admin padrão: `admin@example.com` / `Admin@123`
-   - Usuário final padrão: `cliente@example.com` / `Cliente@123`
+   - Usuário final padrão: `cliente@example.com` (o administrador deve gerar ou usar o código seed exibido ao rodar o comando acima)
 
-O Portal do Usuário agora autentica **via login/senha** (email ou documento + senha) e, opcionalmente, aceita códigos de acesso gerados pelo administrador.
+O Portal do Usuário autentica **exclusivamente por código de acesso** gerado no módulo administrativo, com validade configurável (1h, 24h ou 7d). Cada código é de uso único e pode ser revogado automaticamente ao gerar um novo.

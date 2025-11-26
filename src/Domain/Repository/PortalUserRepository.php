@@ -11,7 +11,6 @@ interface PortalUserRepository
     public function findActiveByLogin(string $identifier): ?array;
     public function create(array $data): int;
     public function update(int $id, array $data): void;
-    public function updatePassword(int $id, string $passwordHash): void;
     public function updateLastLogin(int $id, string $method): void;
     public function deactivate(int $id): void;
 }

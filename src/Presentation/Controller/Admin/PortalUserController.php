@@ -120,7 +120,6 @@ final class PortalUserController
             'external_id'     => $data['external_id'],
             'notes'           => $data['notes'],
             'status'          => $data['status'],
-            'password_hash'   => null,
         ]);
 
         $this->audit->log('ADMIN', (int)$admin['id'], 'PORTAL_USER_CREATED', 'PORTAL_USER', $newId);

@@ -24,8 +24,6 @@ CREATE TABLE IF NOT EXISTS portal_users (
     external_id VARCHAR(100) DEFAULT NULL,
     notes TEXT DEFAULT NULL,
     status ENUM('INVITED','ACTIVE','INACTIVE','BLOCKED') NOT NULL DEFAULT 'INVITED',
-    password_hash VARCHAR(255) DEFAULT NULL,
-    password_changed_at DATETIME DEFAULT NULL,
     last_login_at DATETIME DEFAULT NULL,
     last_login_method VARCHAR(50) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
