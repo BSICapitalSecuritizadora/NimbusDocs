@@ -4,10 +4,18 @@
             Painel Administrativo
         </a>
 
-        <!-- 
-            Quando tivermos o usuário logado, podemos mostrar aqui:
-            - links para Usuários, Auditoria etc.
-            - dropdown com nome do admin + Sair
-        -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="adminNavbar">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="/admin/submissions">Submissões</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/portal-users">Usuários finais</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/users">Administradores</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/audit-logs">Auditoria</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/logout">Sair</a></li>
+            </ul>
+        </div>
     </div>
 </nav>

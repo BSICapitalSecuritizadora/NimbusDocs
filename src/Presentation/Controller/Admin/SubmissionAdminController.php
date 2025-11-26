@@ -7,6 +7,7 @@ namespace App\Presentation\Controller\Admin;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository;
 use App\Support\Csrf;
+use App\Support\AuditLogger;
 use App\Support\Session;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionNoteRepository;
 use Respect\Validation\Validator as v;
@@ -16,12 +17,14 @@ final class SubmissionAdminController
     private MySqlPortalSubmissionRepository $repo;
     private MySqlPortalSubmissionFileRepository $fileRepo;
     private MySqlPortalSubmissionNoteRepository $noteRepo;
+    private AuditLogger $audit;
 
     public function __construct(private array $config)
     {
         $this->repo     = new MySqlPortalSubmissionRepository($config['pdo']);
         $this->fileRepo = new MySqlPortalSubmissionFileRepository($config['pdo']);
         $this->noteRepo = new MySqlPortalSubmissionNoteRepository($config['pdo']);
+        $this->audit    = new AuditLogger($config['pdo']);
     }
 
     private function requireAdmin(): void
@@ -144,6 +147,11 @@ final class SubmissionAdminController
                 'message'       => $noteText,
             ]);
         }
+
+        $this->audit->log('ADMIN', $adminId ? (int)$adminId : null, 'SUBMISSION_STATUS_UPDATED', 'PORTAL_SUBMISSION', $id, [
+            'status' => $status,
+            'note_visibility' => $visible,
+        ]);
 
         // Envia e-mail se serviço estiver disponível e tivermos e-mail do usuário
         if (isset($this->config['mail']) && !empty($submission['user_email'])) {

@@ -4,15 +4,16 @@
 /** @var array $flash */
 $error   = $flash['error']   ?? null;
 $success = $flash['success'] ?? null;
+$oldIdentifier = $flash['old_identifier'] ?? '';
 ?>
 <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
+    <div class="col-md-6 col-lg-5">
 
         <div class="card shadow-sm mt-4">
             <div class="card-body">
                 <h1 class="h4 mb-3 text-center">Acesso ao Portal</h1>
-                <p class="text-muted small text-center mb-4">
-                    Informe o código de acesso recebido.
+                <p class="text-muted small text-center mb-3">
+                    Entre com e-mail/documento e senha previamente cadastrados ou, se preferir, use um código de acesso válido.
                 </p>
 
                 <?php if ($error): ?>
@@ -27,25 +28,47 @@ $success = $flash['success'] ?? null;
                     </div>
                 <?php endif; ?>
 
-                <form method="post" action="/portal/login">
+                <form method="post" action="/portal/login" class="row g-3">
                     <input type="hidden" name="_token"
                         value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
-                    <div class="mb-3">
-                        <label for="access_code" class="form-label">Código de acesso</label>
+                    <div class="col-12">
+                        <label for="identifier" class="form-label">E-mail ou documento</label>
+                        <input type="text"
+                            class="form-control"
+                            id="identifier"
+                            name="identifier"
+                            value="<?= htmlspecialchars($oldIdentifier, ENT_QUOTES, 'UTF-8') ?>"
+                            autocomplete="username"
+                            autofocus>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="password" class="form-label">Senha</label>
+                        <input type="password"
+                            class="form-control"
+                            id="password"
+                            name="password"
+                            autocomplete="current-password">
+                    </div>
+
+                    <div class="col-12">
+                        <div class="text-center text-muted small">ou</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="access_code" class="form-label">Código de acesso (opcional)</label>
                         <input type="text"
                             class="form-control"
                             id="access_code"
                             name="access_code"
-                            autocomplete="one-time-code"
-                            required
-                            autofocus>
+                            autocomplete="one-time-code">
                         <div class="form-text">
                             Ex.: ABCD2345EFGH (sem diferenciar maiúsculas/minúsculas).
                         </div>
                     </div>
 
-                    <div class="d-grid">
+                    <div class="col-12 d-grid">
                         <button type="submit" class="btn btn-primary">
                             Entrar no portal
                         </button>

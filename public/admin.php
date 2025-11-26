@@ -7,6 +7,7 @@ use App\Presentation\Controller\Admin\AdminUserController;
 use App\Presentation\Controller\Admin\PortalUserController;
 use App\Presentation\Controller\Admin\SubmissionAdminController;
 use App\Presentation\Controller\Admin\FileAdminController;
+use App\Presentation\Controller\Admin\AuditLogController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -43,6 +44,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
 
     // Downloads de arquivos de submissão
     $r->addRoute('GET', '/admin/files/{id:\d+}/download', [FileAdminController::class, 'download']);
+
+    // Auditoria
+    $r->addRoute('GET', '/admin/audit-logs', [AuditLogController::class, 'index']);
 
     // Dashboard
     $r->addRoute('GET', '/admin', function () {
