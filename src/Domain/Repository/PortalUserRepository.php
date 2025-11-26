@@ -10,5 +10,6 @@ interface PortalUserRepository
     public function findById(int $id): ?array;
     public function create(array $data): int;
     public function update(int $id, array $data): void;
+    public function recordLastLogin(int $id, string $method): void;
     public function deactivate(int $id): void;
 }

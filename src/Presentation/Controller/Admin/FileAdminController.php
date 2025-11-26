@@ -5,15 +5,18 @@ declare(strict_types=1);
 namespace App\Presentation\Controller\Admin;
 
 use App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository;
+use App\Support\AuditLogger;
 use App\Support\Session;
 
 final class FileAdminController
 {
     private MySqlPortalSubmissionFileRepository $fileRepo;
+    private AuditLogger $audit;
 
     public function __construct(private array $config)
     {
         $this->fileRepo = new MySqlPortalSubmissionFileRepository($config['pdo']);
+        $this->audit    = new AuditLogger($config['pdo']);
     }
 
     private function requireAdmin(): void
@@ -56,6 +59,9 @@ final class FileAdminController
         header('Content-Length: ' . (string)$file['size_bytes']);
         header('Cache-Control: private');
         header('Pragma: public');
+
+        $admin = Session::get('admin');
+        $this->audit->log('ADMIN', $admin['id'] ?? null, 'FILE_DOWNLOAD', 'PORTAL_SUBMISSION_FILE', $id);
 
         readfile($fullPath);
         exit;
