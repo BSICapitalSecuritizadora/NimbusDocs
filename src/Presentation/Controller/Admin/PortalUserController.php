@@ -100,6 +100,8 @@ final class PortalUserController
             'external_id'     => trim($post['external_id'] ?? ''),
             'notes'           => trim($post['notes'] ?? ''),
             'status'          => $post['status'] ?? 'INVITED',
+            'password'        => (string)($post['password'] ?? ''),
+            'password_confirmation' => (string)($post['password_confirmation'] ?? ''),
         ];
 
         $errors = $this->validateData($data, true);
@@ -175,6 +177,8 @@ final class PortalUserController
             'external_id'     => trim($post['external_id'] ?? ''),
             'notes'           => trim($post['notes'] ?? ''),
             'status'          => $post['status'] ?? 'INVITED',
+            'password'        => (string)($post['password'] ?? ''),
+            'password_confirmation' => (string)($post['password_confirmation'] ?? ''),
         ];
 
         $errors = $this->validateData($data, false);

@@ -49,7 +49,9 @@ final class PortalLoginController
             $this->redirect('/portal/login');
         }
 
-        $code = strtoupper(trim($post['access_code'] ?? ''));
+        $identifier = trim($post['identifier'] ?? '');
+        $password   = (string)($post['password'] ?? '');
+        $code       = strtoupper(trim($post['access_code'] ?? ''));
 
         if ($code === '') {
             Session::flash('error', 'Informe um código de acesso válido.');
