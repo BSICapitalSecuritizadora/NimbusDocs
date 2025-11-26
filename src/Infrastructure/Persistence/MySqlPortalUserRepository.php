@@ -154,6 +154,20 @@ final class MySqlPortalUserRepository implements PortalUserRepository
         ]);
     }
 
+    public function recordLastLogin(int $id, string $method): void
+    {
+        $sql = "UPDATE portal_users
+                SET last_login_at = NOW(),
+                    last_login_method = :method
+                WHERE id = :id";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':id'     => $id,
+            ':method' => $method,
+        ]);
+    }
+
     public function deactivate(int $id): void
     {
         $stmt = $this->pdo->prepare("UPDATE portal_users SET status = 'INACTIVE' WHERE id = :id");

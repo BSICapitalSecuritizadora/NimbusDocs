@@ -103,7 +103,7 @@ final class PortalLoginController
         $ua  = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
         $this->tokenRepo->markAsUsed((int)$row['token_id'], $ip, $ua);
-        $this->userRepo->updateLastLogin((int)$row['user_id'], 'ACCESS_CODE');
+        $this->userRepo->recordLastLogin((int)$row['user_id'], 'ACCESS_CODE');
 
         Session::put('portal_user', $portalUser);
         session_regenerate_id(true);
