@@ -5,13 +5,19 @@ declare(strict_types=1);
 namespace App\Presentation\Controller\Admin\Auth;
 
 use App\Infrastructure\Persistence\MySqlAdminUserRepository;
+use App\Support\AuditLogger;
 use App\Support\Csrf;
 use App\Support\Session;
 use Respect\Validation\Validator as v;
 
 final class LoginController
 {
-    public function __construct(private array $config) {}
+    private AuditLogger $audit;
+
+    public function __construct(private array $config)
+    {
+        $this->audit = new AuditLogger($config['pdo']);
+    }
 
     public function showLoginForm(array $vars = []): void
     {
@@ -56,7 +62,7 @@ final class LoginController
 
         $user = $repo->findActiveByEmail($email);
         if (!$user) {
-            $this->audit($pdo, 'ADMIN', null, 'LOGIN_FAILED', 'ADMIN_USER', null);
+            $this->audit->log('ADMIN', null, 'LOGIN_FAILED', 'ADMIN_USER', null);
             Session::flash('error', 'Credenciais inválidas.');
             Session::flash('old_email', $email);
             $this->redirect('/admin/login');
@@ -64,7 +70,7 @@ final class LoginController
 
         // Checa se modo local permite senha
         if (!in_array($user['auth_mode'], ['LOCAL_ONLY', 'LOCAL_AND_MS'], true)) {
-            $this->audit($pdo, 'ADMIN', (int)$user['id'], 'LOGIN_FAILED_AUTH_MODE', 'ADMIN_USER', (int)$user['id']);
+            $this->audit->log('ADMIN', (int)$user['id'], 'LOGIN_FAILED_AUTH_MODE', 'ADMIN_USER', (int)$user['id']);
             Session::flash('error', 'Esse usuário só pode entrar com Microsoft.');
             Session::flash('old_email', $email);
             $this->redirect('/admin/login');
@@ -72,7 +78,7 @@ final class LoginController
 
         // Verifica hash
         if (empty($user['password_hash']) || !password_verify($password, $user['password_hash'])) {
-            $this->audit($pdo, 'ADMIN', (int)$user['id'], 'LOGIN_FAILED', 'ADMIN_USER', (int)$user['id']);
+            $this->audit->log('ADMIN', (int)$user['id'], 'LOGIN_FAILED', 'ADMIN_USER', (int)$user['id']);
             Session::flash('error', 'Credenciais inválidas.');
             Session::flash('old_email', $email);
             $this->redirect('/admin/login');
@@ -88,7 +94,7 @@ final class LoginController
         ]);
 
         $repo->updateLastLogin((int)$user['id'], 'LOCAL');
-        $this->audit($pdo, 'ADMIN', (int)$user['id'], 'LOGIN_SUCCESS', 'ADMIN_USER', (int)$user['id']);
+        $this->audit->log('ADMIN', (int)$user['id'], 'LOGIN_SUCCESS', 'ADMIN_USER', (int)$user['id']);
 
         // Redireciona para dashboard (vamos usar /admin por enquanto)
         $this->redirect('/admin');
@@ -98,22 +104,6 @@ final class LoginController
     {
         header('Location: ' . $path);
         exit;
-    }
-
-    private function audit(\PDO $pdo, string $actorType, ?int $actorId, string $action, ?string $targetType, ?int $targetId): void
-    {
-        $sql = "INSERT INTO audit_logs (actor_type, actor_id, action, target_type, target_id, ip_address, user_agent)
-                VALUES (:actor_type, :actor_id, :action, :target_type, :target_id, :ip, :ua)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ':actor_type' => $actorType,
-            ':actor_id'   => $actorId,
-            ':action'     => $action,
-            ':target_type' => $targetType,
-            ':target_id'  => $targetId,
-            ':ip'         => $_SERVER['REMOTE_ADDR']  ?? null,
-            ':ua'         => $_SERVER['HTTP_USER_AGENT'] ?? null,
-        ]);
     }
 
     public function logout(array $vars = []): void

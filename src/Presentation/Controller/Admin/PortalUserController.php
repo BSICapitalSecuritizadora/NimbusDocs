@@ -6,6 +6,7 @@ namespace App\Presentation\Controller\Admin;
 
 use App\Infrastructure\Persistence\MySqlPortalUserRepository;
 use App\Infrastructure\Persistence\MySqlPortalAccessTokenRepository;
+use App\Support\AuditLogger;
 use App\Support\Csrf;
 use App\Support\Session;
 use App\Support\RandomToken;
@@ -18,14 +19,16 @@ final class PortalUserController
 {
     private MySqlPortalUserRepository $repo;
     private MySqlPortalAccessTokenRepository $tokenRepo;
+    private AuditLogger $audit;
 
     public function __construct(private array $config)
     {
         $this->repo      = new MySqlPortalUserRepository($config['pdo']);
         $this->tokenRepo = new MySqlPortalAccessTokenRepository($config['pdo']);
+        $this->audit     = new AuditLogger($config['pdo']);
     }
 
-    private function requireAdmin(): void
+    private function requireAdmin(): array
     {
         $admin = Session::get('admin');
         if (!$admin) {
@@ -33,6 +36,8 @@ final class PortalUserController
             echo '403 - Não autorizado';
             exit;
         }
+
+        return $admin;
     }
 
     public function index(array $vars = []): void
@@ -77,7 +82,7 @@ final class PortalUserController
 
     public function store(array $vars = []): void
     {
-        $this->requireAdmin();
+        $admin = $this->requireAdmin();
 
         $post  = $_POST;
         $token = $post['_token'] ?? '';
@@ -90,14 +95,14 @@ final class PortalUserController
         $data = [
             'full_name'       => trim($post['full_name'] ?? ''),
             'email'           => trim($post['email'] ?? ''),
-            'document_number' => trim($post['document_number'] ?? ''),
+            'document_number' => $this->normalizeCpf($post['document_number'] ?? ''),
             'phone_number'    => trim($post['phone_number'] ?? ''),
             'external_id'     => trim($post['external_id'] ?? ''),
             'notes'           => trim($post['notes'] ?? ''),
             'status'          => $post['status'] ?? 'INVITED',
         ];
 
-        $errors = $this->validateData($data);
+        $errors = $this->validateData($data, true);
 
         if ($errors) {
             Session::flash('errors', $errors);
@@ -105,7 +110,17 @@ final class PortalUserController
             $this->redirect('/admin/portal-users/create');
         }
 
-        $this->repo->create($data);
+        $newId = $this->repo->create([
+            'full_name'       => $data['full_name'],
+            'email'           => $data['email'],
+            'document_number' => $data['document_number'],
+            'phone_number'    => $data['phone_number'],
+            'external_id'     => $data['external_id'],
+            'notes'           => $data['notes'],
+            'status'          => $data['status'],
+        ]);
+
+        $this->audit->log('ADMIN', (int)$admin['id'], 'PORTAL_USER_CREATED', 'PORTAL_USER', $newId);
 
         Session::flash('success', 'Usuário final criado com sucesso.');
         $this->redirect('/admin/portal-users');
@@ -113,7 +128,7 @@ final class PortalUserController
 
     public function showEditForm(array $vars = []): void
     {
-        $this->requireAdmin();
+        $admin = $this->requireAdmin();
 
         $id   = (int)($vars['id'] ?? 0);
         $user = $this->repo->findById($id);
@@ -141,7 +156,7 @@ final class PortalUserController
 
     public function update(array $vars = []): void
     {
-        $this->requireAdmin();
+        $admin = $this->requireAdmin();
 
         $id    = (int)($vars['id'] ?? 0);
         $post  = $_POST;
@@ -155,14 +170,14 @@ final class PortalUserController
         $data = [
             'full_name'       => trim($post['full_name'] ?? ''),
             'email'           => trim($post['email'] ?? ''),
-            'document_number' => trim($post['document_number'] ?? ''),
+            'document_number' => $this->normalizeCpf($post['document_number'] ?? ''),
             'phone_number'    => trim($post['phone_number'] ?? ''),
             'external_id'     => trim($post['external_id'] ?? ''),
             'notes'           => trim($post['notes'] ?? ''),
             'status'          => $post['status'] ?? 'INVITED',
         ];
 
-        $errors = $this->validateData($data);
+        $errors = $this->validateData($data, false);
 
         if ($errors) {
             Session::flash('errors', $errors);
@@ -170,7 +185,18 @@ final class PortalUserController
             $this->redirect("/admin/portal-users/{$id}/edit");
         }
 
-        $this->repo->update($id, $data);
+        $update = [
+            'full_name'       => $data['full_name'],
+            'email'           => $data['email'],
+            'document_number' => $data['document_number'],
+            'phone_number'    => $data['phone_number'],
+            'external_id'     => $data['external_id'],
+            'notes'           => $data['notes'],
+            'status'          => $data['status'],
+        ];
+
+        $this->repo->update($id, $update);
+        $this->audit->log('ADMIN', (int)$admin['id'], 'PORTAL_USER_UPDATED', 'PORTAL_USER', $id);
 
         Session::flash('success', 'Usuário final atualizado com sucesso.');
         $this->redirect('/admin/portal-users');
@@ -178,7 +204,7 @@ final class PortalUserController
 
     public function deactivate(array $vars = []): void
     {
-        $this->requireAdmin();
+        $admin = $this->requireAdmin();
 
         $id    = (int)($vars['id'] ?? 0);
         $post  = $_POST;
@@ -190,6 +216,7 @@ final class PortalUserController
         }
 
         $this->repo->deactivate($id);
+        $this->audit->log('ADMIN', (int)$admin['id'], 'PORTAL_USER_DEACTIVATED', 'PORTAL_USER', $id);
 
         Session::flash('success', 'Usuário final desativado com sucesso.');
         $this->redirect('/admin/portal-users');
@@ -197,7 +224,7 @@ final class PortalUserController
 
     // ----------------- helpers -----------------
 
-    private function validateData(array $data): array
+    private function validateData(array $data, bool $isCreate): array
     {
         $errors = [];
 
@@ -213,7 +240,38 @@ final class PortalUserController
             $errors['status'] = 'Status inválido.';
         }
 
+        if ($data['document_number'] !== '' && !$this->isValidCpf($data['document_number'])) {
+            $errors['document_number'] = 'CPF inválido.';
+        }
+
         return $errors;
+    }
+
+    private function normalizeCpf(string $value): string
+    {
+        return preg_replace('/\D+/', '', $value) ?? '';
+    }
+
+    private function isValidCpf(string $cpf): bool
+    {
+        $cpf = $this->normalizeCpf($cpf);
+
+        if (strlen($cpf) !== 11 || preg_match('/^(\d)\1{10}$/', $cpf)) {
+            return false;
+        }
+
+        for ($t = 9; $t < 11; $t++) {
+            $sum = 0;
+            for ($i = 0; $i < $t; $i++) {
+                $sum += (int)$cpf[$i] * (($t + 1) - $i);
+            }
+            $digit = ((10 * $sum) % 11) % 10;
+            if ((int)$cpf[$t] !== $digit) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function redirect(string $path): void
@@ -224,7 +282,7 @@ final class PortalUserController
 
     public function generateToken(array $vars = []): void
     {
-        $this->requireAdmin();
+        $admin = $this->requireAdmin();
 
         $id   = (int)($vars['id'] ?? 0);
         $post = $_POST;
@@ -257,7 +315,10 @@ final class PortalUserController
         // opcional: revogar tokens pendentes anteriores
         $this->tokenRepo->revokePendingTokens($id);
 
-        $this->tokenRepo->createToken($id, $code, $expiresAt);
+        $tokenId = $this->tokenRepo->createToken($id, $code, $expiresAt);
+        $this->audit->log('ADMIN', (int)$admin['id'], 'PORTAL_USER_TOKEN_GENERATED', 'PORTAL_ACCESS_TOKEN', $tokenId, [
+            'expires_at' => $expiresAt->format(DateTimeImmutable::ATOM),
+        ]);
 
         Session::flash(
             'success',

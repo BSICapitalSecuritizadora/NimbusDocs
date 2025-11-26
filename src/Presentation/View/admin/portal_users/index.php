@@ -34,7 +34,7 @@ $pages = $pagination['pages'] ?? 1;
                         <th>ID</th>
                         <th>Nome</th>
                         <th>E-mail</th>
-                        <th>Documento</th>
+                        <th>CPF</th>
                         <th>Status</th>
                         <th>Criado em</th>
                         <th class="text-end">Ações</th>

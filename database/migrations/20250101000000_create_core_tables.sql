@@ -1,0 +1,109 @@
+CREATE TABLE IF NOT EXISTS admin_users (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    email VARCHAR(190) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) DEFAULT NULL,
+    auth_mode ENUM('LOCAL_ONLY','MS_ONLY','LOCAL_AND_MS') NOT NULL DEFAULT 'LOCAL_ONLY',
+    role ENUM('SUPER_ADMIN','ADMIN') NOT NULL DEFAULT 'ADMIN',
+    status ENUM('ACTIVE','INACTIVE','BLOCKED') NOT NULL DEFAULT 'ACTIVE',
+    ms_object_id VARCHAR(190) DEFAULT NULL,
+    ms_tenant_id VARCHAR(190) DEFAULT NULL,
+    ms_upn VARCHAR(190) DEFAULT NULL,
+    last_login_at DATETIME DEFAULT NULL,
+    last_login_provider VARCHAR(50) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS portal_users (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(190) NOT NULL,
+    email VARCHAR(190) DEFAULT NULL,
+    document_number VARCHAR(50) DEFAULT NULL,
+    phone_number VARCHAR(50) DEFAULT NULL,
+    external_id VARCHAR(100) DEFAULT NULL,
+    notes TEXT DEFAULT NULL,
+    status ENUM('INVITED','ACTIVE','INACTIVE','BLOCKED') NOT NULL DEFAULT 'INVITED',
+    last_login_at DATETIME DEFAULT NULL,
+    last_login_method VARCHAR(50) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY idx_portal_users_email (email),
+    UNIQUE KEY idx_portal_users_document (document_number)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS portal_access_tokens (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    portal_user_id INT UNSIGNED NOT NULL,
+    code VARCHAR(64) NOT NULL,
+    status ENUM('PENDING','USED','REVOKED') NOT NULL DEFAULT 'PENDING',
+    expires_at DATETIME NOT NULL,
+    used_at DATETIME DEFAULT NULL,
+    used_ip VARCHAR(45) DEFAULT NULL,
+    used_user_agent VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (portal_user_id) REFERENCES portal_users(id)
+        ON DELETE CASCADE,
+    UNIQUE KEY idx_portal_access_tokens_code (code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS portal_submissions (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    portal_user_id INT UNSIGNED NOT NULL,
+    reference_code VARCHAR(64) NOT NULL,
+    title VARCHAR(190) NOT NULL,
+    message TEXT DEFAULT NULL,
+    status ENUM('PENDING','UNDER_REVIEW','COMPLETED','REJECTED') NOT NULL DEFAULT 'PENDING',
+    created_ip VARCHAR(45) DEFAULT NULL,
+    created_user_agent VARCHAR(255) DEFAULT NULL,
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status_updated_at DATETIME DEFAULT NULL,
+    status_updated_by INT UNSIGNED DEFAULT NULL,
+    FOREIGN KEY (portal_user_id) REFERENCES portal_users(id) ON DELETE CASCADE,
+    FOREIGN KEY (status_updated_by) REFERENCES admin_users(id) ON DELETE SET NULL,
+    KEY idx_portal_submissions_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS portal_submission_files (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    submission_id INT UNSIGNED NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
+    stored_name VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(100) DEFAULT NULL,
+    size_bytes BIGINT UNSIGNED NOT NULL,
+    storage_path VARCHAR(255) NOT NULL,
+    checksum VARCHAR(128) DEFAULT NULL,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (submission_id) REFERENCES portal_submissions(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS portal_submission_notes (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    submission_id INT UNSIGNED NOT NULL,
+    admin_user_id INT UNSIGNED DEFAULT NULL,
+    visibility ENUM('USER_VISIBLE','ADMIN_ONLY') NOT NULL DEFAULT 'USER_VISIBLE',
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (submission_id) REFERENCES portal_submissions(id) ON DELETE CASCADE,
+    FOREIGN KEY (admin_user_id) REFERENCES admin_users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    actor_type VARCHAR(50) NOT NULL,
+    actor_id INT UNSIGNED DEFAULT NULL,
+    action VARCHAR(100) NOT NULL,
+    target_type VARCHAR(100) DEFAULT NULL,
+    target_id INT UNSIGNED DEFAULT NULL,
+    ip_address VARCHAR(45) DEFAULT NULL,
+    user_agent VARCHAR(255) DEFAULT NULL,
+    context JSON DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS migrations (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    filename VARCHAR(255) NOT NULL,
+    executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_migration_filename (filename)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
