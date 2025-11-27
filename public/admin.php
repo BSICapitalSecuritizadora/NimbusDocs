@@ -33,6 +33,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/admin/submissions/{id:\d+}', [SubmissionAdminController::class, 'show']);
     $r->addRoute('POST', '/admin/submissions/{id:\d+}/status', [SubmissionAdminController::class, 'updateStatus']);
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}/access-link', [PortalUserController::class, 'generateAccessLink']);
+    $r->addRoute('POST', '/admin/submissions/{id:\d+}/response-files', [SubmissionAdminController::class, 'uploadResponseFiles']);
 
     // Usuários Finais
     $r->addRoute('GET',  '/admin/portal-users',                    [PortalUserController::class, 'index']);

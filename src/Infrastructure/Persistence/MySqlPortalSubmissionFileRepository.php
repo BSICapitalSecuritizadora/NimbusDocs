@@ -14,18 +14,23 @@ final class MySqlPortalSubmissionFileRepository implements PortalSubmissionFileR
     public function create(int $submissionId, array $data): int
     {
         $sql = "INSERT INTO portal_submission_files
-                (submission_id, original_name, stored_name, mime_type, size_bytes, storage_path, checksum)
-                VALUES (:submission_id, :original_name, :stored_name, :mime_type, :size_bytes, :storage_path, :checksum)";
+            (submission_id, origin, original_name, stored_name,
+             mime_type, size_bytes, storage_path, checksum, visible_to_user)
+            VALUES
+            (:submission_id, :origin, :original_name, :stored_name,
+             :mime_type, :size_bytes, :storage_path, :checksum, :visible_to_user)";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':submission_id' => $submissionId,
-            ':original_name' => $data['original_name'],
-            ':stored_name'   => $data['stored_name'],
-            ':mime_type'     => $data['mime_type'],
-            ':size_bytes'    => $data['size_bytes'],
-            ':storage_path'  => $data['storage_path'],
-            ':checksum'      => $data['checksum'] ?? null,
+            ':submission_id'   => $submissionId,
+            ':origin'          => $data['origin'] ?? 'USER',
+            ':original_name'   => $data['original_name'],
+            ':stored_name'     => $data['stored_name'],
+            ':mime_type'       => $data['mime_type'],
+            ':size_bytes'      => $data['size_bytes'],
+            ':storage_path'    => $data['storage_path'],
+            ':checksum'        => $data['checksum'] ?? null,
+            ':visible_to_user' => isset($data['visible_to_user']) ? (int)$data['visible_to_user'] : 0,
         ]);
 
         return (int)$this->pdo->lastInsertId();
@@ -56,5 +61,23 @@ final class MySqlPortalSubmissionFileRepository implements PortalSubmissionFileR
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
+    }
+
+    /**
+     * Arquivos que o usuário final pode ver (origin ADMIN + visible_to_user = 1)
+     */
+    public function findVisibleToUser(int $submissionId): array
+    {
+        $sql = "SELECT *
+            FROM portal_submission_files
+            WHERE submission_id = :sid
+              AND origin = 'ADMIN'
+              AND visible_to_user = 1
+            ORDER BY uploaded_at ASC";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':sid' => $submissionId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 }

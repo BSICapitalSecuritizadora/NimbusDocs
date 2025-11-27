@@ -80,14 +80,18 @@ final class SubmissionAdminController
 
         $files = $this->fileRepo->findBySubmission($id);
         $notes = $this->noteRepo->listAllForSubmission($id);
+        $responseFiles = array_filter($files, static fn($f) => $f['origin'] === 'ADMIN');
+        $userFiles     = array_filter($files, static fn($f) => $f['origin'] === 'USER');
 
         $pageTitle   = 'Detalhes da Submissão';
         $contentView = __DIR__ . '/../../View/admin/submissions/show.php';
-        $viewData    = [
-            'submission' => $submission,
-            'files'      => $files,
-            'notes'      => $notes,
-            'csrfToken'  => Csrf::token(),
+        $viewData = [
+            'submission'    => $submission,
+            'files'         => $files,
+            'userFiles'     => $userFiles,
+            'responseFiles' => $responseFiles,
+            'notes'         => $notes,
+            'csrfToken'     => Csrf::token(),
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -187,6 +191,109 @@ final class SubmissionAdminController
         }
 
         Session::flash('success', 'Status atualizado com sucesso.');
+        $this->redirect('/admin/submissions/' . $id);
+    }
+
+    public function uploadResponseFiles(array $vars = []): void
+    {
+        $this->requireAdmin();
+
+        $id    = (int)($vars['id'] ?? 0);
+        $post  = $_POST;
+        $token = $post['_token'] ?? '';
+
+        if (!Csrf::validate($token)) {
+            Session::flash('error', 'Sessão expirada. Tente novamente.');
+            $this->redirect('/admin/submissions/' . $id);
+        }
+
+        $filesArray = $_FILES['response_files'] ?? null;
+        if (!$filesArray || !isset($filesArray['name']) || !is_array($filesArray['name'])) {
+            Session::flash('error', 'Nenhum arquivo enviado.');
+            $this->redirect('/admin/submissions/' . $id);
+        }
+
+        $maxSize = (int)($this->config['upload_max_file_size'] ?? 104857600);
+
+        $allowedMimes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'text/plain',
+            'text/csv',
+            'image/jpeg',
+            'image/png',
+            'application/zip',
+        ];
+
+        $uploadDir = rtrim($this->config['upload_dir'], '/');
+        $baseDir   = $uploadDir . '/' . date('Y') . '/' . date('m');
+
+        if (!is_dir($baseDir)) {
+            mkdir($baseDir, 0775, true);
+        }
+
+        $count = count($filesArray['name']);
+
+        for ($i = 0; $i < $count; $i++) {
+            $error = $filesArray['error'][$i];
+            if ($error === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+            if ($error !== UPLOAD_ERR_OK) {
+                continue;
+            }
+
+            $size = (int)$filesArray['size'][$i];
+            if ($size <= 0 || $size > $maxSize) {
+                continue;
+            }
+
+            $tmpName      = $filesArray['tmp_name'][$i];
+            $originalName = $filesArray['name'][$i];
+            $mime         = $filesArray['type'][$i] ?? 'application/octet-stream';
+
+            if (!in_array($mime, $allowedMimes, true)) {
+                continue;
+            }
+
+            if (!is_uploaded_file($tmpName)) {
+                continue;
+            }
+
+            $ext        = pathinfo($originalName, PATHINFO_EXTENSION);
+            $storedName = bin2hex(random_bytes(16)) . ($ext ? '.' . strtolower($ext) : '');
+            $relative   = date('Y') . '/' . date('m') . '/' . $storedName;
+            $fullPath   = $uploadDir . '/' . $relative;
+
+            $dir = dirname($fullPath);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0775, true);
+            }
+
+            if (!move_uploaded_file($tmpName, $fullPath)) {
+                continue;
+            }
+
+            $checksum = hash_file('sha256', $fullPath);
+
+            $this->fileRepo->create($id, [
+                'origin'          => 'ADMIN',
+                'original_name'   => $originalName,
+                'stored_name'     => $storedName,
+                'mime_type'       => $mime,
+                'size_bytes'      => $size,
+                'storage_path'    => $relative,
+                'checksum'        => $checksum,
+                'visible_to_user' => 1,  // já sobe visível para o usuário
+            ]);
+        }
+
+        Session::flash('success', 'Documentos enviados para o usuário.');
         $this->redirect('/admin/submissions/' . $id);
     }
 }

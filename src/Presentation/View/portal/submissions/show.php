@@ -59,3 +59,26 @@
         <?php endif; ?>
     </div>
 </div>
+
+<?php if ($responseFiles): ?>
+    <div class="card mt-3">
+        <div class="card-body">
+            <h2 class="h6 mb-2">Documentos disponibilizados para você</h2>
+            <p class="text-muted small">
+                Estes são documentos enviados pela BSI em resposta à sua submissão.
+            </p>
+            <ul class="mb-0">
+                <?php foreach ($responseFiles as $f): ?>
+                    <li>
+                        <a href="/portal/files/<?= (int)$f['id'] ?>/download">
+                            <?= htmlspecialchars($f['original_name'], ENT_QUOTES, 'UTF-8') ?>
+                        </a>
+                        <span class="text-muted small">
+                            (<?= number_format((int)$f['size_bytes'] / 1024, 1, ',', '.') ?> KB)
+                        </span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    </div>
+<?php endif; ?>
