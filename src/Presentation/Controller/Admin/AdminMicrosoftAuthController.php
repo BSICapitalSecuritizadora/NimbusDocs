@@ -111,7 +111,7 @@ final class AdminMicrosoftAuthController
             }
 
             // Procura admin_users por e-mail
-            $adminUser = $this->adminRepo->findByEmail($email);
+            $adminUser = $this->adminRepo->findActiveByEmail($email);
             if (!$adminUser) {
                 http_response_code(403);
                 echo 'Você não possui permissão administrativa no NimbusDocs.';
