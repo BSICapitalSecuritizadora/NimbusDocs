@@ -213,7 +213,7 @@ final class SubmissionAdminController
             $this->redirect('/admin/submissions/' . $id);
         }
 
-        $maxSize = (int)($this->config['upload_max_file_size'] ?? 104857600);
+        $maxSize = (int)($this->config['upload']['max_filesize_bytes'] ?? 104857600);
 
         $allowedMimes = [
             'application/pdf',
@@ -230,7 +230,11 @@ final class SubmissionAdminController
             'application/zip',
         ];
 
-        $uploadDir = rtrim($this->config['upload_dir'], '/');
+        $uploadDir = rtrim((string)($this->config['upload']['storage_path'] ?? ''), '/');
+        if ($uploadDir === '') {
+            // fallback para storage/uploads relativo ao projeto
+            $uploadDir = rtrim(dirname(__DIR__, 4) . '/storage/uploads', '/');
+        }
         $baseDir   = $uploadDir . '/' . date('Y') . '/' . date('m');
 
         if (!is_dir($baseDir)) {
