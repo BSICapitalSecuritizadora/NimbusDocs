@@ -50,8 +50,6 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     // Login com Microsoft (admin)
     $r->addRoute('GET', '/admin/login/microsoft', [AdminMicrosoftAuthController::class, 'redirectToProvider']);
     $r->addRoute('GET', '/admin/auth/callback',   [AdminMicrosoftAuthController::class, 'handleCallback']);
-    $r->addRoute('GET', '/admin/login/microsoft', [AdminMicrosoftLoginController::class, 'redirectToMicrosoft']);
-    $r->addRoute('GET',  '/admin/auth/callback',   [AdminMicrosoftLoginController::class, 'handleCallback']);
 
     // Downloads de arquivos de submissão
     $r->addRoute('GET', '/admin/files/{id:\d+}/download', [FileAdminController::class, 'download']);
@@ -72,6 +70,12 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
 // Descobre método e URI
 $httpMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $uri        = $_SERVER['REQUEST_URI']    ?? '/';
+
+// Remove query string ANTES de qualquer validação de rota
+if (false !== $pos = strpos($uri, '?')) {
+    $uri = substr($uri, 0, $pos);
+}
+$uri = rawurldecode($uri);
 
 // --------------------
 // Proteção de rotas admin
@@ -96,12 +100,6 @@ if (str_starts_with($uri, '/admin') && !$isPublic && !Session::has('admin')) {
     header('Location: /admin/login');
     exit;
 }
-
-// Remove query string
-if (false !== $pos = strpos($uri, '?')) {
-    $uri = substr($uri, 0, $pos);
-}
-$uri = rawurldecode($uri);
 
 // Faz o dispatch
 $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
