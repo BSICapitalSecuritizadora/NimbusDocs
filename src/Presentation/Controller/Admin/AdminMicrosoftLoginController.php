@@ -41,7 +41,7 @@ final class AdminMicrosoftLoginController
         ]);
 
         // salva estado na sessão para proteção CSRF
-        Session::set('ms_oauth_state', $provider->getState());
+        Session::put('ms_oauth_state', $provider->getState());
 
         header('Location: ' . $authUrl);
         exit;
@@ -56,7 +56,7 @@ final class AdminMicrosoftLoginController
         $stored = Session::get('ms_oauth_state');
 
         if (empty($state) || $state !== $stored) {
-            Session::set('ms_oauth_state', null);
+            Session::forget('ms_oauth_state');
             http_response_code(400);
             echo 'Estado inválido na autenticação Microsoft.';
             return;
@@ -74,12 +74,13 @@ final class AdminMicrosoftLoginController
             ]);
 
             $user = $provider->getResourceOwner($token);
+            $data = $user->toArray();
 
             // Dados do Azure AD
-            $azureOid    = $user->getId();                    // oid
-            $azureTenant = $user->getTenantId();              // tid
-            $email       = $user->getUpn() ?? $user->getMail() ?? $user->getEmail();
-            $name        = $user->getName();
+            $azureOid    = $data['id'] ?? $data['oid'] ?? null;
+            $azureTenant = $data['tid'] ?? null;
+            $email       = $data['userPrincipalName'] ?? $data['mail'] ?? $data['email'] ?? null;
+            $name        = $data['displayName'] ?? $data['name'] ?? '';
 
             if (!$email) {
                 http_response_code(403);
@@ -91,8 +92,8 @@ final class AdminMicrosoftLoginController
             /** @var PDO $pdo */
             $pdo = $this->config['pdo'];
 
-            // Primeiro tenta por azure_oid, se existir
-            $sql = "SELECT * FROM admin_users WHERE azure_oid = :oid LIMIT 1";
+            // Primeiro tenta por ms_object_id, se existir
+            $sql = "SELECT * FROM admin_users WHERE ms_object_id = :oid LIMIT 1";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([':oid' => $azureOid]);
             $admin = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -108,9 +109,9 @@ final class AdminMicrosoftLoginController
                 if ($admin) {
                     $update = $pdo->prepare(
                         "UPDATE admin_users
-                         SET azure_oid = :oid,
-                             azure_tenant_id = :tenant,
-                             azure_upn = :upn
+                         SET ms_object_id = :oid,
+                             ms_tenant_id = :tenant,
+                             ms_upn = :upn
                          WHERE id = :id"
                     );
                     $update->execute([
@@ -129,14 +130,14 @@ final class AdminMicrosoftLoginController
             }
 
             // (opcional) validar tenant
-            if (!empty($admin['azure_tenant_id']) && $admin['azure_tenant_id'] !== $azureTenant) {
+            if (!empty($admin['ms_tenant_id']) && $admin['ms_tenant_id'] !== $azureTenant) {
                 http_response_code(403);
                 echo 'Tenant Microsoft não autorizado para este administrador.';
                 return;
             }
 
             // Cria sessão de admin (mantendo o mesmo formato usado no login local)
-            Session::set('admin', [
+            Session::put('admin', [
                 'id'        => (int)$admin['id'],
                 'name'      => $admin['full_name'] ?? $admin['name'] ?? $name,
                 'email'     => $admin['email'],
@@ -144,7 +145,7 @@ final class AdminMicrosoftLoginController
                 'login_via' => 'microsoft',
             ]);
 
-            Session::set('ms_oauth_state', null);
+            Session::forget('ms_oauth_state');
 
             header('Location: /admin/dashboard');
             exit;

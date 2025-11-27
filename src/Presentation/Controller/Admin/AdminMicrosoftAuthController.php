@@ -126,19 +126,6 @@ final class AdminMicrosoftAuthController
                 'auth_driver' => 'microsoft',
             ]);
 
-            $this->config['audit']->log(
-                (int)$admin['id'],
-                'admin.login.microsoft',
-                'admin_user',
-                (int)$admin['id'],
-                [
-                    'email'       => $admin['email'],
-                    'azure_oid'   => $azureOid,
-                    'azure_upn'   => $email,
-                    'azure_tenant' => $azureTenant,
-                ]
-            );
-
             header('Location: /admin');
             exit;
         } catch (\Throwable $e) {
