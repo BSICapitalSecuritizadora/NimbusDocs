@@ -51,4 +51,11 @@ return [
             '/'
         ),
     ],
+
+    'ms_admin_auth' => [
+        'tenant_id'      => $_ENV['MS_ADMIN_TENANT_ID']      ?? '',
+        'client_id'      => $_ENV['MS_ADMIN_CLIENT_ID']      ?? '',
+        'client_secret'  => $_ENV['MS_ADMIN_CLIENT_SECRET']  ?? '',
+        'redirect_uri'   => $_ENV['MS_ADMIN_REDIRECT_URI']   ?? '',
+    ],
 ];

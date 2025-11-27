@@ -8,6 +8,7 @@ use App\Presentation\Controller\Admin\PortalUserController;
 use App\Presentation\Controller\Admin\SubmissionAdminController;
 use App\Presentation\Controller\Admin\FileAdminController;
 use App\Presentation\Controller\Admin\AuditLogController;
+use App\Presentation\Controller\Admin\AdminMicrosoftAuthController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -45,6 +46,10 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}/deactivate', [PortalUserController::class, 'deactivate']);
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}/tokens', [PortalUserController::class, 'generateAccessCode']);
 
+    // Login com Microsoft (admin)
+    $r->addRoute('GET', '/admin/login/microsoft', [AdminMicrosoftAuthController::class, 'redirectToProvider']);
+    $r->addRoute('GET', '/admin/auth/callback',   [AdminMicrosoftAuthController::class, 'handleCallback']);
+
     // Downloads de arquivos de submissão
     $r->addRoute('GET', '/admin/files/{id:\d+}/download', [FileAdminController::class, 'download']);
 
@@ -71,6 +76,8 @@ $uri        = $_SERVER['REQUEST_URI']    ?? '/';
 $publicRoutes = [
     ['GET',  '/admin/login'],
     ['POST', '/admin/login'],
+    ['GET',  '/admin/login/microsoft'],
+    ['GET',  '/admin/auth/callback'],
 ];
 
 $isPublic = false;

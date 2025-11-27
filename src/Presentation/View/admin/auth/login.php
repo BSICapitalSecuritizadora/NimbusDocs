@@ -8,6 +8,7 @@
  * - string $oldEmail      Último e-mail digitado (para manter no form)
  * - string $csrfToken     Token CSRF para o formulário
  */
+
 ?>
 
 <div class="row justify-content-center">
@@ -53,14 +54,12 @@
                             required>
                     </div>
 
-                    <!-- Futuro: botão para login com Microsoft -->
-                    <!--
-                    <div class="mb-3 text-center">
-                        <a href="/admin/login/microsoft" class="btn btn-outline-primary btn-sm">
+                    <!-- botão para login com Microsoft -->
+                    <div class="mt-3">
+                        <a href="/admin/login/microsoft" class="btn btn-outline-secondary w-100">
                             Entrar com Microsoft
                         </a>
                     </div>
-                    -->
 
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary">
