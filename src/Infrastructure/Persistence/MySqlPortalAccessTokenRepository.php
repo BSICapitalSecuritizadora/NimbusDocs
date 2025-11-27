@@ -15,15 +15,15 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
     public function create(array $data): int
     {
         $sql = "INSERT INTO portal_access_tokens
-                (portal_user_id, token, expires_at, created_by_admin_id)
-                VALUES (:portal_user_id, :token, :expires_at, :created_by_admin_id)";
+                (portal_user_id, code, expires_at, status)
+                VALUES (:portal_user_id, :code, :expires_at, :status)";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':portal_user_id'      => $data['portal_user_id'],
-            ':token'               => $data['token'],
-            ':expires_at'          => $data['expires_at'],
-            ':created_by_admin_id' => $data['created_by_admin_id'] ?? null,
+            ':portal_user_id' => $data['portal_user_id'],
+            ':code'           => $data['token'], // interface usa 'token', mas tabela usa 'code'
+            ':expires_at'     => $data['expires_at'],
+            ':status'         => 'PENDING',
         ]);
 
         return (int)$this->pdo->lastInsertId();
@@ -33,13 +33,13 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
     {
         $sql = "SELECT *
                 FROM portal_access_tokens
-                WHERE token = :token
-                  AND used_at IS NULL
+                WHERE code = :code
+                  AND status = 'PENDING'
                   AND expires_at > NOW()
                 LIMIT 1";
 
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':token' => $token]);
+        $stmt->execute([':code' => $token]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
@@ -48,7 +48,8 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
     public function markAsUsed(int $id): void
     {
         $sql = "UPDATE portal_access_tokens
-                SET used_at = NOW()
+                SET status = 'USED',
+                    used_at = NOW()
                 WHERE id = :id";
 
         $stmt = $this->pdo->prepare($sql);
@@ -73,10 +74,10 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
 
     public function invalidateOldTokensForUser(int $portalUserId): void
     {
-        // estratégia simples: marcar todos como usados
         $sql = "UPDATE portal_access_tokens
-            SET used_at = IF(used_at IS NULL, NOW(), used_at)
-            WHERE portal_user_id = :uid";
+                SET status = 'REVOKED'
+                WHERE portal_user_id = :uid
+                  AND status = 'PENDING'";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':uid' => $portalUserId]);

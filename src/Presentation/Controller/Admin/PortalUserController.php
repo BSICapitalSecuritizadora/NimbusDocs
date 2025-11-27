@@ -342,7 +342,7 @@ final class PortalUserController
         // 4) (opcional) envia link por e-mail via Graph, se configurado
         if (isset($this->config['mail']) && !empty($user['email'])) {
             $nomeUsuario = $user['full_name'] ?? $user['name'] ?? 'Cliente';
-            $link        = rtrim($this->config['app_url'], '/') . '/portal/access/' . $code;
+            $link        = rtrim($this->config['app']['url'] ?? '', '/') . '/portal/access/' . $code;
 
             $body = sprintf(
                 '<p>Olá %s,</p>

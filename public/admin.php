@@ -42,7 +42,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/admin/portal-users/{id:\d+}', [PortalUserController::class, 'show']);
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}',           [PortalUserController::class, 'update']);
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}/deactivate', [PortalUserController::class, 'deactivate']);
-    $r->addRoute('POST', '/admin/portal-users/{id:\d+}/tokens', [PortalUserController::class, 'generateToken']);
+    $r->addRoute('POST', '/admin/portal-users/{id:\d+}/tokens', [PortalUserController::class, 'generateAccessCode']);
 
     // Downloads de arquivos de submissão
     $r->addRoute('GET', '/admin/files/{id:\d+}/download', [FileAdminController::class, 'download']);
