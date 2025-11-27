@@ -9,6 +9,7 @@ use App\Presentation\Controller\Admin\SubmissionAdminController;
 use App\Presentation\Controller\Admin\FileAdminController;
 use App\Presentation\Controller\Admin\AuditLogController;
 use App\Presentation\Controller\Admin\AdminMicrosoftAuthController;
+use App\Presentation\Controller\Admin\AdminMicrosoftLoginController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -49,6 +50,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     // Login com Microsoft (admin)
     $r->addRoute('GET', '/admin/login/microsoft', [AdminMicrosoftAuthController::class, 'redirectToProvider']);
     $r->addRoute('GET', '/admin/auth/callback',   [AdminMicrosoftAuthController::class, 'handleCallback']);
+    $r->addRoute('GET', '/admin/login/microsoft', [AdminMicrosoftLoginController::class, 'redirectToMicrosoft']);
+    $r->addRoute('GET',  '/admin/auth/callback',   [AdminMicrosoftLoginController::class, 'handleCallback']);
 
     // Downloads de arquivos de submissão
     $r->addRoute('GET', '/admin/files/{id:\d+}/download', [FileAdminController::class, 'download']);

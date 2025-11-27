@@ -361,6 +361,17 @@ final class PortalUserController
             );
         }
 
+        $this->config['audit']->log(
+            $adminId ? (int)$adminId : null,
+            'portal.access_token.generated',
+            'portal_user',
+            $id,
+            [
+                'token_expires_at' => $expiresAt,
+                'email_sent_to'    => $user['email'],
+            ]
+        );
+
         // 5) feedback visual pro admin
         Session::flash(
             'success',

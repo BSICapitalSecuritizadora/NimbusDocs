@@ -142,6 +142,17 @@ final class SubmissionAdminController
 
         $this->repo->updateStatus($id, $status, $adminId ? (int)$adminId : null);
 
+        $this->config['audit']->log(
+            $adminId ? (int)$adminId : null,
+            'submission.status.updated',
+            'submission',
+            $id,
+            [
+                'new_status' => $status,
+                'note'       => $noteText,
+            ]
+        );
+
         // Cria nota (opcional, mas quase sempre haverá algo)
         if ($noteText !== '') {
             $this->noteRepo->create([
@@ -296,6 +307,16 @@ final class SubmissionAdminController
                 'visible_to_user' => 1,  // já sobe visível para o usuário
             ]);
         }
+
+        $this->config['audit']->log(
+            $adminId ?? null, // se você já tem o admin em sessão; se não, recupera como nos outros métodos
+            'submission.response_files.uploaded',
+            'submission',
+            $id,
+            [
+                'files_count' => $count,
+            ]
+        );
 
         Session::flash('success', 'Documentos enviados para o usuário.');
         $this->redirect('/admin/submissions/' . $id);

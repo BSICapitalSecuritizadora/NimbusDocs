@@ -7,6 +7,7 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use App\Infrastructure\Persistence\Connection;
 use App\Infrastructure\Notification\GraphMailService;
+use App\Infrastructure\Logging\AdminAuditLogger;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -64,6 +65,11 @@ $config['mail'] = new GraphMailService(
     $config,   // passa o array de config completo
     $logger
 );
+
+// -------------------------------------------------------------------------
+// Audit Logger (ações administrativas)
+// -------------------------------------------------------------------------
+$config['audit'] = new AdminAuditLogger($config['pdo']);
 
 
 return $config;
