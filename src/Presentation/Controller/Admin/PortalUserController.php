@@ -140,7 +140,7 @@ final class PortalUserController
             $this->redirect('/admin/portal-users');
         }
 
-        $tokens = $this->tokenRepo->listRecentByUser($id, 10);
+        $tokens = $this->tokenRepo->listRecentForUser($id, 10);
 
         $pageTitle   = 'Editar Usuário Final';
         $contentView = __DIR__ . '/../../View/admin/portal_users/form.php';
@@ -284,12 +284,12 @@ final class PortalUserController
         exit;
     }
 
-    public function generateToken(array $vars = []): void
+    public function generateAccessCode(array $vars = []): void
     {
         $admin = $this->requireAdmin();
 
-        $id   = (int)($vars['id'] ?? 0);
-        $post = $_POST;
+        $id    = (int)($vars['id'] ?? 0);
+        $post  = $_POST;
         $token = $post['_token'] ?? '';
 
         if (!Csrf::validate($token)) {
@@ -303,7 +303,7 @@ final class PortalUserController
             $this->redirect('/admin/portal-users');
         }
 
-        // validade escolhida
+        // validade escolhida no formulário
         $validity = $post['validity'] ?? '24h';
         $intervalSpec = match ($validity) {
             '1h'  => 'PT1H',
@@ -312,18 +312,56 @@ final class PortalUserController
             default => 'P1D',
         };
 
-        $now        = new DateTimeImmutable('now');
-        $expiresAt  = $now->add(new DateInterval($intervalSpec));
-        $code       = RandomToken::shortCode(12); // 12 caracteres
+        $now       = new DateTimeImmutable('now');
+        $expiresAt = $now->add(new DateInterval($intervalSpec));
+        $code      = RandomToken::shortCode(12); // 12 caracteres, será o "token"
 
-        // opcional: revogar tokens pendentes anteriores
-        $this->tokenRepo->revokePendingTokens($id);
+        // 1) invalida tokens pendentes anteriores (novo nome)
+        $this->tokenRepo->invalidateOldTokensForUser($id);
 
-        $tokenId = $this->tokenRepo->createToken($id, $code, $expiresAt);
-        $this->audit->log('ADMIN', (int)$admin['id'], 'PORTAL_USER_TOKEN_GENERATED', 'PORTAL_ACCESS_TOKEN', $tokenId, [
-            'expires_at' => $expiresAt->format(DateTimeImmutable::ATOM),
+        // 2) cria o novo registro com a nova assinatura do repositório
+        $tokenId = $this->tokenRepo->create([
+            'portal_user_id'      => $id,
+            'token'               => $code,
+            'expires_at'          => $expiresAt->format('Y-m-d H:i:s'),
+            'created_by_admin_id' => (int)$admin['id'],
         ]);
 
+        // 3) registra no audit log
+        $this->audit->log(
+            'ADMIN',
+            (int)$admin['id'],
+            'PORTAL_USER_TOKEN_GENERATED',
+            'PORTAL_ACCESS_TOKEN',
+            $tokenId,
+            [
+                'expires_at' => $expiresAt->format(DateTimeImmutable::ATOM),
+            ]
+        );
+
+        // 4) (opcional) envia link por e-mail via Graph, se configurado
+        if (isset($this->config['mail']) && !empty($user['email'])) {
+            $nomeUsuario = $user['full_name'] ?? $user['name'] ?? 'Cliente';
+            $link        = rtrim($this->config['app_url'], '/') . '/portal/access/' . $code;
+
+            $body = sprintf(
+                '<p>Olá %s,</p>
+             <p>Você recebeu um link de acesso ao <strong>NimbusDocs Portal</strong>.</p>
+             <p>Este link é de uso único e é válido até %s.</p>
+             <p><a href="%s">Clique aqui para acessar</a></p>',
+                htmlspecialchars($nomeUsuario, ENT_QUOTES, 'UTF-8'),
+                $expiresAt->format('d/m/Y H:i'),
+                htmlspecialchars($link, ENT_QUOTES, 'UTF-8')
+            );
+
+            $this->config['mail']->sendMail(
+                $user['email'],
+                'Seu link de acesso ao NimbusDocs Portal',
+                $body
+            );
+        }
+
+        // 5) feedback visual pro admin
         Session::flash(
             'success',
             sprintf(
