@@ -98,10 +98,10 @@
                                         <tr>
                                             <td><?= $s['id'] ?></td>
                                             <td><?= htmlspecialchars($s['user_name'] ?? 'Usuário', ENT_QUOTES) ?></td>
-                                            <td><?= $s['created_at'] ?></td>
+                                            <td><?= htmlspecialchars($s['submitted_at'] ?? '', ENT_QUOTES) ?></td>
                                             <td>
                                                 <span class="badge bg-info">
-                                                    <?= $s['status'] ?>
+                                                    <?= htmlspecialchars($s['status'] ?? '', ENT_QUOTES) ?>
                                                 </span>
                                             </td>
                                             <td>

@@ -194,7 +194,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $stmt = $this->pdo->prepare(
             "SELECT *
          FROM portal_submissions
-         ORDER BY created_at DESC
+         ORDER BY submitted_at DESC
          LIMIT :l"
         );
         $stmt->bindValue(':l', $limit, \PDO::PARAM_INT);
