@@ -8,6 +8,9 @@ use Monolog\Handler\StreamHandler;
 use App\Infrastructure\Persistence\Connection;
 use App\Infrastructure\Notification\GraphMailService;
 use App\Infrastructure\Logging\AdminAuditLogger;
+use App\Domain\Repository\AuditLogRepository;
+use App\Infrastructure\Persistence\MySqlAuditLogRepository;
+use App\Infrastructure\Audit\AuditLogger;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -71,5 +74,13 @@ $config['mail'] = new GraphMailService(
 // -------------------------------------------------------------------------
 $config['audit'] = new AdminAuditLogger($config['pdo']);
 
+// -------------------------------------------------------------------------
+// Audit Logger (ações do portal)
+// -------------------------------------------------------------------------
+$auditRepo = new MySqlAuditLogRepository($pdo);
+$auditLogger = new AuditLogger($auditRepo, $config);
+
+// Sobrescreve a chave 'audit' do config com o novo logger
+$config['audit'] = $auditLogger;
 
 return $config;

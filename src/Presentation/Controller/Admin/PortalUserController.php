@@ -328,16 +328,19 @@ final class PortalUserController
         ]);
 
         // 3) registra no audit log
-        $this->audit->log(
-            'ADMIN',
-            (int)$admin['id'],
-            'PORTAL_USER_TOKEN_GENERATED',
-            'PORTAL_ACCESS_TOKEN',
-            $tokenId,
-            [
-                'expires_at' => $expiresAt->format(DateTimeImmutable::ATOM),
-            ]
-        );
+        $this->config['audit']->adminAction([
+            'actor_id'    => $adminId ? (int)$adminId : null,
+            'actor_name'  => $admin['name'] ?? null,
+            'action'      => 'PORTAL_ACCESS_LINK_GENERATED',
+            'summary'     => 'Link de acesso único gerado para usuário do portal.',
+            'context_type' => 'portal_user',
+            'context_id'  => $id,
+            'details'     => [
+                'portal_user_email' => $user['email'],
+                'token_expires_at'  => $expiresAt,
+            ],
+        ]);
+
 
         // 4) (opcional) envia link por e-mail via Graph, se configurado
         if (isset($this->config['mail']) && !empty($user['email'])) {

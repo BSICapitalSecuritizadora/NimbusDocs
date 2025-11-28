@@ -10,6 +10,7 @@ use App\Presentation\Controller\Admin\FileAdminController;
 use App\Presentation\Controller\Admin\AuditLogController;
 use App\Presentation\Controller\Admin\AdminMicrosoftAuthController;
 use App\Presentation\Controller\Admin\AdminMicrosoftLoginController;
+use App\Presentation\Controller\Admin\AuditLogAdminController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -36,6 +37,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('POST', '/admin/submissions/{id:\d+}/status', [SubmissionAdminController::class, 'updateStatus']);
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}/access-link', [PortalUserController::class, 'generateAccessLink']);
     $r->addRoute('POST', '/admin/submissions/{id:\d+}/response-files', [SubmissionAdminController::class, 'uploadResponseFiles']);
+    $r->addRoute('GET', '/admin/audit-logs', [AuditLogAdminController::class, 'index']);
 
     // Usuários Finais
     $r->addRoute('GET',  '/admin/portal-users',                    [PortalUserController::class, 'index']);

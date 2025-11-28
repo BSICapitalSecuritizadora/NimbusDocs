@@ -82,6 +82,15 @@ final class AdminMicrosoftLoginController
             $email       = $data['userPrincipalName'] ?? $data['mail'] ?? $data['email'] ?? null;
             $name        = $data['displayName'] ?? $data['name'] ?? '';
 
+            $this->config['audit']->systemAction([
+                'action'  => 'ADMIN_LOGIN_MICROSOFT_DENIED',
+                'summary' => 'Conta Microsoft não autorizada tentou acesso administrativo.',
+                'details' => [
+                    'azure_oid' => $azureOid,
+                    'azure_upn' => $email,
+                ],
+            ]);
+
             if (!$email) {
                 http_response_code(403);
                 echo 'Não foi possível obter o e-mail/UPN da conta Microsoft.';
@@ -143,6 +152,19 @@ final class AdminMicrosoftLoginController
                 'email'     => $admin['email'],
                 'role'      => $admin['role'] ?? 'admin',
                 'login_via' => 'microsoft',
+            ]);
+
+            $this->config['audit']->adminAction([
+                'actor_id'    => (int)$admin['id'],
+                'actor_name'  => $admin['full_name'] ?? $admin['name'] ?? $name,
+                'action'      => 'ADMIN_LOGIN_SUCCESS',
+                'summary'     => 'Login via Microsoft realizado com sucesso.',
+                'details'     => [
+                    'method'      => 'microsoft',
+                    'azure_oid'   => $azureOid,
+                    'azure_upn'   => $email,
+                    'azure_tenant' => $azureTenant,
+                ],
             ]);
 
             Session::forget('ms_oauth_state');

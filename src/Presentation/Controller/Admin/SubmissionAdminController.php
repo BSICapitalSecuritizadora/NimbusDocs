@@ -201,6 +201,19 @@ final class SubmissionAdminController
             );
         }
 
+        $this->config['audit']->adminAction([
+            'actor_id'    => $adminId ? (int)$adminId : null,
+            'actor_name'  => $admin['name'] ?? null,
+            'action'      => 'SUBMISSION_STATUS_CHANGED',
+            'summary'     => 'Status da submissão alterado para ' . $status,
+            'context_type' => 'submission',
+            'context_id'  => $id,
+            'details'     => [
+                'new_status' => $status,
+                'note'       => $noteText,
+            ],
+        ]);
+
         Session::flash('success', 'Status atualizado com sucesso.');
         $this->redirect('/admin/submissions/' . $id);
     }
@@ -308,15 +321,17 @@ final class SubmissionAdminController
             ]);
         }
 
-        $this->config['audit']->log(
-            $adminId ?? null, // se você já tem o admin em sessão; se não, recupera como nos outros métodos
-            'submission.response_files.uploaded',
-            'submission',
-            $id,
-            [
-                'files_count' => $count,
-            ]
-        );
+        $this->config['audit']->adminAction([
+            'actor_id'    => $admin['id'] ?? null,
+            'actor_name'  => $admin['name'] ?? null,
+            'action'      => 'SUBMISSION_RESPONSE_FILES_UPLOADED',
+            'summary'     => 'Arquivos de resposta enviados ao usuário.',
+            'context_type' => 'submission',
+            'context_id'  => $id,
+            'details'     => [
+                'files_count' => $count, // ou número efetivo de arquivos gravados
+            ],
+        ]);
 
         Session::flash('success', 'Documentos enviados para o usuário.');
         $this->redirect('/admin/submissions/' . $id);

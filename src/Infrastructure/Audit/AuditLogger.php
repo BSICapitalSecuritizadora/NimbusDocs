@@ -1,0 +1,46 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\Audit;
+
+use App\Domain\Repository\AuditLogRepository;
+
+final class AuditLogger
+{
+    public function __construct(
+        private AuditLogRepository $repo,
+        private array $config
+    ) {}
+
+    public function log(array $data): void
+    {
+        $ip  = $_SERVER['REMOTE_ADDR']     ?? null;
+        $ua  = $_SERVER['HTTP_USER_AGENT'] ?? null;
+
+        $payload = array_merge([
+            'ip_address' => $ip,
+            'user_agent' => $ua,
+        ], $data);
+
+        $this->repo->create($payload);
+    }
+
+    public function adminAction(array $data): void
+    {
+        $data['actor_type'] = 'ADMIN';
+        $this->log($data);
+    }
+
+    public function portalUserAction(array $data): void
+    {
+        $data['actor_type'] = 'PORTAL_USER';
+        $this->log($data);
+    }
+
+    public function systemAction(array $data): void
+    {
+        $data['actor_type'] = 'SYSTEM';
+        $this->log($data);
+    }
+}

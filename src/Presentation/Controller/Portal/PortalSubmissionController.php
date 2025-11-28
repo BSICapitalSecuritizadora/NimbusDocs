@@ -178,6 +178,19 @@ final class PortalSubmissionController
             'reference_code' => $refCode,
         ]);
 
+        $this->config['audit']->portalUserAction([
+            'actor_id'    => (int)$user['id'],
+            'actor_name'  => $user['full_name'] ?? $user['name'] ?? $user['email'],
+            'action'      => 'PORTAL_SUBMISSION_CREATED',
+            'summary'     => 'Nova submissão criada pelo usuário do portal.',
+            'context_type' => 'submission',
+            'context_id'  => $submissionId,
+            'details'     => [
+                'title'   => $data['title'],
+                'has_files' => $hasFiles,
+            ],
+        ]);
+
         // --- e-mail de confirmação (se serviço estiver configurado) ---
         if (isset($this->config['mail'])) {
             $emailUsuario = $user['email'] ?? null;
