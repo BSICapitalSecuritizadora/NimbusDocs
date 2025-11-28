@@ -19,6 +19,17 @@ final class MySqlAdminUserRepository implements AdminUserRepository
         return $row ?: null;
     }
 
+    public function findActiveByEmail(string $email): ?array
+    {
+        $sql = "SELECT * FROM admin_users
+                WHERE email = :email AND status = 'ACTIVE'
+                LIMIT 1";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':email' => $email]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
     public function paginate(int $page, int $perPage): array
     {
         $offset = ($page - 1) * $perPage;
@@ -137,5 +148,14 @@ final class MySqlAdminUserRepository implements AdminUserRepository
         $sql = "UPDATE admin_users SET " . implode(', ', $parts) . ", updated_at = NOW() WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
+    }
+
+    public function updateLastLogin(int $id, string $provider): void
+    {
+        $sql = "UPDATE admin_users
+                SET last_login_at = NOW(), last_login_provider = :provider
+                WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':provider' => $provider, ':id' => $id]);
     }
 }
