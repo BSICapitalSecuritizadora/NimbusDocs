@@ -3,6 +3,7 @@
 /** @var array $pagination */
 /** @var string $csrfToken */
 /** @var array $flash */
+
 $items   = $pagination['items'] ?? [];
 $page    = $pagination['page'] ?? 1;
 $pages   = $pagination['pages'] ?? 1;

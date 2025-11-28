@@ -41,11 +41,11 @@ final class AdminUserAdminController
         $page    = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
         $perPage = 20;
 
-        $rows  = $this->repo->paginate($page, $perPage); // raw rows
+        $rows  = $this->repo->paginate($page, $perPage);
         $total = $this->repo->countAll();
         $pages = (int)ceil($total / $perPage);
 
-        // Normaliza campos para a view (garante nome e status legíveis)
+        // Normaliza campos para a view
         $items = array_map(function (array $r) {
             return [
                 'id'             => $r['id'],

@@ -24,13 +24,12 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('POST', '/admin/login', [LoginController::class, 'handleLogin']);
     $r->addRoute('GET',  '/admin/logout', [LoginController::class, 'logout']);
 
-    // Administradores
-    $r->addRoute('GET',  '/admin/users',              [AdminUserController::class, 'index']);
-    $r->addRoute('GET',  '/admin/users/create',       [AdminUserController::class, 'showCreateForm']);
-    $r->addRoute('POST', '/admin/users',              [AdminUserController::class, 'store']);
-    $r->addRoute('GET',  '/admin/users/{id:\d+}/edit', [AdminUserController::class, 'showEditForm']);
-    $r->addRoute('POST', '/admin/users/{id:\d+}',     [AdminUserController::class, 'update']);
-    $r->addRoute('POST', '/admin/users/{id:\d+}/deactivate', [AdminUserController::class, 'deactivate']);
+    // Administradores (sistema)
+    $r->addRoute('GET',  '/admin/users',              [AdminUserAdminController::class, 'index']);
+    $r->addRoute('GET',  '/admin/users/create',       [AdminUserAdminController::class, 'createForm']);
+    $r->addRoute('POST', '/admin/users',              [AdminUserAdminController::class, 'store']);
+    $r->addRoute('GET',  '/admin/users/{id:\d+}/edit', [AdminUserAdminController::class, 'editForm']);
+    $r->addRoute('POST', '/admin/users/{id:\d+}',     [AdminUserAdminController::class, 'update']);
     $r->addRoute('GET',  '/admin/submissions',          [SubmissionAdminController::class, 'index']);
     $r->addRoute('GET',  '/admin/submissions/{id:\d+}', [SubmissionAdminController::class, 'show']);
     $r->addRoute('POST', '/admin/submissions/{id:\d+}/status', [SubmissionAdminController::class, 'updateStatus']);
