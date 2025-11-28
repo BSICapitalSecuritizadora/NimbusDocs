@@ -28,7 +28,7 @@ interface PortalAccessTokenRepository
     /**
      * Marca o token como utilizado (uso único).
      */
-    public function markAsUsed(int $id): void;
+    public function markAsUsed(int $id, string $ip = '', string $userAgent = ''): void;
 
     /**
      * Lista tokens recentes de um usuário do portal.

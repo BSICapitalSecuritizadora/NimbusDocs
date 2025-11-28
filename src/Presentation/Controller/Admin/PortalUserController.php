@@ -319,12 +319,11 @@ final class PortalUserController
         // 1) invalida tokens pendentes anteriores (novo nome)
         $this->tokenRepo->invalidateOldTokensForUser($id);
 
-        // 2) cria o novo registro com a nova assinatura do repositório
+        // 2) cria o novo registro
         $tokenId = $this->tokenRepo->create([
-            'portal_user_id'      => $id,
-            'token'               => $code,
-            'expires_at'          => $expiresAt->format('Y-m-d H:i:s'),
-            'created_by_admin_id' => (int)$admin['id'],
+            'portal_user_id' => $id,
+            'token'          => $code,
+            'expires_at'     => $expiresAt->format('Y-m-d H:i:s'),
         ]);
 
         // 3) registra no audit log
