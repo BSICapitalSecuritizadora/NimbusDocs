@@ -176,4 +176,29 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             ':id'            => $id,
         ]);
     }
+
+    public function countAll(): int
+    {
+        return (int)$this->pdo->query("SELECT COUNT(*) FROM portal_submissions")->fetchColumn();
+    }
+
+    public function countByStatus(string $status): int
+    {
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM portal_submissions WHERE status = :s");
+        $stmt->execute([':s' => $status]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function latest(int $limit = 5): array
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT *
+         FROM portal_submissions
+         ORDER BY created_at DESC
+         LIMIT :l"
+        );
+        $stmt->bindValue(':l', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

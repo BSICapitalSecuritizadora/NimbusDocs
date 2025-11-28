@@ -98,4 +98,17 @@ final class MySqlAuditLogRepository implements AuditLogRepository
             'total' => $total,
         ];
     }
+
+    public function latest(int $limit = 5): array
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT *
+         FROM audit_logs
+         ORDER BY occurred_at DESC, id DESC
+         LIMIT :l"
+        );
+        $stmt->bindValue(':l', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

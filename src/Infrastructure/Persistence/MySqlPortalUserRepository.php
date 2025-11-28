@@ -109,9 +109,6 @@ final class MySqlPortalUserRepository implements PortalUserRepository
     }
 
     // removed password-related updates; portal_users authenticates via access codes
-
-    
-
     public function recordLastLogin(int $id, string $method): void
     {
         $sql = "UPDATE portal_users
@@ -130,5 +127,10 @@ final class MySqlPortalUserRepository implements PortalUserRepository
     {
         $stmt = $this->pdo->prepare("UPDATE portal_users SET status = 'INACTIVE' WHERE id = :id");
         $stmt->execute([':id' => $id]);
+    }
+
+    public function countAll(): int
+    {
+        return (int)$this->pdo->query("SELECT COUNT(*) FROM portal_users")->fetchColumn();
     }
 }

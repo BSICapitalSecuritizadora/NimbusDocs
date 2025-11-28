@@ -10,6 +10,7 @@ use App\Presentation\Controller\Admin\FileAdminController;
 use App\Presentation\Controller\Admin\AuditLogController;
 use App\Presentation\Controller\Admin\AdminMicrosoftAuthController;
 use App\Presentation\Controller\Admin\AdminUserAdminController;
+use App\Presentation\Controller\Admin\DashboardAdminController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -40,6 +41,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('POST', '/admin/admin-users',             [AdminUserAdminController::class, 'store']);
     $r->addRoute('GET',  '/admin/admin-users/{id:\d+}/edit', [AdminUserAdminController::class, 'editForm']);
     $r->addRoute('POST', '/admin/admin-users/{id:\d+}',    [AdminUserAdminController::class, 'update']);
+    $r->addRoute('GET', '/admin/dashboard', [DashboardAdminController::class, 'index']);
 
     // Usuários Finais
     $r->addRoute('GET',  '/admin/portal-users',                    [PortalUserController::class, 'index']);

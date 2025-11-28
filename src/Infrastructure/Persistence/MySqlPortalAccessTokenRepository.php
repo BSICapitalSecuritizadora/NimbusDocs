@@ -29,7 +29,7 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
         return (int)$this->pdo->lastInsertId();
     }
 
-        public function findValidToken(string $token): ?array
+    public function findValidToken(string $token): ?array
     {
         $sql = "SELECT *
                 FROM portal_access_tokens
@@ -45,9 +45,9 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
         return $row ?: null;
     }
 
-        public function findValidWithUserByCode(string $code): ?array
-        {
-                $sql = "SELECT 
+    public function findValidWithUserByCode(string $code): ?array
+    {
+        $sql = "SELECT 
                                         t.id           AS token_id,
                                         t.code         AS token_code,
                                         t.expires_at   AS token_expires_at,
@@ -69,12 +69,12 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
                                 ORDER BY t.created_at DESC
                                 LIMIT 1";
 
-                $stmt = $this->pdo->prepare($sql);
-                $stmt->execute([':code' => $code]);
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':code' => $code]);
 
-                $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                return $row ?: null;
-        }
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
 
     public function markAsUsed(int $id, string $ip = '', string $userAgent = ''): void
     {
@@ -118,5 +118,24 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':uid' => $portalUserId]);
+    }
+
+    public function countValid(): int
+    {
+        return (int)$this->pdo->query(
+            "SELECT COUNT(*) 
+         FROM portal_access_tokens 
+         WHERE used_at IS NULL 
+           AND expires_at >= NOW()"
+        )->fetchColumn();
+    }
+
+    public function countExpired(): int
+    {
+        return (int)$this->pdo->query(
+            "SELECT COUNT(*) 
+         FROM portal_access_tokens 
+         WHERE expires_at < NOW()"
+        )->fetchColumn();
     }
 }
