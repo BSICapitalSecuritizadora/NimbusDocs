@@ -31,24 +31,24 @@ $items = $pagination['items'] ?? [];
                     <?php else: ?>
                         <?php foreach ($items as $log): ?>
                             <tr>
-                                <td class="text-nowrap"><?= htmlspecialchars($log['created_at'], ENT_QUOTES, 'UTF-8') ?></td>
-                                <td><code><?= htmlspecialchars($log['action'], ENT_QUOTES, 'UTF-8') ?></code></td>
+                                <td class="text-nowrap"><?= htmlspecialchars($log['occurred_at'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                                <td><code><?= htmlspecialchars($log['action'] ?? '', ENT_QUOTES, 'UTF-8') ?></code></td>
                                 <td>
-                                    <?= htmlspecialchars($log['actor_type'], ENT_QUOTES, 'UTF-8') ?>
-                                    <?php if ($log['actor_id']): ?>
+                                    <?= htmlspecialchars($log['actor_type'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                    <?php if (!empty($log['actor_id'])): ?>
                                         #<?= (int)$log['actor_id'] ?>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <?= htmlspecialchars($log['target_type'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
-                                    <?php if ($log['target_id']): ?>
+                                    <?php if (!empty($log['target_id'])): ?>
                                         #<?= (int)$log['target_id'] ?>
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-muted small"><?= htmlspecialchars($log['ip_address'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
                                 <td class="small text-break">
-                                    <?php if (!empty($log['context'])): ?>
-                                        <code><?= htmlspecialchars($log['context'], ENT_QUOTES, 'UTF-8') ?></code>
+                                    <?php if (!empty($log['details'])): ?>
+                                        <code><?= htmlspecialchars(mb_substr($log['details'], 0, 100), ENT_QUOTES, 'UTF-8') ?></code>
                                     <?php else: ?>
                                         <span class="text-muted">-</span>
                                     <?php endif; ?>
