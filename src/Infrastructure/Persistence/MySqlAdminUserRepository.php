@@ -43,55 +43,53 @@ final class MySqlAdminUserRepository implements AdminUserRepository
     public function create(array $data): int
     {
         $sql = "INSERT INTO admin_users
-                (full_name, email, role, is_active, password_hash,
-                 azure_oid, azure_tenant_id, azure_upn, created_at)
-                VALUES
-                (:full_name, :email, :role, :is_active, :password_hash,
-                 :azure_oid, :azure_tenant_id, :azure_upn, NOW())";
+                (name, email, password_hash, auth_mode, role, status, ms_object_id, ms_tenant_id, ms_upn)
+                VALUES (:name, :email, :password_hash, :auth_mode, :role, :status, :ms_object_id, :ms_tenant_id, :ms_upn)";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':full_name'       => $data['full_name'],
-            ':email'           => $data['email'],
-            ':role'            => $data['role'] ?? 'ADMIN',
-            ':is_active'       => $data['is_active'] ?? 1,
-            ':password_hash'   => $data['password_hash'] ?? null,
-            ':azure_oid'       => $data['azure_oid'] ?? null,
-            ':azure_tenant_id' => $data['azure_tenant_id'] ?? null,
-            ':azure_upn'       => $data['azure_upn'] ?? null,
+            ':name'          => $data['name'],
+            ':email'         => $data['email'],
+            ':password_hash' => $data['password_hash'] ?? null,
+            ':auth_mode'     => $data['auth_mode'] ?? 'LOCAL_ONLY',
+            ':role'          => $data['role'] ?? 'ADMIN',
+            ':status'        => $data['status'] ?? 'ACTIVE',
+            ':ms_object_id'  => $data['ms_object_id'] ?? null,
+            ':ms_tenant_id'  => $data['ms_tenant_id'] ?? null,
+            ':ms_upn'        => $data['ms_upn'] ?? null,
         ]);
         return (int)$this->pdo->lastInsertId();
     }
 
     public function update(int $id, array $data): void
     {
-        $fields = [];
+        $fieldsMap = [
+            'name',
+            'email',
+            'password_hash',
+            'auth_mode',
+            'role',
+            'status',
+            'ms_object_id',
+            'ms_tenant_id',
+            'ms_upn'
+        ];
+
+        $parts  = [];
         $params = [':id' => $id];
 
-        foreach ([
-            'full_name',
-            'email',
-            'role',
-            'is_active',
-            'password_hash',
-            'azure_oid',
-            'azure_tenant_id',
-            'azure_upn'
-        ] as $col) {
+        foreach ($fieldsMap as $col) {
             if (array_key_exists($col, $data)) {
-                $fields[]          = "{$col} = :{$col}";
-                $params[":{$col}"] = $data[$col];
+                $parts[]          = "$col = :$col";
+                $params[":$col"] = $data[$col];
             }
         }
 
-        if (!$fields) {
+        if (!$parts) {
             return;
         }
 
-        $sql = "UPDATE admin_users
-                SET " . implode(', ', $fields) . ", updated_at = NOW()
-                WHERE id = :id";
-
+        $sql = "UPDATE admin_users SET " . implode(', ', $parts) . ", updated_at = NOW() WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
     }

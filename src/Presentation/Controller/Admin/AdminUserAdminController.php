@@ -41,17 +41,37 @@ final class AdminUserAdminController
         $page    = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
         $perPage = 20;
 
-        $items = $this->repo->paginate($page, $perPage);
+        $rows  = $this->repo->paginate($page, $perPage); // raw rows
         $total = $this->repo->countAll();
+        $pages = (int)ceil($total / $perPage);
+
+        // Normaliza campos para a view (garante nome e status legíveis)
+        $items = array_map(function (array $r) {
+            return [
+                'id'             => $r['id'],
+                'name'           => $r['name'] ?? '',
+                'email'          => $r['email'] ?? '',
+                'role'           => $r['role'] ?? 'ADMIN',
+                'status'         => $r['status'] ?? 'ACTIVE',
+                'last_login_at'  => $r['last_login_at'] ?? null,
+            ];
+        }, $rows);
+
+        $pagination = [
+            'items' => $items,
+            'page'  => $page,
+            'pages' => $pages,
+        ];
 
         $pageTitle   = 'Administradores do sistema';
         $contentView = __DIR__ . '/../../View/admin/admin_users/index.php';
         $viewData    = [
-            'items'    => $items,
-            'page'     => $page,
-            'perPage'  => $perPage,
-            'total'    => $total,
-            'csrfToken' => Csrf::token(),
+            'pagination' => $pagination,
+            'csrfToken'  => Csrf::token(),
+            'flash'      => [
+                'success' => Session::getFlash('success'),
+                'error'   => Session::getFlash('error'),
+            ],
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -85,17 +105,18 @@ final class AdminUserAdminController
         }
 
         $data = [
-            'full_name' => trim($post['full_name'] ?? ''),
-            'email'     => trim($post['email'] ?? ''),
-            'role'      => $post['role'] ?? 'ADMIN',
-            'is_active' => isset($post['is_active']) ? 1 : 0,
+            'name'       => trim($post['full_name'] ?? ''), // mantém campo do formulário
+            'email'      => trim($post['email'] ?? ''),
+            'role'       => $post['role'] ?? 'ADMIN',
+            'status'     => isset($post['is_active']) ? 'ACTIVE' : 'INACTIVE',
+            'auth_mode'  => 'LOCAL_ONLY',
         ];
         $password = $post['password'] ?? '';
         $passwordConfirm = $post['password_confirmation'] ?? '';
 
         $errors = [];
 
-        if (!v::stringType()->length(3, 190)->validate($data['full_name'])) {
+        if (!v::stringType()->length(3, 190)->validate($data['name'])) {
             $errors['full_name'] = 'Nome deve ter ao menos 3 caracteres.';
         }
 
@@ -177,17 +198,17 @@ final class AdminUserAdminController
         }
 
         $data = [
-            'full_name' => trim($post['full_name'] ?? ''),
+            'name'      => trim($post['full_name'] ?? ''),
             'email'     => trim($post['email'] ?? ''),
             'role'      => $post['role'] ?? $user['role'],
-            'is_active' => isset($post['is_active']) ? 1 : 0,
+            'status'    => isset($post['is_active']) ? 'ACTIVE' : 'INACTIVE',
         ];
         $password = $post['password'] ?? '';
         $passwordConfirm = $post['password_confirmation'] ?? '';
 
         $errors = [];
 
-        if (!v::stringType()->length(3, 190)->validate($data['full_name'])) {
+        if (!v::stringType()->length(3, 190)->validate($data['name'])) {
             $errors['full_name'] = 'Nome deve ter ao menos 3 caracteres.';
         }
 
