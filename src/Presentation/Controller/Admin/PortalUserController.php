@@ -329,7 +329,7 @@ final class PortalUserController
 
         // 3) registra no audit log
         $this->config['audit']->adminAction([
-            'actor_id'    => $adminId ? (int)$adminId : null,
+            'actor_id'    => (int)$admin['id'],
             'actor_name'  => $admin['name'] ?? null,
             'action'      => 'PORTAL_ACCESS_LINK_GENERATED',
             'summary'     => 'Link de acesso único gerado para usuário do portal.',
