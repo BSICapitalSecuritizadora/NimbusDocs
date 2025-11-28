@@ -9,6 +9,7 @@ use App\Presentation\Controller\Admin\SubmissionAdminController;
 use App\Presentation\Controller\Admin\FileAdminController;
 use App\Presentation\Controller\Admin\AuditLogController;
 use App\Presentation\Controller\Admin\AdminMicrosoftAuthController;
+use App\Presentation\Controller\Admin\AdminUserAdminController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -35,6 +36,11 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('POST', '/admin/submissions/{id:\d+}/status', [SubmissionAdminController::class, 'updateStatus']);
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}/access-link', [PortalUserController::class, 'generateAccessLink']);
     $r->addRoute('POST', '/admin/submissions/{id:\d+}/response-files', [SubmissionAdminController::class, 'uploadResponseFiles']);
+    $r->addRoute('GET',  '/admin/admin-users',             [AdminUserAdminController::class, 'index']);
+    $r->addRoute('GET',  '/admin/admin-users/create',      [AdminUserAdminController::class, 'createForm']);
+    $r->addRoute('POST', '/admin/admin-users',             [AdminUserAdminController::class, 'store']);
+    $r->addRoute('GET',  '/admin/admin-users/{id:\d+}/edit', [AdminUserAdminController::class, 'editForm']);
+    $r->addRoute('POST', '/admin/admin-users/{id:\d+}',    [AdminUserAdminController::class, 'update']);
 
     // Usuários Finais
     $r->addRoute('GET',  '/admin/portal-users',                    [PortalUserController::class, 'index']);
