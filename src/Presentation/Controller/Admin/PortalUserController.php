@@ -42,13 +42,25 @@ final class PortalUserController
         $perPage = isset($_GET['perPage']) ? max(1, (int)$_GET['perPage']) : 20;
         $search  = trim((string)($_GET['search'] ?? ''));
 
-        // Chama paginação (sem busca por enquanto, compatibilidade com repo atual)
+        // Chama paginação (repositório atual retorna apenas itens; alguns retornam estrutura completa)
         $pagination = $this->repo->paginate($page, $perPage);
 
         // Normaliza estrutura para views simples (items/total/totalPages)
-        $items = $pagination['items'] ?? $pagination;
-        $total = $pagination['total'] ?? (is_array($items) ? count($items) : 0);
-        $totalPages = (int)max(1, ceil($total / $perPage));
+        if (is_array($pagination) && array_key_exists('items', $pagination)) {
+            $items      = is_array($pagination['items']) ? $pagination['items'] : [];
+            $reportedTotal = $pagination['total'] ?? null;
+            $total     = is_numeric($reportedTotal) ? (int)$reportedTotal : (int)count($items);
+            $reportedPer = $pagination['perPage'] ?? $perPage;
+            $perPage  = is_numeric($reportedPer) ? (int)$reportedPer : $perPage;
+            $reportedPages = $pagination['pages'] ?? null;
+            $totalPages = is_numeric($reportedPages)
+                ? (int)$reportedPages
+                : (int)max(1, (int)ceil($total / max(1, $perPage)));
+        } else {
+            $items      = is_array($pagination) ? $pagination : [];
+            $total      = (int)count($items);
+            $totalPages = (int)max(1, (int)ceil($total / max(1, $perPage)));
+        }
 
         $pageTitle   = 'Usuários do Portal';
         $contentView = __DIR__ . '/../../View/admin/portal_users/index.php';
@@ -414,7 +426,7 @@ final class PortalUserController
         // 2) cria o novo registro
         $tokenId = $this->tokenRepo->create([
             'portal_user_id' => $id,
-            'token'          => $code,
+            'code'           => $code,
             'expires_at'     => $expiresAt->format('Y-m-d H:i:s'),
         ]);
 
