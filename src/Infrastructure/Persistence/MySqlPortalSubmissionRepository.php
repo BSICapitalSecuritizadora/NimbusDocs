@@ -237,7 +237,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             "SELECT *
          FROM portal_submissions
          WHERE portal_user_id = :uid
-         ORDER BY created_at DESC
+         ORDER BY submitted_at DESC
          LIMIT :lim"
         );
         $stmt->bindValue(':uid', $userId, \PDO::PARAM_INT);

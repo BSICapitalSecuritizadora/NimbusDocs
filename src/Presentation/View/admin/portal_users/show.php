@@ -6,6 +6,20 @@
 ?>
 <h1 class="h4 mb-3">Usuário do Portal</h1>
 
+<?php if ($success = \App\Support\Session::getFlash('success')): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
+<?php if ($error = \App\Support\Session::getFlash('error')): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
 <div class="card mb-3">
     <div class="card-body">
         <p><strong>Nome:</strong> <?= htmlspecialchars($user['full_name'] ?? $user['name'], ENT_QUOTES, 'UTF-8') ?></p>

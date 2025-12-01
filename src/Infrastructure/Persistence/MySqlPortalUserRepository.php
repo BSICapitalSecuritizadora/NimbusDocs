@@ -98,4 +98,26 @@ final class MySqlPortalUserRepository
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
     }
+
+    public function deactivate(int $id): void
+    {
+        $sql = "UPDATE portal_users SET status = 'INACTIVE', updated_at = NOW() WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $id]);
+    }
+
+    public function recordLastLogin(int $id, string $method): void
+    {
+        $sql = "UPDATE portal_users 
+                SET last_login_at = NOW(), 
+                    last_login_method = :method,
+                    updated_at = NOW()
+                WHERE id = :id";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':id' => $id,
+            ':method' => $method,
+        ]);
+    }
 }

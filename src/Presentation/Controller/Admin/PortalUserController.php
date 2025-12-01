@@ -171,6 +171,33 @@ final class PortalUserController
         $this->redirect('/admin/portal-users');
     }
 
+    public function show(array $vars = []): void
+    {
+        $admin = $this->requireAdmin();
+
+        $id   = (int)($vars['id'] ?? 0);
+        $user = $this->repo->findById($id);
+
+        if (!$user) {
+            http_response_code(404);
+            echo 'Usuário do portal não encontrado.';
+            return;
+        }
+
+        $tokens = $this->tokenRepo->listRecentForUser($id, 10);
+
+        $pageTitle   = 'Detalhes do Usuário';
+        $contentView = __DIR__ . '/../../View/admin/portal_users/show.php';
+        $viewData    = [
+            'admin'     => $admin,
+            'user'      => $user,
+            'tokens'    => $tokens,
+            'csrfToken' => Csrf::token(),
+        ];
+
+        require __DIR__ . '/../../View/admin/layouts/base.php';
+    }
+
     public function showEditForm(array $vars = []): void
     {
         $admin = $this->requireAdmin();
@@ -369,7 +396,7 @@ final class PortalUserController
 
         if (!Csrf::validate($token)) {
             Session::flash('error', 'Sessão expirada. Tente novamente.');
-            $this->redirect("/admin/portal-users/{$id}/edit");
+            $this->redirect("/admin/portal-users/{$id}");
         }
 
         $user = $this->repo->findById($id);
@@ -448,6 +475,6 @@ final class PortalUserController
             )
         );
 
-        $this->redirect("/admin/portal-users/{$id}/edit");
+        $this->redirect("/admin/portal-users/{$id}");
     }
 }
