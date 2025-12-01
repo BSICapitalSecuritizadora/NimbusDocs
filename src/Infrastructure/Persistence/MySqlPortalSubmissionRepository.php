@@ -201,4 +201,49 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public function countForUser(int $userId): int
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT COUNT(*) FROM portal_submissions WHERE portal_user_id = :uid"
+        );
+        $stmt->execute([':uid' => $userId]);
+
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function countForUserByStatus(int $userId, string $status): int
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT COUNT(*) 
+         FROM portal_submissions 
+         WHERE portal_user_id = :uid AND status = :status"
+        );
+        $stmt->execute([
+            ':uid'    => $userId,
+            ':status' => $status,
+        ]);
+
+        return (int)$stmt->fetchColumn();
+    }
+
+    /**
+     * Lista as submissões do usuário para o dashboard (com limite)
+     * @return array<int,array>
+     */
+    public function latestForUser(int $userId, int $limit = 10): array
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT *
+         FROM portal_submissions
+         WHERE portal_user_id = :uid
+         ORDER BY created_at DESC
+         LIMIT :lim"
+        );
+        $stmt->bindValue(':uid', $userId, \PDO::PARAM_INT);
+        $stmt->bindValue(':lim', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+    }
 }
