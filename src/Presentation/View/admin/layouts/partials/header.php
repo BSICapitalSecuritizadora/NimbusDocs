@@ -6,7 +6,10 @@
         </button>
 
         <div class="ms-auto d-flex align-items-center">
-            <span class="me-3 text-muted small"><?= htmlspecialchars($admin['email']) ?></span>
+            <?php $adminEmail = isset($admin) && is_array($admin) ? ($admin['email'] ?? '') : ''; ?>
+            <?php if ($adminEmail !== ''): ?>
+                <span class="me-3 text-muted small"><?= htmlspecialchars((string)$adminEmail, ENT_QUOTES, 'UTF-8') ?></span>
+            <?php endif; ?>
 
             <a href="/admin/logout" class="btn btn-outline-danger btn-sm">
                 <i class="bi bi-box-arrow-right"></i> Sair

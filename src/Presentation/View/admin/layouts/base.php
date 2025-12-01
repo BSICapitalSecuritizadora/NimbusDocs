@@ -17,6 +17,12 @@ $viewData    = $viewData    ?? [];
 if (!empty($viewData) && is_array($viewData)) {
     extract($viewData, EXTR_SKIP);
 }
+
+// Garante que `$admin` esteja definido para os parciais (header/sidebar)
+// mesmo que o controller não o tenha passado explicitamente.
+if (!isset($admin)) {
+    $admin = \App\Support\Session::get('admin') ?? null;
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
