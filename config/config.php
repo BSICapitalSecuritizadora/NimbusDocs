@@ -58,4 +58,12 @@ return [
         'client_secret'  => $_ENV['MS_ADMIN_CLIENT_SECRET']  ?? '',
         'redirect_uri'   => $_ENV['MS_ADMIN_REDIRECT_URI']   ?? '',
     ],
+
+    'notifications' => [
+        'portal' => [
+            'new_submission'   => getenv('PORTAL_NOTIFY_NEW_SUBMISSION') === 'true',
+            'status_change'    => getenv('PORTAL_NOTIFY_STATUS_CHANGE') === 'true',
+            'response_upload'  => getenv('PORTAL_NOTIFY_RESPONSE_UPLOAD') === 'true',
+        ],
+    ],
 ];

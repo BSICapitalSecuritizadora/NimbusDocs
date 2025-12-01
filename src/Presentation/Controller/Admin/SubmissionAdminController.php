@@ -6,6 +6,7 @@ namespace App\Presentation\Controller\Admin;
 
 use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository;
+use App\Infrastructure\Persistence\MySqlPortalUserRepository;
 use App\Support\Csrf;
 use App\Support\AuditLogger;
 use App\Support\Session;
@@ -18,14 +19,16 @@ final class SubmissionAdminController
     private MySqlPortalSubmissionRepository $repo;
     private MySqlPortalSubmissionFileRepository $fileRepo;
     private MySqlPortalSubmissionNoteRepository $noteRepo;
+    private MySqlPortalUserRepository $portalUserRepo;
     private AuditLogger $audit;
 
     public function __construct(private array $config)
     {
-        $this->repo     = new MySqlPortalSubmissionRepository($config['pdo']);
-        $this->fileRepo = new MySqlPortalSubmissionFileRepository($config['pdo']);
-        $this->noteRepo = new MySqlPortalSubmissionNoteRepository($config['pdo']);
-        $this->audit    = new AuditLogger($config['pdo']);
+        $this->repo           = new MySqlPortalSubmissionRepository($config['pdo']);
+        $this->fileRepo       = new MySqlPortalSubmissionFileRepository($config['pdo']);
+        $this->noteRepo       = new MySqlPortalSubmissionNoteRepository($config['pdo']);
+        $this->portalUserRepo = new MySqlPortalUserRepository($config['pdo']);
+        $this->audit          = new AuditLogger($config['pdo']);
     }
 
     private function requireAdmin(): void
@@ -132,6 +135,10 @@ final class SubmissionAdminController
             $visible = 'USER_VISIBLE';
         }
 
+        // antes de alterar:
+        $submission = $this->repo->findById($id);
+        $oldStatus = $submission['status'] ?? null;
+
         // Atualiza status
         $admin = Auth::requireAdmin();
         $adminId = $admin['id'] ?? null;
@@ -164,36 +171,19 @@ final class SubmissionAdminController
             'note_visibility' => $visible,
         ]);
 
-        // Envia e-mail se serviço estiver disponível e tivermos e-mail do usuário
-        if (isset($this->config['mail']) && !empty($submission['user_email'])) {
-            $baseUrl = $this->config['app']['url']
-                ?? ($this->config['app_url'] ?? null);
-            if (!$baseUrl) {
-                $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-                $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
-                $baseUrl = $scheme . '://' . $host;
-            }
-            $linkSubmissao = rtrim((string)$baseUrl, '/') . '/portal/submissions/' . $id;
-            $nomeUsuario   = $submission['user_full_name'] ?? 'Cliente';
+        // depois de atualizar:
+        $updatedSubmission = $this->repo->findById($id);
 
-            $body = sprintf(
-                '<p>Olá %s,</p>
-                <p>O status da sua submissão <strong>%s</strong> foi atualizado para:
-                <strong>%s</strong>.</p>%s
-                <p><a href="%s">Ver detalhes</a></p>',
-                htmlspecialchars($nomeUsuario, ENT_QUOTES, 'UTF-8'),
-                htmlspecialchars($submission['title'], ENT_QUOTES, 'UTF-8'),
-                htmlspecialchars($status, ENT_QUOTES, 'UTF-8'),
-                $noteText !== ''
-                    ? '<p>Comentário do analista:</p><blockquote>' . nl2br(htmlspecialchars($noteText, ENT_QUOTES, 'UTF-8')) . '</blockquote>'
-                    : '',
-                htmlspecialchars($linkSubmissao, ENT_QUOTES, 'UTF-8')
-            );
+        // buscar o usuário do portal
+        $portalUser = $this->portalUserRepo->findById((int)$updatedSubmission['portal_user_id']);
 
-            $this->config['mail']->sendMail(
-                $submission['user_email'],
-                'Status atualizado – ' . $submission['title'],
-                $body
+        $notifications = $this->config['notifications_service'] ?? null;
+        if ($notifications && $portalUser && $oldStatus !== $updatedSubmission['status']) {
+            $notifications->portalSubmissionStatusChanged(
+                $portalUser,
+                $updatedSubmission,
+                (string)$oldStatus,
+                (string)$updatedSubmission['status']
             );
         }
 
@@ -217,6 +207,7 @@ final class SubmissionAdminController
     public function uploadResponseFiles(array $vars = []): void
     {
         $this->requireAdmin();
+        $admin = Auth::requireAdmin();
 
         $id    = (int)($vars['id'] ?? 0);
         $post  = $_POST;
@@ -328,6 +319,21 @@ final class SubmissionAdminController
                 'files_count' => $count, // ou número efetivo de arquivos gravados
             ],
         ]);
+
+        // Notificações centralizadas para resposta disponível
+        $submission = $this->repo->findWithUserById($id);
+        $notifications = $this->config['notifications_service'] ?? null;
+        if ($notifications && $submission && !empty($submission['user_email'])) {
+            $portalUser = [
+                'id'         => (int)($submission['portal_user_id'] ?? 0),
+                'full_name'  => $submission['user_full_name'] ?? null,
+                'email'      => $submission['user_email'] ?? null,
+            ];
+            $notifications->portalSubmissionResponseUploaded(
+                $portalUser,
+                $submission
+            );
+        }
 
         Session::flash('success', 'Documentos enviados para o usuário.');
         $this->redirect('/admin/submissions/' . $id);

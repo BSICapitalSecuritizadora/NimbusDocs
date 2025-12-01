@@ -7,6 +7,7 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use App\Infrastructure\Persistence\Connection;
 use App\Infrastructure\Notification\GraphMailService;
+use App\Infrastructure\Notification\NotificationService;
 use App\Infrastructure\Logging\AdminAuditLogger;
 use App\Domain\Repository\AuditLogRepository;
 use App\Infrastructure\Persistence\MySqlAuditLogRepository;
@@ -82,5 +83,12 @@ $auditLogger = new AuditLogger($auditRepo, $config);
 
 // Sobrescreve a chave 'audit' do config com o novo logger
 $config['audit'] = $auditLogger;
+
+// -------------------------------------------------------------------------
+// Notification Service (serviço de notificações por e-mail)
+// -------------------------------------------------------------------------
+// Disponibiliza um serviço central de notificações para os controllers.
+$notificationService = new NotificationService($config['mail'], $config);
+$config['notifications_service'] = $notificationService;
 
 return $config;

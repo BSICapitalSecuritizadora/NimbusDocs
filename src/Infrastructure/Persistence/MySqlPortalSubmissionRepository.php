@@ -82,6 +82,15 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
 
     // --------- ADMIN ---------
 
+    public function findById(int $id): ?array
+    {
+        $sql = "SELECT * FROM portal_submissions WHERE id = :id LIMIT 1";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
     public function paginateAll(array $filters, int $page, int $perPage): array
     {
         $where  = [];

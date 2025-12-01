@@ -225,40 +225,12 @@ final class PortalSubmissionController
             ],
         ]);
 
-        // --- e-mail de confirmação (se serviço estiver configurado) ---
-        if (isset($this->config['mail'])) {
-            $emailUsuario = $user['email'] ?? null;
+        // --- notificações ---
+        $submission = $this->repo->findById($submissionId);
 
-            if ($emailUsuario) {
-                $nomeUsuario  = $user['full_name'] ?? $user['name'] ?? 'Cliente';
-                $titulo       = $data['title'];
-                // Determina a base URL a partir da config moderna (app.url),
-                // mantendo compatibilidade com uma possível chave legada (app_url).
-                $baseUrl = $this->config['app']['url']
-                    ?? ($this->config['app_url'] ?? null);
-                if (!$baseUrl) {
-                    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-                    $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
-                    $baseUrl = $scheme . '://' . $host;
-                }
-                $linkSubmissao = rtrim((string)$baseUrl, '/') . '/portal/submissions/' . $submissionId;
-
-                $body = sprintf(
-                    '<p>Olá %s,</p>
-                    <p>Sua submissão <strong>%s</strong> foi recebida com sucesso.</p>
-                    <p>Você pode acompanhar o status em:
-                    <a href="%s">clique aqui</a></p>',
-                    htmlspecialchars($nomeUsuario, ENT_QUOTES, 'UTF-8'),
-                    htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'),
-                    htmlspecialchars($linkSubmissao, ENT_QUOTES, 'UTF-8')
-                );
-
-                $this->config['mail']->sendMail(
-                    $emailUsuario,
-                    'Recebemos sua submissão',
-                    $body
-                );
-            }
+        $notifications = $this->config['notifications_service'] ?? null;
+        if ($notifications) {
+            $notifications->portalNewSubmission($user, $submission);
         }
 
         Session::flash('success', 'Submissão enviada com sucesso.');
