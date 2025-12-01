@@ -69,7 +69,10 @@ $search = $filters['search'] ?? '';
                                     </span>
                                 </td>
                                 <td class="small">
-                                    <?= htmlspecialchars(substr($t['token'], 0, 12) . '…', ENT_QUOTES, 'UTF-8') ?>
+                                    <?php $code = (string)($t['code'] ?? ''); ?>
+                                    <?= $code !== ''
+                                        ? htmlspecialchars(substr($code, 0, 12) . '…', ENT_QUOTES, 'UTF-8')
+                                        : '<span class="text-muted">-</span>' ?>
                                 </td>
                                 <td><?= htmlspecialchars($t['created_at'], ENT_QUOTES, 'UTF-8') ?></td>
                                 <td><?= htmlspecialchars($t['expires_at'], ENT_QUOTES, 'UTF-8') ?></td>

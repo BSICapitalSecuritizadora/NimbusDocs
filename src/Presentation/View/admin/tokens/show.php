@@ -21,7 +21,8 @@ $isExpired = !$isUsed && (strtotime($token['expires_at']) < time());
 
             <dt class="col-sm-3">Token</dt>
             <dd class="col-sm-9">
-                <code class="small"><?= htmlspecialchars($token['token'], ENT_QUOTES, 'UTF-8') ?></code>
+                <?php $code = (string)($token['code'] ?? ''); ?>
+                <code class="small"><?= $code !== '' ? htmlspecialchars($code, ENT_QUOTES, 'UTF-8') : '-' ?></code>
             </dd>
 
             <dt class="col-sm-3">Criado em</dt>
