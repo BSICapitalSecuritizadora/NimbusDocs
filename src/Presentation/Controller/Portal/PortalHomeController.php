@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Presentation\Controller\Portal;
 
 use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
-use App\Support\Session;
+use App\Support\Auth;
 
 final class PortalHomeController
 {
@@ -16,19 +16,9 @@ final class PortalHomeController
         $this->submissionRepo = new MySqlPortalSubmissionRepository($config['pdo']);
     }
 
-    private function requireUser(): array
-    {
-        $user = Session::get('portal_user');
-        if (!$user) {
-            header('Location: /portal/login');
-            exit;
-        }
-        return $user;
-    }
-
     public function index(array $vars = []): void
     {
-        $user = $this->requireUser();
+        $user = Auth::requirePortalUser();
         $userId = (int)$user['id'];
 
         // KPIs do usuário

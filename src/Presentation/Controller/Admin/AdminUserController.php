@@ -8,6 +8,7 @@ use App\Infrastructure\Persistence\MySqlAdminUserRepository;
 use App\Support\AuditLogger;
 use App\Support\Csrf;
 use App\Support\Session;
+use App\Support\Auth;
 use Respect\Validation\Validator as v;
 
 final class AdminUserController
@@ -23,12 +24,7 @@ final class AdminUserController
 
     private function requireSuperAdmin(): void
     {
-        $admin = Session::get('admin');
-        if (!$admin || ($admin['role'] ?? '') !== 'SUPER_ADMIN') {
-            http_response_code(403);
-            echo '403 - Acesso restrito a SUPER_ADMIN';
-            exit;
-        }
+        Auth::requireRole('SUPER_ADMIN');
     }
 
     public function index(array $vars = []): void
@@ -114,7 +110,7 @@ final class AdminUserController
             'password_hash' => $passwordHash,
         ]);
 
-        $this->audit->log('ADMIN', (int)Session::get('admin')['id'], 'ADMIN_USER_CREATED', 'ADMIN_USER', $newId);
+        $this->audit->log('ADMIN', (int)Auth::requireAdmin()['id'], 'ADMIN_USER_CREATED', 'ADMIN_USER', $newId);
 
         Session::flash('success', 'Administrador criado com sucesso.');
         $this->redirect('/admin/users');
@@ -189,7 +185,7 @@ final class AdminUserController
         }
 
         $this->repo->update($id, $update);
-        $this->audit->log('ADMIN', (int)Session::get('admin')['id'], 'ADMIN_USER_UPDATED', 'ADMIN_USER', $id);
+        $this->audit->log('ADMIN', (int)Auth::requireAdmin()['id'], 'ADMIN_USER_UPDATED', 'ADMIN_USER', $id);
 
         Session::flash('success', 'Administrador atualizado com sucesso.');
         $this->redirect('/admin/users');
@@ -209,7 +205,7 @@ final class AdminUserController
         }
 
         $this->repo->deactivate($id);
-        $this->audit->log('ADMIN', (int)Session::get('admin')['id'], 'ADMIN_USER_DEACTIVATED', 'ADMIN_USER', $id);
+        $this->audit->log('ADMIN', (int)Auth::requireAdmin()['id'], 'ADMIN_USER_DEACTIVATED', 'ADMIN_USER', $id);
 
         Session::flash('success', 'Administrador desativado com sucesso.');
         $this->redirect('/admin/users');

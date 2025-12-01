@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Presentation\Controller\Portal;
 
 use App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository;
-use App\Support\Session;
+use App\Support\Auth;
 
 final class PortalFileController
 {
@@ -16,19 +16,9 @@ final class PortalFileController
         $this->fileRepo = new MySqlPortalSubmissionFileRepository($config['pdo']);
     }
 
-    private function requireUser(): array
-    {
-        $user = Session::get('portal_user');
-        if (!$user) {
-            header('Location: /portal/login');
-            exit;
-        }
-        return $user;
-    }
-
     public function download(array $vars = []): void
     {
-        $user = $this->requireUser();
+        $user = Auth::requirePortalUser();
 
         $id   = (int)($vars['id'] ?? 0);
         $file = $this->fileRepo->findById($id);
@@ -45,8 +35,8 @@ final class PortalFileController
         // $submission = $this->submissionRepo->findByIdForUser((int)$file['submission_id'], (int)$user['id']);
         // if (!$submission) { 404 ... }
 
-        $uploadDir = rtrim($this->config['upload_dir'], '/');
-        $fullPath  = $uploadDir . '/' . ltrim($file['storage_path'], '/');
+        $storageBase = dirname(__DIR__, 5) . '/storage/';
+        $fullPath    = $storageBase . ltrim($file['storage_path'], '/');
 
         if (!is_file($fullPath)) {
             http_response_code(404);

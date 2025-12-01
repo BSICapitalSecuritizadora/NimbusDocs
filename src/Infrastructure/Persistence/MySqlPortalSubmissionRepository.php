@@ -246,4 +246,21 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
 
         return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
     }
+
+    public function findForUser(int $id, int $userId): ?array
+    {
+        $sql = "SELECT *
+            FROM portal_submissions
+            WHERE id = :id AND portal_user_id = :uid
+            LIMIT 1";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':id'  => $id,
+            ':uid' => $userId,
+        ]);
+
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
 }

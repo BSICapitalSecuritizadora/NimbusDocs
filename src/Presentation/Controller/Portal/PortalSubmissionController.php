@@ -11,6 +11,8 @@ use App\Support\Csrf;
 use App\Support\AuditLogger;
 use App\Support\Session;
 use App\Support\RandomToken;
+use App\Support\Auth;
+use App\Support\FileUpload;
 use Respect\Validation\Validator as v;
 
 final class PortalSubmissionController
@@ -28,20 +30,11 @@ final class PortalSubmissionController
         $this->audit    = new AuditLogger($config['pdo']);
     }
 
-    private function requireUser(): array
-    {
-        $user = Session::get('portal_user');
-        if (!$user) {
-            http_response_code(403);
-            echo '403 - Acesso não autorizado ao portal.';
-            exit;
-        }
-        return $user;
-    }
+    
 
     public function index(array $vars = []): void
     {
-        $user = $this->requireUser();
+        $user = Auth::requirePortalUser();
 
         $page    = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
         $perPage = 10;
@@ -63,7 +56,7 @@ final class PortalSubmissionController
 
     public function showCreateForm(array $vars = []): void
     {
-        $this->requireUser();
+        Auth::requirePortalUser();
 
         $pageTitle   = 'Nova submissão';
         $contentView = __DIR__ . '/../../View/portal/submissions/create.php';
@@ -78,7 +71,7 @@ final class PortalSubmissionController
 
     public function store(array $vars = []): void
     {
-        $user  = $this->requireUser();
+        $user  = Auth::requirePortalUser();
         $post  = $_POST;
         $token = $post['_token'] ?? '';
 
@@ -169,9 +162,50 @@ final class PortalSubmissionController
             'created_user_agent'  => $ua,
         ]);
 
-        // --- salva anexos fisicamente + na tabela ---
+        // --- salva anexos usando helper FileUpload + grava no banco ---
         if ($hasFiles) {
-            $this->saveUploadedFiles($submissionId, $filesArray, $maxSize);
+            $userId = (int)$user['id'];
+            $storageBase = dirname(__DIR__, 5) . '/storage/portal_uploads/' . $userId . '/';
+
+            $count = count($filesArray['name']);
+            for ($i = 0; $i < $count; $i++) {
+                if (($filesArray['error'][$i] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+                    continue;
+                }
+
+                $fileInfo = [
+                    'name'     => $filesArray['name'][$i],
+                    'type'     => $filesArray['type'][$i] ?? '',
+                    'tmp_name' => $filesArray['tmp_name'][$i],
+                    'error'    => $filesArray['error'][$i],
+                    'size'     => (int)$filesArray['size'][$i],
+                ];
+
+                try {
+                    $stored = FileUpload::store($fileInfo, $storageBase);
+
+                    $storedName   = basename($stored['path']);
+                    $checksum     = is_file($stored['path']) ? hash_file('sha256', $stored['path']) : null;
+                    $relativePath = 'portal_uploads/' . $userId . '/' . $storedName;
+
+                    $this->fileRepo->create($submissionId, [
+                        'origin'         => 'USER',
+                        'original_name'  => $stored['original_name'],
+                        'stored_name'    => $storedName,
+                        'mime_type'      => $stored['mime_type'],
+                        'size_bytes'     => (int)$stored['size'],
+                        'storage_path'   => $relativePath,
+                        'checksum'       => $checksum,
+                        'visible_to_user'=> 0,
+                    ]);
+                } catch (\Throwable $e) {
+                    $this->audit->log('PORTAL_USER', (int)$user['id'], 'USER_FILE_UPLOAD_FAILED', 'PORTAL_SUBMISSION', $submissionId, [
+                        'error' => $e->getMessage(),
+                        'file'  => $fileInfo['name'] ?? null,
+                    ]);
+                    // segue para o próximo arquivo
+                }
+            }
         }
 
         $this->audit->log('PORTAL_USER', (int)$user['id'], 'SUBMISSION_CREATED', 'PORTAL_SUBMISSION', $submissionId, [
@@ -233,13 +267,14 @@ final class PortalSubmissionController
 
     public function show(array $vars = []): void
     {
-        $user = $this->requireUser();
-        $id   = (int)($vars['id'] ?? 0);
+        $user = Auth::requirePortalUser();
+        $userId = (int)$user['id'];
+        $id = (int)($vars['id'] ?? 0);
 
-        $submission = $this->repo->findByIdForUser($id, (int)$user['id']);
+        $submission = $this->repo->findForUser($id, $userId);
         if (!$submission) {
             http_response_code(404);
-            echo 'Submissão não encontrada.';
+            echo 'Envio não encontrado.';
             return;
         }
 
@@ -263,62 +298,5 @@ final class PortalSubmissionController
     {
         header('Location: ' . $path);
         exit;
-    }
-
-    private function saveUploadedFiles(int $submissionId, array $filesArray, int $maxSize): void
-    {
-        $uploadDir = rtrim($this->config['upload_dir'] ?? $this->config['upload']['dir'] ?? dirname(__DIR__, 5) . '/storage/uploads', '/');
-
-        $baseDir = $uploadDir . '/' . date('Y') . '/' . date('m');
-        if (!is_dir($baseDir)) {
-            mkdir($baseDir, 0775, true);
-        }
-
-        $count = count($filesArray['name']);
-
-        for ($i = 0; $i < $count; $i++) {
-            $error = $filesArray['error'][$i];
-            if ($error === UPLOAD_ERR_NO_FILE) {
-                continue;
-            }
-            if ($error !== UPLOAD_ERR_OK) {
-                continue; // já validamos antes; aqui só pulamos
-            }
-
-            $tmpName      = $filesArray['tmp_name'][$i];
-            $originalName = $filesArray['name'][$i];
-            $size         = (int)$filesArray['size'][$i];
-            $mime         = $filesArray['type'][$i] ?? 'application/octet-stream';
-
-            if (!is_uploaded_file($tmpName) || $size <= 0 || $size > $maxSize) {
-                continue;
-            }
-
-            $ext = pathinfo($originalName, PATHINFO_EXTENSION);
-            $storedName = bin2hex(random_bytes(16)) . ($ext ? ('.' . strtolower($ext)) : '');
-
-            $relativePath = date('Y') . '/' . date('m') . '/' . $storedName;
-            $fullPath     = $uploadDir . '/' . $relativePath;
-
-            $dir = dirname($fullPath);
-            if (!is_dir($dir)) {
-                mkdir($dir, 0775, true);
-            }
-
-            if (!move_uploaded_file($tmpName, $fullPath)) {
-                continue;
-            }
-
-            $checksum = hash_file('sha256', $fullPath);
-
-            $this->fileRepo->create($submissionId, [
-                'original_name' => $originalName,
-                'stored_name'   => $storedName,
-                'mime_type'     => $mime,
-                'size_bytes'    => $size,
-                'storage_path'  => $relativePath,
-                'checksum'      => $checksum,
-            ]);
-        }
     }
 }

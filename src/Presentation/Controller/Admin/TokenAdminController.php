@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Presentation\Controller\Admin;
 
 use App\Infrastructure\Persistence\MySqlPortalAccessTokenRepository;
+use App\Support\Auth;
 use App\Support\Session;
 use App\Support\Csrf;
 
@@ -19,12 +20,7 @@ final class TokenAdminController
 
     private function requireAdmin(): array
     {
-        $admin = Session::get('admin');
-        if (!$admin) {
-            header('Location: /admin/login');
-            exit;
-        }
-        return $admin;
+        return Auth::requireAdmin();
     }
 
     private function redirect(string $path): void

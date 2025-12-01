@@ -105,8 +105,8 @@ final class PortalLoginController
         $this->tokenRepo->markAsUsed((int)$row['token_id'], $ip, $ua);
         $this->userRepo->recordLastLogin((int)$row['user_id'], 'ACCESS_CODE');
 
-        Session::put('portal_user', $portalUser);
         session_regenerate_id(true);
+        Session::put('portal_user', $portalUser);
 
         $this->audit->log('PORTAL_USER', (int)$row['user_id'], 'PORTAL_LOGIN_SUCCESS_CODE', 'PORTAL_ACCESS_TOKEN', (int)$row['token_id']);
 

@@ -9,6 +9,7 @@ use App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository;
 use App\Support\Csrf;
 use App\Support\AuditLogger;
 use App\Support\Session;
+use App\Support\Auth;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionNoteRepository;
 use Respect\Validation\Validator as v;
 
@@ -29,12 +30,7 @@ final class SubmissionAdminController
 
     private function requireAdmin(): void
     {
-        $admin = Session::get('admin');
-        if (!$admin) {
-            http_response_code(403);
-            echo '403 - Não autorizado.';
-            exit;
-        }
+        Auth::requireAdmin();
     }
 
     public function index(array $vars = []): void
@@ -137,7 +133,7 @@ final class SubmissionAdminController
         }
 
         // Atualiza status
-        $admin = Session::get('admin');
+        $admin = Auth::requireAdmin();
         $adminId = $admin['id'] ?? null;
 
         $this->repo->updateStatus($id, $status, $adminId ? (int)$adminId : null);

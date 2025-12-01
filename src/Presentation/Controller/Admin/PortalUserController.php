@@ -9,6 +9,7 @@ use App\Infrastructure\Persistence\MySqlPortalAccessTokenRepository;
 use App\Support\AuditLogger;
 use App\Support\Csrf;
 use App\Support\Session;
+use App\Support\Auth;
 use App\Support\RandomToken;
 use Respect\Validation\Validator as v;
 use DateInterval;
@@ -30,14 +31,7 @@ final class PortalUserController
 
     private function requireAdmin(): array
     {
-        $admin = Session::get('admin');
-        if (!$admin) {
-            http_response_code(403);
-            echo '403 - Não autorizado';
-            exit;
-        }
-
-        return $admin;
+        return Auth::requireAdmin();
     }
 
     public function index(array $vars = []): void

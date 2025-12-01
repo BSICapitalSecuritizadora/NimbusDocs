@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Presentation\Controller\Admin;
 
-use App\Support\Session;
+use App\Support\Auth;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
 use App\Infrastructure\Persistence\MySqlPortalUserRepository;
 use App\Infrastructure\Persistence\MySqlPortalAccessTokenRepository;
@@ -29,12 +29,7 @@ final class DashboardAdminController
 
     private function requireAdmin(): array
     {
-        $admin = Session::get('admin');
-        if (!$admin) {
-            header('Location: /admin/login');
-            exit;
-        }
-        return $admin;
+        return Auth::requireAdmin();
     }
 
     public function index(): void
