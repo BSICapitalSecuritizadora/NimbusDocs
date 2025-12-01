@@ -42,12 +42,8 @@ final class PortalUserController
         $perPage = isset($_GET['perPage']) ? max(1, (int)$_GET['perPage']) : 20;
         $search  = trim((string)($_GET['search'] ?? ''));
 
-        // Tenta paginação com busca; se não suportado, cai para a existente
-        try {
-            $pagination = $this->repo->paginate($page, $perPage, $search);
-        } catch (\Throwable $e) {
-            $pagination = $this->repo->paginate($page, $perPage);
-        }
+        // Chama paginação (sem busca por enquanto, compatibilidade com repo atual)
+        $pagination = $this->repo->paginate($page, $perPage);
 
         // Normaliza estrutura para views simples (items/total/totalPages)
         $items = $pagination['items'] ?? $pagination;

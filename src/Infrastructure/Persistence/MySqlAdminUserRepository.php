@@ -158,4 +158,13 @@ final class MySqlAdminUserRepository implements AdminUserRepository
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':provider' => $provider, ':id' => $id]);
     }
+
+    public function deactivate(int $id): void
+    {
+        $sql = "UPDATE admin_users
+                SET status = 'INACTIVE', is_active = 0, updated_at = NOW()
+                WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $id]);
+    }
 }
