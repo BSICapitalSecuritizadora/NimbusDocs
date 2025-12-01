@@ -24,18 +24,12 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/portal/submissions/create',         [PortalSubmissionController::class, 'showCreateForm']);
     $r->addRoute('POST', '/portal/submissions',                [PortalSubmissionController::class, 'store']);
     $r->addRoute('GET',  '/portal/submissions/{id:\d+}',       [PortalSubmissionController::class, 'show']);
-    $r->addRoute('GET', '/portal', [PortalHomeController::class, 'index']);
 
     // Downloads de arquivos de submissão pelo usuário final
     $r->addRoute('GET', '/portal/files/{id:\d+}/download', [PortalFileController::class, 'download']);
 
-    // Dashboard do usuário final (placeholder)
-    $r->addRoute('GET', '/portal', function () {
-        echo '<div style="font-family:system-ui;padding:2rem">
-                <h2>Portal do Usuário</h2>
-                <p>Login efetuado com sucesso. Use o menu para enviar informações.</p>
-              </div>';
-    });
+    // Dashboard/Home do portal
+    $r->addRoute('GET', '/portal', [PortalHomeController::class, 'index']);
 });
 
 
