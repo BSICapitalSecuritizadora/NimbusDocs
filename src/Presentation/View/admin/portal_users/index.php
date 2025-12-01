@@ -42,10 +42,14 @@
                             <tr>
                                 <td><?= htmlspecialchars($u['full_name'] ?? '', ENT_QUOTES) ?></td>
                                 <td><?= htmlspecialchars($u['email'] ?? '', ENT_QUOTES) ?></td>
-                                <td><?= htmlspecialchars($u['document'] ?? '-', ENT_QUOTES) ?></td>
+                                <td><?= htmlspecialchars($u['document_number'] ?? '-', ENT_QUOTES) ?></td>
                                 <td>
-                                    <?php if ((int)$u['is_active'] === 1): ?>
+                                    <?php if (($u['status'] ?? '') === 'ACTIVE'): ?>
                                         <span class="badge bg-success">Ativo</span>
+                                    <?php elseif (($u['status'] ?? '') === 'INVITED'): ?>
+                                        <span class="badge bg-info">Convidado</span>
+                                    <?php elseif (($u['status'] ?? '') === 'BLOCKED'): ?>
+                                        <span class="badge bg-danger">Bloqueado</span>
                                     <?php else: ?>
                                         <span class="badge bg-secondary">Inativo</span>
                                     <?php endif; ?>

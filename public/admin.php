@@ -11,6 +11,7 @@ use App\Presentation\Controller\Admin\AuditLogController;
 use App\Presentation\Controller\Admin\AdminMicrosoftAuthController;
 use App\Presentation\Controller\Admin\AdminUserAdminController;
 use App\Presentation\Controller\Admin\DashboardAdminController;
+use App\Presentation\Controller\Admin\TokenAdminController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -42,6 +43,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/admin/admin-users/{id:\d+}/edit', [AdminUserAdminController::class, 'editForm']);
     $r->addRoute('POST', '/admin/admin-users/{id:\d+}',    [AdminUserAdminController::class, 'update']);
     $r->addRoute('GET', '/admin/dashboard', [DashboardAdminController::class, 'index']);
+    $r->addRoute('GET',  '/admin/tokens',             [TokenAdminController::class, 'index']);
+    $r->addRoute('GET',  '/admin/tokens/{id:\d+}',    [TokenAdminController::class, 'show']);
+    $r->addRoute('POST', '/admin/tokens/{id:\d+}/revoke', [TokenAdminController::class, 'revoke']);
 
     // Usuários Finais
     $r->addRoute('GET',  '/admin/portal-users',                    [PortalUserController::class, 'index']);

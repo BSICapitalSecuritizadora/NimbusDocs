@@ -40,7 +40,7 @@ final class MySqlPortalUserRepository
         $sql = "SELECT *
                 FROM portal_users
                 {$where}
-                ORDER BY is_active DESC, full_name ASC
+                ORDER BY status ASC, full_name ASC
                 LIMIT :limit OFFSET :offset";
 
         $stmt = $this->pdo->prepare($sql);
@@ -57,16 +57,19 @@ final class MySqlPortalUserRepository
     public function create(array $data): int
     {
         $sql = "INSERT INTO portal_users
-                (full_name, email, document, is_active, created_at)
+                (full_name, email, document_number, phone_number, external_id, notes, status)
                 VALUES
-                (:full_name, :email, :document, :is_active, NOW())";
+                (:full_name, :email, :document_number, :phone_number, :external_id, :notes, :status)";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':full_name' => $data['full_name'],
-            ':email'     => $data['email'],
-            ':document'  => $data['document'] ?? null,
-            ':is_active' => $data['is_active'] ?? 1,
+            ':full_name'       => $data['full_name'],
+            ':email'           => $data['email'] ?? null,
+            ':document_number' => $data['document_number'] ?? null,
+            ':phone_number'    => $data['phone_number'] ?? null,
+            ':external_id'     => $data['external_id'] ?? null,
+            ':notes'           => $data['notes'] ?? null,
+            ':status'          => $data['status'] ?? 'INVITED',
         ]);
 
         return (int)$this->pdo->lastInsertId();
@@ -77,7 +80,7 @@ final class MySqlPortalUserRepository
         $fields = [];
         $params = [':id' => $id];
 
-        foreach (['full_name', 'email', 'document', 'is_active'] as $col) {
+        foreach (['full_name', 'email', 'document_number', 'phone_number', 'external_id', 'notes', 'status'] as $col) {
             if (array_key_exists($col, $data)) {
                 $fields[]          = "{$col} = :{$col}";
                 $params[":{$col}"] = $data[$col];

@@ -138,4 +138,88 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
          WHERE expires_at < NOW()"
         )->fetchColumn();
     }
+
+    public function findById(int $id): ?array
+    {
+        $sql = "SELECT t.*, u.full_name AS user_name, u.email AS user_email
+            FROM portal_access_tokens t
+            LEFT JOIN portal_users u ON u.id = t.portal_user_id
+            WHERE t.id = :id
+            LIMIT 1";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $id]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+    /**
+     * @return array{items: array<int,array>, total: int}
+     */
+    public function paginate(int $page, int $perPage, ?array $filters = null): array
+    {
+        $filters ??= [];
+        $where  = [];
+        $params = [];
+
+        if (!empty($filters['status'])) {
+            if ($filters['status'] === 'valid') {
+                $where[] = 't.used_at IS NULL AND t.expires_at >= NOW()';
+            } elseif ($filters['status'] === 'expired') {
+                $where[] = 't.used_at IS NULL AND t.expires_at < NOW()';
+            } elseif ($filters['status'] === 'used') {
+                $where[] = 't.used_at IS NOT NULL';
+            }
+        }
+
+        if (!empty($filters['search'])) {
+            $where[] = '(u.full_name LIKE :search OR u.email LIKE :search)';
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+
+        $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
+        $sqlCount = "SELECT COUNT(*)
+                 FROM portal_access_tokens t
+                 LEFT JOIN portal_users u ON u.id = t.portal_user_id
+                 {$whereSql}";
+        $stmt = $this->pdo->prepare($sqlCount);
+        $stmt->execute($params);
+        $total = (int)$stmt->fetchColumn();
+
+        $offset = ($page - 1) * $perPage;
+
+        $sql = "SELECT t.*, u.full_name AS user_name, u.email AS user_email
+            FROM portal_access_tokens t
+            LEFT JOIN portal_users u ON u.id = t.portal_user_id
+            {$whereSql}
+            ORDER BY t.created_at DESC, t.id DESC
+            LIMIT :limit OFFSET :offset";
+
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($params as $k => $v) {
+            $stmt->bindValue($k, $v);
+        }
+        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $items = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        return [
+            'items' => $items,
+            'total' => $total,
+        ];
+    }
+
+    public function revoke(int $id): void
+    {
+        $sql = "UPDATE portal_access_tokens
+            SET used_at = IF(used_at IS NULL, NOW(), used_at)
+            WHERE id = :id";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $id]);
+    }
 }
