@@ -1,99 +1,82 @@
 <?php
 
-/** @var array $pagination */
-/** @var string $csrfToken */
-/** @var array $flash */
-
-$items = $pagination['items'] ?? [];
-$page  = $pagination['page'] ?? 1;
-$pages = $pagination['pages'] ?? 1;
+/** @var array $items */
+/** @var int $page */
+/** @var int $totalPages */
+/** @var string $search */
 ?>
+<h1 class="h4 mb-3">Usuários do Portal</h1>
+
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 mb-0">Usuários Finais</h1>
-    <a href="/admin/portal-users/create" class="btn btn-primary btn-sm">Novo usuário</a>
+    <form class="d-flex" method="get" action="/admin/portal-users">
+        <input type="text" name="search"
+            value="<?= htmlspecialchars($search, ENT_QUOTES) ?>"
+            class="form-control form-control-sm me-2"
+            placeholder="Nome ou e-mail">
+        <button class="btn btn-sm btn-outline-secondary" type="submit">Buscar</button>
+    </form>
+
+    <a href="/admin/portal-users/create" class="btn btn-sm btn-primary">
+        Novo usuário
+    </a>
 </div>
 
-<?php if (!empty($flash['success'])): ?>
-    <div class="alert alert-success py-2">
-        <?= htmlspecialchars($flash['success'], ENT_QUOTES, 'UTF-8') ?>
-    </div>
-<?php endif; ?>
-
-<?php if (!empty($flash['error'])): ?>
-    <div class="alert alert-danger py-2">
-        <?= htmlspecialchars($flash['error'], ENT_QUOTES, 'UTF-8') ?>
-    </div>
-<?php endif; ?>
-
 <div class="card">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Nome</th>
-                        <th>E-mail</th>
-                        <th>CPF</th>
-                        <th>Status</th>
-                        <th>Criado em</th>
-                        <th class="text-end">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (!$items): ?>
+    <div class="card-body">
+        <?php if (!$items): ?>
+            <p class="text-muted mb-0">Nenhum usuário do portal encontrado.</p>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <thead>
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-3">
-                                Nenhum usuário cadastrado.
-                            </td>
+                            <th>Nome</th>
+                            <th>E-mail</th>
+                            <th>Documento</th>
+                            <th>Status</th>
+                            <th class="text-end"></th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($items as $user): ?>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($items as $u): ?>
                             <tr>
-                                <td><?= (int)$user['id'] ?></td>
-                                <td><?= htmlspecialchars($user['full_name'], ENT_QUOTES, 'UTF-8') ?></td>
-                                <td><?= htmlspecialchars($user['email'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-                                <td><?= htmlspecialchars($user['document_number'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-                                <td><?= htmlspecialchars($user['status'], ENT_QUOTES, 'UTF-8') ?></td>
-                                <td><?= htmlspecialchars($user['created_at'], ENT_QUOTES, 'UTF-8') ?></td>
+                                <td><?= htmlspecialchars($u['full_name'] ?? '', ENT_QUOTES) ?></td>
+                                <td><?= htmlspecialchars($u['email'] ?? '', ENT_QUOTES) ?></td>
+                                <td><?= htmlspecialchars($u['document'] ?? '-', ENT_QUOTES) ?></td>
+                                <td>
+                                    <?php if ((int)$u['is_active'] === 1): ?>
+                                        <span class="badge bg-success">Ativo</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary">Inativo</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="text-end">
-                                    <a href="/admin/portal-users/<?= (int)$user['id'] ?>/edit"
-                                        class="btn btn-sm btn-outline-secondary">
+                                    <a href="/admin/portal-users/<?= (int)$u['id'] ?>" class="btn btn-sm btn-outline-secondary">
+                                        Detalhes
+                                    </a>
+                                    <a href="/admin/portal-users/<?= (int)$u['id'] ?>/edit" class="btn btn-sm btn-outline-primary">
                                         Editar
                                     </a>
-
-                                    <?php if ($user['status'] === 'ACTIVE' || $user['status'] === 'INVITED'): ?>
-                                        <form method="post"
-                                            action="/admin/portal-users/<?= (int)$user['id'] ?>/deactivate"
-                                            class="d-inline"
-                                            onsubmit="return confirm('Deseja desativar este usuário?');">
-                                            <input type="hidden" name="_token"
-                                                value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                Desativar
-                                            </button>
-                                        </form>
-                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+            </div>
+
+            <?php if ($totalPages > 1): ?>
+                <nav class="mt-2">
+                    <ul class="pagination pagination-sm mb-0">
+                        <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+                            <li class="page-item <?= $p === $page ? 'active' : '' ?>">
+                                <a class="page-link" href="?page=<?= $p ?>&search=<?= urlencode($search) ?>">
+                                    <?= $p ?>
+                                </a>
+                            </li>
+                        <?php endfor; ?>
+                    </ul>
+                </nav>
+            <?php endif; ?>
+        <?php endif; ?>
     </div>
 </div>
-
-<?php if ($pages > 1): ?>
-    <nav class="mt-3">
-        <ul class="pagination pagination-sm mb-0">
-            <?php for ($p = 1; $p <= $pages; $p++): ?>
-                <li class="page-item <?= $p === $page ? 'active' : '' ?>">
-                    <a class="page-link" href="/admin/portal-users?page=<?= $p ?>">
-                        <?= $p ?>
-                    </a>
-                </li>
-            <?php endfor; ?>
-        </ul>
-    </nav>
-<?php endif; ?>

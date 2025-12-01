@@ -42,16 +42,34 @@ final class PortalUserController
 
     public function index(array $vars = []): void
     {
-        $this->requireAdmin();
+        $admin = $this->requireAdmin();
 
         $page    = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-        $perPage = 10;
+        $perPage = isset($_GET['perPage']) ? max(1, (int)$_GET['perPage']) : 20;
+        $search  = trim((string)($_GET['search'] ?? ''));
 
-        $pagination = $this->repo->paginate($page, $perPage);
+        // Tenta paginação com busca; se não suportado, cai para a existente
+        try {
+            $pagination = $this->repo->paginate($page, $perPage, $search);
+        } catch (\Throwable $e) {
+            $pagination = $this->repo->paginate($page, $perPage);
+        }
 
-        $pageTitle   = 'Usuários Finais - NimbusDocs';
+        // Normaliza estrutura para views simples (items/total/totalPages)
+        $items = $pagination['items'] ?? $pagination;
+        $total = $pagination['total'] ?? (is_array($items) ? count($items) : 0);
+        $totalPages = (int)max(1, ceil($total / $perPage));
+
+        $pageTitle   = 'Usuários do Portal';
         $contentView = __DIR__ . '/../../View/admin/portal_users/index.php';
         $viewData    = [
+            'admin'      => $admin,
+            'items'      => $items,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'total'      => $total,
+            'totalPages' => $totalPages,
+            'search'     => $search,
             'pagination' => $pagination,
             'csrfToken'  => Csrf::token(),
             'flash'      => [
@@ -80,6 +98,26 @@ final class PortalUserController
         require __DIR__ . '/../../View/admin/layouts/base.php';
     }
 
+    // Alias compatível com controlador simplificado
+    public function createForm(array $vars = []): void
+    {
+        $admin = $this->requireAdmin();
+
+        $pageTitle   = 'Novo usuário do portal';
+        // Reusa o mesmo form com modo create
+        $contentView = __DIR__ . '/../../View/admin/portal_users/form.php';
+        $viewData    = [
+            'admin'     => $admin,
+            'mode'      => 'create',
+            'user'      => null,
+            'csrfToken' => Csrf::token(),
+            'errors'    => Session::getFlash('errors') ?? [],
+            'old'       => Session::getFlash('old') ?? [],
+        ];
+
+        require __DIR__ . '/../../View/admin/layouts/base.php';
+    }
+
     public function store(array $vars = []): void
     {
         $admin = $this->requireAdmin();
@@ -92,14 +130,19 @@ final class PortalUserController
             $this->redirect('/admin/portal-users/create');
         }
 
+        // Suporta tanto o payload simplificado (full_name, document, is_active)
+        // quanto o payload completo atual
         $data = [
-            'full_name'       => trim($post['full_name'] ?? ''),
+            'full_name'       => trim($post['full_name'] ?? ($post['name'] ?? '')),
             'email'           => trim($post['email'] ?? ''),
-            'document_number' => $this->normalizeCpf($post['document_number'] ?? ''),
+            'document_number' => $this->normalizeCpf($post['document_number'] ?? ($post['document'] ?? '')),
             'phone_number'    => trim($post['phone_number'] ?? ''),
             'external_id'     => trim($post['external_id'] ?? ''),
             'notes'           => trim($post['notes'] ?? ''),
-            'status'          => $post['status'] ?? 'INVITED',
+            // se vier is_active, converte para ACTIVE/INACTIVE
+            'status'          => isset($post['is_active'])
+                ? ($post['is_active'] ? 'ACTIVE' : 'INACTIVE')
+                : ($post['status'] ?? 'INVITED'),
             'password'        => (string)($post['password'] ?? ''),
             'password_confirmation' => (string)($post['password_confirmation'] ?? ''),
         ];
@@ -156,6 +199,35 @@ final class PortalUserController
         require __DIR__ . '/../../View/admin/layouts/base.php';
     }
 
+    // Alias compatível com controlador simplificado
+    public function editForm(array $vars = []): void
+    {
+        $admin = $this->requireAdmin();
+
+        $id   = (int)($vars['id'] ?? 0);
+        $user = $this->repo->findById($id);
+
+        if (!$user) {
+            http_response_code(404);
+            echo 'Usuário do portal não encontrado.';
+            return;
+        }
+
+        $pageTitle   = 'Editar usuário do portal';
+        // Reusa o mesmo form com modo edit
+        $contentView = __DIR__ . '/../../View/admin/portal_users/form.php';
+        $viewData    = [
+            'admin'     => $admin,
+            'mode'      => 'edit',
+            'user'      => $user,
+            'csrfToken' => Csrf::token(),
+            'errors'    => Session::getFlash('errors') ?? [],
+            'old'       => Session::getFlash('old') ?? [],
+        ];
+
+        require __DIR__ . '/../../View/admin/layouts/base.php';
+    }
+
     public function update(array $vars = []): void
     {
         $admin = $this->requireAdmin();
@@ -169,14 +241,17 @@ final class PortalUserController
             $this->redirect("/admin/portal-users/{$id}/edit");
         }
 
+        // Suporta tanto o payload simplificado quanto o atual
         $data = [
-            'full_name'       => trim($post['full_name'] ?? ''),
+            'full_name'       => trim($post['full_name'] ?? ($post['name'] ?? '')),
             'email'           => trim($post['email'] ?? ''),
-            'document_number' => $this->normalizeCpf($post['document_number'] ?? ''),
+            'document_number' => $this->normalizeCpf($post['document_number'] ?? ($post['document'] ?? '')),
             'phone_number'    => trim($post['phone_number'] ?? ''),
             'external_id'     => trim($post['external_id'] ?? ''),
             'notes'           => trim($post['notes'] ?? ''),
-            'status'          => $post['status'] ?? 'INVITED',
+            'status'          => isset($post['is_active'])
+                ? ($post['is_active'] ? 'ACTIVE' : 'INACTIVE')
+                : ($post['status'] ?? 'INVITED'),
             'password'        => (string)($post['password'] ?? ''),
             'password_confirmation' => (string)($post['password_confirmation'] ?? ''),
         ];

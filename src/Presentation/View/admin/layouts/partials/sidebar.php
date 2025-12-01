@@ -19,6 +19,12 @@
 
         <li>
             <a href="/admin/users" class="nav-link text-white">
+                <i class="bi bi-people me-2"></i> Usuários (Admins)
+            </a>
+        </li>
+
+        <li>
+            <a href="/admin/portal-users" class="nav-link text-white">
                 <i class="bi bi-people me-2"></i> Usuários (Portal)
             </a>
         </li>
