@@ -42,8 +42,8 @@ final class PortalUserController
         $perPage = isset($_GET['perPage']) ? max(1, (int)$_GET['perPage']) : 20;
         $search  = trim((string)($_GET['search'] ?? ''));
 
-        // Chama paginação (repositório atual retorna apenas itens; alguns retornam estrutura completa)
-        $pagination = $this->repo->paginate($page, $perPage);
+        // Chama paginação já aplicando o filtro de busca
+        $pagination = $this->repo->paginate($page, $perPage, $search);
 
         // Normaliza estrutura para views simples (items/total/totalPages)
         if (is_array($pagination) && array_key_exists('items', $pagination)) {
@@ -420,8 +420,8 @@ final class PortalUserController
         $expiresAt = $now->add(new DateInterval($intervalSpec));
         $code      = RandomToken::shortCode(12); // 12 caracteres, será o "token"
 
-        // 1) invalida tokens pendentes anteriores (novo nome)
-        $this->tokenRepo->invalidateOldTokensForUser($id);
+        // 1) revoga tokens válidos anteriores (pendentes, não usados, não expirados)
+        $this->tokenRepo->revokePreviousValidTokensForUser($id);
 
         // 2) cria o novo registro
         $tokenId = $this->tokenRepo->create([

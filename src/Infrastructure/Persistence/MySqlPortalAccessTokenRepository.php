@@ -14,14 +14,22 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
 
     public function create(array $data): int
     {
+        // Garante unicidade lógica: antes de criar um novo token, revoga os válidos anteriores
+        if (isset($data['portal_user_id'])) {
+            $this->revokePreviousValidTokensForUser((int)$data['portal_user_id']);
+        }
+
         $sql = "INSERT INTO portal_access_tokens
                 (portal_user_id, code, expires_at, status)
                 VALUES (:portal_user_id, :code, :expires_at, :status)";
 
         $stmt = $this->pdo->prepare($sql);
+        // Aceita tanto 'code' (nome da coluna) quanto 'token' (nome antigo na camada de cima)
+        $code = $data['code'] ?? $data['token'] ?? null;
+
         $stmt->execute([
             ':portal_user_id' => $data['portal_user_id'],
-            ':code'           => $data['token'], // interface usa 'token', mas tabela usa 'code'
+            ':code'           => $code,
             ':expires_at'     => $data['expires_at'],
             ':status'         => 'PENDING',
         ]);
@@ -111,10 +119,22 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
 
     public function invalidateOldTokensForUser(int $portalUserId): void
     {
+        // Mantido para compatibilidade; revoga tokens pendentes (independente de expiração)
+        $this->revokePreviousValidTokensForUser($portalUserId);
+    }
+
+    /**
+     * Revoga quaisquer tokens ainda válidos (pendentes, não usados e não expirados)
+     * de um usuário antes de emitir um novo.
+     */
+    public function revokePreviousValidTokensForUser(int $portalUserId): void
+    {
         $sql = "UPDATE portal_access_tokens
                 SET status = 'REVOKED'
                 WHERE portal_user_id = :uid
-                  AND status = 'PENDING'";
+                  AND status = 'PENDING'
+                  AND used_at IS NULL
+                  AND expires_at > NOW()";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':uid' => $portalUserId]);
