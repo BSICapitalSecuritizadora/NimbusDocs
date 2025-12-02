@@ -52,9 +52,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/admin/settings/notifications',        [SettingsController::class, 'notificationsForm']);
     $r->addRoute('POST', '/admin/settings/notifications/save',   [SettingsController::class, 'saveNotifications']);
     $r->addRoute('GET', '/admin/submissions/export/csv', [SubmissionAdminController::class, 'exportCsv']);
-        // Link manual de conta Microsoft para admin
-        $r->addRoute('GET',  '/admin/ms-link', [\App\Presentation\Controller\Admin\AdminMicrosoftLinkController::class, 'showForm']);
-        $r->addRoute('POST', '/admin/ms-link', [\App\Presentation\Controller\Admin\AdminMicrosoftLinkController::class, 'store']);
+    // Link manual de conta Microsoft para admin
+    $r->addRoute('GET',  '/admin/ms-link', [\App\Presentation\Controller\Admin\AdminMicrosoftLinkController::class, 'showForm']);
+    $r->addRoute('POST', '/admin/ms-link', [\App\Presentation\Controller\Admin\AdminMicrosoftLinkController::class, 'store']);
     $r->addRoute('GET',  '/admin/documents',              [DocumentAdminController::class, 'index']);
     $r->addRoute('GET',  '/admin/documents/new',          [DocumentAdminController::class, 'createForm']);
     $r->addRoute('POST', '/admin/documents',              [DocumentAdminController::class, 'create']);
@@ -65,6 +65,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET', '/admin/auth/callback',   [AdminAuthController::class, 'loginCallback']);
     // Alias opcional para compatibilidade
     $r->addRoute('GET', '/admin/login/callback',  [AdminAuthController::class, 'loginCallback']);
+    $r->addRoute('GET',  '/admin/settings/branding',        [SettingsController::class, 'brandingForm']);
+    $r->addRoute('POST', '/admin/settings/branding/save',   [SettingsController::class, 'saveBranding']);
 
     // Usuários Finais
     $r->addRoute('GET',  '/admin/portal-users',                    [PortalUserController::class, 'index']);

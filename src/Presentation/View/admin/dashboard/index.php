@@ -2,10 +2,10 @@
 
 /** @var int $totalSubmissions */
 /** @var int $pendingSubmissions */
-/** @var int $finishedSubmissions */
+/** @var int $approvedSubmissions */
+/** @var int $rejectedSubmissions */
 /** @var int $totalPortalUsers */
-/** @var int $validTokens */
-/** @var int $expiredTokens */
+/** @var int $publishedDocuments */
 /** @var array $recentSubmissions */
 /** @var array $recentLogs */
 ?>
@@ -37,8 +37,17 @@
         <div class="col-6 col-md-3">
             <div class="card text-bg-success shadow-sm">
                 <div class="card-body">
-                    <div class="fs-3 fw-bold"><?= $finishedSubmissions ?></div>
-                    <div class="small">Finalizadas</div>
+                    <div class="fs-3 fw-bold"><?= $approvedSubmissions ?></div>
+                    <div class="small">Submissões Aprovadas</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card text-bg-danger shadow-sm">
+                <div class="card-body">
+                    <div class="fs-3 fw-bold"><?= $rejectedSubmissions ?></div>
+                    <div class="small">Submissões Rejeitadas</div>
                 </div>
             </div>
         </div>
@@ -53,19 +62,10 @@
         </div>
 
         <div class="col-6 col-md-3">
-            <div class="card text-bg-info shadow-sm">
-                <div class="card-body">
-                    <div class="fs-3 fw-bold"><?= $validTokens ?></div>
-                    <div class="small">Tokens Ativos</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-6 col-md-3">
             <div class="card text-bg-secondary shadow-sm">
                 <div class="card-body">
-                    <div class="fs-3 fw-bold"><?= $expiredTokens ?></div>
-                    <div class="small">Tokens Expirados</div>
+                    <div class="fs-3 fw-bold"><?= $publishedDocuments ?></div>
+                    <div class="small">Documentos Publicados</div>
                 </div>
             </div>
         </div>
@@ -136,10 +136,149 @@
                         </ul>
                     <?php endif; ?>
 
+
+                    <div class="row g-4 mt-2">
+                        <div class="col-md-6">
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="mb-3">Submissões por Status</h5>
+                                    <canvas id="chartStatus" height="140"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="mb-3">Submissões por Dia (30 dias)</h5>
+                                    <canvas id="chartDaily" height="140"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="mb-3">Documentos Publicados por Mês</h5>
+                                    <canvas id="chartDocsMonth" height="140"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+                    <script>
+                    (function(){
+                        const statusData = <?= json_encode($chartStatusCounts ?? [], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>;
+                        const dailyData  = <?= json_encode($chartDailyCounts ?? [], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>;
+                        const docsMonth  = <?= json_encode($chartDocsPerMonth ?? [], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>;
+
+                        // Chart 1 - Status
+                        const statusLabels = ['Aprovado','Rejeitado','Pendente','Em análise'];
+                        const statusKeys   = ['APPROVED','REJECTED','PENDING','IN_REVIEW'];
+                        const statusValues = statusKeys.map(k => statusData[k] ?? 0);
+                        new Chart(document.getElementById('chartStatus'), {
+                            type: 'doughnut',
+                            data: {
+                                labels: statusLabels,
+                                datasets: [{
+                                    data: statusValues,
+                                    backgroundColor: ['#198754','#dc3545','#ffc107','#0dcaf0'],
+                                }]
+                            }
+                        });
+
+                        // Chart 2 - Daily (last 30 days)
+                        const dailyLabels = (dailyData||[]).map(r => r.date);
+                        const dailyValues = (dailyData||[]).map(r => r.total);
+                        new Chart(document.getElementById('chartDaily'), {
+                            type: 'line',
+                            data: {
+                                labels: dailyLabels,
+                                datasets: [{
+                                    label: 'Submissões',
+                                    data: dailyValues,
+                                    borderColor: '#0d6efd',
+                                    backgroundColor: 'rgba(13,110,253,0.2)',
+                                    tension: 0.25,
+                                    fill: true,
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    y: { beginAtZero: true }
+                                }
+                            }
+                        });
+
+                        // Chart 3 - Documents per month
+                        const docsLabels = (docsMonth||[]).map(r => r.month);
+                        const docsValues = (docsMonth||[]).map(r => r.total);
+                        new Chart(document.getElementById('chartDocsMonth'), {
+                            type: 'bar',
+                            data: {
+                                labels: docsLabels,
+                                datasets: [{
+                                    label: 'Documentos',
+                                    data: docsValues,
+                                    backgroundColor: '#6c757d'
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    y: { beginAtZero: true }
+                                }
+                            }
+                        });
+                    })();
+                    </script>
                 </div>
             </div>
         </div>
 
+    </div>
+
+    <div class="row g-4 mt-2">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3">Alertas Importantes</h5>
+                    <?php $a = $alerts ?? []; ?>
+                    <div class="row g-2">
+                        <div class="col-12 col-md-6">
+                            <div class="card border-warning">
+                                <div class="card-body py-2">
+                                    <div class="fw-bold text-warning">Submissões > 7 dias</div>
+                                    <div class="small"><?= (int)($a['oldPending'] ?? 0) ?> pendentes / em análise</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card border-danger">
+                                <div class="card-body py-2">
+                                    <div class="fw-bold text-danger">Tokens expirados</div>
+                                    <div class="small"><?= (int)($a['expiredTokens'] ?? 0) ?> encontrados</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card border-warning">
+                                <div class="card-body py-2">
+                                    <div class="fw-bold text-warning">Documentos muito grandes</div>
+                                    <div class="small"><?= (int)($a['veryLargeDocs'] ?? 0) ?> acima de 50MB</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card border-danger">
+                                <div class="card-body py-2">
+                                    <div class="fw-bold text-danger">Usuários inativos +30 dias</div>
+                                    <div class="small"><?= (int)($a['inactiveUsers30'] ?? 0) ?> usuários</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>

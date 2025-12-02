@@ -33,6 +33,19 @@ final class MySqlPortalUserRepository
         return (int)$this->pdo->query("SELECT COUNT(*) FROM portal_users")->fetchColumn();
     }
 
+    public function countInactiveSince(int $days = 30): int
+    {
+        $sql = "SELECT COUNT(*)
+                FROM portal_users
+                WHERE (
+                    last_login_at IS NULL OR last_login_at < DATE_SUB(NOW(), INTERVAL :days DAY)
+                ) AND status <> 'INACTIVE'";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':days', $days, PDO::PARAM_INT);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
     /**
      * @return array<int,array>
      */

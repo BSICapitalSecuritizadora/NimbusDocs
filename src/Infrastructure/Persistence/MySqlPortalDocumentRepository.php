@@ -68,4 +68,36 @@ final class MySqlPortalDocumentRepository
         $stmt = $this->pdo->prepare("DELETE FROM portal_documents WHERE id = :id");
         $stmt->execute([':id' => $id]);
     }
+
+    public function countAll(): int
+    {
+        return (int)$this->pdo->query("SELECT COUNT(*) FROM portal_documents")->fetchColumn();
+    }
+
+    /**
+     * Contagem de documentos por mês (YYYY-MM)
+     * @return array<int,array{month:string,total:int}>
+     */
+    public function countsPerMonth(int $months = 12): array
+    {
+        $sql = "SELECT DATE_FORMAT(created_at, '%Y-%m') AS m, COUNT(*) AS total
+                FROM portal_documents
+                WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL :months MONTH)
+                GROUP BY m
+                ORDER BY m ASC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':months', $months, PDO::PARAM_INT);
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        return array_map(fn($r) => ['month' => $r['m'], 'total' => (int)$r['total']], $rows);
+    }
+
+    public function countVeryLarge(int $minSizeMb = 50): int
+    {
+        $bytes = $minSizeMb * 1024 * 1024;
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM portal_documents WHERE file_size >= :bytes");
+        $stmt->bindValue(':bytes', $bytes, PDO::PARAM_INT);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
 }

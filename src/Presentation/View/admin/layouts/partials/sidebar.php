@@ -47,6 +47,18 @@
             </a>
         </li>
 
+        <li class="nav-item">
+            <a href="/admin/settings/notifications" class="nav-link text-white">
+                <i class="bi bi-bell me-2"></i> Notificações
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="/admin/settings/branding" class="nav-link text-white">
+                <i class="bi bi-palette me-2"></i> Branding
+            </a>
+        </li>
+
     </ul>
     <hr>
     <div>

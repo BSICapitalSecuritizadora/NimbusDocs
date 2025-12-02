@@ -1,68 +1,80 @@
 <?php
 
-/**
- * Layout base para o módulo administrativo.
- *
- * Espera as variáveis:
- * - string $pageTitle   Título da página
- * - string $contentView Caminho do arquivo de view a ser incluído
- * - array  $viewData    (opcional) Dados adicionais para a view
- */
-
-$pageTitle   = $pageTitle   ?? 'NimbusDocs Admin';
-$contentView = $contentView ?? null;
-$viewData    = $viewData    ?? [];
-
-// Extrai as variáveis de $viewData para uso direto na view (com cuidado)
-if (!empty($viewData) && is_array($viewData)) {
-    extract($viewData, EXTR_SKIP);
-}
-
-// Garante que `$admin` esteja definido para os parciais (header/sidebar)
-// mesmo que o controller não o tenha passado explicitamente.
-if (!isset($admin)) {
-    $admin = \App\Support\Session::get('admin') ?? null;
-}
+/** @var string $pageTitle */
+/** @var array $viewData */
+$branding = $viewData['branding'] ?? ($branding ?? ($config['branding'] ?? []));
+$appName  = $branding['app_name']       ?? 'NimbusDocs';
+$primary  = $branding['primary_color']  ?? '#00205b';
+$accent   = $branding['accent_color']   ?? '#ffc20e';
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
-    <title><?= $pageTitle ?? 'Admin' ?> — NimbusDocs</title>
+    <title><?= htmlspecialchars($appName . ' — ' . ($pageTitle ?? 'Admin'), ENT_QUOTES, 'UTF-8') ?></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-
-    <!-- Bootstrap Icons -->
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-        body {
-            margin-left: 240px;
+        :root {
+            --brand: <?= $primary ?>;
+            --brand-600: <?= $accent ?>;
         }
 
-        @media (max-width: 768px) {
-            body {
-                margin-left: 0;
-            }
+        body {
+            background-color: #f5f6f8;
+        }
+
+        .admin-navbar,
+        .admin-sidebar {
+            background: var(--brand);
+        }
+
+        .admin-navbar .navbar-brand,
+        .admin-navbar .nav-link,
+        .admin-navbar .navbar-text {
+            color: #fff !important;
+        }
+
+        .badge-brand {
+            background-color: var(--brand-600);
+            color: #000;
+        }
+
+        .btn-brand {
+            background-color: var(--brand);
+            border-color: var(--brand);
+        }
+
+        .btn-brand:hover {
+            opacity: .9;
         }
     </style>
 </head>
 
 <body>
-
-    <?php require __DIR__ . '/partials/sidebar.php'; ?>
     <?php require __DIR__ . '/partials/header.php'; ?>
 
-    <main class="p-4">
-        <?php if (isset($contentView)) {
-            extract($viewData ?? []);
-            require $contentView;
-        } ?>
-    </main>
+    <div class="container-fluid">
+        <div class="row">
+            <?php require __DIR__ . '/partials/sidebar.php'; ?>
 
-    <?php require __DIR__ . '/partials/footer.php'; ?>
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-3">
+                <?php
+                if (isset($contentView)) {
+                    extract($viewData ?? []);
+                    require $contentView;
+                }
+                ?>
+            </main>
+        </div>
+    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

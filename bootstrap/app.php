@@ -91,6 +91,20 @@ $config['audit'] = $auditLogger;
 // Settings Repository (repositório de configurações)
 // -------------------------------------------------------------------------
 $config['settings_repo'] = new MySqlSettingsRepository($pdo);
+// Carrega configurações persistidas e monta branding acessível aos controllers
+$settingsRepo = $config['settings_repo'];
+$settings = method_exists($settingsRepo, 'getAll') ? $settingsRepo->getAll() : [];
+
+$branding = [
+    'app_name'      => $settings['app.name'] ?? ($config['app']['name'] ?? 'NimbusDocs'),
+    'app_subtitle'  => $settings['app.subtitle'] ?? 'Portal de documentos',
+    'primary_color' => $settings['branding.primary_color'] ?? '#00205b',
+    'accent_color'  => $settings['branding.accent_color'] ?? '#ffc20e',
+    'admin_logo_url'=> $settings['branding.admin_logo_url'] ?? '',
+    'portal_logo_url'=> $settings['branding.portal_logo_url'] ?? '',
+];
+
+$config['branding'] = $branding;
 
 // -------------------------------------------------------------------------
 // Notification Service (serviço de notificações por e-mail)

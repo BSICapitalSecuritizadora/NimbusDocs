@@ -198,12 +198,71 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         return (int)$stmt->fetchColumn();
     }
 
+    /**
+     * Retorna contagens por status para gráficos.
+     * @param array<string> $statuses
+     * @return array<string,int>
+     */
+    public function countsByStatuses(array $statuses): array
+    {
+        if (!$statuses) {
+            return [];
+        }
+        $placeholders = implode(',', array_fill(0, count($statuses), '?'));
+        $sql = "SELECT status, COUNT(*) AS total
+                FROM portal_submissions
+                WHERE status IN ($placeholders)
+                GROUP BY status";
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($statuses as $i => $st) {
+            $stmt->bindValue($i + 1, $st);
+        }
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $out = array_fill_keys($statuses, 0);
+        foreach ($rows as $r) {
+            $out[$r['status']] = (int)$r['total'];
+        }
+        return $out;
+    }
+
+    /**
+     * Contagem por dia (últimos N dias)
+     * @return array<int,array{date:string,total:int}>
+     */
+    public function countsPerDay(int $days = 30): array
+    {
+        $sql = "SELECT DATE(submitted_at) AS d, COUNT(*) AS total
+                FROM portal_submissions
+                WHERE submitted_at >= DATE_SUB(CURDATE(), INTERVAL :days DAY)
+                GROUP BY d
+                ORDER BY d ASC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':days', $days, PDO::PARAM_INT);
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        return array_map(fn($r) => ['date' => $r['d'], 'total' => (int)$r['total']], $rows);
+    }
+
+    public function countOlderPending(int $days = 7): int
+    {
+        $sql = "SELECT COUNT(*)
+                FROM portal_submissions
+                WHERE status IN ('PENDING','IN_REVIEW')
+                  AND submitted_at < DATE_SUB(NOW(), INTERVAL :days DAY)";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':days', $days, PDO::PARAM_INT);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
     public function latest(int $limit = 5): array
     {
         $stmt = $this->pdo->prepare(
-            "SELECT *
-         FROM portal_submissions
-         ORDER BY submitted_at DESC
+            "SELECT s.*, u.full_name AS user_name, u.email AS user_email
+         FROM portal_submissions s
+         JOIN portal_users u ON u.id = s.portal_user_id
+         ORDER BY s.submitted_at DESC
          LIMIT :l"
         );
         $stmt->bindValue(':l', $limit, \PDO::PARAM_INT);

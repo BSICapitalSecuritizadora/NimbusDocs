@@ -2,11 +2,19 @@
 
 /** @var array|null $user */
 $user = $user ?? ($viewData['user'] ?? null);
+$branding = $branding ?? ($viewData['branding'] ?? ($config['branding'] ?? []));
+$appName  = $branding['app_name']        ?? 'NimbusDocs';
+$logoUrl  = $branding['portal_logo_url'] ?? '';
 ?>
 <nav class="navbar navbar-expand-lg portal-navbar">
     <div class="container">
-        <a class="navbar-brand fw-semibold" href="/portal">
-            NimbusDocs — Portal
+        <a class="navbar-brand d-flex align-items-center" href="/portal">
+            <?php if ($logoUrl): ?>
+                <img src="<?= htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8') ?>"
+                    alt="Logo"
+                    style="height:26px" class="me-2">
+            <?php endif; ?>
+            <span><?= htmlspecialchars($appName, ENT_QUOTES, 'UTF-8') ?></span>
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
