@@ -35,7 +35,9 @@ final class AuditLogController
 
         $total = (int)$pdo->query('SELECT COUNT(*) FROM audit_logs')->fetchColumn();
 
-        $stmt = $pdo->prepare('SELECT * FROM audit_logs ORDER BY occurred_at DESC LIMIT :limit OFFSET :offset');
+        // Ordena de forma compatível com esquemas antigos/novos
+        // Usamos id DESC como fallback neutro
+        $stmt = $pdo->prepare('SELECT * FROM audit_logs ORDER BY id DESC LIMIT :limit OFFSET :offset');
         $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();

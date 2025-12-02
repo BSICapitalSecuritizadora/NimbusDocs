@@ -88,6 +88,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
 
     // Auditoria
     $r->addRoute('GET', '/admin/audit-logs', [AuditLogController::class, 'index']);
+    // Alias amigável
+    $r->addRoute('GET', '/admin/audit', [AuditLogController::class, 'index']);
 
     // Dashboard
     $r->addRoute('GET', '/admin', function () {

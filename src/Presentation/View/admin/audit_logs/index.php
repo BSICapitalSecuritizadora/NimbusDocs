@@ -31,7 +31,7 @@ $items = $pagination['items'] ?? [];
                     <?php else: ?>
                         <?php foreach ($items as $log): ?>
                             <tr>
-                                <td class="text-nowrap"><?= htmlspecialchars($log['occurred_at'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                                <td class="text-nowrap"><?= htmlspecialchars($log['occurred_at'] ?? $log['created_at'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
                                 <td><code><?= htmlspecialchars($log['action'] ?? '', ENT_QUOTES, 'UTF-8') ?></code></td>
                                 <td>
                                     <?= htmlspecialchars($log['actor_type'] ?? '', ENT_QUOTES, 'UTF-8') ?>
