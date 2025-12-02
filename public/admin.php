@@ -12,6 +12,7 @@ use App\Presentation\Controller\Admin\AdminMicrosoftAuthController;
 use App\Presentation\Controller\Admin\AdminUserAdminController;
 use App\Presentation\Controller\Admin\DashboardAdminController;
 use App\Presentation\Controller\Admin\TokenAdminController;
+use App\Presentation\Controller\Admin\SettingsController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -46,6 +47,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/admin/tokens',             [TokenAdminController::class, 'index']);
     $r->addRoute('GET',  '/admin/tokens/{id:\d+}',    [TokenAdminController::class, 'show']);
     $r->addRoute('POST', '/admin/tokens/{id:\d+}/revoke', [TokenAdminController::class, 'revoke']);
+    $r->addRoute('GET',  '/admin/settings',                      [SettingsController::class, 'index']);
+    $r->addRoute('GET',  '/admin/settings/notifications',        [SettingsController::class, 'notificationsForm']);
+    $r->addRoute('POST', '/admin/settings/notifications/save',   [SettingsController::class, 'saveNotifications']);
 
     // Usuários Finais
     $r->addRoute('GET',  '/admin/portal-users',                    [PortalUserController::class, 'index']);

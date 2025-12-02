@@ -12,6 +12,8 @@ use App\Infrastructure\Logging\AdminAuditLogger;
 use App\Domain\Repository\AuditLogRepository;
 use App\Infrastructure\Persistence\MySqlAuditLogRepository;
 use App\Infrastructure\Audit\AuditLogger;
+use App\Infrastructure\Persistence\MySqlSettingsRepository;
+
 
 require __DIR__ . '/../vendor/autoload.php';
 

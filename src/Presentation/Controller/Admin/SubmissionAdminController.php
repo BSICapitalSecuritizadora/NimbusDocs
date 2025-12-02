@@ -320,7 +320,7 @@ final class SubmissionAdminController
             ],
         ]);
 
-        $submission = $this->repo->findById($submissionId);
+        $submission = $this->repo->findById($id);
         $portalUser = $this->portalUserRepo->findById((int)$submission['portal_user_id']);
 
         $notifications = $this->config['notifications_service'] ?? null;

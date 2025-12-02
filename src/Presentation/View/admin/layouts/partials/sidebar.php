@@ -42,7 +42,7 @@
         </li>
 
         <li>
-            <a href="/admin/settings" class="nav-link text-white">
+            <a href="/admin/settings/notifications" class="nav-link text-white">
                 <i class="bi bi-gear me-2"></i> Configurações
             </a>
         </li>

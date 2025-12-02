@@ -11,7 +11,7 @@ final class NotificationService
 {
     public function __construct(
         private GraphMailService $mailer,
-        private array $config
+        private array $notificationsConfig
     ) {}
 
     /**
@@ -19,7 +19,7 @@ final class NotificationService
      */
     public function portalNewSubmission(array $portalUser, array $submission): void
     {
-        $enabled = $this->config['notifications']['portal']['new_submission'] ?? false;
+        $enabled = $this->notificationsConfig['notifications']['portal']['new_submission'] ?? false;
         if (!$enabled) {
             return;
         }
@@ -55,7 +55,7 @@ HTML;
 
         $this->mailer->sendMail($toEmail, $userName, $subject, $html);
 
-        $this->config['audit']->systemAction([
+        $this->notificationsConfig['audit']->systemAction([
             'action'       => 'PORTAL_NOTIFICATION_SENT',
             'summary'      => 'E-mail de notificação enviado ao usuário do portal.',
             'context_type' => 'submission',
@@ -76,7 +76,7 @@ HTML;
         string $oldStatus,
         string $newStatus
     ): void {
-        $enabled = $this->config['notifications']['portal']['status_change'] ?? false;
+        $enabled = $this->notificationsConfig['notifications']['portal']['status_change'] ?? false;
         if (!$enabled) {
             return;
         }
@@ -113,7 +113,7 @@ HTML;
 
         $this->mailer->sendMail($toEmail, $userName, $subject, $html);
 
-        $this->config['audit']->systemAction([
+        $this->notificationsConfig['audit']->systemAction([
             'action'       => 'PORTAL_NOTIFICATION_SENT',
             'summary'      => 'E-mail de notificação enviado ao usuário do portal.',
             'context_type' => 'submission',
@@ -134,7 +134,7 @@ HTML;
         array $portalUser,
         array $submission
     ): void {
-        $enabled = $this->config['notifications']['portal']['response_upload'] ?? false;
+        $enabled = $this->notificationsConfig['notifications']['portal']['response_upload'] ?? false;
         if (!$enabled) {
             return;
         }
@@ -168,7 +168,7 @@ HTML;
 
         $this->mailer->sendMail($toEmail, $userName, $subject, $html);
 
-        $this->config['audit']->systemAction([
+        $this->notificationsConfig['audit']->systemAction([
             'action'       => 'PORTAL_NOTIFICATION_SENT',
             'summary'      => 'E-mail de notificação enviado ao usuário do portal.',
             'context_type' => 'submission',
