@@ -54,6 +54,17 @@ final class NotificationService
 HTML;
 
         $this->mailer->sendMail($toEmail, $userName, $subject, $html);
+
+        $this->config['audit']->systemAction([
+            'action'       => 'PORTAL_NOTIFICATION_SENT',
+            'summary'      => 'E-mail de notificação enviado ao usuário do portal.',
+            'context_type' => 'submission',
+            'context_id'   => $submissionId,
+            'details'      => [
+                'type' => 'new_submission',
+                'to'   => $portalUser['email'],
+            ],
+        ]);
     }
 
     /**
@@ -101,6 +112,19 @@ HTML;
 HTML;
 
         $this->mailer->sendMail($toEmail, $userName, $subject, $html);
+
+        $this->config['audit']->systemAction([
+            'action'       => 'PORTAL_NOTIFICATION_SENT',
+            'summary'      => 'E-mail de notificação enviado ao usuário do portal.',
+            'context_type' => 'submission',
+            'context_id'   => $submissionId,
+            'details'      => [
+                'type'       => 'status_change',
+                'to'         => $portalUser['email'],
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+            ],
+        ]);
     }
 
     /**
@@ -143,6 +167,17 @@ HTML;
 HTML;
 
         $this->mailer->sendMail($toEmail, $userName, $subject, $html);
+
+        $this->config['audit']->systemAction([
+            'action'       => 'PORTAL_NOTIFICATION_SENT',
+            'summary'      => 'E-mail de notificação enviado ao usuário do portal.',
+            'context_type' => 'submission',
+            'context_id'   => $submissionId,
+            'details'      => [
+                'type' => 'response_uploaded',
+                'to'   => $portalUser['email'],
+            ],
+        ]);
     }
 
     private function e(string $value): string

@@ -320,19 +320,12 @@ final class SubmissionAdminController
             ],
         ]);
 
-        // Notificações centralizadas para resposta disponível
-        $submission = $this->repo->findWithUserById($id);
+        $submission = $this->repo->findById($submissionId);
+        $portalUser = $this->portalUserRepo->findById((int)$submission['portal_user_id']);
+
         $notifications = $this->config['notifications_service'] ?? null;
-        if ($notifications && $submission && !empty($submission['user_email'])) {
-            $portalUser = [
-                'id'         => (int)($submission['portal_user_id'] ?? 0),
-                'full_name'  => $submission['user_full_name'] ?? null,
-                'email'      => $submission['user_email'] ?? null,
-            ];
-            $notifications->portalSubmissionResponseUploaded(
-                $portalUser,
-                $submission
-            );
+        if ($notifications && $portalUser) {
+            $notifications->portalSubmissionResponseUploaded($portalUser, $submission);
         }
 
         Session::flash('success', 'Documentos enviados para o usuário.');
