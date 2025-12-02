@@ -13,6 +13,7 @@ use App\Presentation\Controller\Admin\AdminUserAdminController;
 use App\Presentation\Controller\Admin\DashboardAdminController;
 use App\Presentation\Controller\Admin\TokenAdminController;
 use App\Presentation\Controller\Admin\SettingsController;
+use App\Presentation\Controller\Admin\DocumentAdminController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -51,6 +52,10 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/admin/settings/notifications',        [SettingsController::class, 'notificationsForm']);
     $r->addRoute('POST', '/admin/settings/notifications/save',   [SettingsController::class, 'saveNotifications']);
     $r->addRoute('GET', '/admin/submissions/export/csv', [SubmissionAdminController::class, 'exportCsv']);
+    $r->addRoute('GET',  '/admin/documents',              [DocumentAdminController::class, 'index']);
+    $r->addRoute('GET',  '/admin/documents/new',          [DocumentAdminController::class, 'createForm']);
+    $r->addRoute('POST', '/admin/documents',              [DocumentAdminController::class, 'create']);
+    $r->addRoute('POST', '/admin/documents/{id:\\d+}/delete', [DocumentAdminController::class, 'delete']);
 
     // Usuários Finais
     $r->addRoute('GET',  '/admin/portal-users',                    [PortalUserController::class, 'index']);

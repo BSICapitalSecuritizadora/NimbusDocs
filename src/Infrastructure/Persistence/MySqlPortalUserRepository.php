@@ -10,6 +10,16 @@ final class MySqlPortalUserRepository
 {
     public function __construct(private PDO $pdo) {}
 
+    /**
+     * Retorna todos os usuários (apenas campos essenciais) para selects
+     * @return array<int,array{id:int,full_name:?string,email:?string}>
+     */
+    public function all(): array
+    {
+        $stmt = $this->pdo->query("SELECT id, full_name, email FROM portal_users ORDER BY full_name ASC");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
     public function findById(int $id): ?array
     {
         $stmt = $this->pdo->prepare("SELECT * FROM portal_users WHERE id = :id LIMIT 1");

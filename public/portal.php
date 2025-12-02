@@ -6,6 +6,7 @@ use App\Presentation\Controller\Portal\Auth\PortalLoginController;
 use App\Presentation\Controller\Portal\PortalSubmissionController;
 use App\Presentation\Controller\Portal\PortalFileController;
 use App\Presentation\Controller\Portal\PortalHomeController;
+use App\Presentation\Controller\Portal\PortalDocumentController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -24,6 +25,10 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/portal/submissions/create',         [PortalSubmissionController::class, 'showCreateForm']);
     $r->addRoute('POST', '/portal/submissions',                [PortalSubmissionController::class, 'store']);
     $r->addRoute('GET',  '/portal/submissions/{id:\d+}',       [PortalSubmissionController::class, 'show']);
+
+    // Documentos do usuário final
+    $r->addRoute('GET', '/portal/documents',          [PortalDocumentController::class, 'index']);
+    $r->addRoute('GET', '/portal/documents/{id:\d+}', [PortalDocumentController::class, 'download']);
 
     // Downloads de arquivos de submissão pelo usuário final
     $r->addRoute('GET', '/portal/files/{id:\d+}/download', [PortalFileController::class, 'download']);
