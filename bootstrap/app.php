@@ -68,10 +68,16 @@ $logger->pushHandler(
 // -------------------------------------------------------------------------
 // Serviço de e-mail via Microsoft Graph
 // -------------------------------------------------------------------------
-$config['mail'] = new GraphMailService(
-    $config,   // passa o array de config completo
-    $logger
-);
+// Passa explicitamente as credenciais do .env para o serviço
+$graphMailCfg = [
+    'GRAPH_TENANT_ID'    => $_ENV['GRAPH_TENANT_ID']    ?? '',
+    'GRAPH_CLIENT_ID'    => $_ENV['GRAPH_CLIENT_ID']    ?? '',
+    'GRAPH_CLIENT_SECRET'=> $_ENV['GRAPH_CLIENT_SECRET']?? '',
+    'MAIL_FROM'          => $_ENV['MAIL_FROM']          ?? '',
+    'MAIL_FROM_NAME'     => $_ENV['MAIL_FROM_NAME']     ?? 'NimbusDocs',
+];
+
+$config['mail'] = new GraphMailService($graphMailCfg, $logger);
 
 // -------------------------------------------------------------------------
 // Audit Logger (ações administrativas)

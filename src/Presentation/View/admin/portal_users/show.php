@@ -20,6 +20,13 @@
     </div>
 <?php endif; ?>
 
+<?php if ($emailError = \App\Support\Session::getFlash('email_error')): ?>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Falha ao enviar e-mail:</strong> <?= htmlspecialchars($emailError, ENT_QUOTES, 'UTF-8') ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
 <div class="card mb-3">
     <div class="card-body">
         <p><strong>Nome:</strong> <?= htmlspecialchars($user['full_name'] ?? $user['name'], ENT_QUOTES, 'UTF-8') ?></p>

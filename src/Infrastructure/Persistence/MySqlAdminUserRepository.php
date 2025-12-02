@@ -35,13 +35,7 @@ final class MySqlAdminUserRepository implements AdminUserRepository
         $offset = ($page - 1) * $perPage;
 
         $stmt = $this->pdo->prepare(
-            "SELECT id, 
-                    COALESCE(name, full_name) AS name,
-                    email, role, status, last_login_at, last_login_provider,
-                    created_at, updated_at
-             FROM admin_users
-             ORDER BY status = 'ACTIVE' DESC, name ASC
-             LIMIT :limit OFFSET :offset"
+            "SELECT id, COALESCE(name, full_name) AS name, email, role, status, last_login_at, last_login_provider, created_at, updated_at FROM admin_users ORDER BY status = 'ACTIVE' DESC, name ASC LIMIT :limit OFFSET :offset"
         );
         $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -57,11 +51,7 @@ final class MySqlAdminUserRepository implements AdminUserRepository
 
     public function create(array $data): int
     {
-        $sql = "INSERT INTO admin_users
-                (name, email, full_name, password_hash, auth_mode, role, is_active, status,
-                 azure_oid, azure_tenant_id, azure_upn, ms_object_id, ms_tenant_id, ms_upn)
-                VALUES (:name, :email, :full_name, :password_hash, :auth_mode, :role, :is_active, :status,
-                 :azure_oid, :azure_tenant_id, :azure_upn, :ms_object_id, :ms_tenant_id, :ms_upn)";
+        $sql = "INSERT INTO admin_users (name, email, full_name, password_hash, auth_mode, role, is_active, status, azure_oid, azure_tenant_id, azure_upn, ms_object_id, ms_tenant_id, ms_upn) VALUES (:name, :email, :full_name, :password_hash, :auth_mode, :role, :is_active, :status, :azure_oid, :azure_tenant_id, :azure_upn, :ms_object_id, :ms_tenant_id, :ms_upn)";
 
         $name = $data['name'] ?? $data['full_name'] ?? '';
         $isActive = ($data['status'] ?? 'ACTIVE') === 'ACTIVE' ? 1 : 0;
@@ -152,18 +142,14 @@ final class MySqlAdminUserRepository implements AdminUserRepository
 
     public function updateLastLogin(int $id, string $provider): void
     {
-        $sql = "UPDATE admin_users
-                SET last_login_at = NOW(), last_login_provider = :provider
-                WHERE id = :id";
+        $sql = "UPDATE admin_users SET last_login_at = NOW(), last_login_provider = :provider WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':provider' => $provider, ':id' => $id]);
     }
 
     public function deactivate(int $id): void
     {
-        $sql = "UPDATE admin_users
-                SET status = 'INACTIVE', is_active = 0, updated_at = NOW()
-                WHERE id = :id";
+        $sql = "UPDATE admin_users SET status = 'INACTIVE', is_active = 0, updated_at = NOW() WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $id]);
     }

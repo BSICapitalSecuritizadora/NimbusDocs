@@ -445,37 +445,47 @@ final class PortalUserController
         ]);
 
 
-        // 4) (opcional) envia link por e-mail via Graph, se configurado
-        if (isset($this->config['mail']) && !empty($user['email'])) {
+        // 4) (opcional) envia link por e-mail via Graph, se configurado e habilitado nas configurações
+        $settings = $this->config['settings_repo']->getAll();
+        $notifyAccessLink = ($settings['portal.notify.access_link'] ?? '1') === '1';
+        $emailSent = false;
+
+        if ($notifyAccessLink && isset($this->config['mail']) && !empty($user['email'])) {
             $nomeUsuario = $user['full_name'] ?? $user['name'] ?? 'Cliente';
-            $link        = rtrim($this->config['app']['url'] ?? '', '/') . '/portal/access/' . $code;
+            $baseUrl     = rtrim($this->config['app']['url'] ?? '', '/');
+            $link        = $baseUrl . '/portal/access/' . $code;
 
             $body = sprintf(
                 '<p>Olá %s,</p>
              <p>Você recebeu um link de acesso ao <strong>NimbusDocs Portal</strong>.</p>
-             <p>Este link é de uso único e é válido até %s.</p>
+             <p>Este link é de uso único e é válido até <strong>%s</strong>.</p>
+             <p><strong>Código:</strong> <code>%s</code></p>
              <p><a href="%s">Clique aqui para acessar</a></p>',
                 htmlspecialchars($nomeUsuario, ENT_QUOTES, 'UTF-8'),
                 $expiresAt->format('d/m/Y H:i'),
+                htmlspecialchars($code, ENT_QUOTES, 'UTF-8'),
                 htmlspecialchars($link, ENT_QUOTES, 'UTF-8')
             );
 
-            $this->config['mail']->sendMail(
+            $mailer = $this->config['mail'];
+            $emailSent = (bool)$mailer->sendMail(
                 $user['email'],
                 'Seu link de acesso ao NimbusDocs Portal',
                 $body
             );
+
+            if (!$emailSent && method_exists($mailer, 'getLastError')) {
+                $errorDetail = $mailer->getLastError();
+                Session::flash('email_error', $errorDetail ?? 'Erro desconhecido ao enviar e-mail.');
+            }
         }
 
         // 5) feedback visual pro admin
-        Session::flash(
-            'success',
-            sprintf(
-                'Código de acesso gerado: %s (válido até %s)',
-                $code,
-                $expiresAt->format('d/m/Y H:i')
-            )
-        );
+        $msg = sprintf('Código de acesso gerado: %s (válido até %s)', $code, $expiresAt->format('d/m/Y H:i'));
+        if ($notifyAccessLink) {
+            $msg .= $emailSent ? ' — e-mail enviado com sucesso.' : ' — e-mail não enviado.';
+        }
+        Session::flash('success', $msg);
 
         $this->redirect("/admin/portal-users/{$id}");
     }

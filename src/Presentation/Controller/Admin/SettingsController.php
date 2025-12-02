@@ -69,6 +69,7 @@ final class SettingsController
             'portal.notify.new_submission'  => isset($post['portal_notify_new_submission'])  ? '1' : '0',
             'portal.notify.status_change'   => isset($post['portal_notify_status_change'])   ? '1' : '0',
             'portal.notify.response_upload' => isset($post['portal_notify_response_upload']) ? '1' : '0',
+            'portal.notify.access_link'     => isset($post['portal_notify_access_link'])     ? '1' : '0',
         ];
 
         $this->settingsRepo->setMany($data);

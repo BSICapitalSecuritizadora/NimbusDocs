@@ -56,6 +56,16 @@ $has = fn(string $key, bool $default = true)
                 </label>
             </div>
 
+            <div class="form-check form-switch mb-4">
+                <input class="form-check-input" type="checkbox" role="switch"
+                    id="portal_notify_access_link"
+                    name="portal_notify_access_link"
+                    <?= $has('portal.notify.access_link') ? 'checked' : '' ?>>
+                <label class="form-check-label" for="portal_notify_access_link">
+                    Enviar e-mail ao gerar link de acesso único
+                </label>
+            </div>
+
             <div class="d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary btn-sm">
                     Salvar alterações
