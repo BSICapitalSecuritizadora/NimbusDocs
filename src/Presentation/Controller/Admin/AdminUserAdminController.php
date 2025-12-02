@@ -248,6 +248,36 @@ final class AdminUserAdminController
         $this->redirect('/admin/admin-users');
     }
 
+    public function deactivate(array $vars = []): void
+    {
+        $this->requireSuperAdmin();
+
+        $id = (int)($vars['id'] ?? 0);
+
+        // Se vier por GET (ex.: link direto), apenas redireciona com aviso
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
+            Session::flash('error', 'Ação inválida via GET. Use o botão Desativar.');
+            $this->redirect('/admin/users');
+        }
+
+        $token = $_POST['_token'] ?? '';
+        if (!Csrf::validate($token)) {
+            Session::flash('error', 'Sessão expirada. Tente novamente.');
+            $this->redirect('/admin/users');
+        }
+
+        $user = $this->repo->findById($id);
+        if (!$user) {
+            http_response_code(404);
+            echo 'Administrador não encontrado.';
+            return;
+        }
+
+        $this->repo->deactivate($id);
+        Session::flash('success', 'Administrador desativado com sucesso.');
+        $this->redirect('/admin/users');
+    }
+
     private function redirect(string $path): void
     {
         header('Location: ' . $path);
