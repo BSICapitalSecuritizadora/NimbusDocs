@@ -23,6 +23,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     // Submissões do usuário final
     $r->addRoute('GET',  '/portal/submissions',                [PortalSubmissionController::class, 'index']);
     $r->addRoute('GET',  '/portal/submissions/create',         [PortalSubmissionController::class, 'showCreateForm']);
+    $r->addRoute('GET',  '/portal/submissions/new',            [PortalSubmissionController::class, 'showCreateForm']);
     $r->addRoute('POST', '/portal/submissions',                [PortalSubmissionController::class, 'store']);
     $r->addRoute('GET',  '/portal/submissions/{id:\d+}',       [PortalSubmissionController::class, 'show']);
 
