@@ -13,6 +13,7 @@ use App\Domain\Repository\AuditLogRepository;
 use App\Infrastructure\Persistence\MySqlAuditLogRepository;
 use App\Infrastructure\Audit\AuditLogger;
 use App\Infrastructure\Persistence\MySqlSettingsRepository;
+use App\Infrastructure\Auth\AzureAdminAuthClient;
 
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -97,5 +98,11 @@ $config['settings_repo'] = new MySqlSettingsRepository($pdo);
 // Disponibiliza um serviço central de notificações para os controllers.
 $notificationService = new NotificationService($config['mail'], $config);
 $config['notifications_service'] = $notificationService;
+
+// -------------------------------------------------------------------------
+// Azure Admin OAuth Client (TheNetworg OAuth2 Azure)
+// -------------------------------------------------------------------------
+$azureClient = new AzureAdminAuthClient($config['ms_admin_auth']);
+$config['azure_admin_auth'] = $azureClient;
 
 return $config;

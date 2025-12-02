@@ -8,12 +8,12 @@ use App\Presentation\Controller\Admin\PortalUserController;
 use App\Presentation\Controller\Admin\SubmissionAdminController;
 use App\Presentation\Controller\Admin\FileAdminController;
 use App\Presentation\Controller\Admin\AuditLogController;
-use App\Presentation\Controller\Admin\AdminMicrosoftAuthController;
 use App\Presentation\Controller\Admin\AdminUserAdminController;
 use App\Presentation\Controller\Admin\DashboardAdminController;
 use App\Presentation\Controller\Admin\TokenAdminController;
 use App\Presentation\Controller\Admin\SettingsController;
 use App\Presentation\Controller\Admin\DocumentAdminController;
+use App\Presentation\Controller\Admin\AdminAuthController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -52,10 +52,19 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/admin/settings/notifications',        [SettingsController::class, 'notificationsForm']);
     $r->addRoute('POST', '/admin/settings/notifications/save',   [SettingsController::class, 'saveNotifications']);
     $r->addRoute('GET', '/admin/submissions/export/csv', [SubmissionAdminController::class, 'exportCsv']);
+        // Link manual de conta Microsoft para admin
+        $r->addRoute('GET',  '/admin/ms-link', [\App\Presentation\Controller\Admin\AdminMicrosoftLinkController::class, 'showForm']);
+        $r->addRoute('POST', '/admin/ms-link', [\App\Presentation\Controller\Admin\AdminMicrosoftLinkController::class, 'store']);
     $r->addRoute('GET',  '/admin/documents',              [DocumentAdminController::class, 'index']);
     $r->addRoute('GET',  '/admin/documents/new',          [DocumentAdminController::class, 'createForm']);
     $r->addRoute('POST', '/admin/documents',              [DocumentAdminController::class, 'create']);
     $r->addRoute('POST', '/admin/documents/{id:\\d+}/delete', [DocumentAdminController::class, 'delete']);
+    // Microsoft OAuth (Admin)
+    $r->addRoute('GET', '/admin/login/microsoft', [AdminAuthController::class, 'loginWithMicrosoft']);
+    // Callback principal conforme .env MS_ADMIN_REDIRECT_URI
+    $r->addRoute('GET', '/admin/auth/callback',   [AdminAuthController::class, 'loginCallback']);
+    // Alias opcional para compatibilidade
+    $r->addRoute('GET', '/admin/login/callback',  [AdminAuthController::class, 'loginCallback']);
 
     // Usuários Finais
     $r->addRoute('GET',  '/admin/portal-users',                    [PortalUserController::class, 'index']);
@@ -67,9 +76,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}/deactivate', [PortalUserController::class, 'deactivate']);
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}/tokens', [PortalUserController::class, 'generateAccessCode']);
 
-    // Login com Microsoft (admin)
-    $r->addRoute('GET', '/admin/login/microsoft', [AdminMicrosoftAuthController::class, 'redirectToProvider']);
-    $r->addRoute('GET', '/admin/auth/callback',   [AdminMicrosoftAuthController::class, 'handleCallback']);
+    // (Rotas antigas com AdminMicrosoftAuthController removidas em favor de AdminAuthController)
 
     // Downloads de arquivos de submissão
     $r->addRoute('GET', '/admin/files/{id:\d+}/download', [FileAdminController::class, 'download']);
