@@ -15,8 +15,7 @@ $values = [
     'email'           => $old['email']           ?? ($user['email']           ?? ''),
     'document_number' => $old['document_number'] ?? ($user['document_number'] ?? ''),
     'phone_number'    => $old['phone_number']    ?? ($user['phone_number']    ?? ''),
-    'external_id'     => $old['external_id']     ?? ($user['external_id']     ?? ''),
-    'notes'           => $old['notes']           ?? ($user['notes']           ?? ''),
+    // removidos: external_id, notes
     'status'          => $old['status']          ?? ($user['status']          ?? 'INVITED'),
 ];
 
@@ -86,17 +85,7 @@ $action = $isEdit
                         
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label" for="external_id">ID externo (ERP/CRM)</label>
-                        <input type="text" class="form-control"
-                            id="external_id" name="external_id"
-                            value="<?= htmlspecialchars($values['external_id'], ENT_QUOTES, 'UTF-8') ?>">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label" for="notes">Observações</label>
-                        <textarea class="form-control" id="notes" name="notes" rows="3"><?= htmlspecialchars($values['notes'], ENT_QUOTES, 'UTF-8') ?></textarea>
-                    </div>
+                    <!-- Campos removidos conforme solicitação: ID externo e Observações -->
 
                     <div class="mb-3">
                         <label class="form-label" for="status">Status</label>
