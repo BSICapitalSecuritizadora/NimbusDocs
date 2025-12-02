@@ -47,7 +47,7 @@ final class SettingsController
             'admin'    => $admin,
             'settings' => $settings,
             'csrfToken' => Csrf::token(),
-            'success'  => Session::flash('success'),
+            'success'  => Session::getFlash('success'),
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';

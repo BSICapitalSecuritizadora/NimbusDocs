@@ -87,6 +87,11 @@ $auditLogger = new AuditLogger($auditRepo, $config);
 $config['audit'] = $auditLogger;
 
 // -------------------------------------------------------------------------
+// Settings Repository (repositório de configurações)
+// -------------------------------------------------------------------------
+$config['settings_repo'] = new MySqlSettingsRepository($pdo);
+
+// -------------------------------------------------------------------------
 // Notification Service (serviço de notificações por e-mail)
 // -------------------------------------------------------------------------
 // Disponibiliza um serviço central de notificações para os controllers.
