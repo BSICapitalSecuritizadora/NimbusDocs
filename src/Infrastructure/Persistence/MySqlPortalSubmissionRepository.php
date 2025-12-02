@@ -272,4 +272,58 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         return $row ?: null;
     }
+
+    /**
+     * Exporta submissões para o admin, já filtradas (sem paginação)
+     * @param array $filters
+     * @return array<int,array>
+     */
+    public function exportForAdmin(array $filters = []): array
+    {
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['status'])) {
+            $where[] = 's.status = :status';
+            $params[':status'] = $filters['status'];
+        }
+        if (!empty($filters['portal_user_id'])) {
+            $where[] = 's.portal_user_id = :uid';
+            $params[':uid'] = (int)$filters['portal_user_id'];
+        }
+        if (!empty($filters['from_date'])) {
+            $where[] = 's.submitted_at >= :from_date';
+            $params[':from_date'] = $filters['from_date'];
+        }
+        if (!empty($filters['to_date'])) {
+            $where[] = 's.submitted_at <= :to_date';
+            $params[':to_date'] = $filters['to_date'];
+        }
+
+        $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        $sql = "SELECT
+            s.id,
+            s.reference_code,
+            s.status,
+            s.title,
+            s.message,
+            s.submitted_at,
+            u.full_name AS user_name,
+            u.email     AS user_email,
+            u.document_number AS user_document_number,
+            u.phone_number    AS user_phone_number,
+            s.portal_user_id
+        FROM portal_submissions s
+        JOIN portal_users u ON u.id = s.portal_user_id
+        $whereSql
+        ORDER BY s.submitted_at DESC";
+
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($params as $k => $v) {
+            $stmt->bindValue($k, $v);
+        }
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+    }
 }

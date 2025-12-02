@@ -331,4 +331,44 @@ final class SubmissionAdminController
         Session::flash('success', 'Documentos enviados para o usuário.');
         $this->redirect('/admin/submissions/' . $id);
     }
+
+    public function exportCsv(array $vars = []): void
+    {
+        $this->requireAdmin();
+
+        // Filtros vindos da query string
+        $filters = [
+            'status'         => $_GET['status']         ?? null,
+            'portal_user_id' => $_GET['portal_user_id'] ?? null,
+            'from_date'      => $_GET['from_date']      ?? null,
+            'to_date'        => $_GET['to_date']        ?? null,
+        ];
+
+        $items = $this->repo->exportForAdmin($filters);
+
+        $fields = [
+            'id',
+            'reference_code',
+            'status',
+            'title',
+            'message',
+            'submitted_at',
+            'user_name',
+            'user_email',
+            'user_document_number',
+            'user_phone_number',
+            'portal_user_id',
+        ];
+
+        $data = [];
+        foreach ($items as $row) {
+            $line = [];
+            foreach ($fields as $f) {
+                $line[] = $row[$f] ?? '';
+            }
+            $data[] = $line;
+        }
+
+        \App\Support\CsvResponse::output($fields, $data, 'submissoes_export.csv');
+    }
 }

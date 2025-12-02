@@ -10,8 +10,20 @@ $pagination = $pagination ?? ['items'=>[], 'total'=>0, 'page'=>1, 'perPage'=>15,
 $filters    = $filters    ?? [];
 $items      = $pagination['items'] ?? [];
 ?>
+
+<?php
+$query = http_build_query([
+    'status'         => $filters['status'] ?? '',
+    'portal_user_id' => $filters['portal_user_id'] ?? '',
+]);
+?>
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h1 class="h4 mb-0">Submissões do Portal</h1>
+  <div class="d-flex gap-2">
+    <a href="/admin/submissions/export/csv?<?= $query ?>" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-download"></i> Exportar CSV
+    </a>
+  </div>
 </div>
 
 <?php if (!empty($flash['success'])): ?>
