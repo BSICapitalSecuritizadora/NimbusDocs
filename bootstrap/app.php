@@ -65,6 +65,9 @@ $logger->pushHandler(
     new StreamHandler($logDir . '/app.log', Logger::DEBUG)
 );
 
+// Adiciona logger ao config
+$config['logger'] = $logger;
+
 // -------------------------------------------------------------------------
 // Serviço de e-mail via Microsoft Graph
 // -------------------------------------------------------------------------

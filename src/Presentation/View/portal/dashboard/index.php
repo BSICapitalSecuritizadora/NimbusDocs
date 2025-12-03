@@ -5,6 +5,8 @@
 /** @var int $pendentes */
 /** @var int $concluidas */
 /** @var array $submissions */
+/** @var array $announcements */
+
 ?>
 <div class="row mb-4">
     <div class="col-12 col-lg-8">
@@ -14,6 +16,28 @@
         </p>
     </div>
 </div>
+
+<?php if (!empty($announcements)): ?>
+    <div class="mb-4">
+        <?php foreach ($announcements as $a): ?>
+            <?php
+            $level = $a['level'] ?? 'info';
+            $class = 'alert-info';
+            if ($level === 'success') $class = 'alert-success';
+            if ($level === 'warning') $class = 'alert-warning';
+            if ($level === 'danger')  $class = 'alert-danger';
+            ?>
+            <div class="alert <?= $class ?> border-0 shadow-sm mb-2">
+                <h2 class="h6 mb-1">
+                    <?= htmlspecialchars($a['title'], ENT_QUOTES, 'UTF-8') ?>
+                </h2>
+                <p class="small mb-0">
+                    <?= nl2br(htmlspecialchars($a['body'], ENT_QUOTES, 'UTF-8')) ?>
+                </p>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
 
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">

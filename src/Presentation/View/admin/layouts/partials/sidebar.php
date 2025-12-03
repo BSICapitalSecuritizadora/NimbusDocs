@@ -59,6 +59,12 @@
             </a>
         </li>
 
+        <li class="nav-item">
+            <a href="/admin/announcements" class="nav-link text-white">
+                <i class="bi bi-megaphone me-2"></i> Comunicados
+            </a>
+        </li>
+
     </ul>
     <hr>
     <div>

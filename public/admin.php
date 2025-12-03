@@ -14,6 +14,7 @@ use App\Presentation\Controller\Admin\TokenAdminController;
 use App\Presentation\Controller\Admin\SettingsController;
 use App\Presentation\Controller\Admin\DocumentAdminController;
 use App\Presentation\Controller\Admin\AdminAuthController;
+use App\Presentation\Controller\Admin\AnnouncementAdminController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -70,6 +71,12 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET', '/admin/login/callback',  [AdminAuthController::class, 'loginCallback']);
     $r->addRoute('GET',  '/admin/settings/branding',        [SettingsController::class, 'brandingForm']);
     $r->addRoute('POST', '/admin/settings/branding/save',   [SettingsController::class, 'saveBranding']);
+    $r->addRoute('GET',  '/admin/announcements',             [AnnouncementAdminController::class, 'index']);
+    $r->addRoute('GET',  '/admin/announcements/new',         [AnnouncementAdminController::class, 'createForm']);
+    $r->addRoute('POST', '/admin/announcements',             [AnnouncementAdminController::class, 'store']);
+    $r->addRoute('GET',  '/admin/announcements/{id:\d+}/edit', [AnnouncementAdminController::class, 'editForm']);
+    $r->addRoute('POST', '/admin/announcements/{id:\d+}',    [AnnouncementAdminController::class, 'update']);
+    $r->addRoute('POST', '/admin/announcements/{id:\d+}/delete', [AnnouncementAdminController::class, 'delete']);
 
     // Usuários Finais
     $r->addRoute('GET',  '/admin/portal-users',                    [PortalUserController::class, 'index']);
