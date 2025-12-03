@@ -63,18 +63,38 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
     public function createForUser(int $portalUserId, array $data): int
     {
         $sql = "INSERT INTO portal_submissions
-                (portal_user_id, reference_code, title, message, status, created_ip, created_user_agent)
-                VALUES (:portal_user_id, :reference_code, :title, :message, :status, :created_ip, :created_user_agent)";
+                (portal_user_id, reference_code, title, message, status, created_ip, created_user_agent,
+                 responsible_name, company_cnpj, company_name, main_activity, phone, website,
+                 net_worth, annual_revenue, is_us_person, is_pep,
+                 registrant_name, registrant_position, registrant_rg, registrant_cpf)
+                VALUES (:portal_user_id, :reference_code, :title, :message, :status, :created_ip, :created_user_agent,
+                 :responsible_name, :company_cnpj, :company_name, :main_activity, :phone, :website,
+                 :net_worth, :annual_revenue, :is_us_person, :is_pep,
+                 :registrant_name, :registrant_position, :registrant_rg, :registrant_cpf)";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':portal_user_id'    => $portalUserId,
-            ':reference_code'    => $data['reference_code'],
-            ':title'             => $data['title'],
-            ':message'           => $data['message'] ?? null,
-            ':status'            => $data['status'] ?? 'PENDING',
-            ':created_ip'        => $data['created_ip'] ?? null,
-            ':created_user_agent' => $data['created_user_agent'] ?? null,
+            ':portal_user_id'      => $portalUserId,
+            ':reference_code'      => $data['reference_code'],
+            ':title'               => $data['title'],
+            ':message'             => $data['message'] ?? null,
+            ':status'              => $data['status'] ?? 'PENDING',
+            ':created_ip'          => $data['created_ip'] ?? null,
+            ':created_user_agent'  => $data['created_user_agent'] ?? null,
+            ':responsible_name'    => $data['responsible_name'] ?? null,
+            ':company_cnpj'        => $data['company_cnpj'] ?? null,
+            ':company_name'        => $data['company_name'] ?? null,
+            ':main_activity'       => $data['main_activity'] ?? null,
+            ':phone'               => $data['phone'] ?? null,
+            ':website'             => $data['website'] ?? null,
+            ':net_worth'           => $data['net_worth'] ?? null,
+            ':annual_revenue'      => $data['annual_revenue'] ?? null,
+            ':is_us_person'        => $data['is_us_person'] ?? 0,
+            ':is_pep'              => $data['is_pep'] ?? 0,
+            ':registrant_name'     => $data['registrant_name'] ?? null,
+            ':registrant_position' => $data['registrant_position'] ?? null,
+            ':registrant_rg'       => $data['registrant_rg'] ?? null,
+            ':registrant_cpf'      => $data['registrant_cpf'] ?? null,
         ]);
 
         return (int)$this->pdo->lastInsertId();

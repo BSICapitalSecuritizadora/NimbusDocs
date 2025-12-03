@@ -15,10 +15,10 @@ final class MySqlPortalSubmissionFileRepository implements PortalSubmissionFileR
     {
         $sql = "INSERT INTO portal_submission_files
             (submission_id, origin, original_name, stored_name,
-             mime_type, size_bytes, storage_path, checksum, visible_to_user)
+             mime_type, size_bytes, storage_path, checksum, visible_to_user, document_type)
             VALUES
             (:submission_id, :origin, :original_name, :stored_name,
-             :mime_type, :size_bytes, :storage_path, :checksum, :visible_to_user)";
+             :mime_type, :size_bytes, :storage_path, :checksum, :visible_to_user, :document_type)";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
@@ -31,6 +31,7 @@ final class MySqlPortalSubmissionFileRepository implements PortalSubmissionFileR
             ':storage_path'    => $data['storage_path'],
             ':checksum'        => $data['checksum'] ?? null,
             ':visible_to_user' => isset($data['visible_to_user']) ? (int)$data['visible_to_user'] : 0,
+            ':document_type'   => $data['document_type'] ?? 'OTHER',
         ]);
 
         return (int)$this->pdo->lastInsertId();

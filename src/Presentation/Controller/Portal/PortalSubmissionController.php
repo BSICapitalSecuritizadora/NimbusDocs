@@ -7,6 +7,8 @@ namespace App\Presentation\Controller\Portal;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionNoteRepository;
+use App\Infrastructure\Persistence\MySqlPortalSubmissionShareholderRepository;
+use App\Infrastructure\Integration\CnpjWsService;
 use App\Support\Csrf;
 use App\Support\AuditLogger;
 use App\Support\Session;
@@ -20,14 +22,45 @@ final class PortalSubmissionController
     private MySqlPortalSubmissionRepository $repo;
     private MySqlPortalSubmissionFileRepository $fileRepo;
     private MySqlPortalSubmissionNoteRepository $noteRepo;
+    private MySqlPortalSubmissionShareholderRepository $shareholderRepo;
     private AuditLogger $audit;
+    private CnpjWsService $cnpjService;
 
     public function __construct(private array $config)
     {
-        $this->repo     = new MySqlPortalSubmissionRepository($config['pdo']);
-        $this->fileRepo = new MySqlPortalSubmissionFileRepository($config['pdo']);
-        $this->noteRepo = new MySqlPortalSubmissionNoteRepository($config['pdo']);
-        $this->audit    = new AuditLogger($config['pdo']);
+        $this->repo            = new MySqlPortalSubmissionRepository($config['pdo']);
+        $this->fileRepo        = new MySqlPortalSubmissionFileRepository($config['pdo']);
+        $this->noteRepo        = new MySqlPortalSubmissionNoteRepository($config['pdo']);
+        $this->shareholderRepo = new MySqlPortalSubmissionShareholderRepository($config['pdo']);
+        $this->audit           = new AuditLogger($config['pdo']);
+        $this->cnpjService     = new CnpjWsService($config['logger']);
+    }
+
+    public function getCnpjData(array $vars = []): void
+    {
+        Auth::requirePortalUser();
+        
+        header('Content-Type: application/json');
+        
+        $cnpj = $_POST['cnpj'] ?? '';
+        $cnpj = preg_replace('/\D/', '', $cnpj);
+        
+        if (!CnpjWsService::isValidCnpj($cnpj)) {
+            echo json_encode(['error' => 'CNPJ inválido']);
+            return;
+        }
+        
+        $data = $this->cnpjService->getCompanyData($cnpj);
+        
+        if (!$data) {
+            echo json_encode(['error' => 'Não foi possível buscar os dados do CNPJ']);
+            return;
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'data' => $data,
+        ]);
     }
 
     
@@ -80,70 +113,119 @@ final class PortalSubmissionController
             $this->redirect('/portal/submissions/create');
         }
 
+        // Coleta todos os dados do formulário
         $data = [
-            'title'   => trim($post['title'] ?? ''),
-            'message' => trim($post['message'] ?? ''),
+            'title'                => trim($post['title'] ?? 'Cadastro de Cliente'),
+            'message'              => trim($post['message'] ?? ''),
+            'responsible_name'     => trim($post['responsible_name'] ?? ''),
+            'company_cnpj'         => preg_replace('/\D/', '', $post['company_cnpj'] ?? ''),
+            'company_name'         => trim($post['company_name'] ?? ''),
+            'main_activity'        => trim($post['main_activity'] ?? ''),
+            'phone'                => trim($post['phone'] ?? ''),
+            'website'              => trim($post['website'] ?? ''),
+            'net_worth'            => $this->parseMoney($post['net_worth'] ?? ''),
+            'annual_revenue'       => $this->parseMoney($post['annual_revenue'] ?? ''),
+            'is_us_person'         => isset($post['is_us_person']) ? 1 : 0,
+            'is_pep'               => isset($post['is_pep']) ? 1 : 0,
+            'registrant_name'      => trim($post['registrant_name'] ?? ''),
+            'registrant_position'  => trim($post['registrant_position'] ?? ''),
+            'registrant_rg'        => trim($post['registrant_rg'] ?? ''),
+            'registrant_cpf'       => preg_replace('/\D/', '', $post['registrant_cpf'] ?? ''),
         ];
 
+        // Validações
         $errors = [];
 
-        if (!v::stringType()->length(3, 190)->validate($data['title'])) {
-            $errors['title'] = 'Título deve ter pelo menos 3 caracteres.';
+        if (empty($data['responsible_name'])) {
+            $errors['responsible_name'] = 'Nome do responsável é obrigatório.';
         }
 
-        // --- validação básica dos anexos ---
-        $filesArray = $_FILES['attachments'] ?? null;
-        $hasFiles   = $filesArray && isset($filesArray['name']) && is_array($filesArray['name']);
+        if (empty($data['company_cnpj']) || !CnpjWsService::isValidCnpj($data['company_cnpj'])) {
+            $errors['company_cnpj'] = 'CNPJ inválido.';
+        }
 
-        $maxSize = (int)($this->config['upload_max_file_size'] ?? $this->config['upload']['max_file_size'] ?? 104857600);
+        if (empty($data['company_name'])) {
+            $errors['company_name'] = 'Nome da empresa é obrigatório.';
+        }
 
-        $allowedMimes = [
-            'application/pdf',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.ms-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/vnd.ms-powerpoint',
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            'text/plain',
-            'text/csv',
-            'image/jpeg',
-            'image/png',
+        if (empty($data['phone'])) {
+            $errors['phone'] = 'Telefone é obrigatório.';
+        }
+
+        if ($data['net_worth'] === null || $data['net_worth'] <= 0) {
+            $errors['net_worth'] = 'Patrimônio líquido inválido.';
+        }
+
+        if ($data['annual_revenue'] === null || $data['annual_revenue'] <= 0) {
+            $errors['annual_revenue'] = 'Faturamento anual inválido.';
+        }
+
+        if (empty($data['registrant_name'])) {
+            $errors['registrant_name'] = 'Nome do responsável pelo cadastro é obrigatório.';
+        }
+
+        if (empty($data['registrant_cpf']) || !$this->isValidCpf($data['registrant_cpf'])) {
+            $errors['registrant_cpf'] = 'CPF do responsável inválido.';
+        }
+
+        // Valida composição societária
+        $shareholders = json_decode($post['shareholders'] ?? '[]', true);
+        
+        if (empty($shareholders) || !is_array($shareholders)) {
+            $errors['shareholders'] = 'É necessário informar pelo menos um sócio.';
+        } else {
+            $totalPercentage = 0;
+            foreach ($shareholders as $idx => $shareholder) {
+                $percentage = (float)($shareholder['percentage'] ?? 0);
+                $totalPercentage += $percentage;
+
+                if (empty($shareholder['name'])) {
+                    $errors['shareholders'] = 'Nome do sócio é obrigatório.';
+                    break;
+                }
+
+                if ($percentage <= 0) {
+                    $errors['shareholders'] = 'Porcentagem deve ser maior que zero.';
+                    break;
+                }
+            }
+
+            if (abs($totalPercentage - 100) > 0.01) {
+                $errors['shareholders'] = sprintf(
+                    'A soma das porcentagens deve ser exatamente 100%%. Atual: %.2f%%',
+                    $totalPercentage
+                );
+            }
+        }
+
+        // Validação de arquivos obrigatórios
+        $requiredFiles = [
+            'balance_sheet' => 'Último balanço',
+            'dre' => 'DRE',
+            'policies' => 'Políticas',
+            'cnpj_card' => 'Cartão CNPJ',
+            'power_of_attorney' => 'Procuração',
+            'minutes' => 'Ata',
+            'articles_of_incorporation' => 'Contrato social',
+            'bylaws' => 'Estatuto',
         ];
 
-        if ($hasFiles) {
-            $count = count($filesArray['name']);
-            for ($i = 0; $i < $count; $i++) {
-                $error = $filesArray['error'][$i];
-                if ($error === UPLOAD_ERR_NO_FILE) {
-                    continue;
-                }
-                if ($error !== UPLOAD_ERR_OK) {
-                    $errors['attachments'] = 'Erro ao enviar um ou mais arquivos.';
-                    break;
-                }
-
-                $size = (int)$filesArray['size'][$i];
-                if ($size > $maxSize) {
-                    $errors['attachments'] = 'Um dos arquivos excede o tamanho máximo permitido.';
-                    break;
-                }
-
-                $type = $filesArray['type'][$i] ?? '';
-                if ($type && !in_array($type, $allowedMimes, true)) {
-                    $errors['attachments'] = 'Um dos arquivos possui tipo não permitido.';
-                    break;
-                }
+        foreach ($requiredFiles as $field => $label) {
+            if (!isset($_FILES[$field]) || $_FILES[$field]['error'] === UPLOAD_ERR_NO_FILE) {
+                $errors[$field] = "$label é obrigatório.";
+            } elseif ($_FILES[$field]['error'] !== UPLOAD_ERR_OK) {
+                $errors[$field] = "Erro ao enviar $label.";
             }
         }
 
         if ($errors) {
             Session::flash('errors', $errors);
             Session::flash('old', $data);
+            Session::flash('old_shareholders', $shareholders ?? []);
             $this->redirect('/portal/submissions/create');
         }
 
-        // --- cria submissão ---
+        // --- Cria submissão ---
         $refCode = sprintf(
             'SUB-%s-%s',
             date('Ymd'),
@@ -160,50 +242,73 @@ final class PortalSubmissionController
             'status'              => 'PENDING',
             'created_ip'          => $ip,
             'created_user_agent'  => $ua,
+            'responsible_name'    => $data['responsible_name'],
+            'company_cnpj'        => $data['company_cnpj'],
+            'company_name'        => $data['company_name'],
+            'main_activity'       => $data['main_activity'],
+            'phone'               => $data['phone'],
+            'website'             => $data['website'],
+            'net_worth'           => $data['net_worth'],
+            'annual_revenue'      => $data['annual_revenue'],
+            'is_us_person'        => $data['is_us_person'],
+            'is_pep'              => $data['is_pep'],
+            'registrant_name'     => $data['registrant_name'],
+            'registrant_position' => $data['registrant_position'],
+            'registrant_rg'       => $data['registrant_rg'],
+            'registrant_cpf'      => $data['registrant_cpf'],
         ]);
 
-        // --- salva anexos usando helper FileUpload + grava no banco ---
-        if ($hasFiles) {
-            $userId = (int)$user['id'];
-            $storageBase = dirname(__DIR__, 5) . '/storage/portal_uploads/' . $userId . '/';
+        // Salva composição societária
+        foreach ($shareholders as $shareholder) {
+            $this->shareholderRepo->create($submissionId, [
+                'name'          => $shareholder['name'],
+                'document_rg'   => $shareholder['rg'] ?? null,
+                'document_cnpj' => preg_replace('/\D/', '', $shareholder['cnpj'] ?? ''),
+                'percentage'    => (float)$shareholder['percentage'],
+            ]);
+        }
 
-            $count = count($filesArray['name']);
-            for ($i = 0; $i < $count; $i++) {
-                if (($filesArray['error'][$i] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-                    continue;
-                }
+        // Salva arquivos obrigatórios com tipo específico
+        $userId = (int)$user['id'];
+        $storageBase = dirname(__DIR__, 5) . '/storage/portal_uploads/' . $userId . '/';
 
-                $fileInfo = [
-                    'name'     => $filesArray['name'][$i],
-                    'type'     => $filesArray['type'][$i] ?? '',
-                    'tmp_name' => $filesArray['tmp_name'][$i],
-                    'error'    => $filesArray['error'][$i],
-                    'size'     => (int)$filesArray['size'][$i],
-                ];
+        $fileTypeMap = [
+            'balance_sheet'             => 'BALANCE_SHEET',
+            'dre'                       => 'DRE',
+            'policies'                  => 'POLICIES',
+            'cnpj_card'                 => 'CNPJ_CARD',
+            'power_of_attorney'         => 'POWER_OF_ATTORNEY',
+            'minutes'                   => 'MINUTES',
+            'articles_of_incorporation' => 'ARTICLES_OF_INCORPORATION',
+            'bylaws'                    => 'BYLAWS',
+        ];
 
+        foreach ($fileTypeMap as $field => $docType) {
+            if (isset($_FILES[$field]) && $_FILES[$field]['error'] === UPLOAD_ERR_OK) {
                 try {
-                    $stored = FileUpload::store($fileInfo, $storageBase);
-
+                    $stored = FileUpload::store($_FILES[$field], $storageBase);
+                    
                     $storedName   = basename($stored['path']);
                     $checksum     = is_file($stored['path']) ? hash_file('sha256', $stored['path']) : null;
                     $relativePath = 'portal_uploads/' . $userId . '/' . $storedName;
 
                     $this->fileRepo->create($submissionId, [
-                        'origin'         => 'USER',
-                        'original_name'  => $stored['original_name'],
-                        'stored_name'    => $storedName,
-                        'mime_type'      => $stored['mime_type'],
-                        'size_bytes'     => (int)$stored['size'],
-                        'storage_path'   => $relativePath,
-                        'checksum'       => $checksum,
-                        'visible_to_user'=> 0,
+                        'origin'          => 'USER',
+                        'original_name'   => $stored['original_name'],
+                        'stored_name'     => $storedName,
+                        'mime_type'       => $stored['mime_type'],
+                        'size_bytes'      => (int)$stored['size'],
+                        'storage_path'    => $relativePath,
+                        'checksum'        => $checksum,
+                        'visible_to_user' => 0,
+                        'document_type'   => $docType,
                     ]);
                 } catch (\Throwable $e) {
                     $this->audit->log('PORTAL_USER', (int)$user['id'], 'USER_FILE_UPLOAD_FAILED', 'PORTAL_SUBMISSION', $submissionId, [
                         'error' => $e->getMessage(),
-                        'file'  => $fileInfo['name'] ?? null,
+                        'file'  => $_FILES[$field]['name'] ?? null,
+                        'type'  => $docType,
                     ]);
-                    // segue para o próximo arquivo
                 }
             }
         }
@@ -213,27 +318,27 @@ final class PortalSubmissionController
         ]);
 
         $this->config['audit']->portalUserAction([
-            'actor_id'    => (int)$user['id'],
-            'actor_name'  => $user['full_name'] ?? $user['name'] ?? $user['email'],
-            'action'      => 'PORTAL_SUBMISSION_CREATED',
-            'summary'     => 'Nova submissão criada pelo usuário do portal.',
+            'actor_id'     => (int)$user['id'],
+            'actor_name'   => $user['full_name'] ?? $user['name'] ?? $user['email'],
+            'action'       => 'PORTAL_SUBMISSION_CREATED',
+            'summary'      => 'Nova submissão de cadastro criada.',
             'context_type' => 'submission',
-            'context_id'  => $submissionId,
-            'details'     => [
-                'title'   => $data['title'],
-                'has_files' => $hasFiles,
+            'context_id'   => $submissionId,
+            'details'      => [
+                'company_name' => $data['company_name'],
+                'cnpj'         => CnpjWsService::formatCnpj($data['company_cnpj']),
             ],
         ]);
 
-        // --- notificações ---
+        // Notificações
         $submission = $this->repo->findById($submissionId);
-
         $notifications = $this->config['notifications_service'] ?? null;
+        
         if ($notifications) {
             $notifications->portalNewSubmission($user, $submission);
         }
 
-        Session::flash('success', 'Submissão enviada com sucesso.');
+        Session::flash('success', 'Cadastro enviado com sucesso.');
         $this->redirect('/portal/submissions/' . $submissionId);
     }
 
@@ -270,5 +375,55 @@ final class PortalSubmissionController
     {
         header('Location: ' . $path);
         exit;
+    }
+
+    /**
+     * Converte string de dinheiro (R$ 1.000.000,00) para float
+     */
+    private function parseMoney(string $value): ?float
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        // Remove tudo exceto números, vírgula e ponto
+        $value = preg_replace('/[^\d,.]/', '', $value);
+        
+        // Substitui vírgula por ponto
+        $value = str_replace(',', '.', $value);
+        
+        // Remove pontos extras (mantém apenas o último como decimal)
+        $parts = explode('.', $value);
+        if (count($parts) > 2) {
+            $decimal = array_pop($parts);
+            $value = implode('', $parts) . '.' . $decimal;
+        }
+
+        return (float)$value;
+    }
+
+    /**
+     * Valida CPF
+     */
+    private function isValidCpf(string $cpf): bool
+    {
+        $cpf = preg_replace('/\D/', '', $cpf);
+
+        if (strlen($cpf) != 11 || preg_match('/^(\d)\1*$/', $cpf)) {
+            return false;
+        }
+
+        for ($t = 9; $t < 11; $t++) {
+            $d = 0;
+            for ($c = 0; $c < $t; $c++) {
+                $d += $cpf[$c] * (($t + 1) - $c);
+            }
+            $d = ((10 * $d) % 11) % 10;
+            if ($cpf[$c] != $d) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
