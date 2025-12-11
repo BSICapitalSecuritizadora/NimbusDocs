@@ -8,6 +8,7 @@ use App\Presentation\Controller\Portal\PortalFileController;
 use App\Presentation\Controller\Portal\PortalHomeController;
 use App\Presentation\Controller\Portal\PortalDocumentController;
 use App\Presentation\Controller\Portal\PortalGeneralDocumentsController;
+use App\Presentation\Controller\Portal\PortalGeneralDocumentsViewerController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -42,6 +43,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     // Documentos gerais do portal
     $r->addRoute('GET', '/portal/documents/general',              [PortalGeneralDocumentsController::class, 'index']);
     $r->addRoute('GET', '/portal/documents/general/{id:\d+}',     [PortalGeneralDocumentsController::class, 'download']);
+    $r->addRoute('GET', '/portal/documents/general/{id:\d+}/view',   [PortalGeneralDocumentsViewerController::class, 'view']);
+    $r->addRoute('GET', '/portal/documents/general/{id:\d+}/stream', [PortalGeneralDocumentsViewerController::class, 'stream']);
 });
 
 
