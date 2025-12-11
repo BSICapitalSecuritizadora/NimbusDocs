@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Aplication\Service;
+namespace App\Application\Service;
 
 use App\Infrastructure\Notification\GraphMailService;
 use App\Infrastructure\Persistence\MySqlSettingsRepository;

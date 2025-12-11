@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Aplication;
+namespace App\Application;
 
 use App\Infrastructure\Persistence\MySqlGeneralDocumentRepository;
 use App\Infrastructure\Persistence\MySqlDocumentCategoryRepository;
 use App\Infrastructure\Persistence\MySqlPortalUserRepository;
 use App\Infrastructure\Persistence\MySqlSettingsRepository;
 use App\Infrastructure\Persistence\MySqlAdminUserRepository;
-use App\Aplication\Service\NotificationService;
+use App\Application\Service\NotificationService;
 use App\Infrastructure\Notification\GraphMailService;
 use App\Support\FileUpload;
 use App\Support\AuditLogger;

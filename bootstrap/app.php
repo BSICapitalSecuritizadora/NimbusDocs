@@ -7,7 +7,7 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use App\Infrastructure\Persistence\Connection;
 use App\Infrastructure\Notification\GraphMailService;
-use App\Aplication\Service\NotificationService;
+use App\Application\Service\NotificationService;
 use App\Infrastructure\Logging\AdminAuditLogger;
 use App\Domain\Repository\AuditLogRepository;
 use App\Infrastructure\Persistence\MySqlAuditLogRepository;
