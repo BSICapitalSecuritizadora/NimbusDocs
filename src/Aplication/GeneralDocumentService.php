@@ -56,10 +56,9 @@ final class GeneralDocumentService
         }
 
         try {
-            $uploadResult = $this->fileUpload->handleUpload(
+            $uploadResult = $this->fileUpload::store(
                 $_FILES['file'],
-                'documents',
-                50 * 1024 * 1024 // 50 MB max
+                'storage/documents'
             );
 
             if (!$uploadResult['success']) {
@@ -286,7 +285,7 @@ final class GeneralDocumentService
      */
     public function getCategories(): array
     {
-        return $this->categoryRepo->listAll();
+        return $this->categoryRepo->all();
     }
 
     /**

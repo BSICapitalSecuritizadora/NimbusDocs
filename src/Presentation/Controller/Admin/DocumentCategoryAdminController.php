@@ -30,8 +30,8 @@ final class DocumentCategoryAdminController
         $viewData = [
             'categories' => $categories,
             'csrfToken'  => Csrf::token(),
-            'success'    => Session::flash('success'),
-            'error'      => Session::flash('error'),
+            'success'    => Session::getFlash('success'),
+            'error'      => Session::getFlash('error'),
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
