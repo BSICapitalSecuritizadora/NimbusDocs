@@ -9,7 +9,7 @@ use App\Infrastructure\Persistence\MySqlDocumentCategoryRepository;
 use App\Infrastructure\Persistence\MySqlPortalUserRepository;
 use App\Infrastructure\Persistence\MySqlSettingsRepository;
 use App\Infrastructure\Persistence\MySqlAdminUserRepository;
-use App\Application\Service\NotificationService;
+use App\Aplication\Service\NotificationService;
 use App\Infrastructure\Notification\GraphMailService;
 use App\Support\FileUpload;
 use App\Support\AuditLogger;
