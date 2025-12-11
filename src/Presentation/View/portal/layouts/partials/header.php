@@ -37,6 +37,11 @@ $logoUrl  = $branding['portal_logo_url'] ?? '';
                     <a class="nav-link<?= ($_SERVER['REQUEST_URI'] === '/portal/submissions/new') ? ' active' : '' ?>"
                         href="/portal/submissions/new">Nova submissão</a>
                 </li>
+                <li class="nav-item">
+                    <a href="/portal/documents/general" class="nav-link">
+                        Documentos gerais
+                    </a>
+                </li>
             </ul>
 
             <?php if ($user): ?>

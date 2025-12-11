@@ -17,6 +17,8 @@ use App\Presentation\Controller\Admin\AdminAuthController;
 use App\Presentation\Controller\Admin\AnnouncementAdminController;
 use App\Presentation\Controller\Admin\PortalAccessLogAdminController;
 use App\Presentation\Controller\Admin\ReportsAdminController;
+use App\Presentation\Controller\Admin\DocumentCategoryAdminController;
+use App\Presentation\Controller\Admin\GeneralDocumentAdminController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -82,7 +84,6 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/admin/announcements/{id:\d+}/edit', [AnnouncementAdminController::class, 'editForm']);
     $r->addRoute('POST', '/admin/announcements/{id:\d+}',    [AnnouncementAdminController::class, 'update']);
     $r->addRoute('POST', '/admin/announcements/{id:\d+}/delete', [AnnouncementAdminController::class, 'delete']);
-
     // Usuários Finais
     $r->addRoute('GET',  '/admin/portal-users',                    [PortalUserController::class, 'index']);
     $r->addRoute('GET',  '/admin/portal-users/create',             [PortalUserController::class, 'showCreateForm']);
@@ -92,6 +93,20 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}',           [PortalUserController::class, 'update']);
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}/deactivate', [PortalUserController::class, 'deactivate']);
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}/tokens', [PortalUserController::class, 'generateAccessCode']);
+    // Categorias
+    $r->addRoute('GET',  '/admin/document-categories',               [DocumentCategoryAdminController::class, 'index']);
+    $r->addRoute('GET',  '/admin/document-categories/new',           [DocumentCategoryAdminController::class, 'createForm']);
+    $r->addRoute('POST', '/admin/document-categories',               [DocumentCategoryAdminController::class, 'store']);
+    $r->addRoute('GET',  '/admin/document-categories/{id:\d+}/edit', [DocumentCategoryAdminController::class, 'editForm']);
+    $r->addRoute('POST', '/admin/document-categories/{id:\d+}',      [DocumentCategoryAdminController::class, 'update']);
+    $r->addRoute('POST', '/admin/document-categories/{id:\d+}/delete', [DocumentCategoryAdminController::class, 'delete']);
+    // Documentos gerais
+    $r->addRoute('GET',  '/admin/general-documents',               [GeneralDocumentAdminController::class, 'index']);
+    $r->addRoute('GET',  '/admin/general-documents/new',           [GeneralDocumentAdminController::class, 'createForm']);
+    $r->addRoute('POST', '/admin/general-documents',               [GeneralDocumentAdminController::class, 'store']);
+    $r->addRoute('GET',  '/admin/general-documents/{id:\d+}/edit', [GeneralDocumentAdminController::class, 'editForm']);
+    $r->addRoute('POST', '/admin/general-documents/{id:\d+}',      [GeneralDocumentAdminController::class, 'update']);
+    $r->addRoute('POST', '/admin/general-documents/{id:\d+}/delete', [GeneralDocumentAdminController::class, 'delete']);
 
     // (Rotas antigas com AdminMicrosoftAuthController removidas em favor de AdminAuthController)
 

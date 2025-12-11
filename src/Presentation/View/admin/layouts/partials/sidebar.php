@@ -82,6 +82,16 @@
             </a>
         </li>
 
+        <li class="nav-item">
+            <a href="/admin/general-documents" class="nav-link text-white">
+                <i class="bi bi-folder2-open me-2"></i> Documentos gerais
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="/admin/document-categories" class="nav-link text-white">
+                <i class="bi bi-tags me-2"></i> Categorias de documentos
+            </a>
+        </li>
 
     </ul>
     <hr>

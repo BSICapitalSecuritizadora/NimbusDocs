@@ -7,6 +7,7 @@ use App\Presentation\Controller\Portal\PortalSubmissionController;
 use App\Presentation\Controller\Portal\PortalFileController;
 use App\Presentation\Controller\Portal\PortalHomeController;
 use App\Presentation\Controller\Portal\PortalDocumentController;
+use App\Presentation\Controller\Portal\PortalGeneralDocumentsController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -37,6 +38,10 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
 
     // Dashboard/Home do portal
     $r->addRoute('GET', '/portal', [PortalHomeController::class, 'index']);
+
+    // Documentos gerais do portal
+    $r->addRoute('GET', '/portal/documents/general',              [PortalGeneralDocumentsController::class, 'index']);
+    $r->addRoute('GET', '/portal/documents/general/{id:\d+}',     [PortalGeneralDocumentsController::class, 'download']);
 });
 
 
