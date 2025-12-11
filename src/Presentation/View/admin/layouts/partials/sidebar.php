@@ -71,6 +71,18 @@
             </a>
         </li>
 
+        <li class="nav-item mt-3">
+            <span class="nav-link text-uppercase text-white-50 small">
+                Relatórios
+            </span>
+        </li>
+        <li class="nav-item">
+            <a href="/admin/reports/submissions" class="nav-link text-white">
+                <i class="bi bi-graph-up-arrow me-2"></i> Submissões
+            </a>
+        </li>
+
+
     </ul>
     <hr>
     <div>

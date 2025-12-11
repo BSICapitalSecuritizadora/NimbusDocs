@@ -37,7 +37,7 @@ final class PortalFileController
 
         $logger = $this->config['portal_access_logger'] ?? null;
         if ($logger) {
-            $logger->log((int)$user['id'], 'DOWNLOAD_SUBMISSION_FILE', 'submission_file', $fileId);
+            $logger->log((int)$user['id'], 'DOWNLOAD_SUBMISSION_FILE', 'submission_file', (int)$id);
         }
 
         $storageBase = dirname(__DIR__, 5) . '/storage/';

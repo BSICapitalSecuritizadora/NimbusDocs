@@ -16,6 +16,7 @@ use App\Presentation\Controller\Admin\DocumentAdminController;
 use App\Presentation\Controller\Admin\AdminAuthController;
 use App\Presentation\Controller\Admin\AnnouncementAdminController;
 use App\Presentation\Controller\Admin\PortalAccessLogAdminController;
+use App\Presentation\Controller\Admin\ReportsAdminController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -58,6 +59,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('POST', '/admin/settings/notifications/save',   [SettingsController::class, 'saveNotifications']);
     $r->addRoute('GET', '/admin/submissions/export/csv', [SubmissionAdminController::class, 'exportCsv']);
     $r->addRoute('GET', '/admin/access-log/portal', [PortalAccessLogAdminController::class, 'index']);
+    $r->addRoute('GET', '/admin/reports/submissions', [ReportsAdminController::class, 'submissionsReport']);
+    $r->addRoute('GET', '/admin/reports/submissions/export', [ReportsAdminController::class, 'submissionsReportExportCsv']);
     // Link manual de conta Microsoft para admin
     $r->addRoute('GET',  '/admin/ms-link', [\App\Presentation\Controller\Admin\AdminMicrosoftLinkController::class, 'showForm']);
     $r->addRoute('POST', '/admin/ms-link', [\App\Presentation\Controller\Admin\AdminMicrosoftLinkController::class, 'store']);
