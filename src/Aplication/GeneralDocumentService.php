@@ -6,6 +6,8 @@ namespace App\Aplication;
 
 use App\Infrastructure\Persistence\MySqlGeneralDocumentRepository;
 use App\Infrastructure\Persistence\MySqlDocumentCategoryRepository;
+use App\Infrastructure\Persistence\MySqlPortalUserRepository;
+use App\Application\Service\NotificationService;
 use App\Support\FileUpload;
 use App\Support\AuditLogger;
 use Respect\Validation\Validator as v;
@@ -14,16 +16,33 @@ final class GeneralDocumentService
 {
     private MySqlGeneralDocumentRepository $documentRepo;
     private MySqlDocumentCategoryRepository $categoryRepo;
+    private MySqlPortalUserRepository $userRepo;
+    private NotificationService $notificationService;
     private AuditLogger $audit;
     private FileUpload $fileUpload;
 
     public function __construct(
-        private array $config
+        private array $config,
+        ?NotificationService $notificationService = null
     ) {
         $this->documentRepo = new MySqlGeneralDocumentRepository($config['pdo']);
         $this->categoryRepo = new MySqlDocumentCategoryRepository($config['pdo']);
+        $this->userRepo     = new MySqlPortalUserRepository($config['pdo']);
         $this->audit        = new AuditLogger($config['pdo']);
         $this->fileUpload   = new FileUpload();
+        
+        // Permite injeção ou cria nova instância
+        if ($notificationService === null) {
+            $graphMailService = new \App\Infrastructure\Email\GraphMailService(
+                $config['graph_client_id'] ?? '',
+                $config['graph_client_secret'] ?? '',
+                $config['graph_tenant_id'] ?? '',
+                $config['graph_sender_email'] ?? ''
+            );
+            $this->notificationService = new NotificationService($graphMailService);
+        } else {
+            $this->notificationService = $notificationService;
+        }
     }
 
     /**
@@ -96,6 +115,22 @@ final class GeneralDocumentService
                     'category_id' => $documentData['category_id'],
                 ]
             );
+
+            // Notifica usuários ativos do portal
+            try {
+                $portalUsers = $this->userRepo->getActiveUsers();
+                $category = $this->categoryRepo->find((int)$data['category_id']);
+                
+                $docWithCategory = array_merge(
+                    $this->documentRepo->find($documentId) ?? [],
+                    ['category_name' => $category['name'] ?? 'Sem categoria']
+                );
+                
+                $this->notificationService->notifyGeneralDocument($docWithCategory, $portalUsers);
+            } catch (\Exception $e) {
+                // Falha na notificação não deve impedir criação do documento
+                error_log('Erro ao enviar notificações de documento: ' . $e->getMessage());
+            }
 
             return ['success' => true, 'id' => $documentId];
         } catch (\Exception $e) {

@@ -143,4 +143,19 @@ final class MySqlPortalUserRepository
             ':method' => $method,
         ]);
     }
+
+    /**
+     * Retorna todos os usuários ativos para notificações.
+     * @return array<int,array{id:int,full_name:string,email:string}>
+     */
+    public function getActiveUsers(): array
+    {
+        $sql = "SELECT id, full_name, email 
+                FROM portal_users 
+                WHERE status = 'ACTIVE' AND email IS NOT NULL
+                ORDER BY full_name ASC";
+        
+        $stmt = $this->pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
 }
