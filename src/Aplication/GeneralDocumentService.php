@@ -7,7 +7,10 @@ namespace App\Aplication;
 use App\Infrastructure\Persistence\MySqlGeneralDocumentRepository;
 use App\Infrastructure\Persistence\MySqlDocumentCategoryRepository;
 use App\Infrastructure\Persistence\MySqlPortalUserRepository;
+use App\Infrastructure\Persistence\MySqlSettingsRepository;
+use App\Infrastructure\Persistence\MySqlAdminUserRepository;
 use App\Application\Service\NotificationService;
+use App\Infrastructure\Notification\GraphMailService;
 use App\Support\FileUpload;
 use App\Support\AuditLogger;
 use Respect\Validation\Validator as v;
@@ -42,8 +45,11 @@ final class GeneralDocumentService
             ];
             
             $logger = $config['logger'] ?? new \Monolog\Logger('app');
-            $graphMailService = new \App\Infrastructure\Notification\GraphMailService($graphMailConfig, $logger);
-            $this->notificationService = new NotificationService($graphMailService);
+            $graphMailService = new GraphMailService($graphMailConfig, $logger);
+            $settingsRepo = new MySqlSettingsRepository($config['pdo']);
+            $adminUserRepo = new MySqlAdminUserRepository($config['pdo']);
+            $portalUserRepo = new MySqlPortalUserRepository($config['pdo']);
+            $this->notificationService = new NotificationService($graphMailService, $settingsRepo, $adminUserRepo, $portalUserRepo);
         } else {
             $this->notificationService = $notificationService;
         }
@@ -133,7 +139,7 @@ final class GeneralDocumentService
                         ['category_name' => $category['name'] ?? 'Sem categoria']
                     );
                     
-                    $this->notificationService->notifyGeneralDocument($docWithCategory, $portalUsers);
+                    $this->notificationService->notifyNewGeneralDocument($docWithCategory);
                 } catch (\Exception $e) {
                     // Falha na notificação não deve impedir criação do documento
                     error_log('Erro ao enviar notificações de documento: ' . $e->getMessage());

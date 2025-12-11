@@ -136,11 +136,23 @@ $config['settings'] = $settings;
 $adminUserRepo = new MySqlAdminUserRepository($pdo);
 $portalUserRepo = new MySqlPortalUserRepository($pdo);
 
+$graphMailConfig = [
+    'GRAPH_TENANT_ID'      => $_ENV['GRAPH_TENANT_ID'] ?? '',
+    'GRAPH_CLIENT_ID'      => $_ENV['GRAPH_CLIENT_ID'] ?? '',
+    'GRAPH_CLIENT_SECRET'  => $_ENV['GRAPH_CLIENT_SECRET'] ?? '',
+    'MAIL_FROM'            => $_ENV['GRAPH_SENDER_EMAIL'] ?? '',
+    'MAIL_FROM_NAME'       => 'NimbusDocs'
+];
+
+$mailLogger = new Logger('mail');
+$mailLogger->pushHandler(new StreamHandler(__DIR__ . '/../storage/logs/mail.log', Logger::DEBUG));
+$graphMailService = new GraphMailService($graphMailConfig, $mailLogger);
+
 $notificationService = new NotificationService(
-    mail: $config['mail'],
-    settings: $settingsRepo,
-    adminUsers: $adminUserRepo,
-    portalUsers: $portalUserRepo
+    $graphMailService,
+    $settingsRepo,
+    $adminUserRepo,
+    $portalUserRepo
 );
 
 $config['notification'] = $notificationService;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Service;
 
-use App\Infrastructure\Email\GraphMailService;
+use App\Infrastructure\Notification\GraphMailService;
 use App\Infrastructure\Persistence\MySqlSettingsRepository;
 use App\Infrastructure\Persistence\MySqlAdminUserRepository;
 use App\Infrastructure\Persistence\MySqlPortalUserRepository;
@@ -47,7 +47,7 @@ final class NotificationService
             return;
         }
 
-        $users = $this->portalUsers->allActive(); // implementa esse método se ainda não existir
+        $users = $this->portalUsers->getActiveUsers(); // implementa esse método se ainda não existir
 
         if (!$users) {
             return;
@@ -59,7 +59,7 @@ final class NotificationService
                 'user' => $user,
             ]);
 
-            $this->mail->sendMailHtml(
+            $this->mail->sendMail(
                 to: $user['email'],
                 subject: 'Novo documento disponível: ' . $doc['title'],
                 htmlBody: $html,
@@ -76,7 +76,7 @@ final class NotificationService
             return;
         }
 
-        $users = $this->portalUsers->allActive();
+        $users = $this->portalUsers->getActiveUsers();
         if (!$users) {
             return;
         }
@@ -87,7 +87,7 @@ final class NotificationService
                 'user'         => $user,
             ]);
 
-            $this->mail->sendMailHtml(
+            $this->mail->sendMail(
                 to: $user['email'],
                 subject: '[NimbusDocs] Novo comunicado: ' . $announcement['title'],
                 htmlBody: $html,
@@ -117,7 +117,7 @@ final class NotificationService
                 'admin'      => $admin,
             ]);
 
-            $this->mail->sendMailHtml(
+            $this->mail->sendMail(
                 to: $admin['email'],
                 subject: '[NimbusDocs] Nova submissão recebida',
                 htmlBody: $html,
@@ -152,7 +152,7 @@ final class NotificationService
             $newStatus
         );
 
-        $this->mail->sendMailHtml(
+        $this->mail->sendMail(
             to: $portalUser['email'],
             subject: $subject,
             htmlBody: $html,
@@ -173,7 +173,7 @@ final class NotificationService
             'token' => $token,
         ]);
 
-        $this->mail->sendMailHtml(
+        $this->mail->sendMail(
             to: $portalUser['email'],
             subject: '[NimbusDocs] Seu link de acesso ao portal',
             htmlBody: $html,
@@ -194,7 +194,7 @@ final class NotificationService
             'token' => $token,
         ]);
 
-        $this->mail->sendMailHtml(
+        $this->mail->sendMail(
             to: $portalUser['email'],
             subject: '[NimbusDocs] Link de acesso expirado',
             htmlBody: $html,
@@ -215,7 +215,7 @@ final class NotificationService
             'token' => $token,
         ]);
 
-        $this->mail->sendMailHtml(
+        $this->mail->sendMail(
             to: $portalUser['email'],
             subject: '[NimbusDocs] Acesso ao portal NimbusDocs',
             htmlBody: $html,

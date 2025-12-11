@@ -49,6 +49,14 @@ final class MySqlAdminUserRepository implements AdminUserRepository
         return (int)$this->pdo->query("SELECT COUNT(*) FROM admin_users")->fetchColumn();
     }
 
+    public function allActiveAdmins(): array
+    {
+        $sql = "SELECT * FROM admin_users WHERE status = 'ACTIVE' AND role IN ('ADMIN', 'SUPER_ADMIN') ORDER BY role = 'SUPER_ADMIN' DESC, name ASC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
     public function create(array $data): int
     {
         $sql = "INSERT INTO admin_users (name, email, full_name, password_hash, auth_mode, role, is_active, status, azure_oid, azure_tenant_id, azure_upn, ms_object_id, ms_tenant_id, ms_upn) VALUES (:name, :email, :full_name, :password_hash, :auth_mode, :role, :is_active, :status, :azure_oid, :azure_tenant_id, :azure_upn, :ms_object_id, :ms_tenant_id, :ms_upn)";
