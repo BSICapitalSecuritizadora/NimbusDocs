@@ -33,12 +33,16 @@ final class GeneralDocumentService
         
         // Permite injeção ou cria nova instância
         if ($notificationService === null) {
-            $graphMailService = new \App\Infrastructure\Email\GraphMailService(
-                $config['graph_client_id'] ?? '',
-                $config['graph_client_secret'] ?? '',
-                $config['graph_tenant_id'] ?? '',
-                $config['graph_sender_email'] ?? ''
-            );
+            $graphMailConfig = [
+                'GRAPH_TENANT_ID'      => $config['graph_tenant_id'] ?? '',
+                'GRAPH_CLIENT_ID'      => $config['graph_client_id'] ?? '',
+                'GRAPH_CLIENT_SECRET'  => $config['graph_client_secret'] ?? '',
+                'MAIL_FROM'            => $config['graph_sender_email'] ?? '',
+                'MAIL_FROM_NAME'       => 'NimbusDocs'
+            ];
+            
+            $logger = $config['logger'] ?? new \Monolog\Logger('app');
+            $graphMailService = new \App\Infrastructure\Notification\GraphMailService($graphMailConfig, $logger);
             $this->notificationService = new NotificationService($graphMailService);
         } else {
             $this->notificationService = $notificationService;
