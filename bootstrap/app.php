@@ -13,6 +13,8 @@ use App\Domain\Repository\AuditLogRepository;
 use App\Infrastructure\Persistence\MySqlAuditLogRepository;
 use App\Infrastructure\Audit\AuditLogger;
 use App\Infrastructure\Persistence\MySqlSettingsRepository;
+use App\Infrastructure\Persistence\MySqlAdminUserRepository;
+use App\Infrastructure\Persistence\MySqlPortalUserRepository;
 use App\Infrastructure\Auth\AzureAdminAuthClient;
 use App\Infrastructure\Logging\PortalAccessLogger;
 
@@ -123,11 +125,27 @@ $branding = [
 $config['branding'] = $branding;
 
 // -------------------------------------------------------------------------
+// Configurações de notificações
+// -------------------------------------------------------------------------
+$config['settings'] = $settings;
+
+// -------------------------------------------------------------------------
 // Notification Service (serviço de notificações por e-mail)
 // -------------------------------------------------------------------------
 // Disponibiliza um serviço central de notificações para os controllers.
-$notificationService = new NotificationService($config['mail']);
+$adminUserRepo = new MySqlAdminUserRepository($pdo);
+$portalUserRepo = new MySqlPortalUserRepository($pdo);
+
+$notificationService = new NotificationService(
+    mail: $config['mail'],
+    settings: $settingsRepo,
+    adminUsers: $adminUserRepo,
+    portalUsers: $portalUserRepo
+);
+
 $config['notification'] = $notificationService;
+$config['admin_user_repo'] = $adminUserRepo;
+$config['portal_user_repo'] = $portalUserRepo;
 
 // -------------------------------------------------------------------------
 // Azure Admin OAuth Client (TheNetworg OAuth2 Azure)

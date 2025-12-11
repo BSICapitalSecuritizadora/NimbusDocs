@@ -120,20 +120,24 @@ final class GeneralDocumentService
                 ]
             );
 
-            // Notifica usuários ativos do portal
-            try {
-                $portalUsers = $this->userRepo->getActiveUsers();
-                $category = $this->categoryRepo->find((int)$data['category_id']);
-                
-                $docWithCategory = array_merge(
-                    $this->documentRepo->find($documentId) ?? [],
-                    ['category_name' => $category['name'] ?? 'Sem categoria']
-                );
-                
-                $this->notificationService->notifyGeneralDocument($docWithCategory, $portalUsers);
-            } catch (\Exception $e) {
-                // Falha na notificação não deve impedir criação do documento
-                error_log('Erro ao enviar notificações de documento: ' . $e->getMessage());
+            // Notifica usuários ativos do portal (se habilitado)
+            $notificationsEnabled = ($this->config['settings']['notifications.general_documents.enabled'] ?? '1') === '1';
+            
+            if ($notificationsEnabled) {
+                try {
+                    $portalUsers = $this->userRepo->getActiveUsers();
+                    $category = $this->categoryRepo->find((int)$data['category_id']);
+                    
+                    $docWithCategory = array_merge(
+                        $this->documentRepo->find($documentId) ?? [],
+                        ['category_name' => $category['name'] ?? 'Sem categoria']
+                    );
+                    
+                    $this->notificationService->notifyGeneralDocument($docWithCategory, $portalUsers);
+                } catch (\Exception $e) {
+                    // Falha na notificação não deve impedir criação do documento
+                    error_log('Erro ao enviar notificações de documento: ' . $e->getMessage());
+                }
             }
 
             return ['success' => true, 'id' => $documentId];

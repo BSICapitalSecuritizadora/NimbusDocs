@@ -114,7 +114,7 @@ final class AnnouncementAdminController
             exit;
         }
 
-        $this->repo->create([
+        $announcementId = $this->repo->create([
             'title'            => $title,
             'body'             => $body,
             'level'            => $level,
@@ -123,6 +123,17 @@ final class AnnouncementAdminController
             'is_active'        => $active,
             'created_by_admin' => $admin['id'],
         ]);
+
+        // Notifica usuários do portal sobre o novo comunicado
+        try {
+            $announcement = $this->repo->find($announcementId);
+            if ($announcement) {
+                $this->config['notification']->notifyNewAnnouncement($announcement);
+            }
+        } catch (\Exception $e) {
+            // Não impede a criação do comunicado se notificação falhar
+            error_log('Erro ao notificar sobre novo comunicado: ' . $e->getMessage());
+        }
 
         Session::flash('success', 'Comunicado criado com sucesso.');
         header('Location: /admin/announcements');

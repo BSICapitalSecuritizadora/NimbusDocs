@@ -127,6 +127,21 @@ final class GeneralDocumentAdminController
             'created_by_admin'   => $admin['id'],
         ]);
 
+        // Notifica usuários do portal sobre o novo documento
+        try {
+            $doc = $this->docs->find($id);
+            if ($doc) {
+                $category = $this->categories->find($categoryId);
+                $docWithCategory = array_merge($doc, [
+                    'category_name' => $category['name'] ?? 'Sem categoria'
+                ]);
+                $this->config['notification']->notifyNewGeneralDocument($docWithCategory);
+            }
+        } catch (\Exception $e) {
+            // Não impede a criação do documento se notificação falhar
+            error_log('Erro ao notificar sobre novo documento: ' . $e->getMessage());
+        }
+
         Session::flash('success', 'Documento criado com sucesso.');
         header('Location: /admin/general-documents');
         exit;

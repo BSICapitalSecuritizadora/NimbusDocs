@@ -331,11 +331,16 @@ final class PortalSubmissionController
         ]);
 
         // Notificações
-        $submission = $this->repo->findById($submissionId);
-        $notifications = $this->config['notifications_service'] ?? null;
-        
-        if ($notifications) {
-            $notifications->portalNewSubmission($user, $submission);
+        try {
+            $submission = $this->repo->findById($submissionId);
+            $portalUser = $this->config['portal_user_repo']->findById((int)$user['id']);
+            
+            if ($submission && $portalUser && $this->config['notification']) {
+                $this->config['notification']->notifySubmissionReceived($submission, $portalUser);
+            }
+        } catch (\Exception $e) {
+            // Não impede a criação da submissão se notificação falhar
+            error_log('Erro ao notificar sobre nova submissão: ' . $e->getMessage());
         }
 
         Session::flash('success', 'Cadastro enviado com sucesso.');
