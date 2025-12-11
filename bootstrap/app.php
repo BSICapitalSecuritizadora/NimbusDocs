@@ -14,6 +14,7 @@ use App\Infrastructure\Persistence\MySqlAuditLogRepository;
 use App\Infrastructure\Audit\AuditLogger;
 use App\Infrastructure\Persistence\MySqlSettingsRepository;
 use App\Infrastructure\Auth\AzureAdminAuthClient;
+use App\Infrastructure\Logging\PortalAccessLogger;
 
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -50,6 +51,12 @@ $pdo = Connection::make($config['db']);
 
 // 3) Injeta PDO dentro do array de config para uso pelos controllers
 $config['pdo'] = $pdo;
+
+// -------------------------------------------------------------------------
+// Portal Access Logger
+// -------------------------------------------------------------------------
+$portalAccessLogger = new PortalAccessLogger($pdo);
+$config['portal_access_logger'] = $portalAccessLogger;
 
 // -------------------------------------------------------------------------
 // Logger (Monolog)

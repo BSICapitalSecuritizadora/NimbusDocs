@@ -45,6 +45,12 @@ final class PortalDocumentController
             exit;
         }
 
+        // Log de download
+        $logger = $this->config['portal_access_logger'] ?? null;
+        if ($logger) {
+            $logger->log((int)$user['id'], 'DOWNLOAD_DOCUMENT', 'document', $docId);
+        }
+
         header('Content-Type: ' . $doc['file_mime']);
         header('Content-Disposition: attachment; filename="' . $doc['file_original_name'] . '"');
         header('Content-Length: ' . $doc['file_size']);

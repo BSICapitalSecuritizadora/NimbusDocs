@@ -355,6 +355,12 @@ final class PortalSubmissionController
             return;
         }
 
+        // Log de acesso
+        $logger = $this->config['portal_access_logger'] ?? null;
+        if ($logger) {
+            $logger->log((int)$userId, 'VIEW_SUBMISSION', 'submission', $id);
+        }
+
         $files = $this->fileRepo->findBySubmission($id);
         $notes = $this->noteRepo->listVisibleForSubmission($id);
         $responseFiles = $this->fileRepo->findVisibleToUser($id);

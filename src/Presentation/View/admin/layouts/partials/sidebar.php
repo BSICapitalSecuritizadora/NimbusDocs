@@ -41,6 +41,12 @@
             </a>
         </li>
 
+        <li class="nav-item">
+            <a href="/admin/access-log/portal" class="nav-link text-white">
+                <i class="bi bi-shield-check me-2"></i> Log de acessos (portal)
+            </a>
+        </li>
+
         <li>
             <a href="/admin/settings/notifications" class="nav-link text-white">
                 <i class="bi bi-gear me-2"></i> Configurações

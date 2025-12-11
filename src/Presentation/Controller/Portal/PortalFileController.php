@@ -35,6 +35,11 @@ final class PortalFileController
         // $submission = $this->submissionRepo->findByIdForUser((int)$file['submission_id'], (int)$user['id']);
         // if (!$submission) { 404 ... }
 
+        $logger = $this->config['portal_access_logger'] ?? null;
+        if ($logger) {
+            $logger->log((int)$user['id'], 'DOWNLOAD_SUBMISSION_FILE', 'submission_file', $fileId);
+        }
+
         $storageBase = dirname(__DIR__, 5) . '/storage/';
         $fullPath    = $storageBase . ltrim($file['storage_path'], '/');
 

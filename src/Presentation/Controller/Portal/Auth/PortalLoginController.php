@@ -108,6 +108,11 @@ final class PortalLoginController
         session_regenerate_id(true);
         Session::put('portal_user', $portalUser);
 
+        $logger = $this->config['portal_access_logger'] ?? null;
+        if ($logger) {
+            $logger->log((int)$portalUser['id'], 'LOGIN', 'portal', null);
+        }
+
         $this->audit->log('PORTAL_USER', (int)$row['user_id'], 'PORTAL_LOGIN_SUCCESS_CODE', 'PORTAL_ACCESS_TOKEN', (int)$row['token_id']);
 
         Session::flash('success', 'Login efetuado com sucesso.');
