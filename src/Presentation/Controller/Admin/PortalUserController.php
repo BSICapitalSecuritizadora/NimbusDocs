@@ -169,6 +169,21 @@ final class PortalUserController
 
         $this->audit->log('ADMIN', (int)$admin['id'], 'PORTAL_USER_CREATED', 'PORTAL_USER', $newId);
 
+        // Notificação de usuário pré-cadastrado
+        try {
+            if (isset($this->config['notification'])) {
+                $portalUser = $this->repo->findById($newId);
+                if ($portalUser) {
+                    // opcionalmente criar um token automaticamente, se desejar
+                    // e enviar junto na notificação
+                    $this->config['notification']->notifyUserPrecreated($portalUser, null);
+                }
+            }
+        } catch (\Throwable $t) {
+            // não bloquear fluxo por falha de e-mail
+            error_log('Falha ao enviar notificação de usuário pré-cadastrado: ' . $t->getMessage());
+        }
+
         Session::flash('success', 'Usuário final criado com sucesso.');
         $this->redirect('/admin/portal-users');
     }
@@ -450,7 +465,16 @@ final class PortalUserController
         $notifyAccessLink = ($settings['portal.notify.access_link'] ?? '1') === '1';
         $emailSent = false;
 
-        if ($notifyAccessLink && isset($this->config['mail']) && !empty($user['email'])) {
+        if ($notifyAccessLink && isset($this->config['notification'])) {
+            // Busca o token criado
+            $token = $this->tokenRepo->findById($tokenId);
+            
+            // Envia notificação via NotificationService
+            if ($token) {
+                $this->config['notification']->notifyTokenCreated($user, $token);
+                $emailSent = true;
+            }
+        } elseif ($notifyAccessLink && isset($this->config['mail']) && !empty($user['email'])) {
             $nomeUsuario = $user['full_name'] ?? $user['name'] ?? 'Cliente';
             $baseUrl     = rtrim($this->config['app']['url'] ?? '', '/');
             $link        = $baseUrl . '/portal/access/' . $code;

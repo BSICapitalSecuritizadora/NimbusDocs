@@ -82,10 +82,22 @@ final class PortalLoginController
             Session::flash('error', 'Informe um código de acesso válido.');
             $this->redirect('/portal/login');
         }
-
+        // Tenta um token válido
         $row = $this->tokenRepo->findValidWithUserByCode($code);
 
+        // Se não válido, tenta buscar token pela string para ver se está expirado e notificar
         if (!$row) {
+            $tokenOnly = $this->tokenRepo->findByCode($code);
+            if ($tokenOnly && strtotime($tokenOnly['expires_at']) < time()) {
+                $portalUser = $this->userRepo->findById((int)$tokenOnly['portal_user_id']);
+                if ($portalUser && isset($this->config['notification'])) {
+                    try {
+                        $this->config['notification']->notifyTokenExpired($portalUser, $tokenOnly);
+                    } catch (\Throwable $t) {
+                        error_log('Falha ao enviar notificação de token expirado: ' . $t->getMessage());
+                    }
+                }
+            }
             $this->audit->log('PORTAL_USER', null, 'PORTAL_LOGIN_CODE_FAILED', 'PORTAL_ACCESS_TOKEN', null, ['code' => $code]);
             Session::flash('error', 'Código inválido ou expirado.');
             $this->redirect('/portal/login');

@@ -145,6 +145,25 @@ final class SubmissionAdminController
 
         $this->repo->updateStatus($id, $status, $adminId ? (int)$adminId : null);
 
+        // Busca submissão atualizada
+        $updated = $this->repo->findById($id);
+        
+        // Busca usuário do portal para notificação
+        if ($updated && isset($updated['portal_user_id'])) {
+            $portalUserRepo = new \App\Infrastructure\Persistence\MySqlPortalUserRepository($this->config['pdo']);
+            $portalUser = $portalUserRepo->findById($updated['portal_user_id']);
+            
+            // Envia notificação
+            if ($portalUser && $oldStatus && $this->config['notification']) {
+                $this->config['notification']->notifySubmissionStatusChanged(
+                    $updated,
+                    $portalUser,
+                    $oldStatus,
+                    $status
+                );
+            }
+        }
+
         $this->config['audit']->log(
             $adminId ? (int)$adminId : null,
             'submission.status.updated',
