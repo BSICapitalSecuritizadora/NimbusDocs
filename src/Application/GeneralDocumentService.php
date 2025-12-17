@@ -49,7 +49,8 @@ final class GeneralDocumentService
             $settingsRepo = new MySqlSettingsRepository($config['pdo']);
             $adminUserRepo = new MySqlAdminUserRepository($config['pdo']);
             $portalUserRepo = new MySqlPortalUserRepository($config['pdo']);
-            $this->notificationService = new NotificationService($graphMailService, $settingsRepo, $adminUserRepo, $portalUserRepo);
+            $outboxRepo    = new \App\Infrastructure\Persistence\MySqlNotificationOutboxRepository($config['pdo']);
+            $this->notificationService = new NotificationService($graphMailService, $settingsRepo, $adminUserRepo, $portalUserRepo, $outboxRepo);
         } else {
             $this->notificationService = $notificationService;
         }

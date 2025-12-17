@@ -8,6 +8,7 @@ use App\Infrastructure\Notification\GraphMailService;
 use App\Infrastructure\Persistence\MySqlSettingsRepository;
 use App\Infrastructure\Persistence\MySqlAdminUserRepository;
 use App\Infrastructure\Persistence\MySqlPortalUserRepository;
+use App\Infrastructure\Persistence\MySqlNotificationOutboxRepository;
 
 final class NotificationService
 {
@@ -16,6 +17,7 @@ final class NotificationService
         private MySqlSettingsRepository $settings,
         private MySqlAdminUserRepository $adminUsers,
         private MySqlPortalUserRepository $portalUsers,
+        private MySqlNotificationOutboxRepository $outbox,
     ) {}
 
     private function isEnabled(string $key, bool $default = true): bool
@@ -54,16 +56,15 @@ final class NotificationService
         }
 
         foreach ($users as $user) {
-            $html = $this->renderTemplate('new_general_document', [
-                'doc'  => $doc,
-                'user' => $user,
+            $this->outbox->enqueue([
+                'type'            => 'NEW_GENERAL_DOCUMENT',
+                'recipient_email' => $user['email'],
+                'recipient_name'  => $user['full_name'] ?? $user['name'] ?? null,
+                'subject'         => 'Novo documento disponível: ' . ($doc['title'] ?? ''),
+                'template'        => 'new_general_document',
+                'payload_json'    => json_encode(['doc' => $doc, 'user' => $user], JSON_UNESCAPED_UNICODE),
+                'max_attempts'    => 5,
             ]);
-
-            $this->mail->sendMail(
-                to: $user['email'],
-                subject: 'Novo documento disponível: ' . $doc['title'],
-                htmlBody: $html,
-            );
         }
     }
 
@@ -82,16 +83,15 @@ final class NotificationService
         }
 
         foreach ($users as $user) {
-            $html = $this->renderTemplate('new_announcement', [
-                'announcement' => $announcement,
-                'user'         => $user,
+            $this->outbox->enqueue([
+                'type'            => 'NEW_ANNOUNCEMENT',
+                'recipient_email' => $user['email'],
+                'recipient_name'  => $user['full_name'] ?? $user['name'] ?? null,
+                'subject'         => '[NimbusDocs] Novo comunicado: ' . ($announcement['title'] ?? ''),
+                'template'        => 'new_announcement',
+                'payload_json'    => json_encode(['announcement' => $announcement, 'user' => $user], JSON_UNESCAPED_UNICODE),
+                'max_attempts'    => 5,
             ]);
-
-            $this->mail->sendMail(
-                to: $user['email'],
-                subject: '[NimbusDocs] Novo comunicado: ' . $announcement['title'],
-                htmlBody: $html,
-            );
         }
     }
 
@@ -111,17 +111,15 @@ final class NotificationService
         }
 
         foreach ($admins as $admin) {
-            $html = $this->renderTemplate('submission_received', [
-                'submission' => $submission,
-                'user'       => $portalUser,
-                'admin'      => $admin,
+            $this->outbox->enqueue([
+                'type'            => 'SUBMISSION_RECEIVED',
+                'recipient_email' => $admin['email'],
+                'recipient_name'  => $admin['full_name'] ?? $admin['name'] ?? null,
+                'subject'         => '[NimbusDocs] Nova submissão recebida',
+                'template'        => 'submission_received',
+                'payload_json'    => json_encode(['submission' => $submission, 'user' => $portalUser, 'admin' => $admin], JSON_UNESCAPED_UNICODE),
+                'max_attempts'    => 5,
             ]);
-
-            $this->mail->sendMail(
-                to: $admin['email'],
-                subject: '[NimbusDocs] Nova submissão recebida',
-                htmlBody: $html,
-            );
         }
     }
 
@@ -152,11 +150,20 @@ final class NotificationService
             $newStatus
         );
 
-        $this->mail->sendMail(
-            to: $portalUser['email'],
-            subject: $subject,
-            htmlBody: $html,
-        );
+        $this->outbox->enqueue([
+            'type'            => 'SUBMISSION_STATUS_CHANGED',
+            'recipient_email' => $portalUser['email'],
+            'recipient_name'  => $portalUser['full_name'] ?? $portalUser['name'] ?? null,
+            'subject'         => $subject,
+            'template'        => 'submission_status_changed',
+            'payload_json'    => json_encode([
+                'submission' => $submission,
+                'user'       => $portalUser,
+                'oldStatus'  => $oldStatus,
+                'newStatus'  => $newStatus,
+            ], JSON_UNESCAPED_UNICODE),
+            'max_attempts'    => 5,
+        ]);
     }
 
     // -----------------------------------------------------------------
@@ -173,11 +180,15 @@ final class NotificationService
             'token' => $token,
         ]);
 
-        $this->mail->sendMail(
-            to: $portalUser['email'],
-            subject: '[NimbusDocs] Seu link de acesso ao portal',
-            htmlBody: $html,
-        );
+        $this->outbox->enqueue([
+            'type'            => 'TOKEN_CREATED',
+            'recipient_email' => $portalUser['email'],
+            'recipient_name'  => $portalUser['full_name'] ?? $portalUser['name'] ?? null,
+            'subject'         => '[NimbusDocs] Seu link de acesso ao portal',
+            'template'        => 'token_created',
+            'payload_json'    => json_encode(['user' => $portalUser, 'token' => $token], JSON_UNESCAPED_UNICODE),
+            'max_attempts'    => 5,
+        ]);
     }
 
     // -----------------------------------------------------------------
@@ -194,11 +205,15 @@ final class NotificationService
             'token' => $token,
         ]);
 
-        $this->mail->sendMail(
-            to: $portalUser['email'],
-            subject: '[NimbusDocs] Link de acesso expirado',
-            htmlBody: $html,
-        );
+        $this->outbox->enqueue([
+            'type'            => 'TOKEN_EXPIRED',
+            'recipient_email' => $portalUser['email'],
+            'recipient_name'  => $portalUser['full_name'] ?? $portalUser['name'] ?? null,
+            'subject'         => '[NimbusDocs] Link de acesso expirado',
+            'template'        => 'token_expired',
+            'payload_json'    => json_encode(['user' => $portalUser, 'token' => $token], JSON_UNESCAPED_UNICODE),
+            'max_attempts'    => 5,
+        ]);
     }
 
     // -----------------------------------------------------------------
@@ -215,10 +230,14 @@ final class NotificationService
             'token' => $token,
         ]);
 
-        $this->mail->sendMail(
-            to: $portalUser['email'],
-            subject: '[NimbusDocs] Acesso ao portal NimbusDocs',
-            htmlBody: $html,
-        );
+        $this->outbox->enqueue([
+            'type'            => 'USER_PRECREATED',
+            'recipient_email' => $portalUser['email'],
+            'recipient_name'  => $portalUser['full_name'] ?? $portalUser['name'] ?? null,
+            'subject'         => '[NimbusDocs] Acesso ao portal NimbusDocs',
+            'template'        => 'user_precreated',
+            'payload_json'    => json_encode(['user' => $portalUser, 'token' => $token], JSON_UNESCAPED_UNICODE),
+            'max_attempts'    => 5,
+        ]);
     }
 }

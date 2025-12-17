@@ -1,0 +1,6 @@
+Agendar o worker (Windows)
+No Windows (Task Scheduler), rode a cada 1 minuto:
+Action > Program/script
+C:\xampp\php\php.exe
+Add arguments
+C:\xampp\htdocs\NimbusDocs\bin\notifications-worker.php

@@ -15,6 +15,7 @@ use App\Infrastructure\Audit\AuditLogger;
 use App\Infrastructure\Persistence\MySqlSettingsRepository;
 use App\Infrastructure\Persistence\MySqlAdminUserRepository;
 use App\Infrastructure\Persistence\MySqlPortalUserRepository;
+use App\Infrastructure\Persistence\MySqlNotificationOutboxRepository;
 use App\Infrastructure\Auth\AzureAdminAuthClient;
 use App\Infrastructure\Logging\PortalAccessLogger;
 
@@ -147,12 +148,15 @@ $graphMailConfig = [
 $mailLogger = new Logger('mail');
 $mailLogger->pushHandler(new StreamHandler(__DIR__ . '/../storage/logs/mail.log', Logger::DEBUG));
 $graphMailService = new GraphMailService($graphMailConfig, $mailLogger);
+// Outbox repository para fila de notificações
+$outboxRepo = new MySqlNotificationOutboxRepository($pdo);
 
 $notificationService = new NotificationService(
     $graphMailService,
     $settingsRepo,
     $adminUserRepo,
-    $portalUserRepo
+    $portalUserRepo,
+    $outboxRepo
 );
 
 $config['notification'] = $notificationService;
