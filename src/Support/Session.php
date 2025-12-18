@@ -49,7 +49,7 @@ final class Session
 
     public static function has(string $key): bool
     {
-        return array_key_exists($key, $_SESSION);
+        return isset($_SESSION) && is_array($_SESSION) && array_key_exists($key, $_SESSION);
     }
 
     public static function destroy(): void

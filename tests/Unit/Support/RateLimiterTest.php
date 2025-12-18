@@ -89,7 +89,7 @@ class RateLimiterTest extends TestCase
         $this->assertEquals(0, $limiter->remaining($this->testIdentifier));
         
         // Reset
-        $limiter->reset($this->testIdentifier);
+        $limiter->resetInstance($this->testIdentifier);
         
         $this->assertEquals(5, $limiter->remaining($this->testIdentifier), 'Attempts should reset to limit');
         $this->assertTrue($limiter->check($this->testIdentifier), 'Check should pass after reset');

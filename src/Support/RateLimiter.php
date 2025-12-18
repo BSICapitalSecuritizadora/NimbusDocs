@@ -193,7 +193,7 @@ final class RateLimiter
         return max(0, $remaining);
     }
 
-    public function reset(string $identifier): void
+    public function resetInstance(string $identifier): void
     {
         $data = $this->loadInstanceData();
         if (isset($data[$identifier])) {

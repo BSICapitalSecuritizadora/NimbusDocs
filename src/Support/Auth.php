@@ -11,13 +11,13 @@ final class Auth
     public static function admin(): ?array
     {
         /** @var array|null $admin */
-        $admin = Session::get('admin');
+        $admin = Session::get('admin_user');
         return $admin ?: null;
     }
 
     public static function isAdmin(): bool
     {
-        return Session::has('admin');
+        return Session::has('admin_user');
     }
 
     public static function getAdmin(): ?array
@@ -27,12 +27,12 @@ final class Auth
 
     public static function loginAdmin(array $admin): void
     {
-        Session::set('admin', $admin);
+        Session::set('admin_user', $admin);
     }
 
     public static function logoutAdmin(): void
     {
-        Session::remove('admin');
+        Session::remove('admin_user');
     }
 
     public static function requireAdmin(): array

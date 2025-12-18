@@ -19,15 +19,16 @@ class RequestLoggerTest extends TestCase
     {
         parent::setUp();
         
-        $this->logger = $this->createMock(LoggerInterface::class);
-        $this->requestLogger = new RequestLogger($this->logger);
-        
-        // Simulate request data
+        // Initialize superglobals BEFORE creating RequestLogger
+        $_SESSION = ['admin_user' => ['id' => 1, 'name' => 'Test Admin']];
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/test/path';
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
         $_SERVER['HTTP_USER_AGENT'] = 'PHPUnit Test';
-        $_SESSION = ['admin_user' => ['id' => 1, 'name' => 'Test Admin']];
+        
+        // Now create the logger
+        $this->logger = $this->createMock(LoggerInterface::class);
+        $this->requestLogger = new RequestLogger($this->logger);
     }
 
     protected function tearDown(): void
