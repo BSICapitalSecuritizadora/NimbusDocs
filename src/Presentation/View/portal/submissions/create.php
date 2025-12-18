@@ -384,6 +384,7 @@ document.getElementById('btnSearchCnpj').addEventListener('click', async functio
     try {
         const formData = new FormData();
         formData.append('cnpj', cnpj);
+        formData.append('_token', '<?= Csrf::token() ?>');
         
         const response = await fetch('/portal/api/cnpj', {
             method: 'POST',

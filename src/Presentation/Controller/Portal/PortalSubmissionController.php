@@ -39,6 +39,13 @@ final class PortalSubmissionController
     public function getCnpjData(array $vars = []): void
     {
         Auth::requirePortalUser();
+
+        if (!Csrf::validate($_POST['_token'] ?? '')) {
+            header('Content-Type: application/json');
+            http_response_code(403);
+            echo json_encode(['error' => 'Token CSRF inválido']);
+            return;
+        }
         
         header('Content-Type: application/json');
         
