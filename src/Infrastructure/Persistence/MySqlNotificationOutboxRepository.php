@@ -157,6 +157,39 @@ final class MySqlNotificationOutboxRepository
     }
 
     /**
+     * Verifica se já existe notificação de token expirado para o mesmo token e destinatário
+     * em estados que indiquem processamento/entrega (PENDING, SENDING, SENT).
+     * @param int $tokenId
+     * @param string $recipientEmail
+     * @param int|null $windowHours Janela de tempo em horas (null = sem limite)
+     */
+    public function existsTokenExpiredFor(int $tokenId, string $recipientEmail, ?int $windowHours = null): bool
+    {
+        $params = [
+            ':email' => $recipientEmail,
+            ':tokenId' => (string)$tokenId,
+        ];
+
+        $timeCondition = '';
+        if ($windowHours !== null && $windowHours > 0) {
+            $timeCondition = " AND created_at > DATE_SUB(NOW(), INTERVAL :windowHours HOUR)";
+            $params[':windowHours'] = $windowHours;
+        }
+
+        $sql = "SELECT 1
+                FROM notification_outbox
+                WHERE type = 'TOKEN_EXPIRED'
+                  AND recipient_email = :email
+                  AND JSON_UNQUOTE(JSON_EXTRACT(payload_json, '$.token.id')) = :tokenId
+                  AND status IN ('PENDING','SENDING','SENT')
+                  {$timeCondition}
+                LIMIT 1";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return (bool)$stmt->fetchColumn();
+    }
+
+    /**
      * Lista itens da fila com filtros simples.
      * @param array{status?:string,recipient?:string,type?:string} $filters
      * @return array<int,array<string,mixed>>

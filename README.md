@@ -46,6 +46,7 @@ O foco do NimbusDocs é garantir **segurança**, **segregação de responsabilid
   - Ajuste credenciais de DB, Graph/Mail e toggles do rescue da outbox:
     - `OUTBOX_RESCUE_MINUTES` (padrão 30)
     - `OUTBOX_RESCUE_LOG` (padrão true)
+    - `OUTBOX_DUPLICATE_WINDOW_HOURS` (padrão 24) — janela de tempo para evitar notificações duplicadas
     - opcional fallback: `NOTIFICATION_WORKER_RESCUE_MINUTES`
 
   Sugestão para produção:
@@ -55,6 +56,7 @@ O foco do NimbusDocs é garantir **segurança**, **segregação de responsabilid
   APP_DEBUG=false
   LOG_LEVEL=info
   OUTBOX_RESCUE_LOG=false
+  OUTBOX_DUPLICATE_WINDOW_HOURS=24
   # mantenha OUTBOX_RESCUE_MINUTES ajustado conforme sua tolerância, ex.: 30
   ```
 
@@ -89,6 +91,10 @@ OUTBOX_RESCUE_MINUTES=30
 
 # Habilita/desabilita logs do rescue (default: true)
 OUTBOX_RESCUE_LOG=true
+
+# Janela de tempo (em horas) para evitar notificações duplicadas
+# Impede reenvio da mesma notificação ao mesmo usuário dentro deste período
+OUTBOX_DUPLICATE_WINDOW_HOURS=24
 ```
 
-Se a variável não estiver definida, o padrão é **30 minutos**.
+Se as variáveis não estiverem definidas, os padrões são **30 minutos** para rescue e **24 horas** para janela de duplicação.

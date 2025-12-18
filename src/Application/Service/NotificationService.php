@@ -200,6 +200,13 @@ final class NotificationService
             return;
         }
 
+        // Evita duplicidade: não enfileira se já houver notificação para este token e destinatário
+        $tokenId = isset($token['id']) ? (int)$token['id'] : null;
+        $windowHours = (int)($_ENV['OUTBOX_DUPLICATE_WINDOW_HOURS'] ?? 24);
+        if ($tokenId && $this->outbox->existsTokenExpiredFor($tokenId, (string)$portalUser['email'], $windowHours)) {
+            return;
+        }
+
         $html = $this->renderTemplate('token_expired', [
             'user'  => $portalUser,
             'token' => $token,

@@ -84,6 +84,20 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
         return $row ?: null;
     }
 
+    /**
+     * Busca um token por código, independente de status/expiração.
+     * Útil para diagnosticar se um código informado está expirado
+     * e acionar notificações relacionadas.
+     */
+    public function findByCode(string $code): ?array
+    {
+        $sql = "SELECT * FROM portal_access_tokens WHERE code = :code ORDER BY created_at DESC LIMIT 1";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':code' => $code]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
     public function markAsUsed(int $id, string $ip = '', string $userAgent = ''): void
     {
         $sql = "UPDATE portal_access_tokens
