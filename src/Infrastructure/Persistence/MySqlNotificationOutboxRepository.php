@@ -274,23 +274,4 @@ final class MySqlNotificationOutboxRepository
         ]);
     }
 
-    public function reprocess(int $id): void
-    {
-        $stmt = $this->pdo->prepare("
-            UPDATE notification_outbox
-            SET status = 'PENDING', attempts = 0, next_attempt_at = NULL, last_error = NULL
-            WHERE id = :id AND status = 'FAILED'
-        ");
-        $stmt->execute([':id' => $id]);
-    }
-
-    public function cancel(int $id): void
-    {
-        $stmt = $this->pdo->prepare("
-            UPDATE notification_outbox
-            SET status = 'CANCELLED', next_attempt_at = NULL
-            WHERE id = :id AND status = 'PENDING'
-        ");
-        $stmt->execute([':id' => $id]);
-    }
 }
