@@ -85,6 +85,26 @@ cd "$BACKUP_DIR"
 tar -czf "${BACKUP_NAME}.tar.gz" "$BACKUP_NAME"
 rm -rf "$BACKUP_NAME"
 
+# Gera checksum SHA-256 para validação
+echo -e "${YELLOW}🔐 Gerando checksum SHA-256...${NC}"
+CHECKSUM=$(sha256sum "${BACKUP_NAME}.tar.gz" | awk '{print $1}')
+echo "$CHECKSUM  ${BACKUP_NAME}.tar.gz" > "${BACKUP_NAME}.tar.gz.sha256"
+
+# Cria arquivo de metadados
+cat > "${BACKUP_NAME}.tar.gz.meta" <<METADATA
+{
+  "backup_name": "${BACKUP_NAME}",
+  "timestamp": "$(date -Iseconds)",
+  "database": "${DB_DATABASE}",
+  "host": "${DB_HOST}",
+  "size_bytes": $(stat -c%s "${BACKUP_NAME}.tar.gz" 2>/dev/null || stat -f%z "${BACKUP_NAME}.tar.gz" 2>/dev/null || echo "0"),
+  "sha256": "$CHECKSUM",
+  "version": "1.0"
+}
+METADATA
+
 echo -e "${GREEN}✓ Backup concluído com sucesso!${NC}"
 echo -e "${GREEN}📁 Localização: $BACKUP_DIR/${BACKUP_NAME}.tar.gz${NC}"
 echo -e "${GREEN}📊 Tamanho: $(du -h "$BACKUP_DIR/${BACKUP_NAME}.tar.gz" | cut -f1)${NC}"
+echo -e "${GREEN}🔐 SHA-256: $CHECKSUM${NC}"
+echo -e "${GREEN}📝 Metadados: ${BACKUP_NAME}.tar.gz.meta${NC}"
