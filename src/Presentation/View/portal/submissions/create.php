@@ -4,6 +4,7 @@
 /** @var array $errors */
 /** @var array $old */
 
+use App\Support\Csrf;
 use App\Support\Session;
 
 $oldShareholders = Session::getFlash('old_shareholders') ?? [];
