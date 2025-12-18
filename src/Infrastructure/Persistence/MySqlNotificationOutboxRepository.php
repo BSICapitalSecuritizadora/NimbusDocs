@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence;
 
 use PDO;
+use Psr\Log\LoggerInterface;
 
 final class MySqlNotificationOutboxRepository
 {
-    public function __construct(private PDO $pdo) {}
+    public function __construct(private PDO $pdo, private ?LoggerInterface $logger = null) {}
 
     /** @return array<int,array<string,mixed>> */
     public function search(array $filters = [], int $limit = 200): array
@@ -207,6 +208,47 @@ final class MySqlNotificationOutboxRepository
      */
     public function claimBatch(int $limit = 20): array
     {
+        // Rescue interno: libera jobs travados em 'SENDING' há X minutos (default 30)
+        // Pode ser ajustado via OUTBOX_RESCUE_MINUTES ou NOTIFICATION_WORKER_RESCUE_MINUTES
+        $minutes = 30;
+        if (isset($_ENV['OUTBOX_RESCUE_MINUTES'])) {
+            $minutes = (int)$_ENV['OUTBOX_RESCUE_MINUTES'];
+        } elseif (isset($_ENV['NOTIFICATION_WORKER_RESCUE_MINUTES'])) {
+            $minutes = (int)$_ENV['NOTIFICATION_WORKER_RESCUE_MINUTES'];
+        }
+        if ($minutes < 1) {
+            $minutes = 30;
+        }
+        // INTERVAL não aceita bind param, então interpolamos valor saneado
+        $logRescue = true;
+        if (isset($_ENV['OUTBOX_RESCUE_LOG'])) {
+            $logRescue = filter_var($_ENV['OUTBOX_RESCUE_LOG'], FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
+            $logRescue = ($logRescue === null) ? true : $logRescue; // default true when invalid
+        }
+
+        try {
+            $rescued = $this->pdo->exec(
+                "UPDATE notification_outbox\n" .
+                "SET status='PENDING'\n" .
+                "WHERE status='SENDING'\n" .
+                "  AND created_at < (NOW() - INTERVAL {$minutes} MINUTE)"
+            );
+            if ($rescued && $this->logger && $logRescue) {
+                $this->logger->info('notification_outbox rescue executed', [
+                    'rescued' => $rescued,
+                    'minutes' => $minutes,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // silencioso: não impede o claim
+            if ($this->logger && $logRescue) {
+                $this->logger->warning('notification_outbox rescue failed', [
+                    'error' => $e->getMessage(),
+                    'minutes' => $minutes,
+                ]);
+            }
+        }
+
         // Pega PENDING com next_attempt_at null ou <= now
         $sqlSelect = "
             SELECT *

@@ -149,7 +149,7 @@ $mailLogger = new Logger('mail');
 $mailLogger->pushHandler(new StreamHandler(__DIR__ . '/../storage/logs/mail.log', Logger::DEBUG));
 $graphMailService = new GraphMailService($graphMailConfig, $mailLogger);
 // Outbox repository para fila de notificações
-$outboxRepo = new MySqlNotificationOutboxRepository($pdo);
+$outboxRepo = new MySqlNotificationOutboxRepository($pdo, $logger);
 
 $notificationService = new NotificationService(
     $graphMailService,

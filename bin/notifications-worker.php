@@ -8,34 +8,8 @@ $config = require __DIR__ . '/../bootstrap/app.php';
 
 use App\Infrastructure\Persistence\MySqlNotificationOutboxRepository;
 
-$outbox = new MySqlNotificationOutboxRepository($config['pdo']);
+$outbox = new MySqlNotificationOutboxRepository($config['pdo'], $config['logger'] ?? null);
 $mail   = $config['mail']; // GraphMailService
-
-// Rescue: libera jobs travados em 'SENDING' há X minutos (default 30)
-// Configurável via .env: OUTBOX_RESCUE_MINUTES ou NOTIFICATION_WORKER_RESCUE_MINUTES
-// (usa o primeiro que estiver definido)
-\assert(isset($_ENV));
-\assert(is_array($_ENV));
-$rescueMinutes = (int)($_ENV['OUTBOX_RESCUE_MINUTES']
-    ?? $_ENV['NOTIFICATION_WORKER_RESCUE_MINUTES']
-    ?? 30);
-if ($rescueMinutes < 1) {
-    $rescueMinutes = 30; // sanidade mínima
-}
-try {
-    $rescued = $config['pdo']->exec(
-        "UPDATE notification_outbox\n" .
-        "SET status='PENDING'\n" .
-        "WHERE status='SENDING'\n" .
-        "  AND created_at < (NOW() - INTERVAL {$rescueMinutes} MINUTE)"
-    );
-    if ($rescued) {
-        echo "[worker] rescued {$rescued} stuck SENDING job(s) older than {$rescueMinutes}m\n";
-    }
-} catch (\Throwable $e) {
-    // não impede o processamento do lote
-    echo "[worker] rescue step failed: {$e->getMessage()}\n";
-}
 
 $batch = $outbox->claimBatch(20);
 

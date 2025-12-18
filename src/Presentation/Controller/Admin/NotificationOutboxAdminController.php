@@ -15,7 +15,8 @@ final class NotificationOutboxAdminController
 
     public function __construct(private array $config)
     {
-        $this->outbox = new MySqlNotificationOutboxRepository($config['pdo']);
+        $logger = $config['logger'] ?? null;
+        $this->outbox = new MySqlNotificationOutboxRepository($config['pdo'], $logger);
     }
 
     public function index(): void

@@ -37,13 +37,34 @@ O foco do NimbusDocs é garantir **segurança**, **segregação de responsabilid
    composer install
    ```
 
-2. Rode as migrações para criar todas as tabelas necessárias (admins, usuários finais, tokens, submissões, arquivos, notas e auditoria):
+2. Copie o exemplo de variáveis de ambiente e ajuste conforme necessário:
+
+  ```bash
+  cp .env.example .env
+  ```
+
+  - Ajuste credenciais de DB, Graph/Mail e toggles do rescue da outbox:
+    - `OUTBOX_RESCUE_MINUTES` (padrão 30)
+    - `OUTBOX_RESCUE_LOG` (padrão true)
+    - opcional fallback: `NOTIFICATION_WORKER_RESCUE_MINUTES`
+
+  Sugestão para produção:
+
+  ```env
+  APP_ENV=production
+  APP_DEBUG=false
+  LOG_LEVEL=info
+  OUTBOX_RESCUE_LOG=false
+  # mantenha OUTBOX_RESCUE_MINUTES ajustado conforme sua tolerância, ex.: 30
+  ```
+
+3. Rode as migrações para criar todas as tabelas necessárias (admins, usuários finais, tokens, submissões, arquivos, notas e auditoria):
 
    ```bash
    composer migrate
    ```
 
-3. Popule dados iniciais (credenciais padrão podem ser alteradas via variáveis `SEED_*`):
+4. Popule dados iniciais (credenciais padrão podem ser alteradas via variáveis `SEED_*`):
 
    ```bash
    composer seed
@@ -57,7 +78,7 @@ O Portal do Usuário autentica **exclusivamente por código de acesso** gerado n
 ## Worker de notificações (fila de e-mail)
 
 - O worker que processa a tabela `notification_outbox` está em `bin/notifications-worker.php`.
-- Antes de buscar um lote (`claimBatch()`), ele executa um "rescue" para liberar jobs que possam ter ficado travados com status `SENDING` caso o processo caia no meio.
+- O "rescue" de jobs travados em `SENDING` acontece dentro do repositório (`MySqlNotificationOutboxRepository::claimBatch()`), garantindo o mesmo comportamento para qualquer consumidor.
 - A janela para esse rescue é configurável via `.env`:
 
 ```env
@@ -65,6 +86,9 @@ O Portal do Usuário autentica **exclusivamente por código de acesso** gerado n
 OUTBOX_RESCUE_MINUTES=30
 # Alternativa suportada (fallback):
 # NOTIFICATION_WORKER_RESCUE_MINUTES=30
+
+# Habilita/desabilita logs do rescue (default: true)
+OUTBOX_RESCUE_LOG=true
 ```
 
 Se a variável não estiver definida, o padrão é **30 minutos**.
