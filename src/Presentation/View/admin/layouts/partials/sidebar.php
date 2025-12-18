@@ -71,6 +71,12 @@
             </a>
         </li>
 
+        <li class="nav-item">
+            <a href="/admin/notifications/outbox" class="nav-link text-white">
+                <i class="bi bi-envelope-paper me-2"></i> Fila de notificações
+            </a>
+        </li>
+
         <li class="nav-item mt-3">
             <span class="nav-link text-uppercase text-white-50 small">
                 Relatórios

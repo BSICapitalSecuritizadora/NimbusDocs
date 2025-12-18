@@ -34,6 +34,52 @@ final class MySqlNotificationOutboxRepository
         return (int)$this->pdo->lastInsertId();
     }
 
+        /**
+         * Lista itens da fila com filtros simples.
+         * @param array{status?:string,recipient?:string,type?:string} $filters
+         * @return array<int,array<string,mixed>>
+         */
+        public function list(array $filters = [], int $limit = 100, int $offset = 0): array
+        {
+            $where = [];
+            $params = [];
+
+            if (!empty($filters['status'])) {
+                $where[] = 'status = :status';
+                $params[':status'] = $filters['status'];
+            }
+
+            if (!empty($filters['recipient'])) {
+                $where[] = 'recipient_email LIKE :recipient';
+                $params[':recipient'] = '%' . $filters['recipient'] . '%';
+            }
+
+            if (!empty($filters['type'])) {
+                $where[] = 'type LIKE :type';
+                $params[':type'] = '%' . $filters['type'] . '%';
+            }
+
+            $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
+            $sql = "
+                SELECT *
+                FROM notification_outbox
+                {$whereSql}
+                ORDER BY created_at DESC
+                LIMIT :limit OFFSET :offset
+            ";
+
+            $stmt = $this->pdo->prepare($sql);
+            foreach ($params as $k => $v) {
+                $stmt->bindValue($k, $v);
+            }
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        }
+
     /**
      * Busca lote pronto para envio e trava via status SENDING.
      * @return array<int,array<string,mixed>>
@@ -105,5 +151,25 @@ final class MySqlNotificationOutboxRepository
             ':error'           => $error,
             ':next_attempt_at' => $nextAttemptAt,
         ]);
+    }
+
+    public function reprocess(int $id): void
+    {
+        $stmt = $this->pdo->prepare("
+            UPDATE notification_outbox
+            SET status = 'PENDING', attempts = 0, next_attempt_at = NULL, last_error = NULL
+            WHERE id = :id AND status = 'FAILED'
+        ");
+        $stmt->execute([':id' => $id]);
+    }
+
+    public function cancel(int $id): void
+    {
+        $stmt = $this->pdo->prepare("
+            UPDATE notification_outbox
+            SET status = 'CANCELLED', next_attempt_at = NULL
+            WHERE id = :id AND status = 'PENDING'
+        ");
+        $stmt->execute([':id' => $id]);
     }
 }

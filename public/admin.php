@@ -19,6 +19,7 @@ use App\Presentation\Controller\Admin\PortalAccessLogAdminController;
 use App\Presentation\Controller\Admin\ReportsAdminController;
 use App\Presentation\Controller\Admin\DocumentCategoryAdminController;
 use App\Presentation\Controller\Admin\GeneralDocumentAdminController;
+use App\Presentation\Controller\Admin\NotificationOutboxAdminController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -107,6 +108,11 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/admin/general-documents/{id:\d+}/edit', [GeneralDocumentAdminController::class, 'editForm']);
     $r->addRoute('POST', '/admin/general-documents/{id:\d+}',      [GeneralDocumentAdminController::class, 'update']);
     $r->addRoute('POST', '/admin/general-documents/{id:\d+}/delete', [GeneralDocumentAdminController::class, 'delete']);
+
+    // Outbox de notificações
+    $r->addRoute('GET',  '/admin/notifications/outbox', [NotificationOutboxAdminController::class, 'index']);
+    $r->addRoute('POST', '/admin/notifications/outbox/{id:\\d+}/reprocess', [NotificationOutboxAdminController::class, 'reprocess']);
+    $r->addRoute('POST', '/admin/notifications/outbox/{id:\\d+}/cancel', [NotificationOutboxAdminController::class, 'cancel']);
 
     // (Rotas antigas com AdminMicrosoftAuthController removidas em favor de AdminAuthController)
 
