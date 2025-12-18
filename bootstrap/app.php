@@ -18,6 +18,7 @@ use App\Infrastructure\Persistence\MySqlPortalUserRepository;
 use App\Infrastructure\Persistence\MySqlNotificationOutboxRepository;
 use App\Infrastructure\Auth\AzureAdminAuthClient;
 use App\Infrastructure\Logging\PortalAccessLogger;
+use App\Infrastructure\ErrorHandler;
 
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -45,6 +46,12 @@ if ($appDebug) {
     ini_set('display_errors', '0');
     error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT);
 }
+
+// Handler global de erros
+$errorHandler = new ErrorHandler(
+    __DIR__ . '/../src/Presentation/View/errors',
+    $appDebug
+);
 
 // 1) Carrega config principal (AGORA criamos $config)
 $config = require __DIR__ . '/../config/config.php';

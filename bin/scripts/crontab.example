@@ -1,0 +1,82 @@
+#!/bin/bash
+
+##############################################################################
+# Script para agendamento de tarefas do NimbusDocs (crontab)
+# Adicione as linhas abaixo ao crontab do servidor
+# Uso: crontab -e (Linux/Mac)
+##############################################################################
+
+# Projeto root (ajuste conforme necessário)
+PROJECT_ROOT="/caminho/para/xampp/htdocs/NimbusDocs"
+LOG_FILE="/var/log/nimbusdocs_cron.log"
+
+# ============================================================================
+# ROTAÇÃO DE LOGS
+# Executa diariamente às 2:00 AM
+# ============================================================================
+0 2 * * * bash "$PROJECT_ROOT/bin/scripts/rotate_logs.sh" "$PROJECT_ROOT/storage/logs" 30 >> "$LOG_FILE" 2>&1
+
+# ============================================================================
+# MANUTENÇÃO DIÁRIA
+# Executa diariamente às 3:00 AM
+# ============================================================================
+0 3 * * * bash "$PROJECT_ROOT/bin/scripts/maintenance.sh" >> "$LOG_FILE" 2>&1
+
+# ============================================================================
+# BACKUP DIÁRIO
+# Executa diariamente às 4:00 AM
+# Muda para diretório de backup (ajuste o caminho)
+# ============================================================================
+0 4 * * * cd /backups/nimbusdocs && bash "$PROJECT_ROOT/bin/scripts/backup.sh" . >> "$LOG_FILE" 2>&1
+
+# ============================================================================
+# BACKUP SEMANAL (domingo às 5:00 AM)
+# ============================================================================
+0 5 * * 0 cd /backups/nimbusdocs/weekly && bash "$PROJECT_ROOT/bin/scripts/backup.sh" . >> "$LOG_FILE" 2>&1
+
+# ============================================================================
+# LIMPEZA DE RATE LIMITER ANTIGO
+# Executa a cada 6 horas para remover entradas expiradas
+# ============================================================================
+0 */6 * * * php -r "
+    \\\$file = '$PROJECT_ROOT/storage/rate_limiter.json';
+    if (file_exists(\\\$file)) {
+        \\\$data = json_decode(file_get_contents(\\\$file), true) ?? [];
+        \\\$now = time();
+        \\\$before = count(\\\$data);
+        foreach (\\\$data as \\\$key => \\\$record) {
+            if (\\\$record['expires_at'] < \\\$now) {
+                unset(\\\$data[\\\$key]);
+            }
+        }
+        \\\$after = count(\\\$data);
+        file_put_contents(\\\$file, json_encode(\\\$data, JSON_PRETTY_PRINT));
+        error_log('[' . date('Y-m-d H:i:s') . '] Rate limiter: ' . (\\\$before - \\\$after) . ' entradas limpas');
+    }
+" >> "$LOG_FILE" 2>&1
+
+# ============================================================================
+# LIMPEZA DE UPLOADS EXPIRADOS
+# Executa às 23:00 para remover uploads com mais de 30 dias
+# ============================================================================
+0 23 * * * find "$PROJECT_ROOT/storage/uploads" -type f -atime +30 -delete >> "$LOG_FILE" 2>&1
+
+# ============================================================================
+# WORKER DE NOTIFICAÇÕES (em background)
+# Executa a cada 5 minutos para processar fila de email
+# Descomente se quiser usar cron em vez de supervisor
+# ============================================================================
+# */5 * * * * cd "$PROJECT_ROOT" && php bin/notifications-worker.php >> "$LOG_FILE" 2>&1
+
+# ============================================================================
+# NOTIFICAÇÃO DE TOKENS EXPIRADOS
+# Executa a cada hora para notificar usuários sobre tokens expirados
+# ============================================================================
+0 * * * * cd "$PROJECT_ROOT" && php bin/notify-expired-tokens.php >> "$LOG_FILE" 2>&1
+
+# ============================================================================
+# MONITORAMENTO DE SAÚDE
+# Executa a cada 5 minutos para verificar se a aplicação está ok
+# ============================================================================
+# */5 * * * * curl -s https://seu-dominio.com/health >> "$LOG_FILE" 2>&1
+

@@ -126,13 +126,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     // Alias amigável
     $r->addRoute('GET', '/admin/audit', [AuditLogController::class, 'index']);
 
-    // Dashboard
-    $r->addRoute('GET', '/admin', function () {
-        echo '<div style="font-family:system-ui;padding:2rem">
-                <h2>Bem-vindo ao NimbusDocs Admin</h2>
-                <p>Login efetuado com sucesso.</p>
-              </div>';
-    });
+    // Dashboard (rota raiz)
+    $r->addRoute('GET', '/admin', [DashboardAdminController::class, 'index']);
 });
 
 
