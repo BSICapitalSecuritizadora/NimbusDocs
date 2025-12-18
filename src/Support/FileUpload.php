@@ -10,6 +10,15 @@ final class FileUpload
     private static array $allowedExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'jpg', 'jpeg', 'png'];
 
     /** @var string[] */
+    private static array $blockedExtensions = [
+        'docm', 'xlsm', 'pptm', 'dotm', 'xltm', 'potm', // Office com macros
+        'php', 'phtml', 'php3', 'php4', 'php5', 'phar', // Executáveis PHP
+        'exe', 'com', 'bat', 'cmd', 'sh', 'ps1',        // Executáveis sistema
+        'jar', 'jsp', 'asp', 'aspx', 'cgi',             // Executáveis web
+        'htaccess', 'htpasswd', 'config', 'ini',        // Configs
+    ];
+
+    /** @var string[] */
     private static array $allowedMimePrefix = [
         'application/pdf',
         'application/msword',
@@ -33,6 +42,13 @@ final class FileUpload
             throw new \RuntimeException('Falha no upload (código ' . $file['error'] . ').');
         }
 
+        $original = $file['name'] ?? 'arquivo';
+        
+        // Validação de tamanho do nome
+        if (strlen($original) > 255) {
+            throw new \RuntimeException('Nome do arquivo muito longo (máximo 255 caracteres).');
+        }
+
         $size = (int)$file['size'];
 
         $maxMb  = (int)(getenv('MAX_UPLOAD_MB') ?: 100);
@@ -41,8 +57,18 @@ final class FileUpload
             throw new \RuntimeException('Arquivo excede o limite de ' . $maxMb . 'MB.');
         }
 
-        $original = $file['name'] ?? 'arquivo';
         $ext = strtolower(pathinfo($original, PATHINFO_EXTENSION));
+
+        // Proteção contra double extension (ex: arquivo.pdf.php)
+        $fullBaseName = pathinfo($original, PATHINFO_FILENAME);
+        if (preg_match('/\.(' . implode('|', self::$blockedExtensions) . ')$/i', $fullBaseName)) {
+            throw new \RuntimeException('Nome de arquivo contém extensão perigosa.');
+        }
+
+        // Bloquear extensões perigosas
+        if (in_array($ext, self::$blockedExtensions, true)) {
+            throw new \RuntimeException('Tipo de arquivo não permitido (bloqueado).');
+        }
 
         if (!in_array($ext, self::$allowedExtensions, true)) {
             throw new \RuntimeException('Tipo de arquivo não permitido (extensão).');

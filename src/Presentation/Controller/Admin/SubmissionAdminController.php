@@ -272,6 +272,8 @@ final class SubmissionAdminController
         }
 
         $count = count($filesArray['name']);
+        $uploaded = 0;
+        $errors = [];
 
         for ($i = 0; $i < $count; $i++) {
             $error = $filesArray['error'][$i];
@@ -289,42 +291,48 @@ final class SubmissionAdminController
 
             $tmpName      = $filesArray['tmp_name'][$i];
             $originalName = $filesArray['name'][$i];
-            $mime         = $filesArray['type'][$i] ?? 'application/octet-stream';
-
-            if (!in_array($mime, $allowedMimes, true)) {
-                continue;
-            }
 
             if (!is_uploaded_file($tmpName)) {
                 continue;
             }
 
-            $ext        = pathinfo($originalName, PATHINFO_EXTENSION);
-            $storedName = bin2hex(random_bytes(16)) . ($ext ? '.' . strtolower($ext) : '');
-            $relative   = date('Y') . '/' . date('m') . '/' . $storedName;
-            $fullPath   = $uploadDir . '/' . $relative;
+            // Usar FileUpload::store() seguro para validação completa
+            try {
+                $tempFile = [
+                    'name'     => $originalName,
+                    'type'     => $filesArray['type'][$i] ?? 'application/octet-stream',
+                    'tmp_name' => $tmpName,
+                    'error'    => $error,
+                    'size'     => $size,
+                ];
+                
+                $stored = FileUpload::store($tempFile, $baseDir);
+                
+                $storedName = basename($stored['path']);
+                $relative   = str_replace($uploadDir . '/', '', $stored['path']);
+                $checksum   = hash_file('sha256', $stored['path']);
 
-            $dir = dirname($fullPath);
-            if (!is_dir($dir)) {
-                mkdir($dir, 0775, true);
-            }
-
-            if (!move_uploaded_file($tmpName, $fullPath)) {
+                $this->fileRepo->create($id, [
+                    'origin'          => 'ADMIN',
+                    'original_name'   => $stored['original_name'],
+                    'stored_name'     => $storedName,
+                    'mime_type'       => $stored['mime_type'], // MIME real detectado
+                    'size_bytes'      => $stored['size'],
+                    'storage_path'    => $relative,
+                    'checksum'        => $checksum,
+                    'visible_to_user' => 1,
+                ]);
+                
+                $uploaded++;
+            } catch (\RuntimeException $e) {
+                // Log erro e continua para próximo arquivo
+                $errors[] = $originalName . ': ' . $e->getMessage();
                 continue;
             }
+        }
 
-            $checksum = hash_file('sha256', $fullPath);
-
-            $this->fileRepo->create($id, [
-                'origin'          => 'ADMIN',
-                'original_name'   => $originalName,
-                'stored_name'     => $storedName,
-                'mime_type'       => $mime,
-                'size_bytes'      => $size,
-                'storage_path'    => $relative,
-                'checksum'        => $checksum,
-                'visible_to_user' => 1,  // já sobe visível para o usuário
-            ]);
+        if (!empty($errors)) {
+            error_log('Erros ao processar uploads: ' . implode('; ', $errors));
         }
 
         $this->config['audit']->adminAction([
