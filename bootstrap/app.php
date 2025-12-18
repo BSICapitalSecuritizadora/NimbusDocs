@@ -31,9 +31,23 @@ $dotenv->safeLoad();
 // Timezone
 date_default_timezone_set($_ENV['APP_TIMEZONE'] ?? 'America/Sao_Paulo');
 
-// Sessão
+// Sessão - configure cookies properly for HTTPS
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+    || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443);
+
 session_name($_ENV['SESSION_NAME'] ?? 'nimbusdocs_session');
+
+// Set cookie params before starting session
 if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_set_cookie_params([
+        'lifetime' => 0, // Session cookie (until browser closes)
+        'path' => '/',
+        'domain' => '',
+        'secure' => $isHttps,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
     session_start();
 }
 
@@ -100,7 +114,7 @@ $config['request_logger'] = $requestLogger;
 $graphMailCfg = [
     'GRAPH_TENANT_ID'    => $_ENV['GRAPH_TENANT_ID']    ?? '',
     'GRAPH_CLIENT_ID'    => $_ENV['GRAPH_CLIENT_ID']    ?? '',
-    'GRAPH_CLIENT_SECRET'=> $_ENV['GRAPH_CLIENT_SECRET']?? '',
+    'GRAPH_CLIENT_SECRET' => $_ENV['GRAPH_CLIENT_SECRET'] ?? '',
     'MAIL_FROM'          => $_ENV['MAIL_FROM']          ?? '',
     'MAIL_FROM_NAME'     => $_ENV['MAIL_FROM_NAME']     ?? 'NimbusDocs',
 ];
@@ -134,8 +148,8 @@ $branding = [
     'app_subtitle'  => $settings['app.subtitle'] ?? 'Portal de documentos',
     'primary_color' => $settings['branding.primary_color'] ?? '#00205b',
     'accent_color'  => $settings['branding.accent_color'] ?? '#ffc20e',
-    'admin_logo_url'=> $settings['branding.admin_logo_url'] ?? '',
-    'portal_logo_url'=> $settings['branding.portal_logo_url'] ?? '',
+    'admin_logo_url' => $settings['branding.admin_logo_url'] ?? '',
+    'portal_logo_url' => $settings['branding.portal_logo_url'] ?? '',
 ];
 
 $config['branding'] = $branding;

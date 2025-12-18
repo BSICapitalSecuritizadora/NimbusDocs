@@ -161,4 +161,50 @@ final class MySqlAdminUserRepository implements AdminUserRepository
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $id]);
     }
+
+    /**
+     * Find user by email (regardless of status)
+     */
+    public function findByEmail(string $email): ?array
+    {
+        $sql = "SELECT * FROM admin_users WHERE email = :email LIMIT 1";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':email' => $email]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+    /**
+     * Update user password
+     */
+    public function updatePassword(int $id, string $passwordHash): void
+    {
+        $sql = "UPDATE admin_users SET password_hash = :password_hash, updated_at = NOW() WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':password_hash' => $passwordHash, ':id' => $id]);
+    }
+
+    /**
+     * Update 2FA settings
+     */
+    public function update2FA(int $id, ?string $secret, bool $enabled): void
+    {
+        $sql = "UPDATE admin_users SET two_factor_secret = :secret, two_factor_enabled = :enabled, updated_at = NOW() WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':secret' => $secret,
+            ':enabled' => $enabled ? 1 : 0,
+            ':id' => $id
+        ]);
+    }
+
+    /**
+     * Confirm 2FA setup
+     */
+    public function confirm2FA(int $id): void
+    {
+        $sql = "UPDATE admin_users SET two_factor_confirmed_at = NOW(), updated_at = NOW() WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $id]);
+    }
 }

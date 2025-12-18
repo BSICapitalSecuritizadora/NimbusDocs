@@ -36,6 +36,20 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('POST', '/admin/login', [LoginController::class, 'handleLogin']);
     $r->addRoute('GET',  '/admin/logout', [LoginController::class, 'logout']);
 
+    // Password Recovery
+    $r->addRoute('GET',  '/admin/forgot-password', [\App\Presentation\Controller\Admin\PasswordResetController::class, 'showForgotForm']);
+    $r->addRoute('POST', '/admin/forgot-password', [\App\Presentation\Controller\Admin\PasswordResetController::class, 'sendResetLink']);
+    $r->addRoute('GET',  '/admin/reset-password/{token}', [\App\Presentation\Controller\Admin\PasswordResetController::class, 'showResetForm']);
+    $r->addRoute('POST', '/admin/reset-password', [\App\Presentation\Controller\Admin\PasswordResetController::class, 'resetPassword']);
+
+    // Two-Factor Authentication
+    $r->addRoute('GET',  '/admin/2fa/setup', [\App\Presentation\Controller\Admin\TwoFactorController::class, 'showSetup']);
+    $r->addRoute('POST', '/admin/2fa/enable', [\App\Presentation\Controller\Admin\TwoFactorController::class, 'enable']);
+    $r->addRoute('POST', '/admin/2fa/disable', [\App\Presentation\Controller\Admin\TwoFactorController::class, 'disable']);
+    $r->addRoute('GET',  '/admin/2fa/verify', [\App\Presentation\Controller\Admin\TwoFactorController::class, 'showVerify']);
+    $r->addRoute('POST', '/admin/2fa/verify', [\App\Presentation\Controller\Admin\TwoFactorController::class, 'verify']);
+
+
     // Administradores (sistema)
     $r->addRoute('GET',  '/admin/users',              [AdminUserAdminController::class, 'index']);
     $r->addRoute('GET',  '/admin/users/create',       [AdminUserAdminController::class, 'createForm']);
@@ -124,6 +138,16 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/admin/monitoring/api/alerts',         [MonitoringAdminController::class, 'apiAlerts']);
     $r->addRoute('GET',  '/admin/monitoring/api/requests',       [MonitoringAdminController::class, 'apiRequests']);
 
+    // Global Search
+    $r->addRoute('GET', '/admin/search', [\App\Presentation\Controller\Admin\SearchController::class, 'showResults']);
+    $r->addRoute('GET', '/admin/api/search', [\App\Presentation\Controller\Admin\SearchController::class, 'search']);
+    $r->addRoute('GET', '/admin/api/search/quick', [\App\Presentation\Controller\Admin\SearchController::class, 'quickSearch']);
+
+    // In-App Notifications
+    $r->addRoute('GET',  '/admin/api/notifications', [\App\Presentation\Controller\Admin\InAppNotificationController::class, 'getUnread']);
+    $r->addRoute('POST', '/admin/api/notifications/{id:\d+}/read', [\App\Presentation\Controller\Admin\InAppNotificationController::class, 'markAsRead']);
+    $r->addRoute('POST', '/admin/api/notifications/read-all', [\App\Presentation\Controller\Admin\InAppNotificationController::class, 'markAllAsRead']);
+
     // (Rotas antigas com AdminMicrosoftAuthController removidas em favor de AdminAuthController)
 
     // Downloads de arquivos de submissão
@@ -160,14 +184,26 @@ $publicRoutes = [
     ['POST', '/admin/login'],
     ['GET',  '/admin/login/microsoft'],
     ['GET',  '/admin/auth/callback'],
+    // Password recovery
+    ['GET',  '/admin/forgot-password'],
+    ['POST', '/admin/forgot-password'],
+    // 2FA verification (during login flow)
+    ['GET',  '/admin/2fa/verify'],
+    ['POST', '/admin/2fa/verify'],
 ];
 
+// Also allow reset-password with dynamic token
 $isPublic = false;
 foreach ($publicRoutes as [$method, $path]) {
     if ($httpMethod === $method && $uri === $path) {
         $isPublic = true;
         break;
     }
+}
+
+// Allow reset-password with token
+if (!$isPublic && preg_match('#^/admin/reset-password/[a-f0-9]+$#', $uri)) {
+    $isPublic = true;
 }
 
 // Se não for rota pública e não tiver admin logado, redireciona

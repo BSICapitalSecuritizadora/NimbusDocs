@@ -1,9 +1,9 @@
 <?php
 /**
- * Login Administrativo - Layout Standalone
- * @var string|null $errorMessage
- * @var string|null $oldEmail  
+ * Forgot Password View
  * @var string $csrfToken
+ * @var string|null $error
+ * @var string|null $success
  */
 
 $appName = $branding['app_name'] ?? 'NimbusDocs';
@@ -14,7 +14,7 @@ $primaryColor = $branding['primary_color'] ?? '#00205b';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Administrativo - <?= htmlspecialchars($appName) ?></title>
+    <title>Esqueci Minha Senha - <?= htmlspecialchars($appName) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -69,26 +69,16 @@ $primaryColor = $branding['primary_color'] ?? '#00205b';
             background: #001a4d;
             border-color: #001a4d;
         }
-        .btn-outline-secondary {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-        }
-        .divider {
-            display: flex;
-            align-items: center;
+        .back-link {
             text-align: center;
-            margin: 1.5rem 0;
+            margin-top: 1.5rem;
         }
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid #dee2e6;
+        .back-link a {
+            color: var(--primary-color);
+            text-decoration: none;
         }
-        .divider span {
-            padding: 0 1rem;
-            color: #6c757d;
-            font-size: 0.875rem;
+        .back-link a:hover {
+            text-decoration: underline;
         }
         .icon-wrapper {
             width: 80px;
@@ -104,86 +94,58 @@ $primaryColor = $branding['primary_color'] ?? '#00205b';
             font-size: 2rem;
             color: white;
         }
-        .forgot-link {
-            text-align: center;
-            margin-top: 1rem;
-        }
-        .forgot-link a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-size: 0.875rem;
-        }
-        .forgot-link a:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 <body>
     <div class="login-card">
         <div class="login-header">
             <div class="icon-wrapper">
-                <i class="bi bi-shield-lock"></i>
+                <i class="bi bi-key"></i>
             </div>
-            <h1><?= htmlspecialchars($appName) ?></h1>
-            <p>Acesso Administrativo</p>
+            <h1>Esqueceu sua senha?</h1>
+            <p>Digite seu e-mail e enviaremos um link para redefinir sua senha.</p>
         </div>
 
-        <?php $error = $errorMessage ?? \App\Support\Session::getFlash('error'); ?>
         <?php if (!empty($error)): ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="bi bi-exclamation-triangle me-2"></i>
-                <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
+                <?= htmlspecialchars($error) ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         <?php endif; ?>
 
-        <form method="post" action="/admin/login">
-            <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES, 'UTF-8') ?>">
-            
-            <div class="mb-3">
+        <?php if (!empty($success)): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                <?= htmlspecialchars($success) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
+
+        <form method="POST" action="/admin/forgot-password">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+
+            <div class="mb-4">
                 <label for="email" class="form-label">E-mail</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                     <input type="email" class="form-control" id="email" name="email" 
-                           placeholder="seu@email.com"
-                           value="<?= htmlspecialchars($oldEmail ?? '', ENT_QUOTES, 'UTF-8') ?>" 
-                           required autofocus>
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <label for="password" class="form-label">Senha</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-key"></i></span>
-                    <input type="password" class="form-control" id="password" name="password" 
-                           placeholder="••••••••" required>
+                           placeholder="seu@email.com" required autofocus>
                 </div>
             </div>
 
             <div class="d-grid">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>Entrar
+                    <i class="bi bi-send me-2"></i>Enviar Link de Recuperação
                 </button>
             </div>
         </form>
 
-        <div class="forgot-link">
-            <a href="/admin/forgot-password">Esqueci minha senha</a>
-        </div>
-
-        <div class="divider">
-            <span>ou</span>
-        </div>
-
-        <div class="d-grid">
-            <a href="/admin/login/microsoft" class="btn btn-outline-secondary">
-                <i class="bi bi-microsoft me-2"></i>Entrar com Microsoft
+        <div class="back-link">
+            <a href="/admin/login">
+                <i class="bi bi-arrow-left me-1"></i>Voltar para o login
             </a>
         </div>
-
-        <p class="text-center text-muted small mt-4 mb-0">
-            Acesso restrito ao departamento administrativo.
-        </p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

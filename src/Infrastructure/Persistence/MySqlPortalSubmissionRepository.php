@@ -126,6 +126,28 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             $params[':uid']         = (int)$filters['portal_user_id'];
         }
 
+        // Date range filters
+        if (!empty($filters['date_from'])) {
+            $where[] = 's.submitted_at >= :date_from';
+            $params[':date_from'] = $filters['date_from'] . ' 00:00:00';
+        }
+
+        if (!empty($filters['date_to'])) {
+            $where[] = 's.submitted_at <= :date_to';
+            $params[':date_to'] = $filters['date_to'] . ' 23:59:59';
+        }
+
+        // Search filter (searches in reference_code, title, user name/email)
+        if (!empty($filters['search'])) {
+            $searchTerm = '%' . $filters['search'] . '%';
+            $where[] = '(s.reference_code LIKE :search OR s.title LIKE :search2 OR u.full_name LIKE :search3 OR u.email LIKE :search4 OR s.company_name LIKE :search5)';
+            $params[':search'] = $searchTerm;
+            $params[':search2'] = $searchTerm;
+            $params[':search3'] = $searchTerm;
+            $params[':search4'] = $searchTerm;
+            $params[':search5'] = $searchTerm;
+        }
+
         $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
         $sqlTotal = "SELECT COUNT(*)
@@ -167,6 +189,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             'page'    => $page,
             'perPage' => $perPage,
             'pages'   => (int)ceil($total / $perPage),
+            'filters' => $filters,
         ];
     }
 

@@ -22,16 +22,15 @@ final class LoginController
 
     public function showLoginForm(array $vars = []): void
     {
-        $pageTitle   = 'Login Administrativo - NimbusDocs';
-        $contentView = __DIR__ . '/../../../View/admin/auth/login.php';
+        // Get branding from config
+        $branding = $this->config['branding'] ?? [];
+        
+        $errorMessage = Session::getFlash('error');
+        $oldEmail = Session::getFlash('old_email');
+        $csrfToken = Csrf::token();
 
-        $viewData = [
-            'errorMessage' => Session::getFlash('error'),
-            'oldEmail'     => Session::getFlash('old_email'),
-            'csrfToken'    => Csrf::token(),
-        ];
-
-        require __DIR__ . '/../../../View/admin/layouts/base.php';
+        // Render standalone login view (no base layout with sidebar)
+        require __DIR__ . '/../../../View/admin/auth/login.php';
     }
 
     public function handleLogin(array $vars = []): void
@@ -97,21 +96,42 @@ final class LoginController
             $this->redirect('/admin/login');
         }
 
-        // OK: reset rate limiter e cria sessão
+        // OK: reset rate limiter
         RateLimiter::reset($clientIp);
-        session_regenerate_id(true);
-        Session::put('admin', [
+
+        // Check if 2FA is enabled
+        if (!empty($user['two_factor_enabled']) && !empty($user['two_factor_secret'])) {
+            // Store pending admin data for 2FA verification
+            Session::put('2fa_pending_admin', [
+                'id'    => (int)$user['id'],
+                'name'  => $user['name'] ?? $user['full_name'] ?? '',
+                'email' => $user['email'],
+                'role'  => $user['role'],
+                'last_login_provider' => 'LOCAL',
+            ]);
+            
+            $this->audit->log('ADMIN', (int)$user['id'], 'LOGIN_2FA_REQUIRED', 'ADMIN_USER', (int)$user['id']);
+            $this->redirect('/admin/2fa/verify');
+        }
+
+        // No 2FA - complete login
+        // Set session data directly
+        $_SESSION['admin'] = [
             'id'    => (int)$user['id'],
-            'name'  => $user['name'],
+            'name'  => $user['name'] ?? $user['full_name'] ?? '',
             'email' => $user['email'],
             'role'  => $user['role'],
-        ]);
+        ];
 
         $repo->updateLastLogin((int)$user['id'], 'LOCAL');
         $this->audit->log('ADMIN', (int)$user['id'], 'LOGIN_SUCCESS', 'ADMIN_USER', (int)$user['id']);
 
-        // Redireciona para dashboard (vamos usar /admin por enquanto)
-        $this->redirect('/admin');
+        // Force session write before redirect
+        session_write_close();
+
+        // Redireciona para dashboard
+        header('Location: /admin');
+        exit;
     }
 
     private function redirect(string $path): void
