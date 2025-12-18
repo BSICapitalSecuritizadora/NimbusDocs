@@ -15,6 +15,26 @@ final class Auth
         return $admin ?: null;
     }
 
+    public static function isAdmin(): bool
+    {
+        return Session::has('admin');
+    }
+
+    public static function getAdmin(): ?array
+    {
+        return self::admin();
+    }
+
+    public static function loginAdmin(array $admin): void
+    {
+        Session::set('admin', $admin);
+    }
+
+    public static function logoutAdmin(): void
+    {
+        Session::remove('admin');
+    }
+
     public static function requireAdmin(): array
     {
         $admin = self::admin();
@@ -66,6 +86,26 @@ final class Auth
         /** @var array|null $user */
         $user = Session::get('portal_user');
         return $user ?: null;
+    }
+
+    public static function isPortalUser(): bool
+    {
+        return Session::has('portal_user');
+    }
+
+    public static function getPortalUser(): ?array
+    {
+        return self::portalUser();
+    }
+
+    public static function loginPortalUser(array $user): void
+    {
+        Session::set('portal_user', $user);
+    }
+
+    public static function logoutPortalUser(): void
+    {
+        Session::remove('portal_user');
     }
 
     public static function requirePortalUser(): array

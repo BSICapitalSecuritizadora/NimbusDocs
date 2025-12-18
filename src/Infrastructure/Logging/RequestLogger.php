@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Logging;
 
-use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use App\Support\Session;
 
 /**
@@ -13,7 +13,7 @@ use App\Support\Session;
  */
 final class RequestLogger
 {
-    private Logger $logger;
+    private LoggerInterface $logger;
     private float $startTime;
     private string $requestId;
     private string $clientIp;
@@ -22,7 +22,7 @@ final class RequestLogger
     private ?string $user;
     private array $context;
 
-    public function __construct(Logger $logger)
+    public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
         $this->startTime = microtime(true);
@@ -30,6 +30,8 @@ final class RequestLogger
         $this->clientIp = $this->getClientIp();
         $this->method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $this->uri = $_SERVER['REQUEST_URI'] ?? '/';
+        // Path sem query string
+        $this->context['path'] = (string) (parse_url($this->uri, PHP_URL_PATH) ?? '/');
         $this->user = Session::has('admin_user') ? Session::get('admin_user')['email'] ?? 'unknown' : (Session::has('portal_user') ? 'portal_user_' . Session::get('portal_user')['id'] : null);
         $this->context = [];
     }
@@ -71,6 +73,7 @@ final class RequestLogger
             'ip' => $this->clientIp,
             'method' => $this->method,
             'uri' => $this->uri,
+            'path' => (string) (parse_url($this->uri, PHP_URL_PATH) ?? '/'),
             'status_code' => $statusCode,
             'duration_ms' => $duration,
             'user' => $this->user,
@@ -102,6 +105,7 @@ final class RequestLogger
             'ip' => $this->clientIp,
             'method' => $this->method,
             'uri' => $this->uri,
+            'path' => (string) (parse_url($this->uri, PHP_URL_PATH) ?? '/'),
             'status_code' => $statusCode,
             'duration_ms' => $duration,
             'error' => $error,
@@ -136,6 +140,7 @@ final class RequestLogger
             'ip' => $this->clientIp,
             'method' => $this->method,
             'uri' => $this->uri,
+            'path' => (string) (parse_url($this->uri, PHP_URL_PATH) ?? '/'),
             'status_code' => $statusCode,
             'duration_ms' => $duration,
             'reason' => $reason,

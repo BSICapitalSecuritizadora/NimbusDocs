@@ -10,6 +10,7 @@ use App\Presentation\Controller\Portal\PortalDocumentController;
 use App\Presentation\Controller\Portal\PortalGeneralDocumentsController;
 use App\Presentation\Controller\Portal\PortalGeneralDocumentsViewerController;
 use App\Presentation\Controller\Portal\PortalAnnouncementController;
+use App\Infrastructure\Logging\RequestLogger;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;

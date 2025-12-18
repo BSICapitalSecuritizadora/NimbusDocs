@@ -84,9 +84,9 @@ fi
 echo ""
 
 # ============================================================================
-# TESTE 3: Verificar metadados
+# TESTE 3: Verificar metadados (metadata validation)
 # ============================================================================
-echo -e "${BLUE}[3/5] Verificando metadados...${NC}"
+echo -e "${BLUE}[3/5] Verificando metadados/metadata...${NC}"
 if [ -f "$META_FILE" ]; then
     echo -e "${GREEN}✅ Arquivo de metadados encontrado${NC}"
     

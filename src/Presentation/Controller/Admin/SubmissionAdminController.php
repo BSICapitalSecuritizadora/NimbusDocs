@@ -11,6 +11,7 @@ use App\Support\Csrf;
 use App\Support\AuditLogger;
 use App\Support\Session;
 use App\Support\Auth;
+use App\Support\FileUpload;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionNoteRepository;
 use Respect\Validation\Validator as v;
 

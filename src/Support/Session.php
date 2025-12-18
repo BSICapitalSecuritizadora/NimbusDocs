@@ -25,6 +25,12 @@ final class Session
         $_SESSION[$key] = $value;
     }
 
+    // Alias para compatibilidade com testes
+    public static function set(string $key, $value): void
+    {
+        self::put($key, $value);
+    }
+
     public static function get(string $key, $default = null)
     {
         return $_SESSION[$key] ?? $default;
@@ -33,6 +39,12 @@ final class Session
     public static function forget(string $key): void
     {
         unset($_SESSION[$key]);
+    }
+
+    // Alias para compatibilidade com testes
+    public static function remove(string $key): void
+    {
+        self::forget($key);
     }
 
     public static function has(string $key): bool

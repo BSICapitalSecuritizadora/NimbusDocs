@@ -21,6 +21,7 @@ use App\Presentation\Controller\Admin\DocumentCategoryAdminController;
 use App\Presentation\Controller\Admin\GeneralDocumentAdminController;
 use App\Presentation\Controller\Admin\NotificationOutboxAdminController;
 use App\Presentation\Controller\Admin\MonitoringAdminController;
+use App\Infrastructure\Logging\RequestLogger;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
