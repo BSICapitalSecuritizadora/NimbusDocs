@@ -53,3 +53,18 @@ O foco do NimbusDocs é garantir **segurança**, **segregação de responsabilid
    - Usuário final padrão: `cliente@example.com` (o administrador deve gerar ou usar o código seed exibido ao rodar o comando acima)
 
 O Portal do Usuário autentica **exclusivamente por código de acesso** gerado no módulo administrativo, com validade configurável (1h, 24h ou 7d). Cada código é de uso único e pode ser revogado automaticamente ao gerar um novo.
+
+## Worker de notificações (fila de e-mail)
+
+- O worker que processa a tabela `notification_outbox` está em `bin/notifications-worker.php`.
+- Antes de buscar um lote (`claimBatch()`), ele executa um "rescue" para liberar jobs que possam ter ficado travados com status `SENDING` caso o processo caia no meio.
+- A janela para esse rescue é configurável via `.env`:
+
+```env
+# Quantos minutos um job em SENDING deve ter para ser resgatado
+OUTBOX_RESCUE_MINUTES=30
+# Alternativa suportada (fallback):
+# NOTIFICATION_WORKER_RESCUE_MINUTES=30
+```
+
+Se a variável não estiver definida, o padrão é **30 minutos**.

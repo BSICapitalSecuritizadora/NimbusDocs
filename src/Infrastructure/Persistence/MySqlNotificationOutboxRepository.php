@@ -10,6 +10,127 @@ final class MySqlNotificationOutboxRepository
 {
     public function __construct(private PDO $pdo) {}
 
+    /** @return array<int,array<string,mixed>> */
+    public function search(array $filters = [], int $limit = 200): array
+    {
+        $where  = [];
+        $params = [];
+
+        if (!empty($filters['status'])) {
+            $where[] = 'status = :status';
+            $params[':status'] = $filters['status'];
+        }
+
+        if (!empty($filters['type'])) {
+            $where[] = 'type = :type';
+            $params[':type'] = $filters['type'];
+        }
+
+        if (!empty($filters['email'])) {
+            $where[] = 'recipient_email LIKE :email';
+            $params[':email'] = '%' . $filters['email'] . '%';
+        }
+
+        if (!empty($filters['from_date'])) {
+            $where[] = 'DATE(created_at) >= :from';
+            $params[':from'] = $filters['from_date'];
+        }
+
+        if (!empty($filters['to_date'])) {
+            $where[] = 'DATE(created_at) <= :to';
+            $params[':to'] = $filters['to_date'];
+        }
+
+        $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
+        $sql = "
+            SELECT *
+            FROM notification_outbox
+            {$whereSql}
+            ORDER BY created_at DESC, id DESC
+            LIMIT {$limit}
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /** @return array<int,string> */
+    public function distinctTypes(): array
+    {
+        $stmt = $this->pdo->query("
+            SELECT DISTINCT type
+            FROM notification_outbox
+            ORDER BY type ASC
+        ");
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        return array_values(array_map(fn($r) => (string)$r['type'], $rows));
+    }
+
+    /** @return array<int,string> */
+    public function distinctStatuses(): array
+    {
+        // enums conhecidos, mas melhor ler do banco:
+        $stmt = $this->pdo->query("
+            SELECT DISTINCT status
+            FROM notification_outbox
+            ORDER BY status ASC
+        ");
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        return array_values(array_map(fn($r) => (string)$r['status'], $rows));
+    }
+
+    public function find(int $id): ?array
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM notification_outbox WHERE id = :id LIMIT 1");
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+    public function cancel(int $id): bool
+    {
+        // Só cancela se ainda estiver pendente
+        $stmt = $this->pdo->prepare("
+            UPDATE notification_outbox
+            SET status = 'CANCELLED'
+            WHERE id = :id AND status IN ('PENDING')
+        ");
+        $stmt->execute([':id' => $id]);
+        return $stmt->rowCount() > 0;
+    }
+
+    public function reprocess(int $id): bool
+    {
+        // Reprocessa falhas: volta para pending e limpa erro/agenda
+        $stmt = $this->pdo->prepare("
+            UPDATE notification_outbox
+            SET status = 'PENDING',
+                next_attempt_at = NULL,
+                last_error = NULL
+            WHERE id = :id AND status IN ('FAILED')
+        ");
+        $stmt->execute([':id' => $id]);
+        return $stmt->rowCount() > 0;
+    }
+
+    public function resetAttemptsAndReprocess(int $id): bool
+    {
+        // Mais forte: zera attempts também (útil se você aumentou max_attempts)
+        $stmt = $this->pdo->prepare("
+            UPDATE notification_outbox
+            SET status = 'PENDING',
+                attempts = 0,
+                next_attempt_at = NULL,
+                last_error = NULL
+            WHERE id = :id AND status IN ('FAILED','CANCELLED')
+        ");
+        $stmt->execute([':id' => $id]);
+        return $stmt->rowCount() > 0;
+    }
+
     public function enqueue(array $row): int
     {
         $sql = "
@@ -34,34 +155,34 @@ final class MySqlNotificationOutboxRepository
         return (int)$this->pdo->lastInsertId();
     }
 
-        /**
-         * Lista itens da fila com filtros simples.
-         * @param array{status?:string,recipient?:string,type?:string} $filters
-         * @return array<int,array<string,mixed>>
-         */
-        public function list(array $filters = [], int $limit = 100, int $offset = 0): array
-        {
-            $where = [];
-            $params = [];
+    /**
+     * Lista itens da fila com filtros simples.
+     * @param array{status?:string,recipient?:string,type?:string} $filters
+     * @return array<int,array<string,mixed>>
+     */
+    public function list(array $filters = [], int $limit = 100, int $offset = 0): array
+    {
+        $where = [];
+        $params = [];
 
-            if (!empty($filters['status'])) {
-                $where[] = 'status = :status';
-                $params[':status'] = $filters['status'];
-            }
+        if (!empty($filters['status'])) {
+            $where[] = 'status = :status';
+            $params[':status'] = $filters['status'];
+        }
 
-            if (!empty($filters['recipient'])) {
-                $where[] = 'recipient_email LIKE :recipient';
-                $params[':recipient'] = '%' . $filters['recipient'] . '%';
-            }
+        if (!empty($filters['recipient'])) {
+            $where[] = 'recipient_email LIKE :recipient';
+            $params[':recipient'] = '%' . $filters['recipient'] . '%';
+        }
 
-            if (!empty($filters['type'])) {
-                $where[] = 'type LIKE :type';
-                $params[':type'] = '%' . $filters['type'] . '%';
-            }
+        if (!empty($filters['type'])) {
+            $where[] = 'type LIKE :type';
+            $params[':type'] = '%' . $filters['type'] . '%';
+        }
 
-            $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+        $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
-            $sql = "
+        $sql = "
                 SELECT *
                 FROM notification_outbox
                 {$whereSql}
@@ -69,16 +190,16 @@ final class MySqlNotificationOutboxRepository
                 LIMIT :limit OFFSET :offset
             ";
 
-            $stmt = $this->pdo->prepare($sql);
-            foreach ($params as $k => $v) {
-                $stmt->bindValue($k, $v);
-            }
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-            $stmt->execute();
-
-            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($params as $k => $v) {
+            $stmt->bindValue($k, $v);
         }
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
 
     /**
      * Busca lote pronto para envio e trava via status SENDING.

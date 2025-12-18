@@ -113,6 +113,11 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/admin/notifications/outbox', [NotificationOutboxAdminController::class, 'index']);
     $r->addRoute('POST', '/admin/notifications/outbox/{id:\\d+}/reprocess', [NotificationOutboxAdminController::class, 'reprocess']);
     $r->addRoute('POST', '/admin/notifications/outbox/{id:\\d+}/cancel', [NotificationOutboxAdminController::class, 'cancel']);
+    $r->addRoute('GET',  '/admin/notifications/outbox',                    [NotificationOutboxAdminController::class, 'index']);
+    $r->addRoute('GET',  '/admin/notifications/outbox/{id:\d+}',           [NotificationOutboxAdminController::class, 'show']);
+    $r->addRoute('POST', '/admin/notifications/outbox/{id:\d+}/cancel',    [NotificationOutboxAdminController::class, 'cancel']);
+    $r->addRoute('POST', '/admin/notifications/outbox/{id:\d+}/reprocess', [NotificationOutboxAdminController::class, 'reprocess']);
+    $r->addRoute('POST', '/admin/notifications/outbox/{id:\d+}/reset',     [NotificationOutboxAdminController::class, 'resetAndReprocess']);
 
     // (Rotas antigas com AdminMicrosoftAuthController removidas em favor de AdminAuthController)
 
