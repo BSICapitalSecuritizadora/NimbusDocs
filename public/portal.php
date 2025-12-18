@@ -63,6 +63,9 @@ if (false !== $pos = strpos($uri, '?')) {
 }
 $uri = rawurldecode($uri);
 
+// Inicializa Request Logger
+$requestLogger = $config['request_logger'] ?? null;
+
 // ------------- Proteção de rotas do portal -------------
 $publicRoutes = [
     ['GET',  '/portal/login'],
@@ -79,6 +82,9 @@ foreach ($publicRoutes as [$method, $path]) {
 
 // Se não for rota pública e for do /portal, exige usuário logado
 if (str_starts_with($uri, '/portal') && !$isPublic && !Session::has('portal_user')) {
+    if ($requestLogger) {
+        $requestLogger->logUnauthorized(401, 'Portal user not authenticated');
+    }
     header('Location: /portal/login');
     exit;
 }
@@ -89,11 +95,17 @@ $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 switch ($routeInfo[0]) {
     case FastRoute\Dispatcher::NOT_FOUND:
         http_response_code(404);
+        if ($requestLogger) {
+            $requestLogger->logSuccess(404);
+        }
         echo '404 - Página não encontrada';
         break;
 
     case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
         http_response_code(405);
+        if ($requestLogger) {
+            $requestLogger->logError('Method not allowed', 405);
+        }
         echo '405 - Método não permitido';
         break;
 
@@ -101,24 +113,45 @@ switch ($routeInfo[0]) {
         $handler = $routeInfo[1];
         $vars    = $routeInfo[2];
 
-        if (is_array($handler) && isset($handler[0], $handler[1])) {
-            [$class, $method] = $handler;
+        try {
+            if (is_array($handler) && isset($handler[0], $handler[1])) {
+                [$class, $method] = $handler;
 
-            $controller = new $class($config);
-            $response   = $controller->$method($vars);
+                $controller = new $class($config);
+                $response   = $controller->$method($vars);
 
-            if (is_string($response)) {
-                echo $response;
+                if (is_string($response)) {
+                    echo $response;
+                }
+                
+                // Log sucesso
+                $statusCode = http_response_code();
+                if ($requestLogger) {
+                    $requestLogger->logSuccess($statusCode);
+                }
+                break;
             }
-            break;
-        }
 
-        if (is_callable($handler)) {
-            echo $handler(...array_values($vars));
-            break;
-        }
+            if (is_callable($handler)) {
+                echo $handler(...array_values($vars));
+                $statusCode = http_response_code();
+                if ($requestLogger) {
+                    $requestLogger->logSuccess($statusCode);
+                }
+                break;
+            }
 
-        http_response_code(500);
-        echo '500 - Handler inválido';
+            http_response_code(500);
+            if ($requestLogger) {
+                $requestLogger->logError('Invalid handler', 500);
+            }
+            echo '500 - Handler inválido';
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            if ($requestLogger) {
+                $requestLogger->logError($e->getMessage(), 500, $e);
+            }
+            throw $e;
+        }
         break;
 }

@@ -18,6 +18,7 @@ use App\Infrastructure\Persistence\MySqlPortalUserRepository;
 use App\Infrastructure\Persistence\MySqlNotificationOutboxRepository;
 use App\Infrastructure\Auth\AzureAdminAuthClient;
 use App\Infrastructure\Logging\PortalAccessLogger;
+use App\Infrastructure\Logging\RequestLogger;
 use App\Infrastructure\ErrorHandler;
 
 
@@ -84,6 +85,13 @@ $logger->pushHandler(
 
 // Adiciona logger ao config
 $config['logger'] = $logger;
+
+// -------------------------------------------------------------------------
+// Request Logger (logging avançado de requisições HTTP)
+// -------------------------------------------------------------------------
+$requestLogger = new RequestLogger($logger);
+$config['request_logger'] = $requestLogger;
+
 
 // -------------------------------------------------------------------------
 // Serviço de e-mail via Microsoft Graph

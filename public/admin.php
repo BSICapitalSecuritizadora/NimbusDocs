@@ -20,6 +20,7 @@ use App\Presentation\Controller\Admin\ReportsAdminController;
 use App\Presentation\Controller\Admin\DocumentCategoryAdminController;
 use App\Presentation\Controller\Admin\GeneralDocumentAdminController;
 use App\Presentation\Controller\Admin\NotificationOutboxAdminController;
+use App\Presentation\Controller\Admin\MonitoringAdminController;
 use App\Support\Session;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -116,6 +117,12 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('POST', '/admin/notifications/outbox/{id:\d+}/reprocess', [NotificationOutboxAdminController::class, 'reprocess']);
     $r->addRoute('POST', '/admin/notifications/outbox/{id:\d+}/reset',     [NotificationOutboxAdminController::class, 'resetAndReprocess']);
 
+    // Monitoramento avançado (requisições HTTP, alertas, performance)
+    $r->addRoute('GET',  '/admin/monitoring',                    [MonitoringAdminController::class, 'index']);
+    $r->addRoute('GET',  '/admin/monitoring/api/stats',          [MonitoringAdminController::class, 'apiStats']);
+    $r->addRoute('GET',  '/admin/monitoring/api/alerts',         [MonitoringAdminController::class, 'apiAlerts']);
+    $r->addRoute('GET',  '/admin/monitoring/api/requests',       [MonitoringAdminController::class, 'apiRequests']);
+
     // (Rotas antigas com AdminMicrosoftAuthController removidas em favor de AdminAuthController)
 
     // Downloads de arquivos de submissão
@@ -141,6 +148,9 @@ if (false !== $pos = strpos($uri, '?')) {
 }
 $uri = rawurldecode($uri);
 
+// Inicializa Request Logger
+$requestLogger = $config['request_logger'] ?? null;
+
 // --------------------
 // Proteção de rotas admin
 // --------------------
@@ -161,6 +171,9 @@ foreach ($publicRoutes as [$method, $path]) {
 
 // Se não for rota pública e não tiver admin logado, redireciona
 if (str_starts_with($uri, '/admin') && !$isPublic && !Session::has('admin')) {
+    if ($requestLogger) {
+        $requestLogger->logUnauthorized(401, 'Not authenticated');
+    }
     header('Location: /admin/login');
     exit;
 }
@@ -171,11 +184,17 @@ $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 switch ($routeInfo[0]) {
     case FastRoute\Dispatcher::NOT_FOUND:
         http_response_code(404);
+        if ($requestLogger) {
+            $requestLogger->logSuccess(404);
+        }
         echo '404 - Página não encontrada';
         break;
 
     case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
         http_response_code(405);
+        if ($requestLogger) {
+            $requestLogger->logError('Method not allowed', 405);
+        }
         echo '405 - Método não permitido';
         break;
 
@@ -183,27 +202,48 @@ switch ($routeInfo[0]) {
         $handler = $routeInfo[1];
         $vars    = $routeInfo[2];
 
-        // 1) Se o handler for um array [Controller::class, 'method']
-        if (is_array($handler) && isset($handler[0], $handler[1])) {
-            [$class, $method] = $handler;
+        try {
+            // 1) Se o handler for um array [Controller::class, 'method']
+            if (is_array($handler) && isset($handler[0], $handler[1])) {
+                [$class, $method] = $handler;
 
-            $controller = new $class($config);
-            $response   = $controller->$method($vars);
+                $controller = new $class($config);
+                $response   = $controller->$method($vars);
 
-            if (is_string($response)) {
-                echo $response;
+                if (is_string($response)) {
+                    echo $response;
+                }
+                
+                // Log sucesso
+                $statusCode = http_response_code();
+                if ($requestLogger) {
+                    $requestLogger->logSuccess($statusCode);
+                }
+                break;
             }
-            break;
-        }
 
-        // 2) Se for uma Closure / callable simples
-        if (is_callable($handler)) {
-            echo $handler(...array_values($vars));
-            break;
-        }
+            // 2) Se for uma Closure / callable simples
+            if (is_callable($handler)) {
+                echo $handler(...array_values($vars));
+                $statusCode = http_response_code();
+                if ($requestLogger) {
+                    $requestLogger->logSuccess($statusCode);
+                }
+                break;
+            }
 
-        // 3) Fallback (não deveria chegar aqui)
-        http_response_code(500);
-        echo '500 - Handler inválido';
+            // 3) Fallback (não deveria chegar aqui)
+            http_response_code(500);
+            if ($requestLogger) {
+                $requestLogger->logError('Invalid handler', 500);
+            }
+            echo '500 - Handler inválido';
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            if ($requestLogger) {
+                $requestLogger->logError($e->getMessage(), 500, $e);
+            }
+            throw $e;
+        }
         break;
 }
