@@ -1,4 +1,5 @@
 <?php
+use App\Support\Auth;
 
 /** @var array $filters */
 /** @var array $rows */

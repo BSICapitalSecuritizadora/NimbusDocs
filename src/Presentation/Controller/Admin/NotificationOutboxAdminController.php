@@ -30,8 +30,8 @@ final class NotificationOutboxAdminController
             'status'    => $_GET['status']    ?? '',
             'type'      => $_GET['type']      ?? '',
             'email'     => $_GET['email']     ?? '',
-            'from_date' => $_GET['from_date'] ?: $defaultFrom,
-            'to_date'   => $_GET['to_date']   ?: $defaultTo,
+            'from_date' => $_GET['from_date'] ?? $defaultFrom,
+            'to_date'   => $_GET['to_date']   ?? $defaultTo,
         ];
 
         $rows     = $this->outbox->search($filters, 200);
@@ -47,8 +47,8 @@ final class NotificationOutboxAdminController
             'types'    => $types,
             'statuses' => $statuses,
             'csrfToken' => Csrf::token(),
-            'success'  => Session::flash('success'),
-            'error'    => Session::flash('error'),
+            'success'  => Session::getFlash('success'),
+            'error'    => Session::getFlash('error'),
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';

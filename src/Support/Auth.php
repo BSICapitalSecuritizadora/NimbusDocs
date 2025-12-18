@@ -48,6 +48,19 @@ final class Auth
         return $admin;
     }
 
+    /**
+     * Verifica se o admin logado possui um dos perfis informados.
+     */
+    public static function hasRole(string ...$roles): bool
+    {
+        $admin = self::admin();
+        if (!$admin) {
+            return false;
+        }
+        $role = $admin['role'] ?? 'ADMIN';
+        return in_array($role, $roles, true);
+    }
+
     public static function portalUser(): ?array
     {
         /** @var array|null $user */
