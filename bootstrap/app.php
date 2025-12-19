@@ -32,23 +32,40 @@ $dotenv->safeLoad();
 date_default_timezone_set($_ENV['APP_TIMEZONE'] ?? 'America/Sao_Paulo');
 
 // Sessão - configure cookies properly for HTTPS
+$appUrl = $_ENV['APP_URL'] ?? '';
+$appUrlParts = parse_url($appUrl);
+$appUrlHost = $appUrlParts['host'] ?? '';
+
 $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
     || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
-    || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443);
+    || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
+    || (($appUrlParts['scheme'] ?? '') === 'https');
 
-session_name($_ENV['SESSION_NAME'] ?? 'nimbusdocs_session');
+$sessionName = $_ENV['SESSION_NAME'] ?? 'nimbusdocs_session';
+session_name($sessionName);
 
 // Set cookie params before starting session
 if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_set_cookie_params([
+    $cookieParams = [
         'lifetime' => 0, // Session cookie (until browser closes)
         'path' => '/',
-        'domain' => '',
+        'domain' => $appUrlHost ?: '',
         'secure' => $isHttps,
         'httponly' => true,
         'samesite' => 'Lax',
-    ]);
+    ];
+
+    session_set_cookie_params($cookieParams);
     session_start();
+
+    // Garantir que o cookie de sessão seja enviado já na primeira resposta
+    if (!headers_sent()) {
+        setcookie(
+            $sessionName,
+            session_id(),
+            $cookieParams
+        );
+    }
 }
 
 // Debug / erros
