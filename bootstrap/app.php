@@ -63,7 +63,14 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         setcookie(
             $sessionName,
             session_id(),
-            $cookieParams
+            [
+                'expires' => 0,
+                'path' => $cookieParams['path'],
+                'domain' => $cookieParams['domain'],
+                'secure' => $cookieParams['secure'],
+                'httponly' => $cookieParams['httponly'],
+                'samesite' => $cookieParams['samesite'],
+            ]
         );
     }
 }
