@@ -36,10 +36,11 @@ $appUrl = $_ENV['APP_URL'] ?? '';
 $appUrlParts = parse_url($appUrl);
 $appUrlHost = $appUrlParts['host'] ?? '';
 
+// Detect if current request is actually HTTPS (not just APP_URL config)
+// This allows the same code to work in both HTTP local dev and HTTPS production
 $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
     || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
-    || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
-    || (($appUrlParts['scheme'] ?? '') === 'https');
+    || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443);
 
 $sessionName = $_ENV['SESSION_NAME'] ?? 'nimbusdocs_session';
 session_name($sessionName);
