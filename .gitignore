@@ -19,6 +19,7 @@
 *.tmp
 *.swp
 *.swo
+project.txt
 
 # Arquivos do sistema operacional / IDEs
 .DS_Store
