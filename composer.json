@@ -1,12 +1,50 @@
 {
+    "name": "bsi/nimbusdocs",
+    "description": "Portal seguro e modular para envio e gerenciamento centralizado de informações e documentos, parte do ecossistema Nimbus.",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "BSI Capital - Departamento de Tecnologia",
+            "email": "ti@bsicapital.com.br"
+        }
+    ],
     "require": {
+        "php": "^8.1",
         "vlucas/phpdotenv": "^5.6",
         "nikic/fast-route": "^1.3",
-        "monolog/monolog": "^3.10",
-        "symfony/validator": "^7.4",
+        "monolog/monolog": "^3.9",
+        "symfony/var-dumper": "^7.3",
+        "respect/validation": "^2.4",
         "ramsey/uuid": "^4.9",
         "league/flysystem": "^3.30",
-        "firebase/php-jwt": "^7.0",
-        "robmorgan/phinx": "^0.16.10"
-    }
+        "phpmailer/phpmailer": "^7.0",
+        "thenetworg/oauth2-azure": "^2.2",
+        "league/oauth2-client": "^2.8"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "start": "php -S localhost:8000 -t public",
+        "test": "phpunit",
+        "migrate": "php bin/migrate.php",
+        "seed": "php bin/seed.php"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }

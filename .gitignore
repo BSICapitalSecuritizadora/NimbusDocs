@@ -1,8 +1,10 @@
 # Dependências do Composer
 /vendor/
+/Old_version/vendor/
 
 # Configurações sensíveis
 /.env
+/Old_version/.env
 /.env.local
 /config/local.php
 
@@ -20,6 +22,7 @@
 *.swp
 *.swo
 project.txt
+project/
 
 # Arquivos do sistema operacional / IDEs
 .DS_Store
