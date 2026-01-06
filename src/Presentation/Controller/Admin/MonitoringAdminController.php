@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Presentation\Controller\Admin;
 
+use App\Support\Auth;
 use App\Infrastructure\Logging\RequestLogger;
 use App\Support\Session;
 
@@ -20,13 +21,10 @@ final class MonitoringAdminController
     /**
      * Exibe dashboard principal
      */
-    public function index(array $vars = []): string
+    public function index(array $vars = [])
     {
         // Verifica autorização
-        if (!Session::has('admin_user')) {
-            header('Location: /admin/login');
-            exit;
-        }
+        Auth::requireRole('ADMIN', 'SUPER_ADMIN');
 
         // Obtém dados para dashboard
         $stats = RequestLogger::getStatistics(24); // Últimas 24 horas
@@ -54,14 +52,20 @@ final class MonitoringAdminController
             : 0;
 
         // Views
-        return $this->renderMonitoringDashboard([
-            'stats' => $stats,
-            'recentRequests' => $recentRequests,
-            'alerts' => array_slice($alerts, 0, 30), // Últimos 30 alertas
-            'successRate' => $successRate,
-            'errorRate' => $errorRate,
-            'filter' => $filter,
-        ]);
+        $viewData = [
+            'pageTitle' => 'Monitoramento Avançado',
+            'data' => [
+                'stats' => $stats,
+                'recentRequests' => $recentRequests,
+                'alerts' => array_slice($alerts, 0, 30),
+                'successRate' => $successRate,
+                'errorRate' => $errorRate,
+                'filter' => $filter,
+            ]
+        ];
+
+        $contentView = __DIR__ . '/../../View/admin/monitoring/index.php';
+        require __DIR__ . '/../../View/admin/layouts/base.php';
     }
 
     /**
@@ -69,7 +73,7 @@ final class MonitoringAdminController
      */
     public function apiStats(array $vars = []): string
     {
-        if (!Session::has('admin_user')) {
+        if (!Auth::hasRole('ADMIN', 'SUPER_ADMIN')) {
             http_response_code(401);
             return json_encode(['error' => 'Unauthorized']);
         }
@@ -86,7 +90,7 @@ final class MonitoringAdminController
      */
     public function apiAlerts(array $vars = []): string
     {
-        if (!Session::has('admin_user')) {
+        if (!Auth::hasRole('ADMIN', 'SUPER_ADMIN')) {
             http_response_code(401);
             return json_encode(['error' => 'Unauthorized']);
         }
@@ -102,7 +106,7 @@ final class MonitoringAdminController
      */
     public function apiRequests(array $vars = []): string
     {
-        if (!Session::has('admin_user')) {
+        if (!Auth::hasRole('ADMIN', 'SUPER_ADMIN')) {
             http_response_code(401);
             return json_encode(['error' => 'Unauthorized']);
         }
@@ -117,10 +121,5 @@ final class MonitoringAdminController
     /**
      * Renderiza dashboard
      */
-    private function renderMonitoringDashboard(array $data): string
-    {
-        ob_start();
-        include __DIR__ . '/../../Presentation/View/admin/monitoring/index.php';
-        return ob_get_clean();
-    }
+    /* private function renderMonitoringDashboard removed */
 }

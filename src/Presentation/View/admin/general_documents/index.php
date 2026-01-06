@@ -117,7 +117,7 @@ $old = $viewData['old'] ?? [];
                                         </div>
                                         <div class="small text-muted">
                                             <i class="bi bi-calendar3 me-1"></i>
-                                            <?= htmlspecialchars($doc['published_at'] ?? 'Agora', ENT_QUOTES, 'UTF-8') ?>
+                                            <?= htmlspecialchars(date('d/m/Y H:i', strtotime($doc['published_at'])) ?? 'Agora', ENT_QUOTES, 'UTF-8') ?>
                                         </div>
                                     </div>
                                 </td>
