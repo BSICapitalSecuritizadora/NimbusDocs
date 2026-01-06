@@ -15,35 +15,48 @@ $queryExport = http_build_query([
     'to_date'   => $filters['to_date']  ?? '',
 ]);
 ?>
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h1 class="h4 mb-1">Relatório de submissões</h1>
-        <p class="text-muted small mb-0">
-            Análise por período, status e usuário das submissões recebidas via portal.
-        </p>
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <div class="nd-avatar nd-avatar-lg" style="background: var(--nd-navy-600);">
+            <i class="bi bi-file-earmark-bar-graph-fill text-white"></i>
+        </div>
+        <div>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Relatório de Submissões</h1>
+            <p class="text-muted mb-0 small">Análise por período, status e usuário das submissões recebidas via portal.</p>
+        </div>
     </div>
-    <a href="/admin/reports/submissions/export?<?= $queryExport ?>"
-        class="btn btn-sm btn-outline-secondary">
-        <i class="bi bi-download"></i> Exportar CSV
+    <a href="/admin/reports/submissions/export?<?= $queryExport ?>" class="nd-btn nd-btn-outline nd-btn-sm">
+        <i class="bi bi-download me-1"></i> Exportar CSV
     </a>
 </div>
 
-<div class="card mb-3">
-    <div class="card-body">
-        <form class="row g-2">
+<!-- Filters -->
+<div class="nd-card mb-4">
+    <div class="nd-card-header d-flex align-items-center gap-2">
+        <i class="bi bi-funnel-fill" style="color: var(--nd-gold-500);"></i>
+        <h5 class="nd-card-title mb-0">Filtros</h5>
+    </div>
+    <div class="nd-card-body">
+        <form class="row g-3">
             <div class="col-md-2">
-                <label class="form-label small mb-1">De</label>
-                <input type="date" name="from_date" class="form-control form-control-sm"
-                    value="<?= htmlspecialchars($filters['from_date'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <label class="nd-label">De</label>
+                <div class="nd-input-group">
+                    <input type="date" name="from_date" class="nd-input"
+                        value="<?= htmlspecialchars($filters['from_date'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
             <div class="col-md-2">
-                <label class="form-label small mb-1">Até</label>
-                <input type="date" name="to_date" class="form-control form-control-sm"
-                    value="<?= htmlspecialchars($filters['to_date'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <label class="nd-label">Até</label>
+                <div class="nd-input-group">
+                    <input type="date" name="to_date" class="nd-input"
+                        value="<?= htmlspecialchars($filters['to_date'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
             <div class="col-md-2">
-                <label class="form-label small mb-1">Status</label>
-                <select name="status" class="form-select form-select-sm">
+                <label class="nd-label">Status</label>
+                <select name="status" class="nd-input form-select">
                     <?php
                     $statusOptions = [
                         ''           => 'Todos',
@@ -60,73 +73,110 @@ $queryExport = http_build_query([
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-3">
-                <label class="form-label small mb-1">E-mail do usuário</label>
-                <input type="text" name="email" class="form-control form-control-sm"
-                    placeholder="contato@cliente.com"
-                    value="<?= htmlspecialchars($filters['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+            <div class="col-md-4">
+                <label class="nd-label">E-mail do usuário</label>
+                <div class="nd-input-group">
+                    <input type="text" name="email" class="nd-input"
+                        placeholder="contato@cliente.com"
+                        value="<?= htmlspecialchars($filters['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                        style="padding-left: 2.5rem;">
+                    <i class="bi bi-envelope nd-input-icon"></i>
+                </div>
             </div>
             <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-sm btn-primary w-100">Aplicar filtros</button>
+                <button type="submit" class="nd-btn nd-btn-primary w-100">
+                    <i class="bi bi-search me-1"></i> Filtrar
+                </button>
             </div>
         </form>
     </div>
 </div>
 
-<div class="row g-3 mb-4">
+<!-- KPIs -->
+<div class="row g-4 mb-4">
     <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="small text-muted mb-1">Total de submissões</div>
-                <div class="fs-4 fw-semibold"><?= $kpis['total'] ?? 0 ?></div>
+        <div class="nd-card h-100 border-start border-4 border-primary">
+            <div class="nd-card-body">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="small text-muted text-uppercase fw-bold">Total</div>
+                    <div class="nd-avatar nd-avatar-sm bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-list-task"></i>
+                    </div>
+                </div>
+                <div class="fs-3 fw-bold text-dark"><?= $kpis['total'] ?? 0 ?></div>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="small text-muted mb-1">Pendentes</div>
-                <div class="fs-4 fw-semibold text-warning"><?= $kpis['pending'] ?? 0 ?></div>
+        <div class="nd-card h-100 border-start border-4 border-warning">
+            <div class="nd-card-body">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="small text-muted text-uppercase fw-bold">Pendentes</div>
+                    <div class="nd-avatar nd-avatar-sm bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-clock"></i>
+                    </div>
+                </div>
+                <div class="fs-3 fw-bold text-dark"><?= $kpis['pending'] ?? 0 ?></div>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="small text-muted mb-1">Finalizadas</div>
-                <div class="fs-4 fw-semibold text-success"><?= $kpis['approved'] ?? 0 ?></div>
+        <div class="nd-card h-100 border-start border-4 border-success">
+            <div class="nd-card-body">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="small text-muted text-uppercase fw-bold">Finalizadas</div>
+                    <div class="nd-avatar nd-avatar-sm bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                </div>
+                <div class="fs-3 fw-bold text-dark"><?= $kpis['approved'] ?? 0 ?></div>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="small text-muted mb-1">Rejeitadas</div>
-                <div class="fs-4 fw-semibold text-danger"><?= $kpis['rejected'] ?? 0 ?></div>
+        <div class="nd-card h-100 border-start border-4 border-danger">
+            <div class="nd-card-body">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="small text-muted text-uppercase fw-bold">Rejeitadas</div>
+                    <div class="nd-avatar nd-avatar-sm bg-danger bg-opacity-10 text-danger">
+                        <i class="bi bi-x-circle"></i>
+                    </div>
+                </div>
+                <div class="fs-3 fw-bold text-dark"><?= $kpis['rejected'] ?? 0 ?></div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row g-3 mb-4">
+<div class="row g-4 mb-4">
+    <!-- Chart -->
     <div class="col-12 col-xl-7">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <h2 class="h6 mb-3">Submissões por dia (período filtrado)</h2>
-                <canvas id="chartSubmissionsByDay" height="200"></canvas>
+        <div class="nd-card h-100">
+            <div class="nd-card-header d-flex align-items-center gap-2">
+                <i class="bi bi-graph-up" style="color: var(--nd-blue-500);"></i>
+                <h5 class="nd-card-title mb-0">Submissões por dia (período filtrado)</h5>
+            </div>
+            <div class="nd-card-body">
+                <canvas id="chartSubmissionsByDay" height="250"></canvas>
             </div>
         </div>
     </div>
 
+    <!-- Ranking -->
     <div class="col-12 col-xl-5">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <h2 class="h6 mb-3">Usuários com mais submissões</h2>
+        <div class="nd-card h-100">
+            <div class="nd-card-header d-flex align-items-center gap-2">
+                <i class="bi bi-trophy" style="color: var(--nd-gold-500);"></i>
+                <h5 class="nd-card-title mb-0">Top Usuários</h5>
+            </div>
+            <div class="nd-card-body p-0">
                 <?php if (!$ranking): ?>
-                    <p class="text-muted small mb-0">Nenhuma submissão no período.</p>
+                    <div class="text-center py-5">
+                        <p class="text-muted mb-0 small">Nenhuma submissão no período.</p>
+                    </div>
                 <?php else: ?>
                     <div class="table-responsive">
-                        <table class="table table-sm align-middle mb-0">
+                        <table class="nd-table">
                             <thead>
                                 <tr>
                                     <th>Usuário</th>
@@ -136,13 +186,17 @@ $queryExport = http_build_query([
                             <tbody>
                                 <?php foreach ($ranking as $row): ?>
                                     <tr>
-                                        <td class="small">
-                                            <?= htmlspecialchars($row['full_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?><br>
-                                            <span class="text-muted">
-                                                <?= htmlspecialchars($row['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
-                                            </span>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span class="text-dark fw-medium small">
+                                                    <?= htmlspecialchars($row['full_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                                                </span>
+                                                <span class="text-muted x-small">
+                                                    <?= htmlspecialchars($row['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td class="small text-end fw-semibold">
+                                        <td class="text-end fw-bold text-dark">
                                             <?= (int)$row['total'] ?>
                                         </td>
                                     </tr>
@@ -156,20 +210,24 @@ $queryExport = http_build_query([
     </div>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <h2 class="h6 mb-3">Submissões (detalhamento)</h2>
-
+<!-- Detailed List -->
+<div class="nd-card">
+    <div class="nd-card-header d-flex align-items-center gap-2">
+        <i class="bi bi-table" style="color: var(--nd-navy-500);"></i>
+        <h5 class="nd-card-title mb-0">Detalhamento das Submissões</h5>
+    </div>
+    <div class="nd-card-body p-0">
         <?php if (!$submissions): ?>
-            <p class="text-muted small mb-0">
-                Nenhuma submissão encontrada para os filtros informados.
-            </p>
+            <div class="text-center py-5">
+                <i class="bi bi-inbox text-muted mb-2" style="font-size: 2rem;"></i>
+                <p class="text-muted mb-0">Nenhuma submissão encontrada para os filtros informados.</p>
+            </div>
         <?php else: ?>
             <div class="table-responsive">
-                <table class="table table-sm align-middle mb-0">
+                <table class="nd-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th style="width: 60px;">ID</th>
                             <th>Usuário</th>
                             <th>Título</th>
                             <th>Status</th>
@@ -180,33 +238,54 @@ $queryExport = http_build_query([
                     <tbody>
                         <?php foreach ($submissions as $s): ?>
                             <tr>
-                                <td>#<?= (int)$s['id'] ?></td>
-                                <td class="small">
-                                    <?= htmlspecialchars($s['user_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?><br>
-                                    <span class="text-muted">
-                                        <?= htmlspecialchars($s['user_email'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                                <td><span class="text-muted small">#<?= (int)$s['id'] ?></span></td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="text-dark fw-medium small">
+                                            <?= htmlspecialchars($s['user_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                                        </span>
+                                        <span class="text-muted x-small">
+                                            <?= htmlspecialchars($s['user_email'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-dark small">
+                                        <?= htmlspecialchars($s['title'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
                                     </span>
                                 </td>
-                                <td class="small">
-                                    <?= htmlspecialchars($s['title'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
-                                </td>
-                                <td class="small">
-                                    <span class="badge 
+                                <td>
                                     <?php
                                     $st = $s['status'] ?? '';
-                                    if ($st === 'PENDENTE')   echo 'bg-warning text-dark';
-                                    elseif ($st === 'FINALIZADA') echo 'bg-success';
-                                    elseif ($st === 'REJEITADA')  echo 'bg-danger';
-                                    else echo 'bg-secondary';
-                                    ?>">
-                                        <?= htmlspecialchars($st, ENT_QUOTES, 'UTF-8') ?>
+                                    $badge = 'nd-badge-secondary';
+                                    $label = 'Desconhecido';
+                                    
+                                    if ($st === 'PENDENTE') {
+                                        $badge = 'nd-badge-warning'; // ou bg-warning manual se preferir
+                                        $badge = 'bg-warning text-dark border-warning';
+                                        $label = 'Pendente';
+                                    } elseif ($st === 'FINALIZADA') {
+                                        $badge = 'nd-badge-success';
+                                        $label = 'Finalizada';
+                                    } elseif ($st === 'REJEITADA') {
+                                        $badge = 'nd-badge-danger';
+                                        $label = 'Rejeitada';
+                                    }
+                                    ?>
+                                    <span class="nd-badge <?= $badge ?>">
+                                        <?= htmlspecialchars($label) ?>
                                     </span>
                                 </td>
-                                <td class="small text-muted">
-                                    <?= htmlspecialchars($s['created_at'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                <td>
+                                    <div class="small text-muted">
+                                        <i class="bi bi-calendar-event me-1"></i>
+                                        <?= htmlspecialchars(date('d/m/Y H:i', strtotime($s['created_at'] ?? 'now'))) ?>
+                                    </div>
                                 </td>
-                                <td class="small text-muted">
-                                    <?= htmlspecialchars($s['updated_at'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                <td>
+                                    <div class="small text-muted">
+                                        <?= $s['updated_at'] ? date('d/m/Y H:i', strtotime($s['updated_at'])) : '-' ?>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -229,17 +308,41 @@ $queryExport = http_build_query([
             data: {
                 labels: labels,
                 datasets: [{
+                    label: 'Submissões',
                     data: values,
-                    fill: false,
-                    tension: 0.2
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
                 scales: {
                     y: {
                         beginAtZero: true,
+                        grid: {
+                            borderDash: [2, 4],
+                            color: '#e9ecef'
+                        },
                         ticks: {
-                            precision: 0
+                            precision: 0,
+                            font: { size: 11 }
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 11 }
                         }
                     }
                 }
