@@ -107,7 +107,7 @@
     <div class="row g-4">
         <!-- Recent Submissions -->
         <div class="col-lg-8">
-            <div class="nd-card">
+            <div class="nd-card h-100">
                 <div class="nd-card-header d-flex align-items-center justify-content-between">
                     <h5 class="nd-card-title mb-0">
                         <i class="bi bi-inbox me-2" style="color: var(--nd-gold-500);"></i>
@@ -134,42 +134,45 @@
                                     <th></th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="align-middle">
                                 <?php foreach ($recentSubmissions as $s): ?>
                                     <?php
-                                    $statusClass = match($s['status'] ?? '') {
-                                        'PENDING', 'UNDER_REVIEW' => 'warning',
-                                        'COMPLETED', 'APPROVED' => 'success',
-                                        'REJECTED' => 'danger',
-                                        default => 'secondary'
-                                    };
-                                    $statusLabel = match($s['status'] ?? '') {
-                                        'PENDING' => 'Pendente',
-                                        'UNDER_REVIEW' => 'Em Análise',
-                                        'COMPLETED' => 'Concluída',
-                                        'APPROVED' => 'Aprovada',
-                                        'REJECTED' => 'Rejeitada',
-                                        default => $s['status'] ?? '-'
+                                    $statusConfig = match($s['status'] ?? '') {
+                                        'PENDING'       => ['label' => 'Pendente', 'class' => 'warning', 'icon' => 'bi-clock'],
+                                        'UNDER_REVIEW'  => ['label' => 'Em Análise', 'class' => 'info', 'icon' => 'bi-search'],
+                                        'APPROVED'      => ['label' => 'Aprovada', 'class' => 'success', 'icon' => 'bi-check-circle'],
+                                        'COMPLETED'     => ['label' => 'Concluída', 'class' => 'success', 'icon' => 'bi-check-all'],
+                                        'REJECTED'      => ['label' => 'Rejeitada', 'class' => 'danger', 'icon' => 'bi-x-circle'],
+                                        default         => ['label' => $s['status'] ?? '-', 'class' => 'secondary', 'icon' => 'bi-dash']
                                     };
                                     ?>
                                     <tr>
                                         <td>
-                                            <span class="fw-semibold" style="color: var(--nd-gray-800);">#<?= $s['id'] ?></span>
-                                        </td>
-                                        <td><?= htmlspecialchars($s['user_name'] ?? 'Usuário', ENT_QUOTES) ?></td>
-                                        <td>
-                                            <span style="color: var(--nd-gray-500);">
-                                                <?= htmlspecialchars($s['submitted_at'] ?? '', ENT_QUOTES) ?>
-                                            </span>
+                                            <span class="fw-bold" style="color: var(--nd-navy-700);">#<?= $s['id'] ?></span>
                                         </td>
                                         <td>
-                                            <span class="nd-badge nd-badge-<?= $statusClass ?>">
-                                                <?= $statusLabel ?>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="nd-avatar nd-avatar-xs text-white" style="background-color: var(--nd-navy-500); width: 24px; height: 24px; font-size: 0.75rem;">
+                                                    <?= strtoupper(substr($s['user_name'] ?? 'U', 0, 1)) ?>
+                                                </div>
+                                                <span class="text-dark fw-medium"><?= htmlspecialchars($s['user_name'] ?? 'Usuário', ENT_QUOTES) ?></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center text-muted small">
+                                                <i class="bi bi-calendar3 me-1"></i>
+                                                <?= date('d/m/Y H:i', strtotime($s['submitted_at'] ?? 'now')) ?>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge rounded-pill fw-normal bg-<?= $statusConfig['class'] ?>-subtle text-<?= $statusConfig['class'] ?>-emphasis border border-<?= $statusConfig['class'] ?>-subtle">
+                                                <i class="bi <?= $statusConfig['icon'] ?> me-1"></i>
+                                                <?= $statusConfig['label'] ?>
                                             </span>
                                         </td>
                                         <td class="text-end">
-                                            <a href="/admin/submissions/<?= $s['id'] ?>" class="nd-btn nd-btn-outline nd-btn-sm">
-                                                <i class="bi bi-eye"></i>
+                                            <a href="/admin/submissions/<?= $s['id'] ?>" class="nd-btn nd-btn-ghost nd-btn-sm" title="Ver detalhes">
+                                                <i class="bi bi-chevron-right"></i>
                                             </a>
                                         </td>
                                     </tr>
@@ -185,31 +188,69 @@
         <div class="col-lg-4">
             <!-- Recent Activity -->
             <div class="nd-card mb-4">
-                <div class="nd-card-header">
+                <div class="nd-card-header d-flex align-items-center justify-content-between">
                     <h5 class="nd-card-title mb-0">
                         <i class="bi bi-activity me-2" style="color: var(--nd-gold-500);"></i>
                         Atividade Recente
                     </h5>
+                    <a href="/admin/audit-logs" class="nd-btn nd-btn-link nd-btn-sm p-0 text-decoration-none" style="font-size: 0.8rem;">Ver tudo</a>
                 </div>
-                <div class="nd-card-body">
+                <div class="nd-card-body p-0">
                     <?php if (!$recentLogs): ?>
-                        <p class="text-muted mb-0 small">Nenhuma atividade registrada.</p>
+                        <div class="p-3 text-center text-muted small">Nenhuma atividade registrada.</div>
                     <?php else: ?>
-                        <div class="d-flex flex-column gap-3">
-                            <?php foreach (array_slice($recentLogs, 0, 5) as $log): ?>
-                                <div class="d-flex gap-3">
-                                    <div class="nd-avatar" style="width: 36px; height: 36px; font-size: 0.875rem; flex-shrink: 0;">
-                                        <i class="bi bi-lightning-fill" style="color: var(--nd-gold-500); font-size: 0.875rem;"></i>
+                        <div class="list-group list-group-flush">
+                            <?php foreach (array_slice($recentLogs, 0, 6) as $log): ?>
+                                <?php
+                                    $actionKey = $log['action'] ?? 'UNKNOWN';
+                                    
+                                    // Map text
+                                    $actionText = match($actionKey) {
+                                        'LOGIN_SUCCESS' => 'Login realizado',
+                                        'LOGIN_FAILED' => 'Falha no login',
+                                        'PORTAL_USER_CREATED' => 'Usuário criado',
+                                        'PORTAL_USER_UPDATED' => 'Usuário atualizado',
+                                        'PORTAL_ACCESS_LINK_GENERATED' => 'Link gerado',
+                                        'SUBMISSION_CREATED' => 'Submissão recebida',
+                                        'PORTAL_SUBMISSION_CREATED' => 'Submissão (Portal)',
+                                        default => ucwords(strtolower(str_replace('_', ' ', $actionKey)))
+                                    };
+
+                                    // Map color/icon
+                                    $iconClass = 'bi-circle-fill';
+                                    $colorStyle = 'text-secondary';
+                                    $bgStyle = 'bg-light';
+                                    
+                                    if (str_contains($actionKey, 'LOGIN_SUCCESS')) {
+                                        $iconClass = 'bi-check-circle-fill';
+                                        $colorStyle = 'text-success';
+                                        $bgStyle = 'bg-success-subtle';
+                                    } elseif (str_contains($actionKey, 'FAILED')) {
+                                        $iconClass = 'bi-x-circle-fill';
+                                        $colorStyle = 'text-danger';
+                                        $bgStyle = 'bg-danger-subtle';
+                                    } elseif (str_contains($actionKey, 'CREATED')) {
+                                        $iconClass = 'bi-plus-circle-fill';
+                                        $colorStyle = 'text-primary';
+                                        $bgStyle = 'bg-primary-subtle';
+                                    } elseif (str_contains($actionKey, 'UPDATED')) {
+                                        $iconClass = 'bi-pencil-fill';
+                                        $colorStyle = 'text-info';
+                                        $bgStyle = 'bg-info-subtle';
+                                    }
+                                ?>
+                                <div class="list-group-item d-flex gap-3 align-items-start py-3 border-light">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 <?= $bgStyle ?>" 
+                                         style="width: 32px; height: 32px;">
+                                        <i class="bi <?= $iconClass ?> <?= $colorStyle ?>" style="font-size: 0.875rem;"></i>
                                     </div>
-                                    <div style="min-width: 0;">
-                                        <div class="fw-semibold small" style="color: var(--nd-gray-800);">
-                                            <?= htmlspecialchars($log['action'] ?? '', ENT_QUOTES) ?>
+                                    <div style="min-width: 0;" class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-start mb-1">
+                                            <span class="fw-medium small text-dark"><?= $actionText ?></span>
+                                            <small class="text-muted" style="font-size: 0.7rem; white-space: nowrap;"><?= date('H:i', strtotime($log['occurred_at'])) ?></small>
                                         </div>
-                                        <div class="text-muted small text-truncate">
+                                        <div class="text-muted small text-truncate" title="<?= htmlspecialchars($log['summary'] ?? '', ENT_QUOTES) ?>">
                                             <?= htmlspecialchars($log['summary'] ?? '', ENT_QUOTES) ?>
-                                        </div>
-                                        <div class="text-muted" style="font-size: 0.75rem;">
-                                            <?= htmlspecialchars($log['occurred_at'] ?? '', ENT_QUOTES) ?>
                                         </div>
                                     </div>
                                 </div>
@@ -223,37 +264,44 @@
             <div class="nd-card">
                 <div class="nd-card-header">
                     <h5 class="nd-card-title mb-0">
-                        <i class="bi bi-exclamation-triangle me-2" style="color: var(--nd-warning);"></i>
+                        <i class="bi bi-bell me-2" style="color: var(--nd-warning);"></i>
                         Alertas
                     </h5>
                 </div>
                 <div class="nd-card-body">
                     <?php $a = $alerts ?? []; ?>
-                    <div class="d-flex flex-column gap-3">
-                        <div class="nd-alert-card warning">
-                            <div class="nd-alert-card-title">
-                                <i class="bi bi-clock me-1"></i>
-                                Submissões > 7 dias
-                            </div>
-                            <div class="nd-alert-card-text"><?= (int)($a['oldPending'] ?? 0) ?> pendentes/em análise</div>
+                    <?php if(empty($a['oldPending']) && empty($a['expiredTokens']) && empty($a['inactiveUsers30'])): ?>
+                        <div class="text-center text-muted small">Tudo certo! Sem alertas no momento.</div>
+                    <?php else: ?>
+                        <div class="d-flex flex-column gap-2">
+                            <?php if (!empty($a['oldPending'])): ?>
+                                <div class="alert alert-warning d-flex align-items-center p-2 mb-0 border-0 bg-warning-subtle text-warning-emphasis small">
+                                    <i class="bi bi-clock-history me-2 fs-6"></i>
+                                    <div>
+                                        <strong><?= (int)$a['oldPending'] ?> submissões</strong> pendentes há > 7 dias.
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($a['expiredTokens'])): ?>
+                                <div class="alert alert-danger d-flex align-items-center p-2 mb-0 border-0 bg-danger-subtle text-danger-emphasis small">
+                                    <i class="bi bi-shield-x me-2 fs-6"></i>
+                                    <div>
+                                        <strong><?= (int)$a['expiredTokens'] ?> tokens</strong> expirados.
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($a['inactiveUsers30'])): ?>
+                                <div class="alert alert-secondary d-flex align-items-center p-2 mb-0 border-0 bg-secondary-subtle text-secondary-emphasis small">
+                                    <i class="bi bi-person-dash me-2 fs-6"></i>
+                                    <div>
+                                        <strong><?= (int)$a['inactiveUsers30'] ?> usuários</strong> inativos há +30 dias.
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         </div>
-                        
-                        <div class="nd-alert-card danger">
-                            <div class="nd-alert-card-title">
-                                <i class="bi bi-key me-1"></i>
-                                Tokens expirados
-                            </div>
-                            <div class="nd-alert-card-text"><?= (int)($a['expiredTokens'] ?? 0) ?> encontrados</div>
-                        </div>
-                        
-                        <div class="nd-alert-card warning">
-                            <div class="nd-alert-card-title">
-                                <i class="bi bi-person-x me-1"></i>
-                                Usuários inativos
-                            </div>
-                            <div class="nd-alert-card-text"><?= (int)($a['inactiveUsers30'] ?? 0) ?> há +30 dias</div>
-                        </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

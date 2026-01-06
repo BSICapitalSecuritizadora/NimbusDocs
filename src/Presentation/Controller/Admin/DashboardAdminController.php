@@ -48,7 +48,7 @@ final class DashboardAdminController
         $publishedDocuments   = $this->documentRepo->countAll();
 
         // Listas
-        $recentSubmissions = $this->submissionRepo->latest(5);
+        $recentSubmissions = $this->submissionRepo->latest(8);
         $recentLogs        = $this->auditRepo->latest(10);
 
         // Gráficos
