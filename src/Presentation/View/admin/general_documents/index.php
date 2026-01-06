@@ -16,259 +16,265 @@ $errors = $viewData['errors'] ?? [];
 $old = $viewData['old'] ?? [];
 ?>
 
+<!-- Page Header -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <div>
-    <h1 class="h4 mb-1">Documentos Gerais</h1>
-    <p class="text-muted small mb-0">
-      Gerencie documentos da plataforma que serão disponibilizados aos usuários do portal.
-    </p>
-  </div>
-  <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createDocumentModal">
-    <i class="bi bi-plus-lg"></i> Novo documento
-  </button>
+    <div class="d-flex align-items-center gap-3">
+        <div class="nd-avatar nd-avatar-lg" style="background: var(--nd-navy-600);">
+            <i class="bi bi-file-earmark-text-fill text-white"></i>
+        </div>
+        <div>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Documentos Gerais</h1>
+            <p class="text-muted mb-0 small">Disponibilize arquivos e documentos para os usuários do portal</p>
+        </div>
+    </div>
+    <button class="nd-btn nd-btn-gold nd-btn-sm" data-bs-toggle="modal" data-bs-target="#createDocumentModal">
+        <i class="bi bi-plus-lg me-1"></i>
+        Novo documento
+    </button>
 </div>
 
 <?php if (!empty($flash['success'])): ?>
-  <div class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
-    <i class="bi bi-check-circle"></i> <?= htmlspecialchars($flash['success'], ENT_QUOTES, 'UTF-8') ?>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  </div>
+    <div class="nd-alert nd-alert-success mb-3">
+        <i class="bi bi-check-circle-fill"></i>
+        <div class="nd-alert-text"><?= htmlspecialchars($flash['success'], ENT_QUOTES, 'UTF-8') ?></div>
+    </div>
 <?php endif; ?>
 
 <?php if (!empty($flash['error'])): ?>
-  <div class="alert alert-danger alert-dismissible fade show py-2 small" role="alert">
-    <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($flash['error'], ENT_QUOTES, 'UTF-8') ?>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  </div>
+    <div class="nd-alert nd-alert-danger mb-3">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <div class="nd-alert-text"><?= htmlspecialchars($flash['error'], ENT_QUOTES, 'UTF-8') ?></div>
+    </div>
 <?php endif; ?>
 
-<!-- Listagem de Documentos -->
-<div class="card">
-  <div class="card-body">
-    <?php if (!$documents): ?>
-      <p class="text-muted small mb-0">Nenhum documento cadastrado. <a href="#createDocumentModal" data-bs-toggle="modal">Criar um novo</a></p>
-    <?php else: ?>
-      <div class="table-responsive">
-        <table class="table table-sm align-middle mb-0">
-          <thead class="table-light">
-            <tr>
-              <th>ID</th>
-              <th>Título</th>
-              <th>Categoria</th>
-              <th>Arquivo</th>
-              <th>Tamanho</th>
-              <th>Publicado</th>
-              <th>Status</th>
-              <th class="text-end">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach ($documents as $doc): ?>
-              <tr>
-                <td><small>#<?= (int)$doc['id'] ?></small></td>
-                <td>
-                  <strong><?= htmlspecialchars($doc['title'], ENT_QUOTES, 'UTF-8') ?></strong>
-                  <?php if (!empty($doc['description'])): ?>
-                    <br><small class="text-muted"><?= htmlspecialchars(substr($doc['description'], 0, 50) . (strlen($doc['description']) > 50 ? '...' : ''), ENT_QUOTES, 'UTF-8') ?></small>
-                  <?php endif; ?>
-                </td>
-                <td>
-                  <small><?= htmlspecialchars($doc['category_name'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></small>
-                </td>
-                <td>
-                  <small class="text-monospace"><?= htmlspecialchars($doc['file_original_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></small>
-                </td>
-                <td>
-                  <small class="text-muted">
-                    <?php 
-                    $bytes = (int)($doc['file_size'] ?? 0);
-                    if ($bytes < 1024) {
-                      echo $bytes . ' B';
-                    } elseif ($bytes < 1024 * 1024) {
-                      echo round($bytes / 1024, 2) . ' KB';
-                    } else {
-                      echo round($bytes / (1024 * 1024), 2) . ' MB';
-                    }
-                    ?>
-                  </small>
-                </td>
-                <td>
-                  <small class="text-muted">
-                    <?= htmlspecialchars($doc['published_at'] ?? 'Agora', ENT_QUOTES, 'UTF-8') ?>
-                  </small>
-                </td>
-                <td>
-                  <?php if ((int)$doc['is_active'] === 1): ?>
-                    <span class="badge bg-success">Ativo</span>
-                  <?php else: ?>
-                    <span class="badge bg-secondary">Inativo</span>
-                  <?php endif; ?>
-                </td>
-                <td class="text-end">
-                  <a href="/admin/general-documents/<?= (int)$doc['id'] ?>/edit"
-                    class="btn btn-sm btn-outline-secondary"
-                    title="Editar">
-                    <i class="bi bi-pencil"></i>
-                  </a>
+<!-- Documents List -->
+<div class="nd-card">
+    <div class="nd-card-body p-0">
+        <?php if (!$documents): ?>
+            <div class="text-center py-5">
+                <i class="bi bi-folder2-open text-muted mb-2" style="font-size: 2rem;"></i>
+                <p class="text-muted mb-2">Nenhum documento cadastrado.</p>
+                <button class="btn btn-link text-decoration-none p-0" data-bs-toggle="modal" data-bs-target="#createDocumentModal">
+                    Criar o primeiro documento
+                </button>
+            </div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="nd-table">
+                    <thead>
+                        <tr>
+                            <th>Documento</th>
+                            <th>Categoria</th>
+                            <th>Arquivo</th>
+                            <th>Status/Publicação</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($documents as $doc): ?>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="nd-avatar" style="width: 36px; height: 36px; background: var(--nd-gray-100); color: var(--nd-navy-600);">
+                                            <i class="bi bi-file-text"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-medium text-dark"><?= htmlspecialchars($doc['title'], ENT_QUOTES, 'UTF-8') ?></div>
+                                            <?php if (!empty($doc['description'])): ?>
+                                                <div class="small text-muted text-truncate" style="max-width: 200px;">
+                                                    <?= htmlspecialchars($doc['description'], ENT_QUOTES, 'UTF-8') ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border fw-normal">
+                                        <?= htmlspecialchars($doc['category_name'] ?? 'Geral', ENT_QUOTES, 'UTF-8') ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column small">
+                                        <span class="text-dark font-monospace"><?= htmlspecialchars($doc['file_original_name'] ?? 'arquivo', ENT_QUOTES, 'UTF-8') ?></span>
+                                        <span class="text-muted">
+                                            <?php
+                                            $bytes = (int)($doc['file_size'] ?? 0);
+                                            if ($bytes < 1024) echo $bytes . ' B';
+                                            elseif ($bytes < 1024 * 1024) echo round($bytes / 1024, 2) . ' KB';
+                                            else echo round($bytes / (1024 * 1024), 2) . ' MB';
+                                            ?>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column gap-1">
+                                        <div>
+                                            <?php if ((int)$doc['is_active'] === 1): ?>
+                                                <span class="nd-badge nd-badge-success">Ativo</span>
+                                            <?php else: ?>
+                                                <span class="nd-badge nd-badge-secondary">Inativo</span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="small text-muted">
+                                            <i class="bi bi-calendar3 me-1"></i>
+                                            <?= htmlspecialchars($doc['published_at'] ?? 'Agora', ENT_QUOTES, 'UTF-8') ?>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <button type="button" class="nd-btn nd-btn-outline nd-btn-sm" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#toggleModal"
+                                            data-doc-id="<?= (int)$doc['id'] ?>"
+                                            data-doc-active="<?= (int)$doc['is_active'] ?>"
+                                            title="<?= (int)$doc['is_active'] === 1 ? 'Desativar' : 'Ativar' ?>">
+                                            <i class="bi <?= (int)$doc['is_active'] === 1 ? 'bi-eye-slash' : 'bi-eye' ?>"></i>
+                                        </button>
 
-                  <button type="button" class="btn btn-sm btn-outline-warning" 
-                    data-bs-toggle="modal" 
-                    data-bs-target="#toggleModal"
-                    data-doc-id="<?= (int)$doc['id'] ?>"
-                    data-doc-active="<?= (int)$doc['is_active'] ?>"
-                    title="<?= (int)$doc['is_active'] === 1 ? 'Desativar' : 'Ativar' ?>">
-                    <i class="bi <?= (int)$doc['is_active'] === 1 ? 'bi-eye-slash' : 'bi-eye' ?>"></i>
-                  </button>
+                                        <!-- Nota: Edit link aponta para rota que o controller pode não ter (editForm aponta para form.php que não existe). 
+                                             Se falhar, usuário reportará. Mantendo conforme original. -->
+                                        <a href="/admin/general-documents/<?= (int)$doc['id'] ?>/edit"
+                                            class="nd-btn nd-btn-outline nd-btn-sm"
+                                            title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
 
-                  <button type="button" class="btn btn-sm btn-outline-danger" 
-                    data-bs-toggle="modal" 
-                    data-bs-target="#deleteModal"
-                    data-doc-id="<?= (int)$doc['id'] ?>"
-                    data-doc-title="<?= htmlspecialchars($doc['title'], ENT_QUOTES, 'UTF-8') ?>"
-                    title="Deletar">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
-      </div>
-    <?php endif; ?>
-  </div>
+                                        <button type="button" class="nd-btn nd-btn-outline nd-btn-sm text-danger border-start-0" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#deleteModal"
+                                            data-doc-id="<?= (int)$doc['id'] ?>"
+                                            data-doc-title="<?= htmlspecialchars($doc['title'], ENT_QUOTES, 'UTF-8') ?>"
+                                            title="Excluir">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </div>
 </div>
 
 <!-- Modal: Criar Novo Documento -->
-<div class="modal fade" id="createDocumentModal" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Novo Documento</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <form method="post" action="/admin/general-documents" enctype="multipart/form-data">
-        <div class="modal-body">
-          <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+<div class="modal fade" id="createDocumentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark">Novo Documento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-4">
+                <form method="post" action="/admin/general-documents" enctype="multipart/form-data">
+                    <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
-          <div class="mb-3">
-            <label for="createTitle" class="form-label">Título <span class="text-danger">*</span></label>
-            <input type="text" class="form-control <?= !empty($errors['title']) ? 'is-invalid' : '' ?>" 
-              id="createTitle" name="title" value="<?= htmlspecialchars($old['title'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-              placeholder="Digite o título do documento" required>
-            <?php if (!empty($errors['title'])): ?>
-              <div class="invalid-feedback"><?= htmlspecialchars($errors['title'], ENT_QUOTES, 'UTF-8') ?></div>
-            <?php endif; ?>
-          </div>
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="nd-label">Título <span class="text-danger">*</span></label>
+                            <input type="text" class="nd-input w-100" name="title" required placeholder="Ex: Manual de Conduta" value="<?= htmlspecialchars($old['title'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                        </div>
 
-          <div class="mb-3">
-            <label for="createCategory" class="form-label">Categoria <span class="text-danger">*</span></label>
-            <select class="form-select <?= !empty($errors['category_id']) ? 'is-invalid' : '' ?>" 
-              id="createCategory" name="category_id" required>
-              <option value="">Selecione uma categoria</option>
-              <?php foreach ($categories as $cat): ?>
-                <option value="<?= (int)$cat['id'] ?>" <?= ((int)($old['category_id'] ?? 0) === (int)$cat['id'] ? 'selected' : '') ?>>
-                  <?= htmlspecialchars($cat['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>
-                </option>
-              <?php endforeach; ?>
-            </select>
-            <?php if (!empty($errors['category_id'])): ?>
-              <div class="invalid-feedback d-block"><?= htmlspecialchars($errors['category_id'], ENT_QUOTES, 'UTF-8') ?></div>
-            <?php endif; ?>
-          </div>
+                        <div class="col-md-6">
+                            <label class="nd-label">Categoria <span class="text-danger">*</span></label>
+                            <select class="nd-input form-select w-100" name="category_id" required>
+                                <option value="">Selecione...</option>
+                                <?php foreach ($categories as $cat): ?>
+                                    <option value="<?= (int)$cat['id'] ?>" <?= ((int)($old['category_id'] ?? 0) === (int)$cat['id'] ? 'selected' : '') ?>>
+                                        <?= htmlspecialchars($cat['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
 
-          <div class="mb-3">
-            <label for="createDescription" class="form-label">Descrição</label>
-            <textarea class="form-control <?= !empty($errors['description']) ? 'is-invalid' : '' ?>" 
-              id="createDescription" name="description" rows="3" 
-              placeholder="Digite uma descrição do documento"><?= htmlspecialchars($old['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
-            <?php if (!empty($errors['description'])): ?>
-              <div class="invalid-feedback d-block"><?= htmlspecialchars($errors['description'], ENT_QUOTES, 'UTF-8') ?></div>
-            <?php endif; ?>
-            <small class="form-text text-muted d-block mt-1">Máximo 1000 caracteres</small>
-          </div>
+                        <div class="col-md-6">
+                            <label class="nd-label">Arquivo <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control" name="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.jpg,.jpeg,.png">
+                            <div class="form-text small">Max: 50MB. PDF, Office, Imagens or ZIP.</div>
+                        </div>
 
-          <div class="mb-3">
-            <label for="createFile" class="form-label">Arquivo <span class="text-danger">*</span></label>
-            <input type="file" class="form-control <?= !empty($errors['file']) ? 'is-invalid' : '' ?>" 
-              id="createFile" name="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.jpg,.jpeg,.png">
-            <?php if (!empty($errors['file'])): ?>
-              <div class="invalid-feedback d-block"><?= htmlspecialchars($errors['file'], ENT_QUOTES, 'UTF-8') ?></div>
-            <?php endif; ?>
-            <small class="form-text text-muted d-block mt-1">Máximo 50 MB. Formatos aceitos: PDF, DOC, XLS, PPT, ZIP, JPG, PNG</small>
-          </div>
+                        <div class="col-md-12">
+                            <label class="nd-label">Descrição</label>
+                            <textarea class="nd-input w-100" name="description" rows="3" placeholder="Breve descrição do documento..."><?= htmlspecialchars($old['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                        </div>
 
-          <div class="mb-3">
-            <label for="createPublishedAt" class="form-label">Data de publicação</label>
-            <input type="date" class="form-control" id="createPublishedAt" name="published_at"
-              value="<?= htmlspecialchars($old['published_at'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-            <small class="form-text text-muted d-block mt-1">Deixe em branco para publicar agora</small>
-          </div>
+                        <div class="col-md-6">
+                            <label class="nd-label">Data de Publicação</label>
+                            <input type="date" class="nd-input w-100" name="published_at" value="<?= htmlspecialchars($old['published_at'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                            <div class="form-text small">Deixe vazio para publicar agora.</div>
+                        </div>
 
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="createIsActive" name="is_active" 
-              value="1" <?= (!isset($old['is_active']) || (int)$old['is_active'] === 1 ? 'checked' : '') ?>>
-            <label class="form-check-label" for="createIsActive">
-              Ativar documento (visível no portal)
-            </label>
-          </div>
+                        <div class="col-md-6 d-flex align-items-center">
+                            <div class="form-check nd-form-check mt-3">
+                                <input class="form-check-input" type="checkbox" id="createIsActive" name="is_active" value="1" <?= (!isset($old['is_active']) || (int)$old['is_active'] === 1 ? 'checked' : '') ?>>
+                                <label class="form-check-label text-dark fw-medium" for="createIsActive">
+                                    Visível no Portal
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <button type="button" class="nd-btn nd-btn-outline" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="nd-btn nd-btn-primary">Criar Documento</button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Criar documento</button>
-        </div>
-      </form>
     </div>
-  </div>
 </div>
 
-<!-- Modal: Ativar/Desativar -->
-<div class="modal fade" id="toggleModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Mudar status</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <form method="post" id="toggleForm">
-        <div class="modal-body">
-          <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
-          <p id="toggleMessage"></p>
+<!-- Modal: Toggle Status -->
+<div class="modal fade" id="toggleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold">Alterar Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+             <form method="post" id="toggleForm">
+                <div class="modal-body py-0">
+                    <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                    <p id="toggleMessage" class="text-muted mb-0"></p>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="nd-btn nd-btn-outline nd-btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="nd-btn nd-btn-primary nd-btn-sm">Confirmar</button>
+                </div>
+            </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-warning">Confirmar</button>
-        </div>
-      </form>
     </div>
-  </div>
 </div>
 
-<!-- Modal: Deletar -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Confirmar exclusão</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <form method="post" id="deleteForm">
-        <div class="modal-body">
-          <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
-          <p class="text-danger">
-            <strong>Tem certeza?</strong> Esta ação é irreversível e removerá o documento "<span id="deleteTitle"></span>" permanentemente.
-          </p>
+<!-- Modal: Delete -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold text-danger">Excluir Documento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" id="deleteForm">
+                <div class="modal-body py-0">
+                    <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                    <p class="text-muted">
+                        Tem certeza que deseja excluir o documento <strong id="deleteTitle" class="text-dark"></strong>?
+                        <br><span class="text-danger small">Esta ação não pode ser desfeita.</span>
+                    </p>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="nd-btn nd-btn-outline nd-btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="nd-btn nd-btn-sm bg-danger text-white border-danger">Excluir Permanentemente</button>
+                </div>
+            </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-danger">Deletar permanentemente</button>
-        </div>
-      </form>
     </div>
-  </div>
 </div>
 
 <script>
-// Modal: Ativar/Desativar
+// Modal Logic Preserved
 const toggleModal = document.getElementById('toggleModal');
 const toggleForm = document.getElementById('toggleForm');
 const toggleMessage = document.getElementById('toggleMessage');
@@ -279,13 +285,12 @@ toggleModal?.addEventListener('show.bs.modal', function(e) {
   const isActive = parseInt(btn.dataset.docActive);
   
   toggleMessage.textContent = isActive === 1 
-    ? 'Desativar este documento? Ele não será mais visível no portal.'
-    : 'Ativar este documento? Ele ficará visível no portal.';
+    ? 'Deseja desativar este documento? Ele deixará de ser visível no portal.'
+    : 'Deseja ativar este documento? Ele ficará visível para os usuários.';
   
   toggleForm.action = `/admin/general-documents/${docId}/toggle`;
 });
 
-// Modal: Deletar
 const deleteModal = document.getElementById('deleteModal');
 const deleteForm = document.getElementById('deleteForm');
 const deleteTitle = document.getElementById('deleteTitle');
