@@ -134,11 +134,34 @@ use App\Support\Auth;
                             <?php
                             $status = $r['status'] ?? '';
                             $badge = 'nd-badge-secondary';
-                            if ($status === 'PENDING') $badge = 'bg-warning text-dark border-warning';
-                            if ($status === 'SENDING') $badge = 'bg-info text-white border-info';
-                            if ($status === 'SENT')    $badge = 'nd-badge-success';
-                            if ($status === 'FAILED')  $badge = 'nd-badge-danger';
-                            // CANCELED/CANCELLED usually handled by default secondary
+                            $label = $status;
+                            
+                            switch ($status) {
+                                case 'PENDING':
+                                    $badge = 'bg-warning text-dark border-warning';
+                                    $label = 'Pendente';
+                                    break;
+                                case 'SENDING':
+                                    $badge = 'bg-info text-white border-info';
+                                    $label = 'Enviando';
+                                    break;
+                                case 'SENT':
+                                    $badge = 'nd-badge-success';
+                                    $label = 'Enviado';
+                                    break;
+                                case 'FAILED':
+                                    $badge = 'nd-badge-danger';
+                                    $label = 'Falha';
+                                    break;
+                            }
+                            
+                            $typeKey = $r['type'] ?? '';
+                            $typeLabel = match(strtolower($typeKey)) {
+                                'token_created' => 'Criação de Token',
+                                'password_reset' => 'Redefinição de Senha',
+                                'welcome_email' => 'Boas-vindas',
+                                default => ucwords(str_replace(['_', '-'], ' ', strtolower($typeKey)))
+                            };
                             ?>
                             <tr>
                                 <td><span class="text-muted small">#<?= (int)$r['id'] ?></span></td>
@@ -150,8 +173,8 @@ use App\Support\Auth;
                                 </td>
                                 <td>
                                     <div class="d-flex flex-column gap-1">
-                                        <div><span class="nd-badge <?= $badge ?>"><?= htmlspecialchars($status) ?></span></div>
-                                        <div><span class="badge bg-light text-dark border font-monospace"><?= htmlspecialchars($r['type'] ?? '') ?></span></div>
+                                        <div><span class="nd-badge <?= $badge ?>"><?= htmlspecialchars($label) ?></span></div>
+                                        <div><span class="badge bg-light text-dark border font-monospace"><?= htmlspecialchars($typeLabel) ?></span></div>
                                     </div>
                                 </td>
                                 <td>

@@ -36,13 +36,34 @@ $status = $row['status'] ?? '';
                         <?php
                             $badge = 'nd-badge-secondary';
                             $icon = '';
-                            if ($status === 'PENDING') { $badge = 'bg-warning text-dark border-warning'; $icon = 'bi-clock'; }
-                            if ($status === 'SENDING') { $badge = 'bg-info text-white border-info'; $icon = 'bi-arrow-repeat'; }
-                            if ($status === 'SENT')    { $badge = 'nd-badge-success'; $icon = 'bi-check-all'; }
-                            if ($status === 'FAILED')  { $badge = 'nd-badge-danger'; $icon = 'bi-exclamation-octagon'; }
+                            $label = $status;
+                            
+                            switch ($status) {
+                                case 'PENDING':
+                                    $badge = 'nd-badge-warning'; // Usando classe padrão se existir, ou mantendo estilo manual
+                                    $badge = 'bg-warning text-dark border-warning'; // Mantendo estilo visual do usuário por segurança
+                                    $icon = 'bi-clock';
+                                    $label = 'Pendente';
+                                    break;
+                                case 'SENDING':
+                                    $badge = 'bg-info text-white border-info';
+                                    $icon = 'bi-arrow-repeat';
+                                    $label = 'Enviando';
+                                    break;
+                                case 'SENT':
+                                    $badge = 'nd-badge-success';
+                                    $icon = 'bi-check-all';
+                                    $label = 'Enviado';
+                                    break;
+                                case 'FAILED':
+                                    $badge = 'nd-badge-danger';
+                                    $icon = 'bi-exclamation-octagon';
+                                    $label = 'Falha';
+                                    break;
+                            }
                         ?>
                         <span class="nd-badge <?= $badge ?>">
-                            <i class="bi <?= $icon ?> me-1"></i> <?= htmlspecialchars($status) ?>
+                            <i class="bi <?= $icon ?> me-1"></i> <?= htmlspecialchars($label) ?>
                         </span>
                     </div>
                 </div>
@@ -64,7 +85,19 @@ $status = $row['status'] ?? '';
                 <div class="row mb-3">
                     <div class="col-sm-3 text-muted small text-uppercase fw-bold pt-1">Template</div>
                     <div class="col-sm-9">
-                        <code class="px-2 py-1 rounded bg-light border" style="color: var(--nd-navy-600);"><?= htmlspecialchars($row['template'] ?? '', ENT_QUOTES, 'UTF-8') ?></code>
+                        <?php
+                            $templateName = $row['template'] ?? '';
+                            $templateLabel = match($templateName) {
+                                'token_created' => 'Criação de Token',
+                                'password_reset' => 'Redefinição de Senha',
+                                'welcome_email' => 'Boas-vindas',
+                                default => ucwords(str_replace('_', ' ', $templateName))
+                            };
+                        ?>
+                        <code class="px-2 py-1 rounded bg-light border" style="color: var(--nd-navy-600);"><?= htmlspecialchars($templateLabel, ENT_QUOTES, 'UTF-8') ?></code>
+                        <?php if ($templateName !== $templateLabel): ?>
+                            <small class="text-muted ms-2">(<?= htmlspecialchars($templateName) ?>)</small>
+                        <?php endif; ?>
                     </div>
                 </div>
 
