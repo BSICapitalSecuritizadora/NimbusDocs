@@ -114,6 +114,7 @@ $adminInitials = strtoupper(substr($adminName, 0, 2));
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/nimbusdocs-utils.js"></script>
     
     <!-- Notification Badge Update -->
     <script>

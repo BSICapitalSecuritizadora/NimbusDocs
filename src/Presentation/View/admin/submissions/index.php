@@ -140,7 +140,20 @@ $query = http_build_query([
                         </span>
                     </td>
                     <td class="text-muted small">
-                        <?= htmlspecialchars($row['submitted_at'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                      <?php
+                        $submittedAt = $row['submitted_at'] ?? '';
+                        if ($submittedAt) {
+                            try {
+                                $date = new DateTime($submittedAt);
+                                $formattedDate = $date->format('d/m/Y H:i');
+                            } catch (Exception $e) {
+                                $formattedDate = $submittedAt;
+                            }
+                        } else {
+                            $formattedDate = '';
+                        }
+                        echo htmlspecialchars($formattedDate, ENT_QUOTES, 'UTF-8');
+                      ?>
                     </td>
                     <td class="text-end">
                         <a class="nd-btn nd-btn-outline nd-btn-sm" href="/admin/submissions/<?= (int)$row['id'] ?>">

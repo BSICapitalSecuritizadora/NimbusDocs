@@ -688,3 +688,76 @@ body {
     margin-left: 0;
   }
 }
+
+/* ============================================
+   Input Group Styles
+============================================ */
+.nd-input-group {
+  position: relative;
+  width: 100%;
+}
+
+.nd-input-icon {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+  color: var(--nd-gray-400);
+  font-size: 1rem;
+  pointer-events: none;
+  transition: var(--nd-transition);
+}
+
+.nd-input:focus + .nd-input-icon {
+  color: var(--nd-gold-500);
+}
+
+/* Alert Styles (Additions) */
+.nd-alert {
+  padding: 1rem;
+  border-radius: var(--nd-radius);
+  border: 1px solid transparent;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.nd-alert-success {
+  background: var(--nd-success-light);
+  border-color: #bef2d6;
+  color: #047857;
+}
+
+.nd-alert-danger {
+  background: var(--nd-danger-light);
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.nd-alert-warning {
+  background: var(--nd-warning-light);
+  border-color: #fcd34d;
+  color: #b45309;
+}
+
+.nd-alert-text {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.nd-alert-close {
+  background: transparent;
+  border: none;
+  color: currentColor;
+  opacity: 0.6;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.nd-alert-close:hover {
+  opacity: 1;
+}
