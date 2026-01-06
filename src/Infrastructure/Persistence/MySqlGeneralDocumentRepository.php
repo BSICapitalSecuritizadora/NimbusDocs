@@ -122,4 +122,30 @@ final class MySqlGeneralDocumentRepository
         $stmt = $this->pdo->prepare("DELETE FROM general_documents WHERE id = :id");
         $stmt->execute([':id' => $id]);
     }
+
+    public function countByCategory(int $categoryId): int
+    {
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM general_documents WHERE category_id = :id");
+        $stmt->execute([':id' => $categoryId]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function deleteByCategoryId(int $categoryId): void
+    {
+        // 1. Get all documents in this category
+        $stmt = $this->pdo->prepare("SELECT file_path FROM general_documents WHERE category_id = :id");
+        $stmt->execute([':id' => $categoryId]);
+        $docs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // 2. Delete physical files
+        foreach ($docs as $doc) {
+            if (!empty($doc['file_path']) && is_file($doc['file_path'])) {
+                @unlink($doc['file_path']);
+            }
+        }
+
+        // 3. Delete records
+        $stmt = $this->pdo->prepare("DELETE FROM general_documents WHERE category_id = :id");
+        $stmt->execute([':id' => $categoryId]);
+    }
 }

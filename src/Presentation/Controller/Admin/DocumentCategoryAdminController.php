@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Presentation\Controller\Admin;
 
 use App\Infrastructure\Persistence\MySqlDocumentCategoryRepository;
+use App\Infrastructure\Persistence\MySqlGeneralDocumentRepository;
 use App\Support\Auth;
 use App\Support\Session;
 use App\Support\Csrf;
@@ -12,10 +13,12 @@ use App\Support\Csrf;
 final class DocumentCategoryAdminController
 {
     private MySqlDocumentCategoryRepository $repo;
+    private MySqlGeneralDocumentRepository $docsRepo;
 
     public function __construct(private array $config)
     {
         $this->repo = new MySqlDocumentCategoryRepository($config['pdo']);
+        $this->docsRepo = new MySqlGeneralDocumentRepository($config['pdo']);
     }
 
     public function index(): void
@@ -150,18 +153,37 @@ final class DocumentCategoryAdminController
 
     public function delete(array $vars): void
     {
-        Auth::requireRole('SUPER_ADMIN'); // só super admin remove
+        $admin = Auth::requireRole('ADMIN', 'SUPER_ADMIN');
+        error_log("Delete Category requested. User: " . $admin['id'] . " Role: " . $admin['role']);
 
         if (!Csrf::validate($_POST['_token'] ?? '')) {
+            error_log("CSRF Validation failed for delete category.");
             Session::flash('error', 'Sessão expirada.');
             header('Location: /admin/document-categories');
             exit;
         }
 
         $id = (int)($vars['id'] ?? 0);
-        $this->repo->delete($id);
+        error_log("Attempting to delete category ID: " . $id);
 
-        Session::flash('success', 'Categoria removida.');
+        // Check for dependencies
+        $count = $this->docsRepo->countByCategory($id);
+        error_log("Category dependency count: " . $count);
+
+        if ($count > 0) {
+             error_log("Found $count documents. Cleaning them up before category deletion (User requested fix).");
+             $this->docsRepo->deleteByCategoryId($id);
+        }
+
+        try {
+            $this->repo->delete($id);
+            error_log("Category deletion successful in DB.");
+            Session::flash('success', 'Categoria removida.');
+        } catch (\Exception $e) {
+            error_log("DB Error during category delete: " . $e->getMessage());
+            Session::flash('error', 'Erro ao excluir categoria.');
+        }
+
         header('Location: /admin/document-categories');
         exit;
     }

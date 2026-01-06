@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 18/12/2025 às 17:55
+-- Tempo de geração: 06/01/2026 às 14:16
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -71,6 +71,9 @@ CREATE TABLE `admin_users` (
   `azure_tenant_id` varchar(64) DEFAULT NULL,
   `azure_upn` varchar(190) DEFAULT NULL,
   `password_hash` varchar(255) DEFAULT NULL,
+  `two_factor_secret` varchar(64) DEFAULT NULL,
+  `two_factor_enabled` tinyint(1) NOT NULL DEFAULT 0,
+  `two_factor_confirmed_at` datetime DEFAULT NULL,
   `auth_mode` enum('LOCAL_ONLY','MS_ONLY','LOCAL_AND_MS') NOT NULL DEFAULT 'LOCAL_ONLY',
   `role` enum('SUPER_ADMIN','ADMIN','AUDITOR') NOT NULL DEFAULT 'ADMIN',
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
@@ -88,9 +91,10 @@ CREATE TABLE `admin_users` (
 -- Despejando dados para a tabela `admin_users`
 --
 
-INSERT INTO `admin_users` (`id`, `name`, `email`, `full_name`, `azure_oid`, `azure_tenant_id`, `azure_upn`, `password_hash`, `auth_mode`, `role`, `is_active`, `status`, `ms_object_id`, `ms_tenant_id`, `ms_upn`, `last_login_at`, `last_login_provider`, `created_at`, `updated_at`) VALUES
-(1, 'Anderson Barbosa', 'anderson.cavalcante@bsicapital.com.br', 'Anderson Barbosa', NULL, NULL, NULL, '$2y$10$aXauftJB3ggW.z2oyyZcfu9ghkvjnAxJzYz07dLihoKAdiHdeIb7S', 'LOCAL_ONLY', 'SUPER_ADMIN', 1, 'ACTIVE', NULL, NULL, NULL, '2025-12-18 17:53:46', 'LOCAL', '2025-11-12 14:03:45', '2025-12-18 20:53:46'),
-(2, 'Teste', 'teste@bsicapital.com.br', 'Teste', NULL, NULL, NULL, '$2y$10$an4/xFwsFec7YL2BIttNm.4LdSPwwps.Q8E.l/iSXYJi9bSGE.H2G', 'LOCAL_ONLY', 'ADMIN', 0, 'INACTIVE', NULL, NULL, NULL, NULL, NULL, '2025-12-02 19:21:17', '2025-12-18 15:11:11');
+INSERT INTO `admin_users` (`id`, `name`, `email`, `full_name`, `azure_oid`, `azure_tenant_id`, `azure_upn`, `password_hash`, `two_factor_secret`, `two_factor_enabled`, `two_factor_confirmed_at`, `auth_mode`, `role`, `is_active`, `status`, `ms_object_id`, `ms_tenant_id`, `ms_upn`, `last_login_at`, `last_login_provider`, `created_at`, `updated_at`) VALUES
+(1, 'Anderson Barbosa', 'anderson.cavalcante@bsicapital.com.br', 'Anderson Barbosa', NULL, NULL, NULL, '$2y$10$J5AvvV0NCnf16AYvkwXhWumnj8lqPjKNnVefuYpZdDk3Zuwb4jeRe', NULL, 0, NULL, 'LOCAL_ONLY', 'SUPER_ADMIN', 1, 'ACTIVE', NULL, NULL, NULL, '2025-12-19 09:58:01', 'LOCAL', '2025-11-12 14:03:45', '2025-12-19 12:58:01'),
+(2, 'Teste', 'teste@bsicapital.com.br', 'Teste', NULL, NULL, NULL, '$2y$10$an4/xFwsFec7YL2BIttNm.4LdSPwwps.Q8E.l/iSXYJi9bSGE.H2G', NULL, 0, NULL, 'LOCAL_ONLY', 'ADMIN', 0, 'INACTIVE', NULL, NULL, NULL, NULL, NULL, '2025-12-02 19:21:17', '2025-12-18 15:11:11'),
+(5, 'Administrador', 'admin@nimbusdocs.local', 'Administrador do Sistema', NULL, NULL, NULL, '$2y$10$NJLmdPmCRL0Yw2wnDeGWouiYCxIlXa.77nu/Id1vO4x2qbb9438AG', '35IYW3Q3T6SXER3S', 0, NULL, 'LOCAL_ONLY', 'SUPER_ADMIN', 1, 'ACTIVE', NULL, NULL, NULL, '2026-01-06 12:01:18', 'LOCAL', '2026-01-05 18:53:04', '2026-01-06 15:01:18');
 
 -- --------------------------------------------------------
 
@@ -226,7 +230,56 @@ INSERT INTO `audit_logs` (`id`, `occurred_at`, `actor_type`, `actor_id`, `actor_
 (50, '2025-12-18 09:33:42', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
 (51, '2025-12-18 12:11:16', 'ADMIN', 1, NULL, 'PORTAL_USER_UPDATED', 'PORTAL_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
 (52, '2025-12-18 17:53:42', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
-(53, '2025-12-18 17:53:46', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL);
+(53, '2025-12-18 17:53:46', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(54, '2025-12-18 17:58:54', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(55, '2025-12-18 17:59:01', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(56, '2025-12-18 17:59:13', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(57, '2025-12-18 18:01:17', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(58, '2025-12-18 18:04:53', 'ADMIN', NULL, NULL, 'LOGIN_FAILED', 'ADMIN_USER', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(59, '2025-12-18 18:05:57', 'ADMIN', NULL, NULL, 'LOGIN_FAILED', 'ADMIN_USER', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(60, '2025-12-18 18:13:17', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(61, '2025-12-18 18:16:26', 'ADMIN', 1, NULL, 'LOGIN_FAILED', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(62, '2025-12-18 18:20:25', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(63, '2025-12-18 18:21:57', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(64, '2025-12-18 18:22:40', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(65, '2025-12-18 18:23:27', 'ADMIN', NULL, NULL, 'LOGIN_FAILED', 'ADMIN_USER', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(66, '2025-12-18 18:24:50', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(67, '2025-12-18 18:25:35', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(68, '2025-12-18 18:25:44', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(69, '2025-12-18 18:25:49', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(70, '2025-12-18 18:26:01', 'ADMIN', NULL, NULL, 'LOGIN_FAILED', 'ADMIN_USER', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(71, '2025-12-18 18:31:51', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(72, '2025-12-18 18:48:58', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(73, '2025-12-18 18:50:50', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(74, '2025-12-18 18:52:26', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(75, '2025-12-18 18:52:43', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(76, '2025-12-18 18:52:54', 'ADMIN', 1, NULL, 'LOGIN_FAILED', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(77, '2025-12-18 18:53:03', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(78, '2025-12-18 18:53:30', 'ADMIN', 1, NULL, 'LOGIN_FAILED', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(79, '2025-12-18 18:53:36', 'ADMIN', NULL, NULL, 'LOGIN_FAILED', 'ADMIN_USER', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(80, '2025-12-18 18:53:57', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(81, '2025-12-18 18:57:10', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(82, '2025-12-18 18:57:43', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(83, '2025-12-18 18:58:43', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(84, '2025-12-18 19:02:56', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(85, '2025-12-18 19:04:38', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(86, '2025-12-18 19:05:17', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(87, '2025-12-18 19:06:20', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(88, '2025-12-18 19:08:23', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(89, '2025-12-18 19:08:27', 'ADMIN', 1, NULL, 'LOGIN_FAILED', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(90, '2025-12-19 09:58:01', 'ADMIN', 1, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(91, '2025-12-19 09:58:38', 'ADMIN', NULL, NULL, 'LOGIN_FAILED', 'ADMIN_USER', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(92, '2025-12-19 09:58:48', 'ADMIN', 1, NULL, 'LOGIN_FAILED', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(93, '2025-12-19 09:59:09', 'ADMIN', 1, NULL, 'LOGIN_FAILED', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(94, '2025-12-19 09:59:27', 'ADMIN', 1, NULL, 'LOGIN_FAILED', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(95, '2025-12-19 09:59:31', 'ADMIN', 1, NULL, 'LOGIN_FAILED', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(96, '2025-12-19 10:44:36', 'ADMIN', 1, NULL, 'LOGIN_FAILED', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(97, '2026-01-05 15:41:18', 'ADMIN', 1, NULL, 'LOGIN_FAILED', 'ADMIN_USER', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(98, '2026-01-05 16:01:01', 'ADMIN', 5, NULL, 'LOGIN_FAILED', 'ADMIN_USER', 5, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(99, '2026-01-05 16:18:31', 'ADMIN', 5, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 5, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(100, '2026-01-06 09:54:56', 'ADMIN', 5, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 5, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(101, '2026-01-06 12:01:07', 'ADMIN', 5, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 5, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL),
+(102, '2026-01-06 12:01:18', 'ADMIN', 5, NULL, 'LOGIN_SUCCESS', 'ADMIN_USER', 5, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -258,6 +311,13 @@ CREATE TABLE `document_categories` (
   `sort_order` int(10) UNSIGNED DEFAULT 0,
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `document_categories`
+--
+
+INSERT INTO `document_categories` (`id`, `name`, `description`, `sort_order`, `created_at`) VALUES
+(1, 'Teste', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer ac nisi turpis. Mauris a ipsum in mauris cursus pharetra sit amet vitae eros. Nulla dignissim tortor in lacus consequat, nec facilisis arcu accumsan. Cras placerat ligula ut nunc ornare, in laoreet augue venenatis. Ut dui eros, iaculis nec tristique nec, consectetur sed lectus. Aenean maximus in arcu vitae consequat. Nam sit amet semper nisi. Quisque tempor, augue quis ultrices aliquet, ante nisl varius est, sed convallis est tellus a purus. Nullam ac ligula ipsum. Duis purus nunc, ultrices consequat nisl a, convallis finibus massa.', 1, '2026-01-06 11:33:59');
 
 -- --------------------------------------------------------
 
@@ -304,7 +364,12 @@ INSERT INTO `migrations` (`id`, `filename`, `executed_at`) VALUES
 (5, 'fix_audit_logs.sql', '2025-12-03 14:16:49'),
 (6, '20251211000400_create_app_settings.sql', '2025-12-17 19:10:55'),
 (7, '20251217000500_create_notification_outbox.sql', '2025-12-17 19:10:55'),
-(8, '20251217000600_alter_notification_outbox_status.sql', '2025-12-17 19:43:52');
+(8, '20251217000600_alter_notification_outbox_status.sql', '2025-12-17 19:43:52'),
+(9, '20251218001000_create_password_reset_tokens.sql', '2025-12-18 20:56:56'),
+(10, '20251218001100_add_2fa_to_admin_users.sql', '2025-12-18 20:56:56'),
+(11, '20251218001200_create_admin_notifications.sql', '2025-12-18 20:56:56'),
+(12, '20251218001300_create_file_versions.sql', '2025-12-18 20:56:56'),
+(13, '20251218001400_create_api_tokens.sql', '2025-12-18 20:56:56');
 
 -- --------------------------------------------------------
 
@@ -357,6 +422,13 @@ CREATE TABLE `password_reset_tokens` (
   `used_at` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `password_reset_tokens`
+--
+
+INSERT INTO `password_reset_tokens` (`id`, `admin_user_id`, `token`, `expires_at`, `used_at`, `created_at`) VALUES
+(2, 1, '53504430aa830ead4697877feed9d5ce31ec1bceb577232149e10b033150bde9', '2025-12-19 10:58:55', NULL, '2025-12-19 12:58:55');
 
 -- --------------------------------------------------------
 
@@ -819,7 +891,7 @@ ALTER TABLE `admin_notifications`
 -- AUTO_INCREMENT de tabela `admin_users`
 --
 ALTER TABLE `admin_users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de tabela `api_tokens`
@@ -837,7 +909,7 @@ ALTER TABLE `app_settings`
 -- AUTO_INCREMENT de tabela `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
 
 --
 -- AUTO_INCREMENT de tabela `auth_rate_limits`
@@ -849,7 +921,7 @@ ALTER TABLE `auth_rate_limits`
 -- AUTO_INCREMENT de tabela `document_categories`
 --
 ALTER TABLE `document_categories`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de tabela `general_documents`
@@ -861,7 +933,7 @@ ALTER TABLE `general_documents`
 -- AUTO_INCREMENT de tabela `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de tabela `notification_log`
@@ -879,7 +951,7 @@ ALTER TABLE `notification_outbox`
 -- AUTO_INCREMENT de tabela `password_reset_tokens`
 --
 ALTER TABLE `password_reset_tokens`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de tabela `portal_access_log`
