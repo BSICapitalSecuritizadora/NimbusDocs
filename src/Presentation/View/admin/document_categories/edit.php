@@ -129,9 +129,9 @@ if (!$catId) {
             <i class="bi bi-trash"></i> Deletar categoria
           </button>
         </form>
-        <small class="text-muted d-block mt-3">
-          <i class="bi bi-info-circle"></i> 
-          Você apenas poderá deletar esta categoria se nenhum documento estiver associado a ela.
+        <small class="text-white d-block mt-3 bg-danger p-2 rounded">
+          <i class="bi bi-exclamation-triangle-fill"></i> 
+          <strong>Atenção:</strong> Ao excluir esta categoria, todos os documentos vinculados a ela também serão excluídos permanentemente!
         </small>
       </div>
     </div>

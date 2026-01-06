@@ -45,7 +45,7 @@ final class DocumentCategoryAdminController
         Auth::requireRole('ADMIN', 'SUPER_ADMIN');
 
         $pageTitle   = 'Nova categoria de documento';
-        $contentView = __DIR__ . '/../../View/admin/document_categories/form.php';
+        $contentView = __DIR__ . '/../../View/admin/document_categories/create.php';
 
         $viewData = [
             'mode'     => 'create',
@@ -70,7 +70,7 @@ final class DocumentCategoryAdminController
         }
 
         $pageTitle   = 'Editar categoria de documento';
-        $contentView = __DIR__ . '/../../View/admin/document_categories/form.php';
+        $contentView = __DIR__ . '/../../View/admin/document_categories/edit.php';
 
         $viewData = [
             'mode'     => 'edit',
