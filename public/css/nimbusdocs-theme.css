@@ -84,12 +84,9 @@ body {
 /* ============================================
    Sidebar Styles
 ============================================ */
-/* ============================================
-   Sidebar Styles
-============================================ */
 .nd-sidebar {
   background: linear-gradient(180deg, var(--nd-navy-800) 0%, var(--nd-navy-900) 100%);
-  height: 100vh; /* Changed from min-height to fixed height */
+  min-height: 100vh;
   padding: 0;
   position: fixed;
   top: 0;
@@ -97,8 +94,6 @@ body {
   width: 260px;
   z-index: 1000;
   box-shadow: var(--nd-shadow-xl);
-  display: flex;
-  flex-direction: column;
 }
 
 .nd-sidebar-brand {
@@ -107,10 +102,8 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  flex-shrink: 0; /* Prevent shrinking */
 }
 
-/* ... existing brand styles ... */
 .nd-sidebar-brand-icon {
   width: 42px;
   height: 42px;
@@ -134,27 +127,6 @@ body {
 
 .nd-sidebar-nav {
   padding: 1rem 0;
-  flex-grow: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  
-  /* Firefox */
-  scrollbar-width: thin;
-  scrollbar-color: var(--nd-navy-600) transparent;
-}
-
-/* Webkit Scrollbar Styling for Sidebar */
-.nd-sidebar-nav::-webkit-scrollbar {
-  width: 4px;
-}
-
-.nd-sidebar-nav::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.nd-sidebar-nav::-webkit-scrollbar-thumb {
-  background-color: var(--nd-navy-600);
-  border-radius: 4px;
 }
 
 .nd-nav-section {

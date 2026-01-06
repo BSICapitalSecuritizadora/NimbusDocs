@@ -51,20 +51,13 @@ class TwoFactorController
             $this->config['branding']['app_name'] ?? 'NimbusDocs'
         );
 
-        $viewData = [
-            'csrfToken' => Csrf::token(),
-            'error'     => Session::getFlash('error'),
-            'success'   => Session::getFlash('success'),
-            'branding'  => $this->config['branding'] ?? [],
-            'isEnabled' => (bool) ($user['two_factor_enabled'] ?? false),
-            'secret'    => $secret,
-            'qrCodeUrl' => $qrCodeUrl,
-        ];
+        $csrfToken = Csrf::token();
+        $error = Session::getFlash('error');
+        $success = Session::getFlash('success');
+        $branding = $this->config['branding'] ?? [];
+        $isEnabled = (bool) ($user['two_factor_enabled'] ?? false);
 
-        $pageTitle = 'Autenticação em Dois Fatores (2FA)';
-        $contentView = __DIR__ . '/../../View/admin/settings/two_factor.php';
-
-        require __DIR__ . '/../../View/admin/layouts/base.php';
+        require __DIR__ . '/../../View/admin/settings/two_factor.php';
     }
 
     /**
