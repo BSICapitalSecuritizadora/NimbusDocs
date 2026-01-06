@@ -8,32 +8,47 @@ $items   = $pagination['items'] ?? [];
 $page    = $pagination['page'] ?? 1;
 $pages   = $pagination['pages'] ?? 1;
 ?>
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 mb-0">Administradores</h1>
-    <a href="/admin/users/create" class="btn btn-primary btn-sm">Novo administrador</a>
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <div class="nd-avatar nd-avatar-lg" style="background: var(--nd-navy-600);">
+            <i class="bi bi-shield-lock-fill text-white"></i>
+        </div>
+        <div>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Administradores do Sistema</h1>
+            <p class="text-muted mb-0 small">Gerencie as permissões e acessos administrativos</p>
+        </div>
+    </div>
+    <a href="/admin/users/create" class="nd-btn nd-btn-gold nd-btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>
+        Novo administrador
+    </a>
 </div>
 
+<!-- Alerts -->
 <?php if (!empty($flash['success'])): ?>
-    <div class="alert alert-success py-2">
-        <?= htmlspecialchars($flash['success'], ENT_QUOTES, 'UTF-8') ?>
+    <div class="nd-alert nd-alert-success">
+        <i class="bi bi-check-circle-fill"></i>
+        <div class="nd-alert-text"><?= htmlspecialchars($flash['success'], ENT_QUOTES, 'UTF-8') ?></div>
     </div>
 <?php endif; ?>
 
 <?php if (!empty($flash['error'])): ?>
-    <div class="alert alert-danger py-2">
-        <?= htmlspecialchars($flash['error'], ENT_QUOTES, 'UTF-8') ?>
+    <div class="nd-alert nd-alert-danger">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <div class="nd-alert-text"><?= htmlspecialchars($flash['error'], ENT_QUOTES, 'UTF-8') ?></div>
     </div>
 <?php endif; ?>
 
-<div class="card">
-    <div class="card-body p-0">
+<!-- Users List Card -->
+<div class="nd-card">
+    <div class="nd-card-body p-0">
         <div class="table-responsive">
-            <table class="table table-striped table-hover mb-0">
-                <thead class="table-light">
+            <table class="nd-table">
+                <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Nome</th>
-                        <th>E-mail</th>
+                        <th>Administrador</th>
                         <th>Perfil</th>
                         <th>Status</th>
                         <th>Último login</th>
@@ -43,36 +58,79 @@ $pages   = $pagination['pages'] ?? 1;
                 <tbody>
                     <?php if (!$items): ?>
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-3">
-                                Nenhum administrador cadastrado.
+                            <td colspan="5" class="text-center py-5">
+                                <i class="bi bi-people text-muted mb-2" style="font-size: 2rem;"></i>
+                                <p class="text-muted mb-0">Nenhum administrador encontrado.</p>
                             </td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($items as $user): ?>
                             <tr>
-                                <td><?= (int)$user['id'] ?></td>
-                                <td><?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?></td>
-                                <td><?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?></td>
-                                <td><?= htmlspecialchars($user['role'], ENT_QUOTES, 'UTF-8') ?></td>
-                                <td><?= htmlspecialchars($user['status'], ENT_QUOTES, 'UTF-8') ?></td>
                                 <td>
-                                    <?= $user['last_login_at'] ? htmlspecialchars($user['last_login_at'], ENT_QUOTES, 'UTF-8') : '-' ?>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="nd-avatar" style="width: 36px; height: 36px; background: var(--nd-gray-100); color: var(--nd-gray-600); font-size: 0.8rem;">
+                                            <?= strtoupper(substr($user['name'] ?? 'A', 0, 1)) ?>
+                                        </div>
+                                        <div>
+                                            <div class="fw-medium text-dark"><?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?></div>
+                                            <div class="small text-muted"><?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <?php if ($user['role'] === 'SUPER_ADMIN'): ?>
+                                        <span class="d-inline-flex align-items-center gap-1 text-primary small fw-semibold">
+                                            <i class="bi bi-shield-shaded"></i> Super Admin
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="text-muted small">Administrador</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php
+                                    $statusClass = match ($user['status'] ?? '') {
+                                        'ACTIVE' => 'success',
+                                        'BLOCKED' => 'danger',
+                                        default => 'secondary'
+                                    };
+                                    $statusLabel = match ($user['status'] ?? '') {
+                                        'ACTIVE' => 'Ativo',
+                                        'BLOCKED' => 'Bloqueado',
+                                        'INACTIVE' => 'Inativo',
+                                        default => 'Desconhecido'
+                                    };
+                                    ?>
+                                    <span class="nd-badge nd-badge-<?= $statusClass ?>">
+                                        <?= $statusLabel ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <?php if ($user['last_login_at']): ?>
+                                        <div class="small text-dark">
+                                            <i class="bi bi-calendar3 me-1 text-muted"></i>
+                                            <?= (new DateTime($user['last_login_at']))->format('d/m/Y H:i') ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="text-muted small">-</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="text-end">
-                                    <a href="/admin/users/<?= (int)$user['id'] ?>/edit" class="btn btn-sm btn-outline-secondary">
-                                        Editar
-                                    </a>
+                                    <div class="btn-group">
+                                        <a href="/admin/users/<?= (int)$user['id'] ?>/edit" class="nd-btn nd-btn-outline nd-btn-sm" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
 
-                                    <?php if ($user['status'] === 'ACTIVE'): ?>
-                                        <form method="post" action="/admin/users/<?= (int)$user['id'] ?>/deactivate"
-                                            class="d-inline"
-                                            onsubmit="return confirm('Deseja desativar este administrador?');">
-                                            <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                Desativar
-                                            </button>
-                                        </form>
-                                    <?php endif; ?>
+                                        <?php if ($user['status'] === 'ACTIVE'): ?>
+                                            <form method="post" action="/admin/users/<?= (int)$user['id'] ?>/deactivate"
+                                                class="d-inline"
+                                                onsubmit="return confirm('Deseja desativar este administrador?');">
+                                                <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                                                <button type="submit" class="nd-btn nd-btn-outline nd-btn-sm text-danger border-start-0" title="Desativar">
+                                                    <i class="bi bi-person-x-fill"></i>
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -80,19 +138,21 @@ $pages   = $pagination['pages'] ?? 1;
                 </tbody>
             </table>
         </div>
+        
+        <?php if ($pages > 1): ?>
+            <div class="nd-card-footer p-3 border-top">
+                <nav>
+                    <ul class="pagination pagination-sm justify-content-end mb-0">
+                        <?php for ($p = 1; $p <= $pages; $p++): ?>
+                            <li class="page-item <?= $p === $page ? 'active' : '' ?>">
+                                <a class="page-link" href="/admin/users?page=<?= $p ?>">
+                                    <?= $p ?>
+                                </a>
+                            </li>
+                        <?php endfor; ?>
+                    </ul>
+                </nav>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
-
-<?php if ($pages > 1): ?>
-    <nav class="mt-3">
-        <ul class="pagination pagination-sm mb-0">
-            <?php for ($p = 1; $p <= $pages; $p++): ?>
-                <li class="page-item <?= $p === $page ? 'active' : '' ?>">
-                    <a class="page-link" href="/admin/users?page=<?= $p ?>">
-                        <?= $p ?>
-                    </a>
-                </li>
-            <?php endfor; ?>
-        </ul>
-    </nav>
-<?php endif; ?>
