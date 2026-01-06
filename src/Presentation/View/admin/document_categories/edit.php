@@ -26,114 +26,157 @@ if (!$catId) {
 }
 ?>
 
-<div class="mb-4">
-  <a href="/admin/document-categories" class="btn btn-sm btn-outline-secondary mb-3">
-    <i class="bi bi-chevron-left"></i> Voltar
-  </a>
-  <h1 class="h4">Editar Categoria</h1>
-  <p class="text-muted small mb-0">#<?= (int)$category['id'] ?> | Criada em <?= htmlspecialchars($category['created_at'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <a href="/admin/document-categories" class="text-decoration-none">
+            <div class="nd-avatar nd-avatar-lg" style="background: var(--nd-navy-600);">
+                <i class="bi bi-arrow-left text-white"></i>
+            </div>
+        </a>
+        <div>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Editar Categoria</h1>
+            <p class="text-muted mb-0 small">
+                <span class="badge bg-light text-dark border font-monospace">#<?= $catId ?></span>
+                &bull; <?= htmlspecialchars($category['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+            </p>
+        </div>
+    </div>
+    <a href="/admin/document-categories" class="nd-btn nd-btn-outline nd-btn-sm">
+        <i class="bi bi-list-ul me-1"></i>
+        Ver Todas
+    </a>
 </div>
 
 <?php if (!empty($flash['success'])): ?>
-  <div class="alert alert-success alert-dismissible fade show" role="alert">
-    <i class="bi bi-check-circle"></i> <?= htmlspecialchars($flash['success'], ENT_QUOTES, 'UTF-8') ?>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  </div>
+    <div class="nd-alert nd-alert-success mb-3">
+        <i class="bi bi-check-circle-fill"></i>
+        <div class="nd-alert-text"><?= htmlspecialchars($flash['success'], ENT_QUOTES, 'UTF-8') ?></div>
+    </div>
 <?php endif; ?>
 
 <?php if (!empty($flash['error'])): ?>
-  <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($flash['error'], ENT_QUOTES, 'UTF-8') ?>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  </div>
+    <div class="nd-alert nd-alert-danger mb-3">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <div class="nd-alert-text"><?= htmlspecialchars($flash['error'], ENT_QUOTES, 'UTF-8') ?></div>
+    </div>
 <?php endif; ?>
 
-<div class="row">
-  <div class="col-lg-6">
-    <div class="card">
-      <div class="card-body">
-        <form method="post" action="/admin/document-categories/<?= $catId ?>" novalidate>
-          <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
-          <input type="hidden" name="_method" value="PUT">
+<!-- Main Content -->
+<div class="nd-card">
+    <div class="nd-card-body p-0">
+        <div class="row g-0">
+            <!-- Form Column -->
+            <div class="col-lg-8 p-4">
+                <form method="post" action="/admin/document-categories/<?= $catId ?>" novalidate>
+                    <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="_method" value="PUT">
 
-          <!-- Nome -->
-          <div class="mb-3">
-            <label for="name" class="form-label">Nome da Categoria <span class="text-danger">*</span></label>
-            <input type="text" class="form-control <?= !empty($errors['name']) ? 'is-invalid' : '' ?>" 
-              id="name" name="name" 
-              value="<?= htmlspecialchars($old['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-              placeholder="Ex: Políticas, Manuais, Relatórios" 
-              required>
-            <?php if (!empty($errors['name'])): ?>
-              <div class="invalid-feedback d-block"><?= htmlspecialchars($errors['name'], ENT_QUOTES, 'UTF-8') ?></div>
-            <?php endif; ?>
-          </div>
+                    <!-- Nome -->
+                    <div class="mb-4">
+                        <label for="name" class="nd-label">Nome da Categoria <span class="text-danger">*</span></label>
+                        <div class="nd-input-group">
+                            <input type="text" class="nd-input <?= !empty($errors['name']) ? 'is-invalid' : '' ?>" 
+                                id="name" name="name" 
+                                value="<?= htmlspecialchars($old['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                placeholder="Ex: Políticas, Manuais, Relatórios" 
+                                required style="padding-left: 2.5rem;">
+                            <i class="bi bi-tag nd-input-icon"></i>
+                        </div>
+                        <?php if (!empty($errors['name'])): ?>
+                            <div class="text-danger small mt-1"><?= htmlspecialchars($errors['name'], ENT_QUOTES, 'UTF-8') ?></div>
+                        <?php endif; ?>
+                    </div>
 
-          <!-- Descrição -->
-          <div class="mb-3">
-            <label for="description" class="form-label">Descrição</label>
-            <textarea class="form-control <?= !empty($errors['description']) ? 'is-invalid' : '' ?>" 
-              id="description" name="description" rows="3"><?= htmlspecialchars($old['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
-            <?php if (!empty($errors['description'])): ?>
-              <div class="invalid-feedback d-block"><?= htmlspecialchars($errors['description'], ENT_QUOTES, 'UTF-8') ?></div>
-            <?php endif; ?>
-          </div>
+                    <!-- Descrição -->
+                    <div class="mb-4">
+                        <label for="description" class="nd-label">Descrição</label>
+                        <textarea class="nd-input w-100 <?= !empty($errors['description']) ? 'is-invalid' : '' ?>" 
+                            id="description" name="description" rows="3" style="resize: none;"
+                            placeholder="Descreva o propósito desta categoria..."><?= htmlspecialchars($old['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                        <?php if (!empty($errors['description'])): ?>
+                            <div class="text-danger small mt-1"><?= htmlspecialchars($errors['description'], ENT_QUOTES, 'UTF-8') ?></div>
+                        <?php endif; ?>
+                    </div>
 
-          <!-- Ordem de Exibição -->
-          <div class="mb-4">
-            <label for="sort_order" class="form-label">Ordem de Exibição</label>
-            <input type="number" class="form-control" 
-              id="sort_order" name="sort_order" 
-              value="<?= htmlspecialchars($old['sort_order'] ?? '1', ENT_QUOTES, 'UTF-8') ?>" 
-              min="1" max="999">
-            <small class="form-text text-muted d-block mt-1">
-              Categorias com menor número aparecem primeiro
-            </small>
-          </div>
+                    <!-- Ordem de Exibição -->
+                    <div class="mb-4">
+                        <label for="sort_order" class="nd-label">Ordem de Exibição</label>
+                        <div class="d-flex align-items-center gap-3">
+                            <input type="number" class="nd-input <?= !empty($errors['sort_order']) ? 'is-invalid' : '' ?>" 
+                                id="sort_order" name="sort_order" 
+                                value="<?= htmlspecialchars($old['sort_order'] ?? '1', ENT_QUOTES, 'UTF-8') ?>" 
+                                min="1" max="999" style="width: 100px;">
+                            <div class="form-text small mb-0">Menor número aparece primeiro.</div>
+                        </div>
+                    </div>
 
-          <div>
-            <a href="/admin/document-categories" class="btn btn-outline-secondary">Cancelar</a>
-            <button type="submit" class="btn btn-primary">Salvar alterações</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                        <a href="/admin/document-categories" class="nd-btn nd-btn-outline">Cancelar</a>
+                        <button type="submit" class="nd-btn nd-btn-primary">
+                            <i class="bi bi-check-lg me-1"></i> Salvar Alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
 
-  <!-- Painel Lateral -->
-  <div class="col-lg-6">
-    <!-- Informações -->
-    <div class="card mb-3 bg-light border-0">
-      <div class="card-body">
-        <h6 class="card-title mb-3">Informações</h6>
-        <div class="mb-2">
-          <small class="text-muted">ID:</small><br>
-          <small><code>#<?= (int)$category['id'] ?></code></small>
+            <!-- Info Sidebar -->
+            <div class="col-lg-4 border-start bg-light">
+                <!-- Informações -->
+                <div class="p-4 border-bottom">
+                    <h6 class="text-uppercase text-muted small fw-bold mb-3">Informações</h6>
+                    <div class="mb-3">
+                        <label class="small text-muted d-block">ID da Categoria</label>
+                        <span class="badge bg-white text-dark border shadow-sm font-monospace">#<?= $catId ?></span>
+                    </div>
+                    <div class="mb-0">
+                        <label class="small text-muted d-block">Data de Criação</label>
+                        <span class="small text-dark">
+                            <i class="bi bi-calendar3 me-1"></i>
+                            <?= htmlspecialchars(date('d/m/Y \à\s H:i', strtotime($category['created_at'] ?? 'now')), ENT_QUOTES, 'UTF-8') ?>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Zona de Perigo -->
+                <div class="p-4">
+                    <h6 class="text-uppercase text-danger small fw-bold mb-3">
+                        <i class="bi bi-exclamation-octagon me-1"></i> Zona de Perigo
+                    </h6>
+                    <p class="small text-muted mb-3">
+                        A exclusão desta categoria é <strong>irreversível</strong> e também <strong>removerá permanentemente todos os documentos associados</strong>.
+                    </p>
+                    <button type="button" class="nd-btn nd-btn-sm w-100 bg-danger text-white border-danger" 
+                        data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <i class="bi bi-trash me-1"></i> Excluir Categoria
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="mb-2">
-          <small class="text-muted">Criada em:</small><br>
-          <small><?= htmlspecialchars($category['created_at'] ?? '', ENT_QUOTES, 'UTF-8') ?></small>
-        </div>
-      </div>
     </div>
+</div>
 
-    <!-- Ações -->
-    <div class="card">
-      <div class="card-header bg-light">
-        <h6 class="card-title mb-0">Ações</h6>
-      </div>
-      <div class="card-body">
-        <form method="post" action="/admin/document-categories/<?= $catId ?>/delete" onsubmit="return confirm('Tem certeza que deseja deletar esta categoria? Esta ação é irreversível.');">
-          <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
-          <button type="submit" class="btn btn-sm btn-outline-danger w-100">
-            <i class="bi bi-trash"></i> Deletar categoria
-          </button>
-        </form>
-        <small class="text-white d-block mt-3 bg-danger p-2 rounded">
-          <i class="bi bi-exclamation-triangle-fill"></i> 
-          <strong>Atenção:</strong> Ao excluir esta categoria, todos os documentos vinculados a ela também serão excluídos permanentemente!
-        </small>
-      </div>
+<!-- Modal: Delete -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold text-danger">Excluir Categoria</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="/admin/document-categories/<?= $catId ?>/delete">
+                <div class="modal-body py-0">
+                    <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                    <p class="text-muted">
+                        Tem certeza que deseja excluir a categoria <strong class="text-dark"><?= htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8') ?></strong>?
+                        <br><span class="text-danger small">Isso removerá permanentemente todos os documentos vinculados.</span>
+                    </p>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="nd-btn nd-btn-outline nd-btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="nd-btn nd-btn-sm bg-danger text-white border-danger">Excluir Permanentemente</button>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 </div>

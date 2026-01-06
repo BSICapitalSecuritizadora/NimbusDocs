@@ -12,95 +12,116 @@ $errors = $viewData['errors'] ?? [];
 $old = $viewData['old'] ?? [];
 ?>
 
-<div class="mb-4">
-  <a href="/admin/document-categories" class="btn btn-sm btn-outline-secondary mb-3">
-    <i class="bi bi-chevron-left"></i> Voltar
-  </a>
-  <h1 class="h4">Nova Categoria de Documentos</h1>
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <a href="/admin/document-categories" class="text-decoration-none text-muted">
+            <div class="nd-avatar nd-avatar-lg bg-light border">
+                <i class="bi bi-arrow-left text-muted"></i>
+            </div>
+        </a>
+        <div>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Nova Categoria</h1>
+            <p class="text-muted mb-0 small">Crie uma nova categoria para organizar documentos</p>
+        </div>
+    </div>
 </div>
 
 <?php if (!empty($flash['error'])): ?>
-  <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($flash['error'], ENT_QUOTES, 'UTF-8') ?>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  <div class="nd-alert nd-alert-danger mb-3">
+    <i class="bi bi-exclamation-triangle-fill"></i> 
+    <div class="nd-alert-text"><?= htmlspecialchars($flash['error'], ENT_QUOTES, 'UTF-8') ?></div>
   </div>
 <?php endif; ?>
 
 <div class="row">
-  <div class="col-lg-6">
-    <div class="card">
-      <div class="card-body">
+  <div class="col-lg-8">
+    <div class="nd-card h-100">
+      <div class="nd-card-header d-flex align-items-center gap-2">
+         <div class="nd-avatar nd-avatar-sm bg-primary bg-opacity-10">
+            <i class="bi bi-folder-plus text-primary"></i>
+         </div>
+         <h5 class="nd-card-title mb-0">Dados da Nova Categoria</h5>
+      </div>
+      <div class="nd-card-body">
         <form method="post" action="/admin/document-categories" novalidate>
           <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
           <!-- Nome -->
-          <div class="mb-3">
-            <label for="name" class="form-label">Nome da Categoria <span class="text-danger">*</span></label>
-            <input type="text" class="form-control <?= !empty($errors['name']) ? 'is-invalid' : '' ?>" 
-              id="name" name="name" 
-              value="<?= htmlspecialchars($old['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-              placeholder="Ex: Políticas, Manuais, Relatórios" 
-              required>
+          <div class="mb-4">
+            <label for="name" class="nd-label">Nome da Categoria <span class="text-danger">*</span></label>
+            <div class="nd-input-group">
+                <input type="text" class="nd-input <?= !empty($errors['name']) ? 'is-invalid' : '' ?>" 
+                  id="name" name="name" 
+                  value="<?= htmlspecialchars($old['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                  placeholder="Ex: Políticas, Manuais, Relatórios" 
+                  required style="padding-left: 2.5rem;">
+                <i class="bi bi-tag nd-input-icon"></i>
+            </div>
             <?php if (!empty($errors['name'])): ?>
-              <div class="invalid-feedback d-block"><?= htmlspecialchars($errors['name'], ENT_QUOTES, 'UTF-8') ?></div>
+              <div class="text-danger small mt-1"><?= htmlspecialchars($errors['name'], ENT_QUOTES, 'UTF-8') ?></div>
             <?php endif; ?>
-            <small class="form-text text-muted d-block mt-1">Deve ser único e descritivo</small>
+            <small class="text-muted mt-1 d-block font-size-sm">O nome deve ser único e fácil de identificar.</small>
           </div>
 
           <!-- Descrição -->
-          <div class="mb-3">
-            <label for="description" class="form-label">Descrição</label>
-            <textarea class="form-control <?= !empty($errors['description']) ? 'is-invalid' : '' ?>" 
-              id="description" name="description" rows="3" 
-              placeholder="Descreva brevemente o propósito desta categoria"><?= htmlspecialchars($old['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+          <div class="mb-4">
+            <label for="description" class="nd-label">Descrição</label>
+            <textarea class="nd-input w-100 <?= !empty($errors['description']) ? 'is-invalid' : '' ?>" 
+              id="description" name="description" rows="4" style="resize: none;"
+              placeholder="Descreva brevemente quais tipos de documentos ficarão aqui..."><?= htmlspecialchars($old['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
             <?php if (!empty($errors['description'])): ?>
-              <div class="invalid-feedback d-block"><?= htmlspecialchars($errors['description'], ENT_QUOTES, 'UTF-8') ?></div>
+              <div class="text-danger small mt-1"><?= htmlspecialchars($errors['description'], ENT_QUOTES, 'UTF-8') ?></div>
             <?php endif; ?>
-            <small class="form-text text-muted d-block mt-1">Máximo 500 caracteres</small>
           </div>
 
           <!-- Ordem de Exibição -->
           <div class="mb-4">
-            <label for="sort_order" class="form-label">Ordem de Exibição</label>
-            <input type="number" class="form-control" 
-              id="sort_order" name="sort_order" 
-              value="<?= htmlspecialchars($old['sort_order'] ?? '1', ENT_QUOTES, 'UTF-8') ?>" 
-              min="1" max="999">
-            <small class="form-text text-muted d-block mt-1">
-              Categorias com menor número aparecem primeiro no portal (ex: 1 aparece antes de 2)
-            </small>
+            <label for="sort_order" class="nd-label">Ordem de Exibição</label>
+             <div class="d-flex align-items-center gap-3">
+                 <div class="nd-input-group w-auto" style="max-width: 150px;">
+                    <input type="number" class="nd-input <?= !empty($errors['sort_order']) ? 'is-invalid' : '' ?>" 
+                      id="sort_order" name="sort_order" 
+                      value="<?= htmlspecialchars($old['sort_order'] ?? '1', ENT_QUOTES, 'UTF-8') ?>" 
+                      min="1" max="999" style="padding-left: 2.5rem;">
+                    <i class="bi bi-sort-numeric-down nd-input-icon"></i>
+                </div>
+                <small class="text-muted">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Define a posição da categoria na listagem (menor = topo).
+                </small>
+             </div>
           </div>
 
-          <div>
-            <a href="/admin/document-categories" class="btn btn-outline-secondary">Cancelar</a>
-            <button type="submit" class="btn btn-primary">Criar categoria</button>
+          <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+            <a href="/admin/document-categories" class="nd-btn nd-btn-outline">Cancelar</a>
+            <button type="submit" class="nd-btn nd-btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Criar Categoria
+            </button>
           </div>
         </form>
       </div>
     </div>
   </div>
 
-  <div class="col-lg-6">
-    <div class="card bg-light border-0">
-      <div class="card-body">
-        <h6 class="card-title mb-3">
-          <i class="bi bi-info-circle"></i> Dicas
+  <div class="col-lg-4">
+    <div class="nd-card bg-light border-0">
+      <div class="nd-card-body">
+        <h6 class="nd-card-title mb-3 d-flex align-items-center gap-2">
+          <i class="bi bi-lightbulb text-warning"></i> Dicas Úteis
         </h6>
-        <ul class="small text-muted mb-0">
-          <li class="mb-2">
-            <strong>Nome:</strong> Use nomes claros e concisos (ex: "Políticas e Procedimentos")
+        <ul class="nd-list-unstyled small text-muted mb-0 d-flex flex-column gap-2">
+          <li class="d-flex align-items-start gap-2">
+            <i class="bi bi-check2 text-success mt-1"></i>
+            <span><strong>Seja claro:</strong> Use nomes curtos mas descritivos.</span>
           </li>
-          <li class="mb-2">
-            <strong>Descrição:</strong> Ajuda os usuários a entenderem o conteúdo da categoria
+          <li class="d-flex align-items-start gap-2">
+            <i class="bi bi-check2 text-success mt-1"></i>
+            <span><strong>Agrupe bem:</strong> Crie categorias amplas para evitar fragmentação excessiva.</span>
           </li>
-          <li class="mb-2">
-            <strong>Ordem:</strong> Use números sequenciais para organizar visualmente (10, 20, 30...)
-          </li>
-          <li class="mb-2">
-            <strong>Organização:</strong> Cada categoria pode conter múltiplos documentos
-          </li>
-          <li>
-            <strong>Exclusão:</strong> Você pode deletar uma categoria vazia a qualquer momento
+          <li class="d-flex align-items-start gap-2">
+            <i class="bi bi-check2 text-success mt-1"></i>
+            <span><strong>Organize:</strong> Use a ordem numérica para destacar as categorias mais importantes no topo.</span>
           </li>
         </ul>
       </div>

@@ -74,7 +74,7 @@ final class DocumentCategoryAdminController
 
         $viewData = [
             'mode'     => 'edit',
-            'data'     => $cat,
+            'category' => $cat,
             'csrfToken' => Csrf::token(),
         ];
 
