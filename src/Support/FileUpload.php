@@ -33,10 +33,16 @@ final class FileUpload
      * Aceita tanto array do $_FILES quanto caminho de arquivo (para testes).
      *
      * @param array|string $file
+     * @param string $baseDir
+     * @param array $options ['allowed_extensions' => [], 'max_size_mb' => int]
      * @return array|string
      */
-    public static function store(array|string $file, string $baseDir): array|string
+    public static function store(array|string $file, string $baseDir, array $options = []): array|string
     {
+        // Configurações mescladas com defaults
+        $allowedExt = $options['allowed_extensions'] ?? self::$allowedExtensions;
+        $maxMb      = $options['max_size_mb'] ?? (int)(getenv('MAX_UPLOAD_MB') ?: 100);
+
         // Caso teste: caminho de arquivo
         if (is_string($file)) {
             if (!file_exists($file)) {
@@ -80,7 +86,6 @@ final class FileUpload
 
         $size = (int)$file['size'];
 
-        $maxMb  = (int)(getenv('MAX_UPLOAD_MB') ?: 100);
         $maxB   = $maxMb * 1024 * 1024;
         if ($size > $maxB) {
             throw new \RuntimeException('Arquivo excede o limite de ' . $maxMb . 'MB.');
@@ -99,7 +104,7 @@ final class FileUpload
             throw new \RuntimeException('Tipo de arquivo não permitido (bloqueado).');
         }
 
-        if (!in_array($ext, self::$allowedExtensions, true)) {
+        if (!in_array($ext, $allowedExt, true)) {
             throw new \RuntimeException('Tipo de arquivo não permitido (extensão).');
         }
 

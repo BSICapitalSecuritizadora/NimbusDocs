@@ -123,6 +123,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('POST', '/admin/general-documents',               [GeneralDocumentAdminController::class, 'store']);
     $r->addRoute('GET',  '/admin/general-documents/{id:\d+}/edit', [GeneralDocumentAdminController::class, 'editForm']);
     $r->addRoute('POST', '/admin/general-documents/{id:\d+}',      [GeneralDocumentAdminController::class, 'update']);
+    $r->addRoute('POST', '/admin/general-documents/{id:\d+}/toggle', [GeneralDocumentAdminController::class, 'toggle']);
     $r->addRoute('POST', '/admin/general-documents/{id:\d+}/delete', [GeneralDocumentAdminController::class, 'delete']);
 
     // Outbox de notificações

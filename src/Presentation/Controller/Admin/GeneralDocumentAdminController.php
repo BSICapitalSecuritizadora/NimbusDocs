@@ -49,11 +49,11 @@ final class GeneralDocumentAdminController
         Auth::requireRole('ADMIN', 'SUPER_ADMIN');
 
         $pageTitle   = 'Novo documento geral';
-        $contentView = __DIR__ . '/../../View/admin/general_documents/form.php';
+        $contentView = __DIR__ . '/../../View/admin/general_documents/create.php';
 
         $viewData = [
             'mode'       => 'create',
-            'data'       => ['category_id' => '', 'title' => '', 'description' => '', 'is_active' => 1],
+            'document'   => ['category_id' => '', 'title' => '', 'description' => '', 'is_active' => 1],
             'categories' => $this->categories->all(),
             'csrfToken'  => Csrf::token(),
         ];
@@ -74,11 +74,11 @@ final class GeneralDocumentAdminController
         }
 
         $pageTitle   = 'Editar documento geral';
-        $contentView = __DIR__ . '/../../View/admin/general_documents/form.php';
+        $contentView = __DIR__ . '/../../View/admin/general_documents/edit.php';
 
         $viewData = [
             'mode'       => 'edit',
-            'data'       => $doc,
+            'document'   => $doc,
             'categories' => $this->categories->all(),
             'csrfToken'  => Csrf::token(),
         ];
@@ -209,6 +209,46 @@ final class GeneralDocumentAdminController
         }
 
         Session::flash('success', 'Documento removido.');
+        header('Location: /admin/general-documents');
+        exit;
+    }
+
+    public function toggle(array $vars): void
+    {
+        Auth::requireRole('ADMIN', 'SUPER_ADMIN');
+
+        if (!Csrf::validate($_POST['_token'] ?? '')) {
+            Session::flash('error', 'Sessão expirada.');
+            header('Location: /admin/general-documents');
+            exit;
+        }
+
+        $id = (int)($vars['id'] ?? 0);
+        $doc = $this->docs->find($id);
+
+        if (!$doc) {
+            Session::flash('error', 'Documento não encontrado.');
+            header('Location: /admin/general-documents');
+            exit;
+        }
+
+        // Toggle status
+        $newStatus = ((int)$doc['is_active'] === 1) ? 0 : 1;
+        
+        // We only need to update the status, but the repo update method expects all fields.
+        // So we keep original values for others.
+        // NOTE: The update method signature is: update(int $id, array $data)
+        // keys: category_id, title, description, is_active
+        
+        $this->docs->update($id, [
+            'category_id' => $doc['category_id'],
+            'title'       => $doc['title'],
+            'description' => $doc['description'],
+            'is_active'   => $newStatus,
+        ]);
+
+        $msg = $newStatus ? 'Documento ativado.' : 'Documento desativado.';
+        Session::flash('success', $msg);
         header('Location: /admin/general-documents');
         exit;
     }
