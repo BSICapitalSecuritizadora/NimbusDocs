@@ -9,105 +9,173 @@
 $pagination = $pagination ?? ['items'=>[], 'total'=>0, 'page'=>1, 'perPage'=>15, 'pages'=>1];
 $filters    = $filters    ?? [];
 $items      = $pagination['items'] ?? [];
-?>
 
-<?php
 $query = http_build_query([
     'status'         => $filters['status'] ?? '',
     'portal_user_id' => $filters['portal_user_id'] ?? '',
 ]);
 ?>
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="h4 mb-0">Submissões do Portal</h1>
-  <div class="d-flex gap-2">
-    <a href="/admin/submissions/export/csv?<?= $query ?>" class="btn btn-sm btn-outline-secondary">
-      <i class="bi bi-download"></i> Exportar CSV
-    </a>
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex align-items-center gap-3">
+    <div class="nd-avatar nd-avatar-lg" style="background: var(--nd-navy-600);">
+        <i class="bi bi-inbox-fill text-white"></i>
+    </div>
+    <div>
+        <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Submissões do Portal</h1>
+        <p class="text-muted mb-0 small">Gerencie os envios recebidos</p>
+    </div>
   </div>
+  <a href="/admin/submissions/export/csv?<?= $query ?>" class="nd-btn nd-btn-outline nd-btn-sm">
+    <i class="bi bi-file-earmark-spreadsheet me-2"></i> Exportar CSV
+  </a>
 </div>
 
 <?php if (!empty($flash['success'])): ?>
-  <div class="alert alert-success"><?= htmlspecialchars($flash['success'], ENT_QUOTES, 'UTF-8') ?></div>
+  <div class="nd-alert nd-alert-success mb-4">
+    <i class="bi bi-check-circle-fill text-success"></i>
+    <span class="nd-alert-text"><?= htmlspecialchars($flash['success'], ENT_QUOTES, 'UTF-8') ?></span>
+  </div>
 <?php endif; ?>
+
 <?php if (!empty($flash['error'])): ?>
-  <div class="alert alert-danger"><?= htmlspecialchars($flash['error'], ENT_QUOTES, 'UTF-8') ?></div>
+  <div class="nd-alert nd-alert-danger mb-4">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span class="nd-alert-text"><?= htmlspecialchars($flash['error'], ENT_QUOTES, 'UTF-8') ?></span>
+  </div>
 <?php endif; ?>
 
-<form class="row g-2 align-items-end mb-3" method="get" action="/admin/submissions">
-  <div class="col-sm-3">
-    <label class="form-label" for="f_status">Status</label>
-    <select class="form-select" id="f_status" name="status">
-      <?php $st = $filters['status'] ?? ''; ?>
-      <option value="">Todos</option>
-      <option value="PENDING" <?= $st==='PENDING'?'selected':''; ?>>Pendente</option>
-      <option value="UNDER_REVIEW" <?= $st==='UNDER_REVIEW'?'selected':''; ?>>Em análise</option>
-      <option value="COMPLETED" <?= $st==='COMPLETED'?'selected':''; ?>>Concluída</option>
-      <option value="REJECTED" <?= $st==='REJECTED'?'selected':''; ?>>Rejeitada</option>
-    </select>
-  </div>
-  <div class="col-sm-3">
-    <label class="form-label" for="f_uid">ID Usuário</label>
-    <input type="number" class="form-control" id="f_uid" name="portal_user_id" value="<?= htmlspecialchars((string)($filters['portal_user_id'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
-  </div>
-  <div class="col-sm-3">
-    <button type="submit" class="btn btn-outline-primary">Filtrar</button>
-    <a class="btn btn-outline-secondary ms-1" href="/admin/submissions">Limpar</a>
-  </div>
-</form>
+<!-- Filter & List Card -->
+<div class="nd-card">
+    <div class="nd-card-header bg-white border-bottom p-3">
+        <form class="row g-3 align-items-end" method="get" action="/admin/submissions">
+          <div class="col-sm-3">
+            <label class="nd-label" for="f_status">Status</label>
+            <div class="nd-input-group">
+                <select class="nd-input" id="f_status" name="status" style="padding-left: 1rem;">
+                  <?php $st = $filters['status'] ?? ''; ?>
+                  <option value="">Todos os status</option>
+                  <option value="PENDING" <?= $st==='PENDING'?'selected':''; ?>>Pendente</option>
+                  <option value="UNDER_REVIEW" <?= $st==='UNDER_REVIEW'?'selected':''; ?>>Em análise</option>
+                  <option value="COMPLETED" <?= $st==='COMPLETED'?'selected':''; ?>>Concluída</option>
+                  <option value="REJECTED" <?= $st==='REJECTED'?'selected':''; ?>>Rejeitada</option>
+                </select>
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <label class="nd-label" for="f_uid">ID Usuário</label>
+            <input type="number" class="nd-input" id="f_uid" name="portal_user_id" placeholder="Ex: 123" value="<?= htmlspecialchars((string)($filters['portal_user_id'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+          </div>
+          <div class="col-sm-4">
+            <div class="d-flex gap-2">
+                <button type="submit" class="nd-btn nd-btn-primary">
+                    <i class="bi bi-filter"></i> Filtrar
+                </button>
+                <a class="nd-btn nd-btn-outline" href="/admin/submissions">Limpar</a>
+            </div>
+          </div>
+        </form>
+    </div>
 
-<div class="table-responsive">
-  <table class="table table-striped align-middle">
-    <thead class="table-light">
-      <tr>
-        <th>#</th>
-        <th>Ref.</th>
-        <th>Título</th>
-        <th>Usuário</th>
-        <th>Status</th>
-        <th>Enviada em</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php if (!$items): ?>
-        <tr>
-          <td colspan="7" class="text-muted text-center">Nenhuma submissão encontrada.</td>
-        </tr>
-      <?php else: ?>
-        <?php foreach ($items as $row): ?>
-          <tr>
-            <td><?= (int)$row['id'] ?></td>
-            <td><code><?= htmlspecialchars($row['reference_code'] ?? '', ENT_QUOTES, 'UTF-8') ?></code></td>
-            <td><?= htmlspecialchars($row['title'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-            <td>
-              <?= htmlspecialchars($row['user_full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?><br>
-              <small class="text-muted"><?= htmlspecialchars($row['user_email'] ?? '', ENT_QUOTES, 'UTF-8') ?></small>
-            </td>
-            <td><?= htmlspecialchars($row['status'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-            <td><?= htmlspecialchars($row['submitted_at'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-            <td><a class="btn btn-sm btn-outline-primary" href="/admin/submissions/<?= (int)$row['id'] ?>">Ver</a></td>
-          </tr>
-        <?php endforeach; ?>
-      <?php endif; ?>
-    </tbody>
-  </table>
+    <div class="nd-card-body p-0">
+        <div class="table-responsive">
+          <table class="nd-table">
+            <thead>
+              <tr>
+                <th style="width: 80px;">#ID</th>
+                <th style="width: 120px;">Ref.</th>
+                <th>Título</th>
+                <th>Usuário</th>
+                <th style="width: 140px;">Status</th>
+                <th>Data envio</th>
+                <th style="width: 100px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php if (!$items): ?>
+                <tr>
+                  <td colspan="7" class="text-center py-5">
+                    <div class="d-flex flex-column align-items-center">
+                        <i class="bi bi-inbox text-muted mb-2" style="font-size: 2rem;"></i>
+                        <span class="text-muted">Nenhuma submissão encontrada.</span>
+                    </div>
+                  </td>
+                </tr>
+              <?php else: ?>
+                <?php foreach ($items as $row): ?>
+                    <?php
+                    $statusClass = match($row['status'] ?? '') {
+                        'PENDING', 'UNDER_REVIEW' => 'warning',
+                        'COMPLETED' => 'success',
+                        'APPROVED' => 'success',
+                        'REJECTED' => 'danger',
+                        default => 'secondary'
+                    };
+                    $statusLabel = match($row['status'] ?? '') {
+                        'PENDING' => 'Pendente',
+                        'UNDER_REVIEW' => 'Em Análise',
+                        'COMPLETED' => 'Concluída',
+                        'APPROVED' => 'Aprovada',
+                        'REJECTED' => 'Rejeitada',
+                        default => $row['status'] ?? '-'
+                    };
+                    ?>
+                  <tr>
+                    <td class="fw-semibold text-muted">#<?= (int)$row['id'] ?></td>
+                    <td><code class="px-2 py-1 rounded bg-light text-dark small border"><?= htmlspecialchars($row['reference_code'] ?? '', ENT_QUOTES, 'UTF-8') ?></code></td>
+                    <td class="fw-medium text-dark"><?= htmlspecialchars($row['title'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                    <td>
+                      <div class="d-flex align-items-center gap-2">
+                          <div class="nd-avatar" style="width: 24px; height: 24px; font-size: 0.7rem;">
+                              <?= strtoupper(substr($row['user_full_name'] ?? 'U', 0, 1)) ?>
+                          </div>
+                          <div class="d-flex flex-column" style="line-height: 1.2;">
+                              <span><?= htmlspecialchars($row['user_full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+                              <small class="text-muted" style="font-size: 0.75rem;"><?= htmlspecialchars($row['user_email'] ?? '', ENT_QUOTES, 'UTF-8') ?></small>
+                          </div>
+                      </div>
+                    </td>
+                    <td>
+                        <span class="nd-badge nd-badge-<?= $statusClass ?>">
+                            <?= $statusLabel ?>
+                        </span>
+                    </td>
+                    <td class="text-muted small">
+                        <?= htmlspecialchars($row['submitted_at'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                    </td>
+                    <td class="text-end">
+                        <a class="nd-btn nd-btn-outline nd-btn-sm" href="/admin/submissions/<?= (int)$row['id'] ?>">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                  </tr>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </tbody>
+          </table>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    <?php if (($pagination['pages'] ?? 1) > 1): ?>
+    <div class="nd-card-footer p-3 border-top">
+        <nav aria-label="Paginação">
+          <ul class="pagination pagination-sm justify-content-end mb-0">
+            <?php $page=(int)($pagination['page']??1); $pages=(int)($pagination['pages']??1); ?>
+            <li class="page-item <?= $page<=1?'disabled':''; ?>">
+              <a class="page-link" href="?page=<?= max(1,$page-1) ?>&status=<?= urlencode($filters['status']??'') ?>&portal_user_id=<?= urlencode($filters['portal_user_id']??'') ?>">Anterior</a>
+            </li>
+            <?php for($p=1;$p<=$pages;$p++): ?>
+              <li class="page-item <?= $p===$page?'active':''; ?>">
+                <a class="page-link" href="?page=<?= $p ?>&status=<?= urlencode($filters['status']??'') ?>&portal_user_id=<?= urlencode($filters['portal_user_id']??'') ?>"><?= $p ?></a>
+              </li>
+            <?php endfor; ?>
+            <li class="page-item <?= $page>=$pages?'disabled':''; ?>">
+              <a class="page-link" href="?page=<?= min($pages,$page+1) ?>&status=<?= urlencode($filters['status']??'') ?>&portal_user_id=<?= urlencode($filters['portal_user_id']??'') ?>">Próxima</a>
+            </li>
+          </ul>
+        </nav>
+    </div>
+    <?php endif; ?>
 </div>
-
-<?php if (($pagination['pages'] ?? 1) > 1): ?>
-<nav aria-label="Paginação">
-  <ul class="pagination">
-    <?php $page=(int)($pagination['page']??1); $pages=(int)($pagination['pages']??1); ?>
-    <li class="page-item <?= $page<=1?'disabled':''; ?>">
-      <a class="page-link" href="?page=<?= max(1,$page-1) ?>&status=<?= urlencode($filters['status']??'') ?>&portal_user_id=<?= urlencode($filters['portal_user_id']??'') ?>">Anterior</a>
-    </li>
-    <?php for($p=1;$p<=$pages;$p++): ?>
-      <li class="page-item <?= $p===$page?'active':''; ?>">
-        <a class="page-link" href="?page=<?= $p ?>&status=<?= urlencode($filters['status']??'') ?>&portal_user_id=<?= urlencode($filters['portal_user_id']??'') ?>"><?= $p ?></a>
-      </li>
-    <?php endfor; ?>
-    <li class="page-item <?= $page>=$pages?'disabled':''; ?>">
-      <a class="page-link" href="?page=<?= min($pages,$page+1) ?>&status=<?= urlencode($filters['status']??'') ?>&portal_user_id=<?= urlencode($filters['portal_user_id']??'') ?>">Próxima</a>
-    </li>
-  </ul>
-</nav>
-<?php endif; ?>
