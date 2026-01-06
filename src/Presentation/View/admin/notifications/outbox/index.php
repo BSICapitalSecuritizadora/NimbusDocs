@@ -7,39 +7,59 @@ use App\Support\Auth;
 /** @var array $statuses */
 /** @var string $csrfToken */
 ?>
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h1 class="h4 mb-1">Fila de notificações (Outbox)</h1>
-        <p class="text-muted small mb-0">
-            Monitoramento dos envios de e-mail (Graph). Máx. 200 registros por consulta.
-        </p>
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <div class="nd-avatar nd-avatar-lg" style="background: var(--nd-navy-600);">
+            <i class="bi bi-envelope-paper-fill text-white"></i>
+        </div>
+        <div>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Fila de Notificações</h1>
+            <p class="text-muted mb-0 small">Monitoramento de envios de e-mail (Outbox)</p>
+        </div>
     </div>
 </div>
 
 <?php if (!empty($success)): ?>
-    <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+    <div class="nd-alert nd-alert-success mb-3">
+        <i class="bi bi-check-circle-fill"></i>
+        <div class="nd-alert-text"><?= htmlspecialchars($success) ?></div>
+    </div>
 <?php endif; ?>
+
 <?php if (!empty($error)): ?>
-    <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+    <div class="nd-alert nd-alert-danger mb-3">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <div class="nd-alert-text"><?= htmlspecialchars($error) ?></div>
+    </div>
 <?php endif; ?>
 
-<div class="card mb-3">
-    <div class="card-body">
-        <form class="row g-2">
-            <div class="col-md-2">
-                <label class="form-label small mb-1">De</label>
-                <input type="date" name="from_date" class="form-control form-control-sm"
-                    value="<?= htmlspecialchars($filters['from_date'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+<!-- Filters Card -->
+<div class="nd-card mb-4">
+    <div class="nd-card-header d-flex align-items-center gap-2">
+        <i class="bi bi-funnel-fill" style="color: var(--nd-gold-500);"></i>
+        <h5 class="nd-card-title mb-0">Filtros</h5>
+    </div>
+    <div class="nd-card-body">
+        <form class="row g-3">
+            <div class="col-md-3">
+                <label class="nd-label">De</label>
+                <div class="nd-input-group">
+                    <input type="date" name="from_date" class="nd-input"
+                        value="<?= htmlspecialchars($filters['from_date'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
-            <div class="col-md-2">
-                <label class="form-label small mb-1">Até</label>
-                <input type="date" name="to_date" class="form-control form-control-sm"
-                    value="<?= htmlspecialchars($filters['to_date'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+            <div class="col-md-3">
+                <label class="nd-label">Até</label>
+                <div class="nd-input-group">
+                    <input type="date" name="to_date" class="nd-input"
+                        value="<?= htmlspecialchars($filters['to_date'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                </div>
             </div>
-
-            <div class="col-md-2">
-                <label class="form-label small mb-1">Status</label>
-                <select name="status" class="form-select form-select-sm">
+            <div class="col-md-3">
+                <label class="nd-label">Status</label>
+                <select name="status" class="nd-input form-select">
                     <option value="">Todos</option>
                     <?php foreach ($statuses as $st): ?>
                         <option value="<?= htmlspecialchars($st) ?>" <?= (($filters['status'] ?? '') === $st) ? 'selected' : '' ?>>
@@ -48,10 +68,9 @@ use App\Support\Auth;
                     <?php endforeach; ?>
                 </select>
             </div>
-
             <div class="col-md-3">
-                <label class="form-label small mb-1">Tipo</label>
-                <select name="type" class="form-select form-select-sm">
+                <label class="nd-label">Tipo</label>
+                <select name="type" class="nd-input form-select">
                     <option value="">Todos</option>
                     <?php foreach ($types as $tp): ?>
                         <option value="<?= htmlspecialchars($tp) ?>" <?= (($filters['type'] ?? '') === $tp) ? 'selected' : '' ?>>
@@ -60,36 +79,52 @@ use App\Support\Auth;
                     <?php endforeach; ?>
                 </select>
             </div>
-
-            <div class="col-md-3">
-                <label class="form-label small mb-1">E-mail</label>
-                <input type="text" name="email" class="form-control form-control-sm"
-                    placeholder="destinatario@..."
-                    value="<?= htmlspecialchars($filters['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+            
+            <div class="col-md-9">
+                <label class="nd-label">E-mail do Destinatário</label>
+                <div class="nd-input-group">
+                    <input type="text" name="email" class="nd-input"
+                        placeholder="Ex: usuario@empresa.com"
+                        value="<?= htmlspecialchars($filters['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                        style="padding-left: 2.5rem;">
+                    <i class="bi bi-envelope nd-input-icon"></i>
+                </div>
             </div>
 
-            <div class="col-12 d-flex justify-content-end">
-                <button type="submit" class="btn btn-sm btn-primary">Filtrar</button>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="nd-btn nd-btn-primary w-100">
+                    <i class="bi bi-search me-1"></i> Filtrar
+                </button>
             </div>
         </form>
     </div>
 </div>
 
-<div class="card">
-    <div class="card-body">
+<!-- Results Card -->
+<div class="nd-card">
+    <div class="nd-card-header d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-list-ul" style="color: var(--nd-gold-500);"></i>
+            <h5 class="nd-card-title mb-0">Resultados</h5>
+        </div>
+        <small class="text-muted">Máx. 200 registros</small>
+    </div>
+    
+    <div class="nd-card-body p-0">
         <?php if (!$rows): ?>
-            <p class="text-muted small mb-0">Nenhum registro encontrado.</p>
+            <div class="text-center py-5">
+                <i class="bi bi-inbox text-muted mb-2" style="font-size: 2rem;"></i>
+                <p class="text-muted mb-0">Nenhum registro encontrado.</p>
+            </div>
         <?php else: ?>
             <div class="table-responsive">
-                <table class="table table-sm align-middle mb-0">
+                <table class="nd-table">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th style="width: 60px;">ID</th>
                             <th>Data</th>
-                            <th>Status</th>
-                            <th>Tipo</th>
-                            <th>Destinatário</th>
-                            <th>Assunto</th>
+                            <th>Status/Tipo</th>
+                            <th>Destinatário/Assunto</th>
                             <th class="text-end">Tentativas</th>
                             <th class="text-end">Ações</th>
                         </tr>
@@ -98,51 +133,80 @@ use App\Support\Auth;
                         <?php foreach ($rows as $r): ?>
                             <?php
                             $status = $r['status'] ?? '';
-                            $badge = 'bg-secondary';
-                            if ($status === 'PENDING') $badge = 'bg-warning text-dark';
-                            if ($status === 'SENDING') $badge = 'bg-info text-dark';
-                            if ($status === 'SENT')    $badge = 'bg-success';
-                            if ($status === 'FAILED')  $badge = 'bg-danger';
-                            if ($status === 'CANCELLED') $badge = 'bg-secondary';
+                            $badge = 'nd-badge-secondary';
+                            if ($status === 'PENDING') $badge = 'bg-warning text-dark border-warning';
+                            if ($status === 'SENDING') $badge = 'bg-info text-white border-info';
+                            if ($status === 'SENT')    $badge = 'nd-badge-success';
+                            if ($status === 'FAILED')  $badge = 'nd-badge-danger';
+                            // CANCELED/CANCELLED usually handled by default secondary
                             ?>
                             <tr>
-                                <td class="small">#<?= (int)$r['id'] ?></td>
-                                <td class="small text-muted"><?= htmlspecialchars($r['created_at'] ?? '') ?></td>
-                                <td><span class="badge <?= $badge ?>"><?= htmlspecialchars($status) ?></span></td>
-                                <td class="small"><code><?= htmlspecialchars($r['type'] ?? '') ?></code></td>
-                                <td class="small">
-                                    <?= htmlspecialchars($r['recipient_email'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                <td><span class="text-muted small">#<?= (int)$r['id'] ?></span></td>
+                                <td>
+                                    <div class="small text-dark">
+                                        <i class="bi bi-calendar-event me-1 text-muted"></i>
+                                        <?= htmlspecialchars(date('d/m/Y H:i', strtotime($r['created_at'] ?? 'now'))) ?>
+                                    </div>
                                 </td>
-                                <td class="small">
-                                    <a href="/admin/notifications/outbox/<?= (int)$r['id'] ?>">
-                                        <?= htmlspecialchars($r['subject'] ?? '', ENT_QUOTES, 'UTF-8') ?>
-                                    </a>
+                                <td>
+                                    <div class="d-flex flex-column gap-1">
+                                        <div><span class="nd-badge <?= $badge ?>"><?= htmlspecialchars($status) ?></span></div>
+                                        <div><span class="badge bg-light text-dark border font-monospace"><?= htmlspecialchars($r['type'] ?? '') ?></span></div>
+                                    </div>
                                 </td>
-                                <td class="small text-end">
-                                    <?= (int)($r['attempts'] ?? 0) ?>/<?= (int)($r['max_attempts'] ?? 5) ?>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="text-dark fw-medium small mb-1">
+                                            <i class="bi bi-envelope me-1 text-muted"></i>
+                                            <?= htmlspecialchars($r['recipient_email'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                        </span>
+                                        <a href="/admin/notifications/outbox/<?= (int)$r['id'] ?>" class="text-decoration-none small text-truncate d-block" style="max-width: 300px; color: var(--nd-navy-600);">
+                                            <?= htmlspecialchars($r['subject'] ?? '(Sem assunto)', ENT_QUOTES, 'UTF-8') ?>
+                                        </a>
+                                    </div>
                                 </td>
-
                                 <td class="text-end">
-                                    <?php if (($r['status'] ?? '') === 'FAILED'): ?>
-                                        <form method="post" action="/admin/notifications/outbox/<?= (int)$r['id'] ?>/reprocess" class="d-inline">
-                                            <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken) ?>">
-                                            <button class="btn btn-sm btn-outline-primary">Reprocessar</button>
-                                        </form>
-                                    <?php endif; ?>
+                                    <?php 
+                                        $attempts = (int)($r['attempts'] ?? 0);
+                                        $max = (int)($r['max_attempts'] ?? 5);
+                                        $ratio = $attempts / max(1, $max);
+                                        $color = $ratio > 0.8 ? 'text-danger' : 'text-muted';
+                                    ?>
+                                    <span class="small fw-medium <?= $color ?>"><?= $attempts ?> / <?= $max ?></span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <?php if (($r['status'] ?? '') === 'FAILED'): ?>
+                                            <form method="post" action="/admin/notifications/outbox/<?= (int)$r['id'] ?>/reprocess" class="d-inline">
+                                                <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                                                <button class="nd-btn nd-btn-outline nd-btn-sm text-primary" title="Reprocessar">
+                                                    <i class="bi bi-arrow-repeat"></i>
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
 
-                                    <?php if (($r['status'] ?? '') === 'PENDING'): ?>
-                                        <form method="post" action="/admin/notifications/outbox/<?= (int)$r['id'] ?>/cancel" class="d-inline">
-                                            <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken) ?>">
-                                            <button class="btn btn-sm btn-outline-danger">Cancelar</button>
-                                        </form>
-                                    <?php endif; ?>
+                                        <?php if (($r['status'] ?? '') === 'PENDING'): ?>
+                                            <form method="post" action="/admin/notifications/outbox/<?= (int)$r['id'] ?>/cancel" class="d-inline">
+                                                <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                                                <button class="nd-btn nd-btn-outline nd-btn-sm text-danger border-start-0" title="Cancelar">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
 
-                                    <?php if (in_array(($r['status'] ?? ''), ['FAILED', 'CANCELLED'], true) && Auth::hasRole('SUPER_ADMIN')): ?>
-                                        <form method="post" action="/admin/notifications/outbox/<?= (int)$r['id'] ?>/reset" class="d-inline">
-                                            <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken) ?>">
-                                            <button class="btn btn-sm btn-outline-secondary">Reset</button>
-                                        </form>
-                                    <?php endif; ?>
+                                        <?php if (in_array(($r['status'] ?? ''), ['FAILED', 'CANCELLED'], true) && Auth::hasRole('SUPER_ADMIN')): ?>
+                                            <form method="post" action="/admin/notifications/outbox/<?= (int)$r['id'] ?>/reset" class="d-inline">
+                                                <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                                                <button class="nd-btn nd-btn-outline nd-btn-sm text-secondary border-start-0" title="Reset (Super Admin)">
+                                                    <i class="bi bi-bootstrap-reboot"></i>
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
+                                        
+                                        <a href="/admin/notifications/outbox/<?= (int)$r['id'] ?>" class="nd-btn nd-btn-outline nd-btn-sm border-start-0" title="Ver Detalhes">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

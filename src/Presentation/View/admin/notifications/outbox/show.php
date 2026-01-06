@@ -5,77 +5,137 @@
 /** @var string $csrfToken */
 $status = $row['status'] ?? '';
 ?>
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h1 class="h5 mb-1">Notificação #<?= (int)$row['id'] ?></h1>
-        <div class="small text-muted">
-            Criada em <?= htmlspecialchars($row['created_at'] ?? '') ?> · Tipo <code><?= htmlspecialchars($row['type'] ?? '') ?></code>
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <div class="nd-avatar nd-avatar-lg" style="background: var(--nd-navy-600);">
+            <i class="bi bi-envelope-open-fill text-white"></i>
+        </div>
+        <div>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Detalhes da Notificação</h1>
+            <p class="text-muted mb-0 small">Visualizando registro #<?= (int)$row['id'] ?> (<?= htmlspecialchars($row['type'] ?? '') ?>)</p>
         </div>
     </div>
-    <a href="/admin/notifications/outbox" class="btn btn-sm btn-outline-secondary">Voltar</a>
+    <a href="/admin/notifications/outbox" class="nd-btn nd-btn-outline nd-btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Voltar
+    </a>
 </div>
 
-<div class="row g-3">
+<div class="row g-4">
     <div class="col-12 col-lg-7">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="h6 mb-3">Resumo</h2>
-                <dl class="row mb-0">
-                    <dt class="col-sm-3 small text-muted">Status</dt>
-                    <dd class="col-sm-9 small"><strong><?= htmlspecialchars($status) ?></strong></dd>
+        <div class="nd-card mb-4">
+            <div class="nd-card-header d-flex align-items-center gap-2">
+                <i class="bi bi-info-circle-fill" style="color: var(--nd-gold-500);"></i>
+                <h5 class="nd-card-title mb-0">Resumo</h5>
+            </div>
+            <div class="nd-card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-3 text-muted small text-uppercase fw-bold pt-1">Status</div>
+                    <div class="col-sm-9">
+                        <?php
+                            $badge = 'nd-badge-secondary';
+                            $icon = '';
+                            if ($status === 'PENDING') { $badge = 'bg-warning text-dark border-warning'; $icon = 'bi-clock'; }
+                            if ($status === 'SENDING') { $badge = 'bg-info text-white border-info'; $icon = 'bi-arrow-repeat'; }
+                            if ($status === 'SENT')    { $badge = 'nd-badge-success'; $icon = 'bi-check-all'; }
+                            if ($status === 'FAILED')  { $badge = 'nd-badge-danger'; $icon = 'bi-exclamation-octagon'; }
+                        ?>
+                        <span class="nd-badge <?= $badge ?>">
+                            <i class="bi <?= $icon ?> me-1"></i> <?= htmlspecialchars($status) ?>
+                        </span>
+                    </div>
+                </div>
 
-                    <dt class="col-sm-3 small text-muted">Para</dt>
-                    <dd class="col-sm-9 small"><?= htmlspecialchars($row['recipient_email'] ?? '', ENT_QUOTES, 'UTF-8') ?></dd>
+                <div class="row mb-3">
+                    <div class="col-sm-3 text-muted small text-uppercase fw-bold pt-1">Destinatário</div>
+                    <div class="col-sm-9 text-dark fw-medium">
+                        <?= htmlspecialchars($row['recipient_email'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                    </div>
+                </div>
 
-                    <dt class="col-sm-3 small text-muted">Assunto</dt>
-                    <dd class="col-sm-9 small"><?= htmlspecialchars($row['subject'] ?? '', ENT_QUOTES, 'UTF-8') ?></dd>
+                <div class="row mb-3">
+                    <div class="col-sm-3 text-muted small text-uppercase fw-bold pt-1">Assunto</div>
+                    <div class="col-sm-9 text-dark">
+                        <?= htmlspecialchars($row['subject'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                    </div>
+                </div>
 
-                    <dt class="col-sm-3 small text-muted">Template</dt>
-                    <dd class="col-sm-9 small"><code><?= htmlspecialchars($row['template'] ?? '', ENT_QUOTES, 'UTF-8') ?></code></dd>
+                <div class="row mb-3">
+                    <div class="col-sm-3 text-muted small text-uppercase fw-bold pt-1">Template</div>
+                    <div class="col-sm-9">
+                        <code class="px-2 py-1 rounded bg-light border" style="color: var(--nd-navy-600);"><?= htmlspecialchars($row['template'] ?? '', ENT_QUOTES, 'UTF-8') ?></code>
+                    </div>
+                </div>
 
-                    <dt class="col-sm-3 small text-muted">Attempts</dt>
-                    <dd class="col-sm-9 small"><?= (int)($row['attempts'] ?? 0) ?>/<?= (int)($row['max_attempts'] ?? 5) ?></dd>
+                <hr class="my-3" style="border-color: var(--nd-gray-200);">
 
-                    <dt class="col-sm-3 small text-muted">Próxima tentativa</dt>
-                    <dd class="col-sm-9 small"><?= htmlspecialchars($row['next_attempt_at'] ?? '-', ENT_QUOTES, 'UTF-8') ?></dd>
+                <div class="row mb-3">
+                    <div class="col-sm-3 text-muted small text-uppercase fw-bold pt-1">Tentativas</div>
+                    <div class="col-sm-9 text-dark">
+                         <?= (int)($row['attempts'] ?? 0) ?> <span class="text-muted">de</span> <?= (int)($row['max_attempts'] ?? 5) ?>
+                    </div>
+                </div>
 
-                    <dt class="col-sm-3 small text-muted">Enviado em</dt>
-                    <dd class="col-sm-9 small"><?= htmlspecialchars($row['sent_at'] ?? '-', ENT_QUOTES, 'UTF-8') ?></dd>
-                </dl>
+                <div class="row mb-3">
+                    <div class="col-sm-3 text-muted small text-uppercase fw-bold pt-1">Próxima</div>
+                    <div class="col-sm-9 text-dark">
+                        <i class="bi bi-calendar-event me-1 text-muted"></i>
+                        <?= htmlspecialchars($row['next_attempt_at'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                    </div>
+                </div>
+
+                <div class="row mb-0">
+                    <div class="col-sm-3 text-muted small text-uppercase fw-bold pt-1">Enviado em</div>
+                    <div class="col-sm-9 text-dark">
+                        <i class="bi bi-send me-1 text-muted"></i>
+                        <?= htmlspecialchars($row['sent_at'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                    </div>
+                </div>
             </div>
         </div>
 
         <?php if (!empty($row['last_error'])): ?>
-            <div class="card mt-3 border-danger">
-                <div class="card-body">
-                    <h2 class="h6 mb-2 text-danger">Último erro</h2>
-                    <pre class="small mb-0" style="white-space: pre-wrap;"><?= htmlspecialchars((string)$row['last_error']) ?></pre>
+            <div class="nd-card mb-4 border-danger">
+                <div class="nd-card-header bg-danger text-white d-flex align-items-center gap-2">
+                    <i class="bi bi-bug-fill"></i>
+                    <h5 class="nd-card-title mb-0 text-white">Último Erro Registrado</h5>
+                </div>
+                <div class="nd-card-body bg-light">
+                     <pre class="small mb-0 p-3 rounded bg-white border border-danger text-danger font-monospace" style="white-space: pre-wrap;"><?= htmlspecialchars((string)$row['last_error']) ?></pre>
                 </div>
             </div>
         <?php endif; ?>
 
-        <div class="mt-3">
+        <div class="d-flex gap-2">
             <?php if ($status === 'FAILED'): ?>
-                <form method="post" action="/admin/notifications/outbox/<?= (int)$row['id'] ?>/reprocess" class="d-inline">
+                <form method="post" action="/admin/notifications/outbox/<?= (int)$row['id'] ?>/reprocess">
                     <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken) ?>">
-                    <button class="btn btn-sm btn-primary">Reprocessar</button>
+                    <button class="nd-btn nd-btn-primary">
+                        <i class="bi bi-arrow-repeat me-1"></i> Reprocessar Envio
+                    </button>
                 </form>
             <?php endif; ?>
 
             <?php if ($status === 'PENDING'): ?>
-                <form method="post" action="/admin/notifications/outbox/<?= (int)$row['id'] ?>/cancel" class="d-inline">
+                <form method="post" action="/admin/notifications/outbox/<?= (int)$row['id'] ?>/cancel">
                     <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken) ?>">
-                    <button class="btn btn-sm btn-outline-danger">Cancelar</button>
+                    <button class="nd-btn nd-btn-outline text-danger border-danger">
+                        <i class="bi bi-x-circle me-1"></i> Cancelar Envio
+                    </button>
                 </form>
             <?php endif; ?>
         </div>
     </div>
 
     <div class="col-12 col-lg-5">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="h6 mb-3">Payload (JSON)</h2>
-                <pre class="small mb-0" style="white-space: pre-wrap;"><?= htmlspecialchars(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) ?></pre>
+        <div class="nd-card h-100">
+            <div class="nd-card-header d-flex align-items-center gap-2">
+                <i class="bi bi-code-square" style="color: var(--nd-navy-500);"></i>
+                <h5 class="nd-card-title mb-0">Payload (JSON)</h5>
+            </div>
+            <div class="nd-card-body p-0">
+                <pre class="m-0 p-3 small font-monospace text-muted" style="white-space: pre-wrap; background-color: #fafbfc; min-height: 100%; border-bottom-left-radius: var(--nd-radius-md); border-bottom-right-radius: var(--nd-radius-md);"><?= htmlspecialchars(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) ?></pre>
             </div>
         </div>
     </div>
