@@ -100,7 +100,16 @@
                         <div class="fs-6 text-dark">
                             <?php if (!empty($user['document_number'])): ?>
                                 <code class="px-2 py-1 rounded bg-light text-dark border">
-                                    <?= htmlspecialchars($user['document_number'], ENT_QUOTES, 'UTF-8') ?>
+                                    <?php 
+                                        $doc = $user['document_number'];
+                                        $len = strlen($doc);
+                                        if ($len === 11) {
+                                            $doc = preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $doc);
+                                        } elseif ($len === 14) {
+                                            $doc = preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $doc);
+                                        }
+                                        echo htmlspecialchars($doc, ENT_QUOTES, 'UTF-8');
+                                    ?>
                                 </code>
                             <?php else: ?>
                                 <span class="text-muted">-</span>
@@ -126,7 +135,7 @@
                             <h6 class="fw-bold text-dark mb-1">Link de Acesso Único</h6>
                             <p class="text-muted small mb-0">
                                 Gere um novo link mágico para permitir que o usuário acesse o portal sem senha.
-                                O link expira em 24 horas.
+                                O link expira em até 24 horas.
                             </p>
                         </div>
                         <form method="post" action="/admin/portal-users/<?= (int)$user['id'] ?>/access-link">
@@ -160,16 +169,16 @@
                                     <tr>
                                         <td>
                                             <i class="bi bi-clock me-1 text-muted"></i>
-                                            <?= htmlspecialchars($t['created_at'], ENT_QUOTES, 'UTF-8') ?>
+                                            <?= (new DateTime($t['created_at']))->format('d/m/Y H:i') ?>
                                         </td>
                                         <td>
-                                            <?= htmlspecialchars($t['expires_at'], ENT_QUOTES, 'UTF-8') ?>
+                                            <?= (new DateTime($t['expires_at']))->format('d/m/Y H:i') ?>
                                         </td>
                                         <td>
                                             <?php if ($t['used_at']): ?>
                                                 <div class="d-flex align-items-center gap-2 text-success small fw-medium">
                                                     <i class="bi bi-check-circle-fill"></i>
-                                                    Usado em <?= htmlspecialchars($t['used_at'], ENT_QUOTES, 'UTF-8') ?>
+                                                    Usado em <?= (new DateTime($t['used_at']))->format('d/m/Y H:i') ?>
                                                 </div>
                                             <?php else: ?>
                                                 <?php 
