@@ -33,14 +33,51 @@ final class AuditLogController
         $perPage = 20;
         $offset = max(0, ($page - 1) * $perPage);
 
-        $total = (int)$pdo->query('SELECT COUNT(*) FROM audit_logs')->fetchColumn();
+        // Build Filter Query
+        $where = [];
+        $params = [];
 
-        // Ordena de forma compatível com esquemas antigos/novos
-        // Usamos id DESC como fallback neutro
-        $stmt = $pdo->prepare('SELECT * FROM audit_logs ORDER BY id DESC LIMIT :limit OFFSET :offset');
+        if (!empty($_GET['actor_type'])) {
+            $where[] = "actor_type = :actor_type";
+            $params[':actor_type'] = $_GET['actor_type'];
+        }
+
+        if (!empty($_GET['action'])) {
+            $where[] = "action LIKE :action";
+            $params[':action'] = '%' . $_GET['action'] . '%';
+        }
+
+        if (!empty($_GET['search'])) {
+            $term = '%' . $_GET['search'] . '%';
+            // Search in details JSON, actor_id, or IP
+            $where[] = "(details LIKE :search OR ip_address LIKE :search OR actor_id LIKE :search OR target_id LIKE :search)";
+            $params[':search'] = $term;
+        }
+
+        $whereSql = '';
+        if (count($where) > 0) {
+            $whereSql = 'WHERE ' . implode(' AND ', $where);
+        }
+
+        // Count Total
+        $stmtCount = $pdo->prepare("SELECT COUNT(*) FROM audit_logs $whereSql");
+        foreach ($params as $key => $val) {
+            $stmtCount->bindValue($key, $val);
+        }
+        $stmtCount->execute();
+        $total = (int)$stmtCount->fetchColumn();
+
+        // Fetch Items
+        $sql = "SELECT * FROM audit_logs $whereSql ORDER BY id DESC LIMIT :limit OFFSET :offset";
+        $stmt = $pdo->prepare($sql);
+        
+        foreach ($params as $key => $val) {
+            $stmt->bindValue($key, $val);
+        }
         $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
+        
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
         $pageTitle = 'Auditoria do Sistema';
@@ -51,7 +88,7 @@ final class AuditLogController
                 'total' => $total,
                 'page' => $page,
                 'perPage' => $perPage,
-                'pages' => (int)ceil($total / $perPage),
+                'pages' => max(1, (int)ceil($total / $perPage)),
             ],
             'csrfToken' => Csrf::token(),
         ];
