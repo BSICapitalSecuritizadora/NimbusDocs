@@ -195,8 +195,30 @@ $actionMap = [
                                     </span>
                                 </td>
                                 <td>
-                                    <div class="d-flex flex-column small">
-                                        <span class="fw-bold text-dark"><?= htmlspecialchars($log['actor_type'] ?? 'Sistema', ENT_QUOTES, 'UTF-8') ?></span>
+                                    <div class="d-flex flex-column align-items-start small">
+                                        <?php
+                                            $actorType = $log['actor_type'] ?? 'SYSTEM';
+                                            $actorLabel = $actorType;
+                                            $actorClass = 'bg-secondary text-white'; // Default
+
+                                            switch ($actorType) {
+                                                case 'ADMIN':
+                                                    $actorLabel = 'Administrador';
+                                                    $actorClass = 'bg-primary text-white shadow-sm'; 
+                                                    break;
+                                                case 'PORTAL_USER':
+                                                    $actorLabel = 'Usuário do Portal';
+                                                    $actorClass = 'bg-info text-dark bg-opacity-25 text-info border border-info border-opacity-25'; 
+                                                    break;
+                                                case 'SYSTEM':
+                                                    $actorLabel = 'Sistema';
+                                                    $actorClass = 'bg-dark text-white shadow-sm'; 
+                                                    break;
+                                            }
+                                        ?>
+                                        <span class="badge rounded-pill fw-normal mb-1 <?= $actorClass ?>">
+                                            <?= htmlspecialchars($actorLabel, ENT_QUOTES, 'UTF-8') ?>
+                                        </span>
                                         <?php if (!empty($log['actor_name'])): ?>
                                              <span class="text-dark"><?= htmlspecialchars($log['actor_name'], ENT_QUOTES, 'UTF-8') ?></span>
                                              <?php if (!empty($log['actor_id'])): ?>
@@ -208,11 +230,44 @@ $actionMap = [
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="d-flex flex-column small">
-                                         <span class="fw-medium text-dark"><?= htmlspecialchars($log['target_type'] ?? '-', ENT_QUOTES, 'UTF-8') ?></span>
-                                          <?php if (!empty($log['target_id'])): ?>
+                                    <div class="d-flex flex-column align-items-start small">
+                                         <?php
+                                            $targetType = $log['target_type'] ?? '-';
+                                            $targetLabel = $targetType;
+                                            $targetStyle = '';
+                                            $targetClass = 'bg-light text-dark border'; // Default
+
+                                            switch ($targetType) {
+                                                case 'ADMIN_USER':
+                                                    $targetLabel = 'Administrador';
+                                                    $targetClass = 'bg-primary text-white';
+                                                    break;
+                                                case 'PORTAL_USER':
+                                                    $targetLabel = 'Usuário do Portal';
+                                                    $targetClass = 'bg-info text-dark bg-opacity-25 border border-info border-opacity-25';
+                                                    break;
+                                                case 'PORTAL_ACCESS_TOKEN':
+                                                    $targetLabel = 'Token de Acesso';
+                                                    $targetClass = 'bg-dark text-white';
+                                                    break;
+                                                case 'PORTAL_SUBMISSION':
+                                                case 'SUBMISSION':
+                                                    $targetLabel = 'Submissão';
+                                                    $targetClass = 'text-white';
+                                                    $targetStyle = 'background-color: #6610f2;'; // Indigo
+                                                    break;
+                                            }
+                                         ?>
+                                         <?php if ($targetType !== '-'): ?>
+                                            <span class="badge rounded-pill fw-normal mb-1 <?= $targetClass ?>" style="<?= $targetStyle ?>">
+                                                <?= htmlspecialchars($targetLabel, ENT_QUOTES, 'UTF-8') ?>
+                                            </span>
+                                            <?php if (!empty($log['target_id'])): ?>
                                              <span class="text-muted">#<?= (int)$log['target_id'] ?></span>
-                                        <?php endif; ?>
+                                            <?php endif; ?>
+                                         <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                         <?php endif; ?>
                                     </div>
                                 </td>
                                 <td>
@@ -236,25 +291,65 @@ $actionMap = [
             </div>
 
             <?php if (($pagination['pages'] ?? 1) > 1): ?>
-                <div class="d-flex justify-content-center border-top p-3">
-                    <nav>
-                        <ul class="pagination pagination-sm mb-0">
-                            <?php $current = (int)$pagination['page']; ?>
-                            <?php if ($current > 1): ?>
-                                <li class="page-item">
-                                    <a class="page-link border-0 text-dark" href="/admin/audit-logs?page=<?= $current - 1 ?>">&laquo; Anterior</a>
-                                </li>
-                            <?php endif; ?>
+                <div class="d-flex justify-content-center border-top p-3 bg-light rounded-bottom">
+                    <nav aria-label="Navegação da auditoria">
+                        <ul class="pagination pagination-sm mb-0 shadow-sm">
+                            <?php 
+                            $current = (int)$pagination['page'];
+                            $pages = (int)$pagination['pages'];
+                            $range = 2; // Show 2 pages before and after current
+                            $start = max(1, $current - $range);
+                            $end = min($pages, $current + $range);
                             
-                            <li class="page-item disabled">
-                                <span class="page-link border-0 text-muted">Página <?= $current ?></span>
+                            // Helper to build URL preserving filters
+                            $buildUrl = function($p) {
+                                $params = $_GET;
+                                $params['page'] = $p;
+                                return '/admin/audit-logs?' . http_build_query($params);
+                            };
+                            ?>
+
+                            <!-- First / Previous -->
+                            <li class="page-item <?= $current <= 1 ? 'disabled' : '' ?>">
+                                <a class="page-link border-0 text-secondary" href="<?= $buildUrl(1) ?>" aria-label="Primeira">
+                                    <i class="bi bi-chevron-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item <?= $current <= 1 ? 'disabled' : '' ?>">
+                                <a class="page-link border-0 text-secondary" href="<?= $buildUrl($max = max(1, $current - 1)) ?>" aria-label="Anterior">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
                             </li>
 
-                            <?php if ($current < (int)$pagination['pages']): ?>
-                                <li class="page-item">
-                                    <a class="page-link border-0 text-dark" href="/admin/audit-logs?page=<?= $current + 1 ?>">Próxima &raquo;</a>
-                                </li>
+                            <!-- Numbers -->
+                            <?php if ($start > 1): ?>
+                                <li class="page-item disabled"><span class="page-link border-0">...</span></li>
                             <?php endif; ?>
+
+                            <?php for ($p = $start; $p <= $end; $p++): ?>
+                                <li class="page-item <?= $p === $current ? 'active' : '' ?>">
+                                    <a class="page-link <?= $p === $current ? 'bg-primary border-primary text-white fw-bold' : 'border-0 text-dark hover-bg-light' ?>" 
+                                       href="<?= $buildUrl($p) ?>">
+                                        <?= $p ?>
+                                    </a>
+                                </li>
+                            <?php endfor; ?>
+
+                            <?php if ($end < $pages): ?>
+                                <li class="page-item disabled"><span class="page-link border-0">...</span></li>
+                            <?php endif; ?>
+
+                            <!-- Next / Last -->
+                            <li class="page-item <?= $current >= $pages ? 'disabled' : '' ?>">
+                                <a class="page-link border-0 text-secondary" href="<?= $buildUrl(min($pages, $current + 1)) ?>" aria-label="Próxima">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item <?= $current >= $pages ? 'disabled' : '' ?>">
+                                <a class="page-link border-0 text-secondary" href="<?= $buildUrl($pages) ?>" aria-label="Última">
+                                    <i class="bi bi-chevron-double-right"></i>
+                                </a>
+                            </li>
                         </ul>
                     </nav>
                 </div>
