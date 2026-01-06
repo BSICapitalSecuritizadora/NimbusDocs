@@ -4,63 +4,122 @@
 /** @var int $page */
 /** @var int $totalPages */
 /** @var string $search */
+
 ?>
-<h1 class="h4 mb-3">Usuários do Portal</h1>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <form class="d-flex" method="get" action="/admin/portal-users">
-        <input type="text" name="search"
-            value="<?= htmlspecialchars($search, ENT_QUOTES) ?>"
-            class="form-control form-control-sm me-2"
-            placeholder="Nome ou e-mail">
-        <button class="btn btn-sm btn-outline-secondary" type="submit">Buscar</button>
-    </form>
-
-    <a href="/admin/portal-users/create" class="btn btn-sm btn-primary">
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <div class="nd-avatar nd-avatar-lg" style="background: var(--nd-navy-600);">
+            <i class="bi bi-people-fill text-white"></i>
+        </div>
+        <div>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Usuários do Portal</h1>
+            <p class="text-muted mb-0 small">Gerencie os usuários externos</p>
+        </div>
+    </div>
+    <a href="/admin/portal-users/create" class="nd-btn nd-btn-gold nd-btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>
         Novo usuário
     </a>
 </div>
 
-<div class="card">
-    <div class="card-body">
+<!-- Filter & List Card -->
+<div class="nd-card">
+    <div class="nd-card-header bg-white border-bottom p-3">
+        <form class="row g-3 align-items-center" method="get" action="/admin/portal-users">
+            <div class="col-sm-6 col-md-4">
+                <div class="nd-input-group">
+                    <input type="text" name="search"
+                        value="<?= htmlspecialchars($search, ENT_QUOTES) ?>"
+                        class="nd-input"
+                        placeholder="Buscar por nome ou e-mail"
+                        style="padding-left: 2.5rem;">
+                    <i class="bi bi-search nd-input-icon"></i>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+                <button class="nd-btn nd-btn-primary" type="submit">
+                    Filtrar
+                </button>
+                <?php if (!empty($search)): ?>
+                    <a href="/admin/portal-users" class="nd-btn nd-btn-outline ms-2">Limpar</a>
+                <?php endif; ?>
+            </div>
+        </form>
+    </div>
+
+    <div class="nd-card-body p-0">
         <?php if (!$items): ?>
-            <p class="text-muted mb-0">Nenhum usuário do portal encontrado.</p>
+            <div class="text-center py-5">
+                <i class="bi bi-people text-muted mb-2" style="font-size: 2rem;"></i>
+                <p class="text-muted mb-0">Nenhum usuário do portal encontrado.</p>
+                <?php if (!empty($search)): ?>
+                    <p class="text-muted small mt-1">Tente ajustar seus termos de busca.</p>
+                <?php endif; ?>
+            </div>
         <?php else: ?>
             <div class="table-responsive">
-                <table class="table table-sm align-middle">
+                <table class="nd-table">
                     <thead>
                         <tr>
-                            <th>Nome</th>
-                            <th>E-mail</th>
+                            <th>Nome / E-mail</th>
                             <th>Documento</th>
                             <th>Status</th>
-                            <th class="text-end"></th>
+                            <th class="text-end">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($items as $u): ?>
                             <tr>
-                                <td><?= htmlspecialchars($u['full_name'] ?? '', ENT_QUOTES) ?></td>
-                                <td><?= htmlspecialchars($u['email'] ?? '', ENT_QUOTES) ?></td>
-                                <td><?= htmlspecialchars($u['document_number'] ?? '-', ENT_QUOTES) ?></td>
                                 <td>
-                                    <?php if (($u['status'] ?? '') === 'ACTIVE'): ?>
-                                        <span class="badge bg-success">Ativo</span>
-                                    <?php elseif (($u['status'] ?? '') === 'INVITED'): ?>
-                                        <span class="badge bg-info">Convidado</span>
-                                    <?php elseif (($u['status'] ?? '') === 'BLOCKED'): ?>
-                                        <span class="badge bg-danger">Bloqueado</span>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="nd-avatar" style="width: 36px; height: 36px; background: var(--nd-gray-100); color: var(--nd-gray-600); font-size: 0.8rem;">
+                                            <?= strtoupper(substr($u['full_name'] ?? 'U', 0, 1)) ?>
+                                        </div>
+                                        <div>
+                                            <div class="fw-medium text-dark"><?= htmlspecialchars($u['full_name'] ?? '', ENT_QUOTES) ?></div>
+                                            <div class="small text-muted"><?= htmlspecialchars($u['email'] ?? '', ENT_QUOTES) ?></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <?php if (!empty($u['document_number'])): ?>
+                                        <code class="px-2 py-1 rounded bg-light text-dark small border">
+                                            <?= htmlspecialchars($u['document_number'], ENT_QUOTES) ?>
+                                        </code>
                                     <?php else: ?>
-                                        <span class="badge bg-secondary">Inativo</span>
+                                        <span class="text-muted">-</span>
                                     <?php endif; ?>
                                 </td>
+                                <td>
+                                    <?php
+                                    $statusClass = match ($u['status'] ?? '') {
+                                        'ACTIVE' => 'success',
+                                        'INVITED' => 'info',
+                                        'BLOCKED' => 'danger',
+                                        default => 'secondary'
+                                    };
+                                    $statusLabel = match ($u['status'] ?? '') {
+                                        'ACTIVE' => 'Ativo',
+                                        'INVITED' => 'Convidado',
+                                        'BLOCKED' => 'Bloqueado',
+                                        default => 'Inativo'
+                                    };
+                                    ?>
+                                    <span class="nd-badge nd-badge-<?= $statusClass ?>">
+                                        <?= $statusLabel ?>
+                                    </span>
+                                </td>
                                 <td class="text-end">
-                                    <a href="/admin/portal-users/<?= (int)$u['id'] ?>" class="btn btn-sm btn-outline-secondary">
-                                        Detalhes
-                                    </a>
-                                    <a href="/admin/portal-users/<?= (int)$u['id'] ?>/edit" class="btn btn-sm btn-outline-primary">
-                                        Editar
-                                    </a>
+                                    <div class="btn-group">
+                                        <a href="/admin/portal-users/<?= (int)$u['id'] ?>" class="nd-btn nd-btn-outline nd-btn-sm" title="Detalhes">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="/admin/portal-users/<?= (int)$u['id'] ?>/edit" class="nd-btn nd-btn-outline nd-btn-sm" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -69,17 +128,19 @@
             </div>
 
             <?php if ($totalPages > 1): ?>
-                <nav class="mt-2">
-                    <ul class="pagination pagination-sm mb-0">
-                        <?php for ($p = 1; $p <= $totalPages; $p++): ?>
-                            <li class="page-item <?= $p === $page ? 'active' : '' ?>">
-                                <a class="page-link" href="?page=<?= $p ?>&search=<?= urlencode($search) ?>">
-                                    <?= $p ?>
-                                </a>
-                            </li>
-                        <?php endfor; ?>
-                    </ul>
-                </nav>
+                <div class="nd-card-footer p-3 border-top">
+                    <nav aria-label="Paginação">
+                        <ul class="pagination pagination-sm justify-content-end mb-0">
+                            <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+                                <li class="page-item <?= $p === $page ? 'active' : '' ?>">
+                                    <a class="page-link" href="?page=<?= $p ?>&search=<?= urlencode($search) ?>">
+                                        <?= $p ?>
+                                    </a>
+                                </li>
+                            <?php endfor; ?>
+                        </ul>
+                    </nav>
+                </div>
             <?php endif; ?>
         <?php endif; ?>
     </div>

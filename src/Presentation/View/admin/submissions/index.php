@@ -83,7 +83,6 @@ $query = http_build_query([
           <table class="nd-table">
             <thead>
               <tr>
-                <th style="width: 80px;">#ID</th>
                 <th style="width: 120px;">Ref.</th>
                 <th>Título</th>
                 <th>Usuário</th>
@@ -122,7 +121,6 @@ $query = http_build_query([
                     };
                     ?>
                   <tr>
-                    <td class="fw-semibold text-muted">#<?= (int)$row['id'] ?></td>
                     <td><code class="px-2 py-1 rounded bg-light text-dark small border"><?= htmlspecialchars($row['reference_code'] ?? '', ENT_QUOTES, 'UTF-8') ?></code></td>
                     <td class="fw-medium text-dark"><?= htmlspecialchars($row['title'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
                     <td>
