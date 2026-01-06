@@ -2,6 +2,19 @@
 /** @var array $pagination */
 /** @var string $csrfToken */
 $items = $pagination['items'] ?? [];
+
+$actionMap = [
+    'LOGIN_SUCCESS' => 'Autenticação concluída com êxito',
+    'LOGIN_FAILED' => 'Falha no processo de autenticação',
+    'PORTAL_USER_CREATED' => 'Usuário do portal criado',
+    'PORTAL_USER_UPDATED' => 'Dados do usuário do portal atualizados',
+    'PORTAL_ACCESS_LINK_GENERATED' => 'Link de acesso ao portal gerado',
+    'PORTAL_LOGIN_CODE_FAILED' => 'Falha na validação do código de acesso ao portal',
+    'PORTAL_LOGIN_SUCCESS_CODE' => 'Autenticação via código de acesso ao portal concluída',
+    'SUBMISSION_RESPONSE_FILES_UPLOADED' => 'Arquivos de resposta da submissão enviados',
+    'PORTAL_SUBMISSION_CREATED' => 'Submissão criada no portal',
+    'SUBMISSION_CREATED' => 'Submissão criada'
+];
 ?>
 
 <!-- Page Header -->
@@ -26,7 +39,7 @@ $items = $pagination['items'] ?? [];
     <div class="nd-card-body">
         <form class="row g-3" method="get" action="/admin/audit-logs">
             <div class="col-md-3">
-                <label class="nd-label">Tipo de Ator</label>
+                <label class="nd-label">Tipo de Usuário</label>
                 <div class="nd-input-group">
                     <select name="actor_type" class="nd-input form-select" style="padding-left: 2.5rem;">
                         <option value="">Todos</option>
@@ -41,11 +54,14 @@ $items = $pagination['items'] ?? [];
             <div class="col-md-3">
                 <label class="nd-label">Ação</label>
                 <div class="nd-input-group">
-                    <input type="text" name="action"
-                        value="<?= htmlspecialchars($_GET['action'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                        class="nd-input"
-                        placeholder="Ex: LOGIN_SUCCESS"
-                        style="padding-left: 2.5rem;">
+                    <select name="action" class="nd-input form-select" style="padding-left: 2.5rem;">
+                        <option value="">Todas as Ações</option>
+                        <?php foreach ($actionMap as $key => $label): ?>
+                            <option value="<?= htmlspecialchars($key) ?>" <?= ($_GET['action'] ?? '') === $key ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($label) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                     <i class="bi bi-lightning nd-input-icon"></i>
                 </div>
             </div>
@@ -111,20 +127,6 @@ $items = $pagination['items'] ?? [];
                                 <td>
                                     <?php
                                         $action = $log['action'] ?? 'UNKNOWN';
-                                        
-                                        $actionMap = [
-                                            'LOGIN_SUCCESS' => 'Autenticação concluída com êxito',
-                                            'LOGIN_FAILED' => 'Falha no processo de autenticação',
-                                            'PORTAL_USER_CREATED' => 'Usuário do portal criado',
-                                            'PORTAL_USER_UPDATED' => 'Dados do usuário do portal atualizados',
-                                            'PORTAL_ACCESS_LINK_GENERATED' => 'Link de acesso ao portal gerado',
-                                            'PORTAL_LOGIN_CODE_FAILED' => 'Falha na validação do código de acesso ao portal',
-                                            'PORTAL_LOGIN_SUCCESS_CODE' => 'Autenticação via código de acesso ao portal concluída',
-                                            'SUBMISSION_RESPONSE_FILES_UPLOADED' => 'Arquivos de resposta da submissão enviados',
-                                            'PORTAL_SUBMISSION_CREATED' => 'Submissão criada no portal',
-                                            'SUBMISSION_CREATED' => 'Submissão criada'
-                                        ];
-
                                         $displayAction = $actionMap[$action] ?? $action;
 
                                         // Default fallback
@@ -195,7 +197,12 @@ $items = $pagination['items'] ?? [];
                                 <td>
                                     <div class="d-flex flex-column small">
                                         <span class="fw-bold text-dark"><?= htmlspecialchars($log['actor_type'] ?? 'Sistema', ENT_QUOTES, 'UTF-8') ?></span>
-                                        <?php if (!empty($log['actor_id'])): ?>
+                                        <?php if (!empty($log['actor_name'])): ?>
+                                             <span class="text-dark"><?= htmlspecialchars($log['actor_name'], ENT_QUOTES, 'UTF-8') ?></span>
+                                             <?php if (!empty($log['actor_id'])): ?>
+                                                <span class="text-muted" style="font-size: 0.8em;">ID: #<?= (int)$log['actor_id'] ?></span>
+                                             <?php endif; ?>
+                                        <?php elseif (!empty($log['actor_id'])): ?>
                                              <span class="text-muted">ID: #<?= (int)$log['actor_id'] ?></span>
                                         <?php endif; ?>
                                     </div>
