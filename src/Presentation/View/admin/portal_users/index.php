@@ -86,7 +86,16 @@
                                 <td>
                                     <?php if (!empty($u['document_number'])): ?>
                                         <code class="px-2 py-1 rounded bg-light text-dark small border">
-                                            <?= htmlspecialchars($u['document_number'], ENT_QUOTES) ?>
+                                            <?php 
+                                                $doc = $u['document_number'];
+                                                $len = strlen($doc);
+                                                if ($len === 11) {
+                                                    $doc = preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $doc);
+                                                } elseif ($len === 14) {
+                                                    $doc = preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $doc);
+                                                }
+                                                echo htmlspecialchars($doc, ENT_QUOTES);
+                                            ?>
                                         </code>
                                     <?php else: ?>
                                         <span class="text-muted">-</span>
