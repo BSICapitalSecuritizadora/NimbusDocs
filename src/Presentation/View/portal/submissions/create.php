@@ -139,33 +139,40 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
                     <?php endif; ?>
                 </div>
 
-                <div class="col-12 mt-3">
-                    <div class="d-flex gap-4">
-                        <div class="form-check nd-checkbox">
-                            <input class="form-check-input" type="checkbox" id="is_us_person" name="is_us_person"
-                                <?= !empty($old['is_us_person']) ? 'checked' : '' ?>>
-                            <label class="form-check-label" for="is_us_person">
-                                Sou US Person
-                            </label>
-                        </div>
-                        <div class="form-check nd-checkbox">
-                            <input class="form-check-input" type="checkbox" id="is_pep" name="is_pep"
-                                <?= !empty($old['is_pep']) ? 'checked' : '' ?>>
-                            <label class="form-check-label" for="is_pep">
-                                Sou PEP (Pessoa Exposta Politicamente)
-                            </label>
-                        </div>
-                        <div class="form-check nd-checkbox">
-                            <input class="form-check-input" type="checkbox" id="is_none_compliant">
-                            <label class="form-check-label" for="is_none_compliant">
-                                Não me enquadro nas opções acima
-                            </label>
-                        </div>
-                    </div>
-                    <div id="complianceError" class="text-danger small mt-1" style="display: none;">
-                        Selecione pelo menos uma opção.
-                    </div>
                 </div>
+            </div>
+        </div>
+
+    <!-- Declarações -->
+    <div class="nd-card mb-4">
+        <div class="nd-card-header">
+            <h2 class="nd-card-title mb-0">Declarações</h2>
+        </div>
+        <div class="nd-card-body">
+            <div class="d-flex gap-4">
+                <div class="form-check nd-checkbox">
+                    <input class="form-check-input" type="checkbox" id="is_us_person" name="is_us_person"
+                        <?= !empty($old['is_us_person']) ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="is_us_person">
+                        Sou US Person
+                    </label>
+                </div>
+                <div class="form-check nd-checkbox">
+                    <input class="form-check-input" type="checkbox" id="is_pep" name="is_pep"
+                        <?= !empty($old['is_pep']) ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="is_pep">
+                        Sou PEP (Pessoa Exposta Politicamente)
+                    </label>
+                </div>
+                <div class="form-check nd-checkbox">
+                    <input class="form-check-input" type="checkbox" id="is_none_compliant">
+                    <label class="form-check-label" for="is_none_compliant">
+                        Não me enquadro nas opções
+                    </label>
+                </div>
+            </div>
+            <div id="complianceError" class="text-danger small mt-1" style="display: none;">
+                Selecione pelo menos uma opção.
             </div>
         </div>
     </div>
