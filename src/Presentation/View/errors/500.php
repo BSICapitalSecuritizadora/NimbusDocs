@@ -1,82 +1,66 @@
 <?php
 http_response_code(500);
-$pageTitle = 'Erro interno do servidor (500)';
-$contentView = __FILE__;
+$pageTitle = 'Erro interno do servidor';
+// Branding config fallback
+$branding = $config['branding'] ?? [];
+$appName = $branding['app_name'] ?? 'NimbusDocs';
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($pageTitle ?? 'NimbusDocs', ENT_QUOTES, 'UTF-8') ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .error-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        .error-content {
-            text-align: center;
-            background: white;
-            padding: 3rem;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            max-width: 600px;
-        }
-        .error-code {
-            font-size: 5rem;
-            font-weight: bold;
-            color: #f5576c;
-            margin: 0;
-        }
-        .error-message {
-            font-size: 1.5rem;
-            color: #333;
-            margin: 1rem 0;
-        }
-        .error-description {
-            color: #666;
-            margin: 1.5rem 0;
-            line-height: 1.6;
-        }
-        .error-details {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 5px;
-            margin: 1.5rem 0;
-            text-align: left;
-            max-height: 300px;
-            overflow-y: auto;
-            border-left: 4px solid #f5576c;
-        }
-        .error-details code {
-            color: #d63031;
-            font-size: 0.9rem;
-            word-break: break-all;
-        }
-    </style>
+    <title><?= htmlspecialchars($pageTitle . ' - ' . $appName) ?></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/nimbusdocs-theme.css" rel="stylesheet">
 </head>
 <body>
-    <div class="error-container">
-        <div class="error-content">
-            <h1 class="error-code">500</h1>
-            <h2 class="error-message">Erro interno do servidor</h2>
-            <p class="error-description">
-                Desculpe, algo deu errado em nosso servidor. Nossa equipe foi notificada sobre este problema.
+    <div class="nd-full-page">
+        <!-- Floating Shapes -->
+        <div class="nd-shape nd-shape-1"></div>
+        <div class="nd-shape nd-shape-2"></div>
+        <div class="nd-shape nd-shape-3"></div>
+
+        <div class="nd-glass-card nd-page-card-anim text-center">
+            <!-- Icon -->
+            <div class="mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle nd-float-anim" 
+                     style="width: 80px; height: 80px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
+                    <i class="bi bi-exclamation-triangle text-danger" style="font-size: 2.5rem; color: var(--nd-danger) !important;"></i>
+                </div>
+            </div>
+
+            <!-- Error Code -->
+            <h1 class="display-1 fw-bold text-dark mb-0" style="color: var(--nd-navy-900);">500</h1>
+            <h2 class="h4 text-muted mb-4">Erro Interno do Servidor</h2>
+
+            <!-- Message -->
+            <p class="text-secondary mb-4">
+                Ocorreu uma falha inesperada em nossos sistemas.
+                Nossa equipe técnica foi notificada automaticamente.
             </p>
+
             <?php if (!empty($error)): ?>
-                <div class="error-details">
-                    <strong>Detalhes:</strong>
-                    <code><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></code>
+                <div class="d-none d-md-block text-start bg-light p-3 rounded mb-4 overflow-auto" style="max-height: 200px; font-size: 0.8rem; border: 1px solid var(--nd-gray-200);">
+                    <strong class="d-block mb-2 text-danger">Detalhes Técnicos:</strong>
+                    <code class="text-secondary"><?= nl2br(htmlspecialchars($error, ENT_QUOTES, 'UTF-8')) ?></code>
                 </div>
             <?php endif; ?>
-            <div class="mt-3">
-                <a href="/" class="btn btn-primary me-2">Página inicial</a>
-                <button class="btn btn-secondary" onclick="window.history.back()">Voltar</button>
+
+            <!-- Actions -->
+            <div class="d-flex flex-column gap-2">
+                <a href="/admin/dashboard" class="nd-btn nd-btn-primary w-100 justify-content-center">
+                    <i class="bi bi-grid-1x2-fill"></i>
+                    Voltar ao Dashboard
+                </a>
+                <a href="javascript:location.reload()" class="nd-btn nd-btn-outline w-100 justify-content-center">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Tentar Novamente
+                </a>
             </div>
         </div>
     </div>

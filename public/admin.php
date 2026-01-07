@@ -222,19 +222,21 @@ $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 
 switch ($routeInfo[0]) {
     case FastRoute\Dispatcher::NOT_FOUND:
-        http_response_code(404);
+        // Renderiza 404
         if ($requestLogger) {
             $requestLogger->logSuccess(404);
         }
-        echo '404 - Página não encontrada';
+        $viewData = []; // No data needed
+        require __DIR__ . '/../src/Presentation/View/errors/404.php';
         break;
 
     case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
-        http_response_code(405);
+        // Renderiza 404 (ou 405 se preferir)
         if ($requestLogger) {
             $requestLogger->logError('Method not allowed', 405);
         }
-        echo '405 - Método não permitido';
+        $viewData = [];
+        require __DIR__ . '/../src/Presentation/View/errors/404.php';
         break;
 
     case FastRoute\Dispatcher::FOUND:
@@ -276,13 +278,19 @@ switch ($routeInfo[0]) {
             if ($requestLogger) {
                 $requestLogger->logError('Invalid handler', 500);
             }
-            echo '500 - Handler inválido';
+            $error = 'Invalid route handler';
+            require __DIR__ . '/../src/Presentation/View/errors/500.php';
         } catch (\Throwable $e) {
             http_response_code(500);
             if ($requestLogger) {
                 $requestLogger->logError($e->getMessage(), 500, $e);
             }
-            throw $e;
+            // Passa o erro para a view
+            $error = $e->getMessage();
+            if ($_SERVER['APP_ENV'] ?? 'production' !== 'production') {
+                 $error .= "\n\n" . $e->getTraceAsString();
+            }
+            require __DIR__ . '/../src/Presentation/View/errors/500.php';
         }
         break;
 }

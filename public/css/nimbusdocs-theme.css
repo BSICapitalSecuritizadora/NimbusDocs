@@ -779,3 +779,107 @@ body {
 .nd-alert-close:hover {
   opacity: 1;
 }
+
+/* ============================================
+   Page Animations & Shapes (Login/Error)
+============================================ */
+@keyframes fadeInUp {
+  from {
+      opacity: 0;
+      transform: translateY(20px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
+
+.nd-page-card-anim {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.nd-float-anim {
+  animation: float 4s ease-in-out infinite;
+}
+
+.nd-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.05;
+  background: var(--nd-gold-500);
+  pointer-events: none;
+}
+
+.nd-shape-1 {
+  width: 300px;
+  height: 300px;
+  top: 10%;
+  right: 10%;
+  animation: float 6s ease-in-out infinite;
+}
+
+.nd-shape-2 {
+  width: 200px;
+  height: 200px;
+  bottom: 20%;
+  left: 5%;
+  animation: float 8s ease-in-out infinite reverse;
+}
+
+.nd-shape-3 {
+  width: 150px;
+  height: 150px;
+  top: 50%;
+  left: 20%;
+  animation: float 5s ease-in-out infinite;
+}
+
+.nd-full-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--nd-navy-900) 0%, var(--nd-navy-800) 50%, var(--nd-navy-700) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.nd-full-page::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(212, 168, 75, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.nd-full-page::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -30%;
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(circle, rgba(212, 168, 75, 0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.nd-glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--nd-radius-xl);
+  box-shadow: var(--nd-shadow-xl), 0 0 40px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 480px;
+  padding: 2.5rem;
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
