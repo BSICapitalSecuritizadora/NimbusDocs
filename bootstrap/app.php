@@ -50,7 +50,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     $cookieParams = [
         'lifetime' => 0, // Session cookie (until browser closes)
         'path' => '/',
-        'domain' => $appUrlHost ?: '',
+        'domain' => (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] !== $appUrlHost) ? null : ($appUrlHost ?: null),
         'secure' => $isHttps,
         'httponly' => true,
         'samesite' => 'Lax',

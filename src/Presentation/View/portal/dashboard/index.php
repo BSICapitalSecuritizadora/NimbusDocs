@@ -8,127 +8,177 @@
 /** @var array $announcements */
 
 ?>
-<div class="row mb-4">
+<?php
+
+/** @var array $user */
+/** @var int $total */
+/** @var int $pendentes */
+/** @var int $concluidas */
+/** @var array $submissions */
+/** @var array $announcements */
+
+?>
+<div class="row mb-4 align-items-center">
     <div class="col-12 col-lg-8">
-        <h1 class="h4 mb-1">Olá, <?= htmlspecialchars($user['full_name'] ?? $user['email'], ENT_QUOTES, 'UTF-8') ?>!</h1>
-        <p class="text-muted mb-0">
-            Aqui você acompanha seus envios e documentos disponibilizados pela BSI.
+        <h1 class="h3 fw-bold text-dark mb-1">Olá, <?= htmlspecialchars($user['full_name'] ?? $user['email'], ENT_QUOTES, 'UTF-8') ?>!</h1>
+        <p class="text-secondary mb-0">
+            Bem-vindo ao seu portal exclusivo. Acompanhe seus envios e documentos.
         </p>
+    </div>
+    <div class="col-12 col-lg-4 text-lg-end mt-3 mt-lg-0">
+        <a href="/portal/submissions/new" class="nd-btn nd-btn-gold shadow-sm">
+            <i class="bi bi-plus-lg"></i> Novo Envio
+        </a>
     </div>
 </div>
 
 <?php if (!empty($announcements)): ?>
-    <div class="mb-4">
+    <div class="mb-5">
         <?php foreach ($announcements as $a): ?>
             <?php
             $level = $a['level'] ?? 'info';
-            $class = 'alert-info';
-            if ($level === 'success') $class = 'alert-success';
-            if ($level === 'warning') $class = 'alert-warning';
-            if ($level === 'danger')  $class = 'alert-danger';
+            $class = 'nd-alert-info';
+            $icon  = 'bi-info-circle-fill';
+            
+            if ($level === 'success') { $class = 'nd-alert-success'; $icon = 'bi-check-circle-fill'; }
+            if ($level === 'warning') { $class = 'nd-alert-warning'; $icon = 'bi-exclamation-triangle-fill'; }
+            if ($level === 'danger')  { $class = 'nd-alert-danger';  $icon = 'bi-x-circle-fill'; }
             ?>
-            <div class="alert <?= $class ?> border-0 shadow-sm mb-2">
-                <h2 class="h6 mb-1">
-                    <?= htmlspecialchars($a['title'], ENT_QUOTES, 'UTF-8') ?>
-                </h2>
-                <p class="small mb-0">
-                    <?= nl2br(htmlspecialchars($a['body'], ENT_QUOTES, 'UTF-8')) ?>
-                </p>
+            <div class="nd-alert <?= $class ?> shadow-sm mb-3">
+                <i class="bi <?= $icon ?> fs-5"></i>
+                <div class="nd-alert-text">
+                    <h5 class="nd-alert-card-title mb-1">
+                        <?= htmlspecialchars($a['title'], ENT_QUOTES, 'UTF-8') ?>
+                    </h5>
+                    <span>
+                        <?= nl2br(htmlspecialchars($a['body'], ENT_QUOTES, 'UTF-8')) ?>
+                    </span>
+                </div>
             </div>
         <?php endforeach; ?>
     </div>
 <?php endif; ?>
 
-<div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <div class="small text-muted mb-1">Total de envios</div>
-                <div class="fs-4 fw-semibold"><?= $total ?></div>
+<div class="row g-4 mb-5">
+    <!-- Total -->
+    <div class="col-12 col-md-4">
+        <div class="nd-metric-card primary h-100">
+            <div class="nd-metric-card-gradient"></div>
+            <div class="d-flex justify-content-between align-items-start position-relative">
+                <div>
+                    <div class="nd-metric-value mb-1"><?= $total ?></div>
+                    <div class="nd-metric-label">Total de Envios</div>
+                </div>
+                <div class="nd-metric-icon">
+                    <i class="bi bi-layers-fill"></i>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="col-6 col-md-3">
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <div class="small text-muted mb-1">Pendentes</div>
-                <div class="fs-4 fw-semibold text-warning"><?= $pendentes ?></div>
+    <!-- Pendentes -->
+    <div class="col-12 col-md-4">
+        <div class="nd-metric-card warning h-100">
+            <div class="nd-metric-card-gradient"></div>
+            <div class="d-flex justify-content-between align-items-start position-relative">
+                <div>
+                    <div class="nd-metric-value mb-1"><?= $pendentes ?></div>
+                    <div class="nd-metric-label">Aguardando Análise</div>
+                </div>
+                <div class="nd-metric-icon">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="col-6 col-md-3">
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <div class="small text-muted mb-1">Concluídos</div>
-                <div class="fs-4 fw-semibold text-success"><?= $concluidas ?></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-6 col-md-3">
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <div class="small text-muted mb-1">Novo envio</div>
-                <a href="/portal/submissions/new" class="btn btn-sm btn-primary">
-                    <i class="bi bi-plus-lg"></i> Criar
-                </a>
+    <!-- Concluídos -->
+    <div class="col-12 col-md-4">
+        <div class="nd-metric-card success h-100">
+            <div class="nd-metric-card-gradient"></div>
+            <div class="d-flex justify-content-between align-items-start position-relative">
+                <div>
+                    <div class="nd-metric-value mb-1"><?= $concluidas ?></div>
+                    <div class="nd-metric-label">Processados / Concluídos</div>
+                </div>
+                <div class="nd-metric-icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="card shadow-sm border-0">
-    <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h2 class="h6 mb-0">Meus envios recentes</h2>
-            <a href="/portal/submissions" class="small">Ver todos</a>
+<div class="nd-card mb-4">
+    <div class="nd-card-header d-flex justify-content-between align-items-center bg-white border-bottom-0 pt-4 px-4 pb-2">
+        <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center justify-content-center rounded-2 bg-light text-primary" style="width: 32px; height: 32px;">
+                <i class="bi bi-clock-history"></i>
+            </div>
+            <h2 class="nd-card-title fs-5">Envios Recentes</h2>
         </div>
-
+        <a href="/portal/submissions" class="nd-btn nd-btn-outline nd-btn-sm">
+            Ver Todos
+        </a>
+    </div>
+    
+    <div class="nd-card-body p-0">
         <?php if (!$submissions): ?>
-            <p class="text-muted mb-0">
-                Você ainda não possui envios registrados.
-                <a href="/portal/submissions/new">Clique aqui para fazer o primeiro envio.</a>
-            </p>
+            <div class="text-center py-5">
+                <div class="mb-3 text-muted opacity-25">
+                    <i class="bi bi-inbox fs-1"></i>
+                </div>
+                <h6 class="text-secondary fw-normal mb-1">Nenhum envio encontrado</h6>
+                <p class="small text-muted mb-3">Você ainda não realizou nenhum envio de documento.</p>
+                <a href="/portal/submissions/new" class="nd-btn nd-btn-primary nd-btn-sm">
+                    <i class="bi bi-plus-lg"></i> Criar Primeiro Envio
+                </a>
+            </div>
         <?php else: ?>
             <div class="table-responsive">
-                <table class="table table-sm align-middle mb-0">
+                <table class="nd-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th class="ps-4">ID</th>
                             <th>Assunto / Título</th>
                             <th>Data</th>
                             <th>Status</th>
-                            <th class="text-end">Ações</th>
+                            <th class="text-end pe-4">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($submissions as $s): ?>
                             <tr>
-                                <td>#<?= (int)$s['id'] ?></td>
+                                <td class="ps-4 fw-medium text-muted">#<?= str_pad((string)$s['id'], 4, '0', STR_PAD_LEFT) ?></td>
                                 <td>
-                                    <?= htmlspecialchars($s['title'] ?? 'Envio', ENT_QUOTES, 'UTF-8') ?>
+                                    <span class="d-block fw-medium text-dark">
+                                        <?= htmlspecialchars($s['title'] ?? 'Sem título', ENT_QUOTES, 'UTF-8') ?>
+                                    </span>
                                 </td>
                                 <td>
-                                    <span class="small text-muted">
-                                        <?= htmlspecialchars($s['created_at'] ?? '', ENT_QUOTES, 'UTF-8') ?>
-                                    </span>
+                                    <div class="d-flex align-items-center gap-2 text-secondary">
+                                        <i class="bi bi-calendar3 small"></i>
+                                        <?= date('d/m/Y', strtotime($s['created_at'])) ?>
+                                    </div>
                                 </td>
                                 <td>
                                     <?php
                                     $status = $s['status'] ?? '';
-                                    $badgeClass = 'bg-secondary';
-                                    if ($status === 'PENDENTE')   $badgeClass = 'bg-warning';
-                                    if ($status === 'FINALIZADA') $badgeClass = 'bg-success';
+                                    $badgeClass = 'nd-badge-secondary';
+                                    $icon = 'bi-circle';
+                                    
+                                    if ($status === 'PENDENTE')   { $badgeClass = 'nd-badge-warning'; $icon = 'bi-hourglass'; }
+                                    if ($status === 'FINALIZADA') { $badgeClass = 'nd-badge-success'; $icon = 'bi-check2'; }
+                                    if ($status === 'REJEITADA')  { $badgeClass = 'nd-badge-danger';  $icon = 'bi-x-lg'; }
                                     ?>
-                                    <span class="badge <?= $badgeClass ?>">
+                                    <span class="nd-badge <?= $badgeClass ?>">
+                                        <i class="bi <?= $icon ?> me-1"></i>
                                         <?= htmlspecialchars($status, ENT_QUOTES, 'UTF-8') ?>
                                     </span>
                                 </td>
-                                <td class="text-end">
+                                <td class="text-end pe-4">
                                     <a href="/portal/submissions/<?= (int)$s['id'] ?>"
-                                        class="btn btn-sm btn-outline-secondary">
+                                        class="nd-btn nd-btn-outline nd-btn-sm">
                                         Detalhes
                                     </a>
                                 </td>

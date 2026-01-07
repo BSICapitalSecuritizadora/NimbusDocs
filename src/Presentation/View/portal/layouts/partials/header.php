@@ -26,20 +26,23 @@ $logoUrl  = $branding['portal_logo_url'] ?? '';
         <div class="collapse navbar-collapse" id="portalNavbar">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link<?= ($_SERVER['REQUEST_URI'] === '/portal') ? ' active' : '' ?>"
-                        href="/portal">Início</a>
+                    <a class="nav-link<?= ($_SERVER['REQUEST_URI'] === '/portal') ? ' active' : '' ?>" href="/portal">
+                        <i class="bi bi-house-door-fill me-1"></i> Início
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link<?= str_starts_with($_SERVER['REQUEST_URI'], '/portal/submissions') ? ' active' : '' ?>"
-                        href="/portal/submissions">Meus envios</a>
+                    <a class="nav-link<?= str_starts_with($_SERVER['REQUEST_URI'], '/portal/submissions') && $_SERVER['REQUEST_URI'] !== '/portal/submissions/new' ? ' active' : '' ?>" href="/portal/submissions">
+                        <i class="bi bi-inbox-fill me-1"></i> Meus envios
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link<?= ($_SERVER['REQUEST_URI'] === '/portal/submissions/new') ? ' active' : '' ?>"
-                        href="/portal/submissions/new">Nova submissão</a>
+                    <a class="nav-link<?= ($_SERVER['REQUEST_URI'] === '/portal/submissions/new') ? ' active' : '' ?>" href="/portal/submissions/new">
+                        <i class="bi bi-plus-circle-fill me-1"></i> Nova submissão
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/portal/documents/general" class="nav-link">
-                        Documentos gerais
+                    <a href="/portal/documents/general" class="nav-link<?= str_starts_with($_SERVER['REQUEST_URI'], '/portal/documents/general') ? ' active' : '' ?>">
+                        <i class="bi bi-folder-fill me-1"></i> Documentos gerais
                     </a>
                 </li>
             </ul>

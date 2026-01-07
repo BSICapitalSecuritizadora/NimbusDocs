@@ -36,7 +36,9 @@ final class PortalLoginController
             ],
         ];
 
-        require __DIR__ . '/../../../View/portal/layouts/base.php';
+        // Render view directly (standalone page)
+        extract($viewData);
+        require $contentView;
     }
 
     public function handleLogin(array $vars = []): void
