@@ -375,15 +375,17 @@ final class PortalSubmissionController
 
         $files = $this->fileRepo->findBySubmission($id);
         $notes = $this->noteRepo->listVisibleForSubmission($id);
+        $shareholders = $this->shareholderRepo->findBySubmission($id);
         $responseFiles = $this->fileRepo->findVisibleToUser($id);
 
         $pageTitle   = 'Detalhes da submissão';
         $contentView = __DIR__ . '/../../View/portal/submissions/show.php';
         $viewData = [
             'submission'    => $submission,
-            'files'         => $files,          // se ainda usa
+            'files'         => $files,
             'responseFiles' => $responseFiles,
             'notes'         => $notes,
+            'shareholders'  => $shareholders,
         ];
 
         require __DIR__ . '/../../View/portal/layouts/base.php';

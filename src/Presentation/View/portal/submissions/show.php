@@ -109,7 +109,10 @@ $dateFormatted = !empty($submission['submitted_at'])
                     <div class="col-md-6">
                         <label class="nd-label text-muted mb-1">CNPJ</label>
                         <div class="text-dark font-monospace">
-                            <?= htmlspecialchars($submission['company_cnpj'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                            <?php 
+                            $cnpj = $submission['company_cnpj'] ?? '';
+                            echo htmlspecialchars(preg_replace("/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/", "$1.$2.$3/$4-$5", $cnpj), ENT_QUOTES, 'UTF-8');
+                            ?>
                         </div>
                     </div>
                     
@@ -147,9 +150,42 @@ $dateFormatted = !empty($submission['submitted_at'])
                     </div>
                     
                     <div class="col-12 border-top border-light-subtle pt-3 mt-3">
+                        <h6 class="text-secondary small fw-bold text-uppercase mb-3">Dados do Responsável pelo Cadastro</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="nd-label text-muted mb-1">Nome Completo</label>
+                                <div class="text-dark">
+                                    <?= htmlspecialchars($submission['registrant_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="nd-label text-muted mb-1">Cargo</label>
+                                <div class="text-dark">
+                                    <?= htmlspecialchars($submission['registrant_position'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="nd-label text-muted mb-1">RG</label>
+                                <div class="text-dark">
+                                    <?= htmlspecialchars($submission['registrant_rg'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="nd-label text-muted mb-1">CPF</label>
+                                <div class="text-dark font-monospace">
+                                    <?php 
+                                    $cpf = $submission['registrant_cpf'] ?? '';
+                                    echo htmlspecialchars(preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "$1.$2.$3-$4", $cpf), ENT_QUOTES, 'UTF-8');
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 border-top border-light-subtle pt-3 mt-3">
                          <div class="d-flex gap-4">
                             <div class="d-flex align-items-center">
-                                <i class="bi <?= !empty($submission['is_us_person']) ? 'bi-check-circle-fill text-danger' : 'bi-x-circle text-muted' ?> me-2"></i>
+                                <i class="bi <?= !empty($submission['is_us_person']) ? 'bi-check-circle-fill text-warning' : 'bi-x-circle text-muted' ?> me-2"></i>
                                 <span class="small text-secondary">US Person</span>
                             </div>
                             <div class="d-flex align-items-center">
@@ -158,6 +194,54 @@ $dateFormatted = !empty($submission['submitted_at'])
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shareholders -->
+        <div class="nd-card mb-4">
+            <div class="nd-card-header">
+                <h2 class="nd-card-title">Quadro Societário</h2>
+            </div>
+            <div class="nd-card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="px-4 py-3 text-secondary small text-uppercase">Nome</th>
+                                <th class="px-4 py-3 text-secondary small text-uppercase">RG</th>
+                                <th class="px-4 py-3 text-secondary small text-uppercase">CNPJ</th>
+                                <th class="px-4 py-3 text-secondary small text-uppercase text-end">Participação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($shareholders)): ?>
+                                <tr>
+                                    <td colspan="4" class="px-4 py-3 text-center text-muted">Nenhum sócio cadastrado.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($shareholders as $shareholder): ?>
+                                    <tr>
+                                        <td class="px-4 py-3 fw-medium text-dark">
+                                            <?= htmlspecialchars($shareholder['name'], ENT_QUOTES, 'UTF-8') ?>
+                                        </td>
+                                        <td class="px-4 py-3 text-secondary font-monospace">
+                                            <?= htmlspecialchars($shareholder['document_rg'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                                        </td>
+                                        <td class="px-4 py-3 text-secondary font-monospace">
+                                            <?php 
+                                            $sCnpj = $shareholder['document_cnpj'] ?? '';
+                                            echo htmlspecialchars(preg_replace("/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/", "$1.$2.$3/$4-$5", $sCnpj), ENT_QUOTES, 'UTF-8');
+                                            ?>
+                                        </td>
+                                        <td class="px-4 py-3 text-end fw-medium text-dark">
+                                            <?= number_format((float)($shareholder['percentage'] ?? 0), 2, ',', '.') ?>%
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
