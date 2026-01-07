@@ -207,14 +207,14 @@ final class PortalSubmissionController
 
         // Validação de arquivos obrigatórios
         $requiredFiles = [
-            'balance_sheet' => 'Último balanço',
+            'ultimo_balanco' => 'Último balanço',
             'dre' => 'DRE',
-            'policies' => 'Políticas',
-            'cnpj_card' => 'Cartão CNPJ',
-            'power_of_attorney' => 'Procuração',
-            'minutes' => 'Ata',
-            'articles_of_incorporation' => 'Contrato social',
-            'bylaws' => 'Estatuto',
+            'politicas' => 'Políticas',
+            'cartao_cnpj' => 'Cartão CNPJ',
+            'procuracao' => 'Procuração',
+            'ata' => 'Ata',
+            'contrato_social' => 'Contrato social',
+            'estatuto' => 'Estatuto',
         ];
 
         foreach ($requiredFiles as $field => $label) {
@@ -280,14 +280,14 @@ final class PortalSubmissionController
         $storageBase = dirname(__DIR__, 5) . '/storage/portal_uploads/' . $userId . '/';
 
         $fileTypeMap = [
-            'balance_sheet'             => 'BALANCE_SHEET',
+            'ultimo_balanco'            => 'BALANCE_SHEET',
             'dre'                       => 'DRE',
-            'policies'                  => 'POLICIES',
-            'cnpj_card'                 => 'CNPJ_CARD',
-            'power_of_attorney'         => 'POWER_OF_ATTORNEY',
-            'minutes'                   => 'MINUTES',
-            'articles_of_incorporation' => 'ARTICLES_OF_INCORPORATION',
-            'bylaws'                    => 'BYLAWS',
+            'politicas'                 => 'POLICIES',
+            'cartao_cnpj'               => 'CNPJ_CARD',
+            'procuracao'                => 'POWER_OF_ATTORNEY',
+            'ata'                       => 'MINUTES',
+            'contrato_social'           => 'ARTICLES_OF_INCORPORATION',
+            'estatuto'                  => 'BYLAWS',
         ];
 
         foreach ($fileTypeMap as $field => $docType) {

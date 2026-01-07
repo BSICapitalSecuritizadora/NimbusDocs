@@ -146,7 +146,7 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
     <!-- Declarações -->
     <div class="nd-card mb-4">
         <div class="nd-card-header">
-            <h2 class="nd-card-title mb-0">Declarações</h2>
+            <h2 class="nd-card-title mb-0">Declarações <span class="text-danger">*</span></h2>
         </div>
         <div class="nd-card-body">
             <div class="d-flex gap-4">
@@ -216,27 +216,27 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
         </div>
         <div class="nd-card-body">
             <div class="row g-4">
-                <?php
+                <?php 
                 $docs = [
-                    'balance_sheet' => 'Último Balanço',
+                    'ultimo_balanco' => 'Último Balanço',
                     'dre' => 'DRE (Demonstração do Resultado do Exercício)',
-                    'policies' => 'Políticas',
-                    'cnpj_card' => 'Cartão CNPJ',
-                    'power_of_attorney' => 'Procuração',
-                    'minutes' => 'Ata',
-                    'articles_of_incorporation' => 'Contrato Social',
-                    'bylaws' => 'Estatuto'
+                    'politicas' => 'Políticas',
+                    'cartao_cnpj' => 'Cartão CNPJ',
+                    'procuracao' => 'Procuração',
+                    'ata' => 'Ata',
+                    'contrato_social' => 'Contrato Social',
+                    'estatuto' => 'Estatuto',
                 ];
-                foreach ($docs as $field => $label): 
+                foreach ($docs as $name => $label): 
                 ?>
                 <div class="col-md-6">
-                    <label class="nd-label" for="<?= $field ?>">
+                    <label class="nd-label" for="<?= $name ?>">
                         <?= $label ?> <span class="text-danger">*</span>
                     </label>
-                    <input type="file" class="nd-input form-control <?= isset($errors[$field]) ? 'is-invalid' : '' ?>"
-                        id="<?= $field ?>" name="<?= $field ?>" accept=".pdf" required>
-                    <?php if (isset($errors[$field])): ?>
-                        <div class="invalid-feedback"><?= htmlspecialchars($errors[$field], ENT_QUOTES, 'UTF-8') ?></div>
+                    <input type="file" class="nd-input form-control <?= isset($errors[$name]) ? 'is-invalid' : '' ?>"
+                        id="<?= $name ?>" name="<?= $name ?>" accept=".pdf" required>
+                    <?php if (isset($errors[$name])): ?>
+                        <div class="invalid-feedback"><?= htmlspecialchars($errors[$name], ENT_QUOTES, 'UTF-8') ?></div>
                     <?php endif; ?>
                 </div>
                 <?php endforeach; ?>
