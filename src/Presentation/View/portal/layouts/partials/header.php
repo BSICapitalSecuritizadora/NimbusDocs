@@ -76,7 +76,7 @@ $isActive = fn($path) =>
                             </div>
                         </li>
                         <li>
-                            <a class="dropdown-item rounded-2 py-2 mb-1" href="#">
+                            <a class="dropdown-item rounded-2 py-2 mb-1" href="/portal/profile">
                                 <i class="bi bi-person-gear me-2 text-secondary"></i> Meu Perfil
                             </a>
                         </li>

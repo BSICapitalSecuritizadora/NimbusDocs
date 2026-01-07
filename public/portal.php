@@ -10,6 +10,7 @@ use App\Presentation\Controller\Portal\PortalDocumentController;
 use App\Presentation\Controller\Portal\PortalGeneralDocumentsController;
 use App\Presentation\Controller\Portal\PortalGeneralDocumentsViewerController;
 use App\Presentation\Controller\Portal\PortalAnnouncementController;
+use App\Presentation\Controller\Portal\PortalProfileController;
 use App\Infrastructure\Logging\RequestLogger;
 use App\Support\Session;
 use FastRoute\RouteCollector;
@@ -23,6 +24,10 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/portal/login',  [PortalLoginController::class, 'showLoginForm']);
     $r->addRoute('POST', '/portal/login',  [PortalLoginController::class, 'handleLogin']);
     $r->addRoute('GET',  '/portal/logout', [PortalLoginController::class, 'logout']);
+
+    // Perfil do usuário
+    $r->addRoute('GET',  '/portal/profile', [PortalProfileController::class, 'edit']);
+    $r->addRoute('POST', '/portal/profile', [PortalProfileController::class, 'update']);
 
     // Submissões do usuário final
     $r->addRoute('GET',  '/portal/submissions',                [PortalSubmissionController::class, 'index']);
