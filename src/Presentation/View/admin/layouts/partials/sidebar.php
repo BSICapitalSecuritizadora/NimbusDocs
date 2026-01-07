@@ -93,14 +93,14 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
                 Comunicados
             </a>
             
-            <a href="/admin/settings/notifications" class="nd-nav-item <?= isActive('/admin/settings/notifications', $currentUri) ? 'active' : '' ?>">
-                <i class="bi bi-gear-fill nd-nav-icon"></i>
-                Notificações
-            </a>
-
             <a href="/admin/notifications/outbox" class="nd-nav-item <?= isActive('/admin/notifications', $currentUri) ? 'active' : '' ?>">
                 <i class="bi bi-envelope-paper-fill nd-nav-icon"></i>
                 Fila de E-mails
+            </a>
+            
+            <a href="/admin/settings/notifications" class="nd-nav-item <?= isActive('/admin/settings/notifications', $currentUri) ? 'active' : '' ?>">
+                <i class="bi bi-gear-fill nd-nav-icon"></i>
+                Notificações
             </a>
         </div>
         
