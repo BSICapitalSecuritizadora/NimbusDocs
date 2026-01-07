@@ -41,7 +41,7 @@ $errors = $errors ?? [];
             </div>
 
             <div class="nd-card-body">
-                <form method="post" action="/admin/admin-users/<?= (int)$user['id'] ?>/update">
+                <form method="post" action="/admin/admin-users/<?= (int)$user['id'] ?>">
                     <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
                     <div class="row gx-3 gy-2">
