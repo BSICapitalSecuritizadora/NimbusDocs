@@ -161,17 +161,43 @@
                                 </td>
                                 <td>
                                     <?php
-                                    $status = $s['status'] ?? '';
+                                    $statusRaw = $s['status'] ?? '';
+                                    $label = $statusRaw;
                                     $badgeClass = 'nd-badge-secondary';
                                     $icon = 'bi-circle';
                                     
-                                    if ($status === 'PENDENTE')   { $badgeClass = 'nd-badge-warning'; $icon = 'bi-hourglass'; }
-                                    if ($status === 'FINALIZADA') { $badgeClass = 'nd-badge-success'; $icon = 'bi-check2'; }
-                                    if ($status === 'REJEITADA')  { $badgeClass = 'nd-badge-danger';  $icon = 'bi-x-lg'; }
+                                    switch ($statusRaw) {
+                                        case 'PENDING':
+                                            $label = 'Pendente';
+                                            $badgeClass = 'nd-badge-warning';
+                                            $icon = 'bi-hourglass';
+                                            break;
+                                        case 'IN_REVIEW':
+                                            $label = 'Em Análise';
+                                            $badgeClass = 'nd-badge-info';
+                                            $icon = 'bi-search';
+                                            break;
+                                        case 'APPROVED':
+                                        case 'COMPLETED':
+                                        case 'FINALIZADA':
+                                            $label = 'Concluído';
+                                            $badgeClass = 'nd-badge-success';
+                                            $icon = 'bi-check2-circle';
+                                            break;
+                                        case 'REJECTED':
+                                        case 'REJEITADA':
+                                            $label = 'Rejeitado';
+                                            $badgeClass = 'nd-badge-danger';
+                                            $icon = 'bi-x-circle';
+                                            break;
+                                        default:
+                                            // Mantém original se não mapeado
+                                            break;
+                                    }
                                     ?>
                                     <span class="nd-badge <?= $badgeClass ?>">
                                         <i class="bi <?= $icon ?> me-1"></i>
-                                        <?= htmlspecialchars($status, ENT_QUOTES, 'UTF-8') ?>
+                                        <?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>
                                     </span>
                                 </td>
                                 <td class="text-end pe-4">
