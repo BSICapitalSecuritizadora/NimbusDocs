@@ -30,6 +30,13 @@ $has = fn(string $key, bool $default = true)
     </div>
 <?php endif; ?>
 
+<?php if (!empty($error)): ?>
+    <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <div><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
+    </div>
+<?php endif; ?>
+
 <div class="row">
     <div class="col-lg-8">
         <div class="nd-card">
