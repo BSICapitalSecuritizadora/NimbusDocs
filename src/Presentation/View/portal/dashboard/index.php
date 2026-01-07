@@ -139,7 +139,6 @@
                 <table class="nd-table">
                     <thead>
                         <tr>
-                            <th class="ps-4">ID</th>
                             <th>Assunto / Título</th>
                             <th>Data</th>
                             <th>Status</th>
@@ -149,7 +148,6 @@
                     <tbody>
                         <?php foreach ($submissions as $s): ?>
                             <tr>
-                                <td class="ps-4 fw-medium text-muted">#<?= str_pad((string)$s['id'], 4, '0', STR_PAD_LEFT) ?></td>
                                 <td>
                                     <span class="d-block fw-medium text-dark">
                                         <?= htmlspecialchars($s['title'] ?? 'Sem título', ENT_QUOTES, 'UTF-8') ?>
@@ -158,7 +156,7 @@
                                 <td>
                                     <div class="d-flex align-items-center gap-2 text-secondary">
                                         <i class="bi bi-calendar3 small"></i>
-                                        <?= date('d/m/Y', strtotime($s['created_at'])) ?>
+                                        <?= date('d/m/Y H:i', strtotime($s['submitted_at'] ?? 'now')) ?>
                                     </div>
                                 </td>
                                 <td>
