@@ -155,6 +155,15 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
                                 Sou PEP (Pessoa Exposta Politicamente)
                             </label>
                         </div>
+                        <div class="form-check nd-checkbox">
+                            <input class="form-check-input" type="checkbox" id="is_none_compliant">
+                            <label class="form-check-label" for="is_none_compliant">
+                                Não me enquadro nas opções acima
+                            </label>
+                        </div>
+                    </div>
+                    <div id="complianceError" class="text-danger small mt-1" style="display: none;">
+                        Selecione pelo menos uma opção.
                     </div>
                 </div>
             </div>
@@ -376,6 +385,33 @@ document.getElementById('btnSearchCnpj').addEventListener('click', async functio
     }
 });
 
+// Gerenciar checkboxes de Compliance (US Person / PEP)
+const usPerson = document.getElementById('is_us_person');
+const pep = document.getElementById('is_pep');
+const noneCompliant = document.getElementById('is_none_compliant');
+const complianceError = document.getElementById('complianceError');
+
+function updateComplianceChecks(e) {
+    if (e.target === noneCompliant && noneCompliant.checked) {
+        usPerson.checked = false;
+        pep.checked = false;
+    } else if ((e.target === usPerson || e.target === pep) && e.target.checked) {
+        noneCompliant.checked = false;
+    }
+    
+    // Hide error if any is checked
+    if (usPerson.checked || pep.checked || noneCompliant.checked) {
+        complianceError.style.display = 'none';
+        usPerson.classList.remove('is-invalid');
+        pep.classList.remove('is-invalid');
+        noneCompliant.classList.remove('is-invalid');
+    }
+}
+
+usPerson.addEventListener('change', updateComplianceChecks);
+pep.addEventListener('change', updateComplianceChecks);
+noneCompliant.addEventListener('change', updateComplianceChecks);
+
 // Gerenciar sócios
 function renderShareholders() {
     const container = document.getElementById('shareholdersList');
@@ -416,10 +452,13 @@ function renderShareholders() {
                             <span class="input-group-text bg-white border-start-0 text-muted">%</span>
                         </div>
                     </div>
-                    <div class="col-md-1 text-end">
-                        <button type="button" class="btn btn-outline-danger btn-sm rounded-circle p-2" onclick="removeShareholder(${index})" title="Remover Sócio">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                    <div class="col-md-1">
+                        <label class="nd-label small mb-1 d-block">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="button" class="nd-btn nd-btn-sm nd-btn-danger-soft" onclick="removeShareholder(${index})" title="Remover Sócio" style="height: 48px;">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -466,15 +505,29 @@ renderShareholders();
 
 // Validação antes de enviar
 document.getElementById('submissionForm').addEventListener('submit', function(e) {
+    let isValid = true;
+    
+    // Validar Compliance
+    if (!usPerson.checked && !pep.checked && !noneCompliant.checked) {
+        isValid = false;
+        complianceError.style.display = 'block';
+        usPerson.classList.add('is-invalid');
+        pep.classList.add('is-invalid');
+        noneCompliant.classList.add('is-invalid');
+        // Visually scroll to it
+        usPerson.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     const total = parseFloat(document.getElementById('totalPercentage').textContent);
     
     // Se não tiver sócios, libera (ou bloqueie se for obrigatório ter ao menos 1)
     if (shareholders.length > 0 && Math.abs(total - 100) > 0.01) {
-        e.preventDefault();
+        isValid = false;
         alert('A soma das porcentagens dos sócios deve ser exatamente 100%');
         const warning = document.getElementById('percentageWarning');
         warning.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return false;
     }
+    
+    if (!isValid) e.preventDefault();
 });
 </script>
