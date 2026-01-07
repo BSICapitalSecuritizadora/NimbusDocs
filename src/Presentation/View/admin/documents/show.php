@@ -126,9 +126,24 @@
                         <span class="text-muted">Status:</span>
                         <?php
                         $status = $user['status'] ?? 'ACTIVE';
-                        $badgeClass = $status === 'ACTIVE' ? 'nd-badge-success' : 'nd-badge-secondary';
+                        $statusLabels = [
+                            'ACTIVE' => 'Ativo',
+                            'INACTIVE' => 'Inativo',
+                            'INVITED' => 'Convidado',
+                            'BLOCKED' => 'Bloqueado',
+                            'PENDING' => 'Pendente',
+                        ];
+                        $statusColors = [
+                            'ACTIVE' => 'nd-badge-success',
+                            'INACTIVE' => 'nd-badge-secondary',
+                            'INVITED' => 'nd-badge-info',
+                            'BLOCKED' => 'nd-badge-danger',
+                            'PENDING' => 'nd-badge-warning',
+                        ];
+                        $label = $statusLabels[$status] ?? $status;
+                        $badgeClass = $statusColors[$status] ?? 'nd-badge-secondary';
                         ?>
-                        <span class="nd-badge <?= $badgeClass ?>"><?= $status ?></span>
+                        <span class="nd-badge <?= $badgeClass ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted">ID:</span>
