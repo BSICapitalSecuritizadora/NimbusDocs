@@ -97,9 +97,9 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
                 <i class="bi bi-envelope-paper-fill nd-nav-icon"></i>
                 Fila de E-mails
             </a>
-            
+
             <a href="/admin/settings/notifications" class="nd-nav-item <?= isActive('/admin/settings/notifications', $currentUri) ? 'active' : '' ?>">
-                <i class="bi bi-gear-fill nd-nav-icon"></i>
+                <i class="bi bi-bell-fill nd-nav-icon"></i>
                 Notificações
             </a>
         </div>
