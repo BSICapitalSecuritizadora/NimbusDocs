@@ -298,24 +298,47 @@ document.querySelectorAll('.money').forEach(input => {
     });
 });
 
-// Máscara CNPJ
-document.getElementById('company_cnpj').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
+// Funções de Máscara reutilizáveis
+function maskCnpj(input) {
+    let value = input.value.replace(/\D/g, '');
+    
+    // Limita ao tamanho máximo de um CNPJ (14 dígitos)
+    if (value.length > 14) value = value.slice(0, 14);
+    
     value = value.replace(/^(\d{2})(\d)/, '$1.$2');
     value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
     value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
     value = value.replace(/(\d{4})(\d)/, '$1-$2');
-    e.target.value = value;
-});
+    input.value = value;
+}
 
-// Máscara CPF
-document.getElementById('registrant_cpf').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
+function maskRg(input) {
+    let value = input.value.replace(/\D/g, '');
+    
+    // Limita (exemplo 9 dígitos)
+    if (value.length > 9) value = value.slice(0, 9);
+
+    value = value.replace(/(\d{2})(\d)/, '$1.$2');
+    value = value.replace(/(\d{3})(\d)/, '$1.$2');
+    value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    input.value = value;
+}
+
+function maskCpf(input) {
+    let value = input.value.replace(/\D/g, '');
+    if (value.length > 11) value = value.slice(0, 11);
+    
     value = value.replace(/(\d{3})(\d)/, '$1.$2');
     value = value.replace(/(\d{3})(\d)/, '$1.$2');
     value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    e.target.value = value;
-});
+    input.value = value;
+}
+
+// Attach masks to static inputs
+document.getElementById('company_cnpj').addEventListener('input', function(e) { maskCnpj(e.target); });
+document.getElementById('registrant_cpf').addEventListener('input', function(e) { maskCpf(e.target); });
+document.getElementById('registrant_rg')?.addEventListener('input', function(e) { maskRg(e.target); });
+
 
 // Buscar CNPJ
 document.getElementById('btnSearchCnpj').addEventListener('click', async function() {
@@ -376,17 +399,19 @@ function renderShareholders() {
                     <div class="col-md-2">
                         <label class="nd-label small mb-1">RG</label>
                         <input type="text" class="nd-input bg-white" value="${shareholder.rg || ''}"
-                            onchange="updateShareholder(${index}, 'rg', this.value)" placeholder="RG">
+                            oninput="maskRg(this)"
+                            onchange="updateShareholder(${index}, 'rg', this.value)" placeholder="00.000.000-0">
                     </div>
                     <div class="col-md-3">
                         <label class="nd-label small mb-1">CNPJ</label>
                         <input type="text" class="nd-input bg-white" value="${shareholder.cnpj || ''}"
-                            onchange="updateShareholder(${index}, 'cnpj', this.value)" placeholder="CNPJ">
+                            oninput="maskCnpj(this)"
+                            onchange="updateShareholder(${index}, 'cnpj', this.value)" placeholder="00.000.000/0000-00">
                     </div>
                     <div class="col-md-2">
                         <label class="nd-label small mb-1">Porcentagem (%)</label>
                         <div class="input-group">
-                            <input type="number" step="0.01" class="nd-input bg-white" value="${shareholder.percentage || ''}"
+                            <input type="number" step="0.01" class="nd-input form-control bg-white" value="${shareholder.percentage || ''}"
                                 onchange="updateShareholder(${index}, 'percentage', this.value); renderShareholders();">
                             <span class="input-group-text bg-white border-start-0 text-muted">%</span>
                         </div>
