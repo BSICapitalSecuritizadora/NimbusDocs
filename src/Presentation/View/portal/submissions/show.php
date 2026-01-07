@@ -121,15 +121,28 @@ $dateFormatted = !empty($submission['submitted_at'])
                     </div>
                 <?php else: ?>
                     <ul class="list-group list-group-flush">
-                        <?php foreach ($files as $f): ?>
+                        <?php 
+                        $docLabels = [
+                            'BALANCE_SHEET'             => 'Último Balanço',
+                            'DRE'                       => 'DRE',
+                            'POLICIES'                  => 'Políticas',
+                            'CNPJ_CARD'                 => 'Cartão CNPJ',
+                            'POWER_OF_ATTORNEY'         => 'Procuração',
+                            'MINUTES'                   => 'Ata',
+                            'ARTICLES_OF_INCORPORATION' => 'Contrato Social',
+                            'BYLAWS'                    => 'Estatuto',
+                        ];
+                        foreach ($files as $f): 
+                            $label = $docLabels[$f['document_type'] ?? ''] ?? $f['original_name'];
+                        ?>
                             <li class="list-group-item px-4 py-3 border-light-subtle">
                                 <div class="d-flex align-items-center">
                                     <div class="me-3 text-secondary">
                                         <i class="bi bi-file-earmark-text fs-4"></i>
                                     </div>
                                     <div class="overflow-hidden">
-                                        <div class="text-truncate fw-medium text-dark" title="<?= htmlspecialchars($f['original_name'], ENT_QUOTES, 'UTF-8') ?>">
-                                            <?= htmlspecialchars($f['original_name'], ENT_QUOTES, 'UTF-8') ?>
+                                        <div class="text-truncate fw-medium text-dark" title="<?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>">
+                                            <?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>
                                         </div>
                                         <?php if (isset($f['size_bytes'])): ?>
                                             <div class="small text-muted">
