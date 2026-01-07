@@ -82,7 +82,7 @@
                     <div class="col-md-6">
                         <label class="nd-label">Data de Envio</label>
                         <div class="p-3 bg-light rounded">
-                            <?= htmlspecialchars($document['created_at'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?>
+                            <?= htmlspecialchars(date('d/m/Y H:i', strtotime($document['created_at'])) ?? 'N/A', ENT_QUOTES, 'UTF-8') ?>
                         </div>
                     </div>
                 </div>
