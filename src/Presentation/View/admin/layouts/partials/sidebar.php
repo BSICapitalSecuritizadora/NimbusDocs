@@ -108,14 +108,14 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
         <div class="nd-nav-section">
             <div class="nd-nav-section-title">Auditoria</div>
             
-            <a href="/admin/audit" class="nd-nav-item <?= isActive('/admin/audit', $currentUri) ? 'active' : '' ?>">
-                <i class="bi bi-clipboard-check-fill nd-nav-icon"></i>
-                Logs de Auditoria
-            </a>
-            
             <a href="/admin/access-log/portal" class="nd-nav-item <?= isActive('/admin/access-log', $currentUri) ? 'active' : '' ?>">
                 <i class="bi bi-shield-fill-check nd-nav-icon"></i>
                 Log de Acessos
+            </a>
+
+            <a href="/admin/audit" class="nd-nav-item <?= isActive('/admin/audit', $currentUri) ? 'active' : '' ?>">
+                <i class="bi bi-clipboard-check-fill nd-nav-icon"></i>
+                Logs de Auditoria
             </a>
             
             <a href="/admin/monitoring" class="nd-nav-item <?= isActive('/admin/monitoring', $currentUri) ? 'active' : '' ?>">
