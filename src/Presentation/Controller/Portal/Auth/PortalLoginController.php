@@ -74,6 +74,7 @@ final class PortalLoginController
 
     private function redirect(string $path): void
     {
+        session_write_close();
         header('Location: ' . $path);
         exit;
     }
