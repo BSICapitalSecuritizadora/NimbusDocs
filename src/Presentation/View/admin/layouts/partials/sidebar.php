@@ -93,6 +93,11 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
                 Comunicados
             </a>
             
+            <a href="/admin/settings/notifications" class="nd-nav-item <?= isActive('/admin/settings/notifications', $currentUri) ? 'active' : '' ?>">
+                <i class="bi bi-gear-fill nd-nav-icon"></i>
+                Notificações
+            </a>
+
             <a href="/admin/notifications/outbox" class="nd-nav-item <?= isActive('/admin/notifications', $currentUri) ? 'active' : '' ?>">
                 <i class="bi bi-envelope-paper-fill nd-nav-icon"></i>
                 Fila de E-mails
@@ -128,7 +133,7 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
         <div class="nd-nav-section">
             <div class="nd-nav-section-title">Sistema</div>
             
-            <a href="/admin/settings/branding" class="nd-nav-item <?= isActive('/admin/settings', $currentUri) ? 'active' : '' ?>">
+            <a href="/admin/settings/branding" class="nd-nav-item <?= isActive('/admin/settings', $currentUri) && !str_contains($currentUri, '/admin/settings/notifications') ? 'active' : '' ?>">
                 <i class="bi bi-gear-fill nd-nav-icon"></i>
                 Configurações
             </a>
