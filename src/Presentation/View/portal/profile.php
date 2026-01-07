@@ -51,8 +51,17 @@
                         
                         <div class="col-md-6">
                             <label for="document_number" class="nd-label">Documento (CPF/CNPJ)</label>
+                            <?php
+                                $doc = preg_replace('/\D/', '', $user['document_number'] ?? '');
+                                $maskedDoc = $doc;
+                                if (strlen($doc) === 11) {
+                                    $maskedDoc = preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $doc);
+                                } elseif (strlen($doc) === 14) {
+                                    $maskedDoc = preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $doc);
+                                }
+                            ?>
                             <input type="text" class="nd-input bg-light" id="document_number" 
-                                   value="<?= htmlspecialchars($user['document_number'] ?? '') ?>" readonly disabled>
+                                   value="<?= htmlspecialchars($maskedDoc) ?>" readonly disabled>
                             <div class="form-text small">O documento não pode ser alterado.</div>
                         </div>
 
