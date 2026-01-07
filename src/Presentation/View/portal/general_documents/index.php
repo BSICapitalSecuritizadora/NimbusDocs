@@ -85,7 +85,7 @@
                                 </div>
                                 
                                 <h5 class="card-title h6 text-dark fw-bold mb-2">
-                                    <a href="/portal/documents/general/<?= $doc['id'] ?>/download" class="text-decoration-none text-dark stretched-link">
+                                    <a href="/portal/documents/general/<?= $doc['id'] ?>" class="text-decoration-none text-dark stretched-link">
                                         <?= htmlspecialchars($doc['title']) ?>
                                     </a>
                                 </h5>
