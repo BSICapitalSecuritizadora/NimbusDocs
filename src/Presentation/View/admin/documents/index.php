@@ -72,7 +72,7 @@ $documents = $documents ?? [];
                             </td>
                             <td>
                                 <span class="text-muted small">
-                                    <?= htmlspecialchars($d['created_at'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                    <?= htmlspecialchars(date('d/m/Y H:i', strtotime($d['created_at'])) ?? '', ENT_QUOTES, 'UTF-8') ?>
                                 </span>
                             </td>
                             <td class="text-end">
