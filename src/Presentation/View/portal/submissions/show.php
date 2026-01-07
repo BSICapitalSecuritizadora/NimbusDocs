@@ -93,6 +93,75 @@ $dateFormatted = !empty($submission['submitted_at'])
             </div>
         </div>
 
+        <!-- Details -->
+        <div class="nd-card mb-4">
+            <div class="nd-card-header">
+                <h2 class="nd-card-title">Detalhes da Empresa</h2>
+            </div>
+            <div class="nd-card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="nd-label text-muted mb-1">Empresa</label>
+                        <div class="text-dark fw-medium">
+                            <?= htmlspecialchars($submission['company_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="nd-label text-muted mb-1">CNPJ</label>
+                        <div class="text-dark font-monospace">
+                            <?= htmlspecialchars($submission['company_cnpj'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="nd-label text-muted mb-1">Responsável</label>
+                        <div class="text-dark">
+                            <?= htmlspecialchars($submission['responsible_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="nd-label text-muted mb-1">Telefone</label>
+                        <div class="text-dark">
+                            <?= htmlspecialchars($submission['phone'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="nd-label text-muted mb-1">Atividade Principal</label>
+                        <div class="text-dark">
+                            <?= htmlspecialchars($submission['main_activity'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="nd-label text-muted mb-1">Patrimônio Líquido</label>
+                        <div class="text-dark">
+                            R$ <?= number_format((float)($submission['net_worth'] ?? 0), 2, ',', '.') ?>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="nd-label text-muted mb-1">Faturamento Anual</label>
+                        <div class="text-dark">
+                            R$ <?= number_format((float)($submission['annual_revenue'] ?? 0), 2, ',', '.') ?>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12 border-top border-light-subtle pt-3 mt-3">
+                         <div class="d-flex gap-4">
+                            <div class="d-flex align-items-center">
+                                <i class="bi <?= !empty($submission['is_us_person']) ? 'bi-check-circle-fill text-danger' : 'bi-x-circle text-muted' ?> me-2"></i>
+                                <span class="small text-secondary">US Person</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bi <?= !empty($submission['is_pep']) ? 'bi-check-circle-fill text-danger' : 'bi-x-circle text-muted' ?> me-2"></i>
+                                <span class="small text-secondary">PEP (Pessoa Exposta Politicamente)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <?php if (!empty($submission['message'])): ?>
             <div class="nd-card mb-4">
                 <div class="nd-card-header">
