@@ -40,6 +40,34 @@ final class DocumentAdminController
         require __DIR__ . '/../../View/admin/layouts/base.php';
     }
 
+    public function show(array $vars): void
+    {
+        Auth::requireRole('ADMIN', 'SUPER_ADMIN');
+
+        $id = (int)($vars['id'] ?? 0);
+        $document = $this->documents->find($id);
+
+        if (!$document) {
+            Session::flash('error', 'Documento não encontrado.');
+            header('Location: /admin/documents');
+            exit;
+        }
+
+        // Get user info
+        $user = $this->users->findById((int)$document['portal_user_id']);
+
+        $pageTitle   = 'Detalhes do Documento';
+        $contentView = __DIR__ . '/../../View/admin/documents/show.php';
+
+        $viewData = [
+            'document'  => $document,
+            'user'      => $user,
+            'csrfToken' => Csrf::token(),
+        ];
+
+        require __DIR__ . '/../../View/admin/layouts/base.php';
+    }
+
     public function createForm(): void
     {
         Auth::requireRole('ADMIN', 'SUPER_ADMIN');

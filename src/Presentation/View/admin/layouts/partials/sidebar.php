@@ -40,7 +40,7 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
             
             <a href="/admin/submissions" class="nd-nav-item <?= isActive('/admin/submissions', $currentUri) ? 'active' : '' ?>">
                 <i class="bi bi-inbox-fill nd-nav-icon"></i>
-                Submissões
+                Envios
             </a>
         </div>
         
@@ -48,16 +48,16 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
         <div class="nd-nav-section">
             <div class="nd-nav-section-title">Gestão</div>
             
-            <a href="/admin/portal-users" class="nd-nav-item <?= isActive('/admin/portal-users', $currentUri) ? 'active' : '' ?>">
-                <i class="bi bi-people-fill nd-nav-icon"></i>
-                Usuários do Portal
-            </a>
-            
             <a href="/admin/users" class="nd-nav-item <?= isActive('/admin/users', $currentUri) ? 'active' : '' ?>">
                 <i class="bi bi-person-gear nd-nav-icon"></i>
                 Administradores
             </a>
-            
+
+            <a href="/admin/portal-users" class="nd-nav-item <?= isActive('/admin/portal-users', $currentUri) ? 'active' : '' ?>">
+                <i class="bi bi-people-fill nd-nav-icon"></i>
+                Usuários do Portal
+            </a>
+
             <a href="/admin/tokens" class="nd-nav-item <?= isActive('/admin/tokens', $currentUri) ? 'active' : '' ?>">
                 <i class="bi bi-key-fill nd-nav-icon"></i>
                 Tokens de Acesso
@@ -67,15 +67,20 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
         <!-- Documentos -->
         <div class="nd-nav-section">
             <div class="nd-nav-section-title">Documentos</div>
-            
+
+            <a href="/admin/document-categories" class="nd-nav-item <?= isActive('/admin/document-categories', $currentUri) ? 'active' : '' ?>">
+                <i class="bi bi-tags-fill nd-nav-icon"></i>
+                Categorias
+            </a>
+
             <a href="/admin/general-documents" class="nd-nav-item <?= isActive('/admin/general-documents', $currentUri) ? 'active' : '' ?>">
                 <i class="bi bi-folder-fill nd-nav-icon"></i>
                 Documentos Gerais
             </a>
-            
-            <a href="/admin/document-categories" class="nd-nav-item <?= isActive('/admin/document-categories', $currentUri) ? 'active' : '' ?>">
-                <i class="bi bi-tags-fill nd-nav-icon"></i>
-                Categorias
+
+            <a href="/admin/documents" class="nd-nav-item <?= isActive('/admin/documents', $currentUri) ? 'active' : '' ?>">
+                <i class="bi bi-folder-fill nd-nav-icon"></i>
+                Documentos para o Usuário
             </a>
         </div>
         
@@ -108,14 +113,14 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
                 Log de Acessos
             </a>
             
-            <a href="/admin/reports/submissions" class="nd-nav-item <?= isActive('/admin/reports', $currentUri) ? 'active' : '' ?>">
-                <i class="bi bi-graph-up-arrow nd-nav-icon"></i>
-                Relatórios
-            </a>
-            
             <a href="/admin/monitoring" class="nd-nav-item <?= isActive('/admin/monitoring', $currentUri) ? 'active' : '' ?>">
                 <i class="bi bi-activity nd-nav-icon"></i>
                 Monitoramento
+            </a>
+            
+            <a href="/admin/reports/submissions" class="nd-nav-item <?= isActive('/admin/reports', $currentUri) ? 'active' : '' ?>">
+                <i class="bi bi-graph-up-arrow nd-nav-icon"></i>
+                Relatórios
             </a>
         </div>
         

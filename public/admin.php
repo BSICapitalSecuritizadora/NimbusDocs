@@ -86,7 +86,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/admin/documents',              [DocumentAdminController::class, 'index']);
     $r->addRoute('GET',  '/admin/documents/new',          [DocumentAdminController::class, 'createForm']);
     $r->addRoute('POST', '/admin/documents',              [DocumentAdminController::class, 'create']);
-    $r->addRoute('POST', '/admin/documents/{id:\\d+}/delete', [DocumentAdminController::class, 'delete']);
+    $r->addRoute('GET',  '/admin/documents/{id:\d+}',     [DocumentAdminController::class, 'show']);
+    $r->addRoute('POST', '/admin/documents/{id:\d+}/delete', [DocumentAdminController::class, 'delete']);
     // Microsoft OAuth (Admin)
     $r->addRoute('GET', '/admin/login/microsoft', [AdminAuthController::class, 'loginWithMicrosoft']);
     // Callback principal conforme .env MS_ADMIN_REDIRECT_URI
