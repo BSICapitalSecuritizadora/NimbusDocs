@@ -57,7 +57,24 @@ class TwoFactorController
         $branding = $this->config['branding'] ?? [];
         $isEnabled = (bool) ($user['two_factor_enabled'] ?? false);
 
-        require __DIR__ . '/../../View/admin/settings/two_factor.php';
+        $isEnabled = (bool) ($user['two_factor_enabled'] ?? false);
+
+        // Standard Layout Pattern
+        $pageTitle = 'Autenticação em Dois Fatores';
+        $contentView = __DIR__ . '/../../View/admin/settings/two_factor.php';
+        
+        $viewData = [
+            'admin'     => $admin,
+            'csrfToken' => $csrfToken,
+            'qrCodeUrl' => $qrCodeUrl,
+            'secret'    => $secret,
+            'isEnabled' => $isEnabled,
+            'branding'  => $branding,
+            'error'     => $error,
+            'success'   => $success
+        ];
+
+        require __DIR__ . '/../../View/admin/layouts/base.php';
     }
 
     /**
