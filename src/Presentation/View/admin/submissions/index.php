@@ -23,12 +23,12 @@ $query = http_build_query([
         <i class="bi bi-inbox-fill text-white"></i>
     </div>
     <div>
-        <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Submissões do Portal</h1>
-        <p class="text-muted mb-0 small">Gerencie os envios recebidos</p>
+        <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Protocolos Recebidos</h1>
+        <p class="text-muted mb-0 small">Gestão de solicitações e documentos enviados pelo portal</p>
     </div>
   </div>
   <a href="/admin/submissions/export/csv?<?= $query ?>" class="nd-btn nd-btn-outline nd-btn-sm">
-    <i class="bi bi-file-earmark-spreadsheet me-2"></i> Exportar CSV
+    <i class="bi bi-file-earmark-spreadsheet me-2"></i> Exportar Relatório
   </a>
 </div>
 
@@ -51,20 +51,20 @@ $query = http_build_query([
     <div class="nd-card-header bg-white border-bottom p-3">
         <form class="row g-3 align-items-end" method="get" action="/admin/submissions">
           <div class="col-sm-3">
-            <label class="nd-label" for="f_status">Status</label>
+            <label class="nd-label" for="f_status">Situação</label>
             <div class="nd-input-group">
                 <select class="nd-input" id="f_status" name="status" style="padding-left: 1rem;">
                   <?php $st = $filters['status'] ?? ''; ?>
-                  <option value="">Todos os status</option>
+                  <option value="">Todas as situações</option>
                   <option value="PENDING" <?= $st==='PENDING'?'selected':''; ?>>Pendente</option>
-                  <option value="UNDER_REVIEW" <?= $st==='UNDER_REVIEW'?'selected':''; ?>>Em análise</option>
-                  <option value="COMPLETED" <?= $st==='COMPLETED'?'selected':''; ?>>Concluída</option>
-                  <option value="REJECTED" <?= $st==='REJECTED'?'selected':''; ?>>Rejeitada</option>
+                  <option value="UNDER_REVIEW" <?= $st==='UNDER_REVIEW'?'selected':''; ?>>Em Análise</option>
+                  <option value="COMPLETED" <?= $st==='COMPLETED'?'selected':''; ?>>Concluído</option>
+                  <option value="REJECTED" <?= $st==='REJECTED'?'selected':''; ?>>Rejeitado</option>
                 </select>
             </div>
           </div>
           <div class="col-sm-3">
-            <label class="nd-label" for="f_uid">ID Usuário</label>
+            <label class="nd-label" for="f_uid">ID do Solicitante</label>
             <input type="number" class="nd-input" id="f_uid" name="portal_user_id" placeholder="Ex: 123" value="<?= htmlspecialchars((string)($filters['portal_user_id'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
           </div>
           <div class="col-sm-4">
@@ -83,11 +83,11 @@ $query = http_build_query([
           <table class="nd-table">
             <thead>
               <tr>
-                <th style="width: 120px;">Ref.</th>
-                <th>Título</th>
-                <th>Usuário</th>
-                <th style="width: 140px;">Status</th>
-                <th>Data envio</th>
+                <th style="width: 120px;">Protocolo</th>
+                <th>Assunto</th>
+                <th>Solicitante</th>
+                <th style="width: 140px;">Situação</th>
+                <th>Recebido em</th>
                 <th style="width: 100px;"></th>
               </tr>
             </thead>
@@ -97,7 +97,7 @@ $query = http_build_query([
                   <td colspan="7" class="text-center py-5">
                     <div class="d-flex flex-column align-items-center">
                         <i class="bi bi-inbox text-muted mb-2" style="font-size: 2rem;"></i>
-                        <span class="text-muted">Nenhuma submissão encontrada.</span>
+                        <span class="text-muted">Nenhum protocolo localizado.</span>
                     </div>
                   </td>
                 </tr>
@@ -114,9 +114,9 @@ $query = http_build_query([
                     $statusLabel = match($row['status'] ?? '') {
                         'PENDING' => 'Pendente',
                         'UNDER_REVIEW' => 'Em Análise',
-                        'COMPLETED' => 'Concluída',
-                        'APPROVED' => 'Aprovada',
-                        'REJECTED' => 'Rejeitada',
+                        'COMPLETED' => 'Concluído',
+                        'APPROVED' => 'Aprovado',
+                        'REJECTED' => 'Rejeitado',
                         default => $row['status'] ?? '-'
                     };
                     ?>
@@ -146,7 +146,7 @@ $query = http_build_query([
                             try {
                                 $date = new DateTime($submittedAt);
                                 $formattedDate = $date->format('d/m/Y H:i');
-                            } catch (Exception $e) {
+                            } catch (Exception $e) {Relatório de Submissões
                                 $formattedDate = $submittedAt;
                             }
                         } else {
@@ -156,7 +156,7 @@ $query = http_build_query([
                       ?>
                     </td>
                     <td class="text-end">
-                        <a class="nd-btn nd-btn-outline nd-btn-sm" href="/admin/submissions/<?= (int)$row['id'] ?>">
+                        <a class="nd-btn nd-btn-outline nd-btn-sm" href="/admin/submissions/<?= (int)$row['id'] ?>" title="Ver Detalhes">
                             <i class="bi bi-eye"></i>
                         </a>
                     </td>
