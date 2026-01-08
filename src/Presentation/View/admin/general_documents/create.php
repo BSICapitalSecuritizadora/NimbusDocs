@@ -22,12 +22,12 @@ $old = $viewData['old'] ?? [];
             <i class="bi bi-plus-lg"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Novo Documento</h1>
-            <p class="text-muted mb-0 small">Adicione um novo arquivo para download no portal</p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Cadastro de Publicação</h1>
+            <p class="text-muted mb-0 small">Registro de novos documentos e arquivos institucionais</p>
         </div>
     </div>
     <a href="/admin/general-documents" class="nd-btn nd-btn-outline nd-btn-sm">
-        <i class="bi bi-arrow-left me-1"></i> Voltar
+        <i class="bi bi-arrow-left me-1"></i> Cancelar e Voltar
     </a>
 </div>
 
@@ -45,7 +45,7 @@ $old = $viewData['old'] ?? [];
          <div class="nd-avatar nd-avatar-sm" style="background: var(--nd-primary-100); color: var(--nd-primary-700);">
             <i class="bi bi-file-earmark-plus"></i>
          </div>
-         <h5 class="nd-card-title mb-0">Dados do Documento</h5>
+         <h5 class="nd-card-title mb-0">Dados da Publicação</h5>
       </div>
       <div class="nd-card-body">
         <form method="post" action="/admin/general-documents" enctype="multipart/form-data" novalidate>
@@ -53,12 +53,12 @@ $old = $viewData['old'] ?? [];
 
           <!-- Título -->
           <div class="mb-4">
-            <label for="title" class="nd-label">Título <span class="text-danger">*</span></label>
+            <label for="title" class="nd-label">Título da Publicação <span class="text-danger">*</span></label>
             <div class="nd-input-group">
                 <input type="text" class="nd-input <?= !empty($errors['title']) ? 'is-invalid' : '' ?>" 
                   id="title" name="title" 
                   value="<?= htmlspecialchars($old['title'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                  placeholder="Ex: Manual de Conduta 2026" 
+                  placeholder="Ex: Regulamento Interno 2026, Cartilha de Benefícios..." 
                   required style="padding-left: 2.5rem;">
                 <i class="bi bi-type-h1 nd-input-icon"></i>
             </div>
@@ -89,10 +89,10 @@ $old = $viewData['old'] ?? [];
 
           <!-- Descrição -->
           <div class="mb-4">
-            <label for="description" class="nd-label">Descrição</label>
+            <label for="description" class="nd-label">Ementa/Descrição</label>
             <textarea class="nd-input w-100 <?= !empty($errors['description']) ? 'is-invalid' : '' ?>" 
               id="description" name="description" rows="4" style="resize: none;"
-              placeholder="Descreva o conteúdo do documento para facilitar a busca..."><?= htmlspecialchars($old['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+              placeholder="Descreva o conteúdo e a finalidade deste documento..."><?= htmlspecialchars($old['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
             <?php if (!empty($errors['description'])): ?>
               <div class="text-danger small mt-1"><?= htmlspecialchars($errors['description'], ENT_QUOTES, 'UTF-8') ?></div>
             <?php endif; ?>
@@ -100,7 +100,7 @@ $old = $viewData['old'] ?? [];
 
           <!-- Arquivo -->
           <div class="mb-4">
-            <label for="file" class="nd-label">Arquivo <span class="text-danger">*</span></label>
+            <label for="file" class="nd-label">Arquivo Digital <span class="text-danger">*</span></label>
             <div class="nd-input p-1">
                 <input type="file" class="form-control border-0 bg-transparent <?= !empty($errors['file']) ? 'is-invalid' : '' ?>" 
                   id="file" name="file" required 
@@ -122,19 +122,19 @@ $old = $viewData['old'] ?? [];
 
           <!-- Data de Publicação -->
           <div class="mb-4">
-            <label for="published_at" class="nd-label">Data de Publicação</label>
+            <label for="published_at" class="nd-label">Vigência/Publicação</label>
             <div class="nd-input-group">
                 <input type="date" class="nd-input" id="published_at" name="published_at"
                   value="<?= htmlspecialchars($old['published_at'] ?? '', ENT_QUOTES, 'UTF-8') ?>" style="padding-left: 2.5rem;">
                 <i class="bi bi-calendar3 nd-input-icon"></i>
             </div>
-            <small class="text-muted mt-1 d-block font-size-sm">Deixe vazio para publicar imediatamente.</small>
+            <small class="text-muted mt-1 d-block font-size-sm">Data de início da vigência. Se vazio, será publicado imediatamente.</small>
           </div>
 
           <div class="d-flex justify-content-end gap-2 pt-3 border-top">
             <a href="/admin/general-documents" class="nd-btn nd-btn-outline">Cancelar</a>
             <button type="submit" class="nd-btn nd-btn-primary">
-                <i class="bi bi-plus-lg me-1"></i> Criar Documento
+                <i class="bi bi-check-lg me-1"></i> Publicar Documento
             </button>
           </div>
         </form>
@@ -145,18 +145,18 @@ $old = $viewData['old'] ?? [];
   <div class="col-lg-4">
     <div class="nd-card mb-4">
       <div class="nd-card-header">
-        <h6 class="nd-card-title mb-0">Visibilidade</h6>
+        <h6 class="nd-card-title mb-0">Disponibilidade</h6>
       </div>
       <div class="nd-card-body">
          <div class="form-check nd-form-check">
             <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
               value="1" <?= (!isset($old['is_active']) || (int)$old['is_active'] === 1 ? 'checked' : '') ?>>
             <label class="form-check-label text-dark fw-medium" for="is_active">
-              Ativo no Portal
+              Disponível no Portal
             </label>
           </div>
           <small class="text-muted d-block mt-2">
-             Se desmarcado, o documento ficará oculto para os usuários até ser ativado manualmente.
+             Se desmarcado, o documento ficará no status "Rascunho/Arquivado" e não aparecerá para os usuários.
           </small>
       </div>
     </div>
@@ -164,11 +164,11 @@ $old = $viewData['old'] ?? [];
     <div class="nd-card bg-light border-0">
       <div class="nd-card-body">
         <h6 class="nd-card-title mb-3 d-flex align-items-center gap-2">
-           <i class="bi bi-info-circle text-primary"></i> Informações
+           <i class="bi bi-info-circle text-primary"></i> Diretrizes
         </h6>
         <ul class="nd-list-unstyled small text-muted mb-0 d-flex flex-column gap-2">
-           <li><strong>Tamanho Máx:</strong> 50 MB</li>
-           <li><strong>Formatos:</strong> PDF, Office, Imagens e ZIP</li>
+           <li><strong>Tamanho Limite:</strong> 50 MB</li>
+           <li><strong>Tipos Aceitos:</strong> PDF, Office, Imagens e ZIP</li>
         </ul>
       </div>
     </div>

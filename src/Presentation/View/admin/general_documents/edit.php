@@ -36,12 +36,12 @@ if (!$docId) {
             <i class="bi bi-pencil-square"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Editar Documento</h1>
-            <p class="text-muted mb-0 small">#<?= $docId ?> &bull; Atualize as informações do arquivo</p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Gerenciar Publicação</h1>
+            <p class="text-muted mb-0 small">Protocolo #<?= $docId ?> &bull; Edição de dados e arquivo</p>
         </div>
     </div>
     <a href="/admin/general-documents" class="nd-btn nd-btn-outline nd-btn-sm">
-        <i class="bi bi-arrow-left me-1"></i> Voltar
+        <i class="bi bi-arrow-left me-1"></i> Retornar
     </a>
 </div>
 
@@ -66,7 +66,7 @@ if (!$docId) {
          <div class="nd-avatar nd-avatar-sm" style="background: var(--nd-primary-100); color: var(--nd-primary-700);">
             <i class="bi bi-pencil-square"></i>
          </div>
-         <h5 class="nd-card-title mb-0">Detalhes do Documento</h5>
+         <h5 class="nd-card-title mb-0">Ficha Técnica</h5>
       </div>
       <div class="nd-card-body">
         <form method="post" action="/admin/general-documents/<?= $docId ?>" novalidate>
@@ -75,7 +75,7 @@ if (!$docId) {
 
           <!-- Título -->
           <div class="mb-4">
-            <label for="title" class="nd-label">Título <span class="text-danger">*</span></label>
+            <label for="title" class="nd-label">Título da Publicação <span class="text-danger">*</span></label>
             <div class="nd-input-group">
                 <input type="text" class="nd-input <?= !empty($errors['title']) ? 'is-invalid' : '' ?>" 
                   id="title" name="title" 
@@ -111,10 +111,10 @@ if (!$docId) {
 
           <!-- Descrição -->
           <div class="mb-4">
-            <label for="description" class="nd-label">Descrição</label>
+            <label for="description" class="nd-label">Ementa/Descrição</label>
             <textarea class="nd-input w-100 <?= !empty($errors['description']) ? 'is-invalid' : '' ?>" 
               id="description" name="description" rows="5" style="resize: none;"
-              placeholder="Descreva o conteúdo deste documento..."><?= htmlspecialchars($old['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+              placeholder="Descreva o conteúdo e a finalidade deste documento..."><?= htmlspecialchars($old['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
             <?php if (!empty($errors['description'])): ?>
               <div class="text-danger small mt-1"><?= htmlspecialchars($errors['description'], ENT_QUOTES, 'UTF-8') ?></div>
             <?php endif; ?>
@@ -141,7 +141,7 @@ if (!$docId) {
     <!-- Arquivo Atual -->
     <div class="nd-card mb-4">
       <div class="nd-card-header">
-        <h6 class="nd-card-title mb-0">Arquivo Atual</h6>
+        <h6 class="nd-card-title mb-0">Arquivo em Vigência</h6>
       </div>
       <div class="nd-card-body">
         <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-light rounded border border-light">
@@ -168,7 +168,7 @@ if (!$docId) {
           <a href="<?= htmlspecialchars($document['file_path'], ENT_QUOTES, 'UTF-8') ?>" 
             class="nd-btn nd-btn-outline w-100" 
             target="_blank" download>
-            <i class="bi bi-download me-1"></i> Baixar Arquivo
+            <i class="bi bi-download me-1"></i> Baixar Cópia Digital
           </a>
         <?php endif; ?>
       </div>
@@ -177,15 +177,15 @@ if (!$docId) {
     <!-- Status e Ações -->
     <div class="nd-card mb-4">
       <div class="nd-card-header">
-        <h6 class="nd-card-title mb-0">Status e Ações</h6>
+        <h6 class="nd-card-title mb-0">Controle de Vigência</h6>
       </div>
       <div class="nd-card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
-           <label class="nd-label mb-0">Visibilidade</label>
+           <label class="nd-label mb-0">Situação Atual</label>
             <?php if ((int)$document['is_active'] === 1): ?>
-              <span class="nd-badge nd-badge-success">Ativo</span>
+              <span class="nd-badge nd-badge-success">Publicado</span>
             <?php else: ?>
-              <span class="nd-badge nd-badge-secondary">Inativo</span>
+              <span class="nd-badge nd-badge-secondary">Arquivado</span>
             <?php endif; ?>
         </div>
         
@@ -193,15 +193,15 @@ if (!$docId) {
           <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
           <button type="submit" class="nd-btn w-100 <?= (int)$document['is_active'] === 1 ? 'nd-btn-outline text-muted' : 'nd-btn-primary' ?>">
             <i class="bi <?= (int)$document['is_active'] === 1 ? 'bi-eye-slash' : 'bi-eye' ?> me-1"></i>
-            <?= (int)$document['is_active'] === 1 ? 'Ocultar Documento' : 'Publicar Documento' ?>
+            <?= (int)$document['is_active'] === 1 ? 'Arquivar Publicação' : 'Publicar Agora' ?>
           </button>
         </form>
 
         <div class="border-top pt-3">
-            <form method="post" action="/admin/general-documents/<?= $docId ?>/delete" onsubmit="return confirm('Tem certeza que deseja deletar este documento? Ação irreversível.');">
+            <form method="post" action="/admin/general-documents/<?= $docId ?>/delete" onsubmit="return confirm('Confirma a exclusão definitiva desta publicação? Ação irreversível.');">
             <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
             <button type="submit" class="nd-btn w-100 bg-danger text-white border-0 hover-opacity-90">
-                <i class="bi bi-trash me-1"></i> Excluir Permanentemente
+                <i class="bi bi-trash me-1"></i> Remover Definitivamente
             </button>
             </form>
         </div>
@@ -211,23 +211,23 @@ if (!$docId) {
     <!-- Metadados -->
     <div class="nd-card bg-light border-0">
       <div class="nd-card-body">
-        <h6 class="nd-card-title mb-3 text-muted small text-uppercase">Metadados do Sistema</h6>
+        <h6 class="nd-card-title mb-3 text-muted small text-uppercase">Dados de Auditoria</h6>
         <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small">
             <li class="d-flex justify-content-between text-muted">
-                <span>ID Interno:</span>
+                <span>ID do Registro:</span>
                 <span class="font-monospace text-dark">#<?= (int)$document['id'] ?></span>
             </li>
             <li class="d-flex justify-content-between text-muted">
-                <span>Criado em:</span>
+                <span>Data de Criação:</span>
                 <span class="text-dark"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($document['created_at'] ?? 'now')), ENT_QUOTES, 'UTF-8') ?></span>
             </li>
             <li class="d-flex justify-content-between text-muted">
-                <span>Publicado em:</span>
+                <span>Início da Vigência:</span>
                 <span class="text-dark"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($document['published_at'] ?? 'now')), ENT_QUOTES, 'UTF-8') ?></span>
             </li>
             <li class="d-flex justify-content-between text-muted">
-                <span>Admin ID:</span>
-                <span class="text-dark">#<?= (int)$document['created_by_admin'] ?></span>
+                <span>Registrado por:</span>
+                <span class="text-dark">Admin #<?= (int)$document['created_by_admin'] ?></span>
             </li>
         </ul>
       </div>

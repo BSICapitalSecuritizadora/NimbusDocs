@@ -23,13 +23,13 @@ $old = $viewData['old'] ?? [];
             <i class="bi bi-file-earmark-text-fill text-white"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Documentos Gerais</h1>
-            <p class="text-muted mb-0 small">Disponibilize arquivos e documentos para os usuários do portal</p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Biblioteca Digital</h1>
+            <p class="text-muted mb-0 small">Repositório de documentos e normativas institucionais</p>
         </div>
     </div>
     <button class="nd-btn nd-btn-gold nd-btn-sm" data-bs-toggle="modal" data-bs-target="#createDocumentModal">
         <i class="bi bi-plus-lg me-1"></i>
-        Novo documento
+        Nova Publicação
     </button>
 </div>
 
@@ -53,9 +53,9 @@ $old = $viewData['old'] ?? [];
         <?php if (!$documents): ?>
             <div class="text-center py-5">
                 <i class="bi bi-folder2-open text-muted mb-2" style="font-size: 2rem;"></i>
-                <p class="text-muted mb-2">Nenhum documento cadastrado.</p>
+                <p class="text-muted mb-2">Nenhum documento publicado no acervo.</p>
                 <button class="btn btn-link text-decoration-none p-0" data-bs-toggle="modal" data-bs-target="#createDocumentModal">
-                    Criar o primeiro documento
+                    Realizar primeira publicação
                 </button>
             </div>
         <?php else: ?>
@@ -63,10 +63,10 @@ $old = $viewData['old'] ?? [];
                 <table class="nd-table">
                     <thead>
                         <tr>
-                            <th>Documento</th>
-                            <th>Categoria</th>
-                            <th>Arquivo</th>
-                            <th>Status/Publicação</th>
+                            <th>Identificação</th>
+                            <th>Classificação</th>
+                            <th>Arquivo Digital</th>
+                            <th>Situação/Vigência</th>
                             <th class="text-end">Ações</th>
                         </tr>
                     </thead>
@@ -110,9 +110,9 @@ $old = $viewData['old'] ?? [];
                                     <div class="d-flex flex-column gap-1">
                                         <div>
                                             <?php if ((int)$doc['is_active'] === 1): ?>
-                                                <span class="nd-badge nd-badge-success">Ativo</span>
+                                                <span class="nd-badge nd-badge-success">Publicado</span>
                                             <?php else: ?>
-                                                <span class="nd-badge nd-badge-secondary">Inativo</span>
+                                                <span class="nd-badge nd-badge-secondary">Arquivado</span>
                                             <?php endif; ?>
                                         </div>
                                         <div class="small text-muted">
@@ -128,7 +128,7 @@ $old = $viewData['old'] ?? [];
                                             data-bs-target="#toggleModal"
                                             data-doc-id="<?= (int)$doc['id'] ?>"
                                             data-doc-active="<?= (int)$doc['is_active'] ?>"
-                                            title="<?= (int)$doc['is_active'] === 1 ? 'Desativar' : 'Ativar' ?>">
+                                            title="<?= (int)$doc['is_active'] === 1 ? 'Arquivar' : 'Publicar' ?>">
                                             <i class="bi <?= (int)$doc['is_active'] === 1 ? 'bi-eye-slash' : 'bi-eye' ?>"></i>
                                         </button>
 
@@ -136,7 +136,7 @@ $old = $viewData['old'] ?? [];
                                              Se falhar, usuário reportará. Mantendo conforme original. -->
                                         <a href="/admin/general-documents/<?= (int)$doc['id'] ?>/edit"
                                             class="nd-btn nd-btn-outline nd-btn-sm"
-                                            title="Editar">
+                                            title="Gerenciar">
                                             <i class="bi bi-pencil"></i>
                                         </a>
 
@@ -145,7 +145,7 @@ $old = $viewData['old'] ?? [];
                                             data-bs-target="#deleteModal"
                                             data-doc-id="<?= (int)$doc['id'] ?>"
                                             data-doc-title="<?= htmlspecialchars($doc['title'], ENT_QUOTES, 'UTF-8') ?>"
-                                            title="Excluir">
+                                            title="Remover">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
@@ -164,7 +164,7 @@ $old = $viewData['old'] ?? [];
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold text-dark">Novo Documento</h5>
+                <h5 class="modal-title fw-bold text-dark">Nova Publicação</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body pt-4">
@@ -173,8 +173,8 @@ $old = $viewData['old'] ?? [];
 
                     <div class="row g-3">
                         <div class="col-md-12">
-                            <label class="nd-label">Título <span class="text-danger">*</span></label>
-                            <input type="text" class="nd-input w-100" name="title" required placeholder="Ex: Manual de Conduta" value="<?= htmlspecialchars($old['title'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                            <label class="nd-label">Título da Publicação <span class="text-danger">*</span></label>
+                            <input type="text" class="nd-input w-100" name="title" required placeholder="Ex: Manual de Conduta, Regulamento Interno..." value="<?= htmlspecialchars($old['title'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         </div>
 
                         <div class="col-md-6">
@@ -190,27 +190,27 @@ $old = $viewData['old'] ?? [];
                         </div>
 
                         <div class="col-md-6">
-                            <label class="nd-label">Arquivo <span class="text-danger">*</span></label>
+                            <label class="nd-label">Arquivo Digital <span class="text-danger">*</span></label>
                             <input type="file" class="form-control" name="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.jpg,.jpeg,.png">
-                            <div class="form-text small">Max: 50MB. PDF, Office, Imagens or ZIP.</div>
+                            <div class="form-text small">Max: 50MB. (PDF, Office, Imagens e ZIP).</div>
                         </div>
 
                         <div class="col-md-12">
                             <label class="nd-label">Descrição</label>
-                            <textarea class="nd-input w-100" name="description" rows="3" placeholder="Breve descrição do documento..."><?= htmlspecialchars($old['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                            <textarea class="nd-input w-100" name="description" rows="3" placeholder="Descreva brevemente o conteúdo e objetivo deste documento..."><?= htmlspecialchars($old['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="nd-label">Data de Publicação</label>
+                            <label class="nd-label">Vigência Inicial</label>
                             <input type="date" class="nd-input w-100" name="published_at" value="<?= htmlspecialchars($old['published_at'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-                            <div class="form-text small">Deixe vazio para publicar agora.</div>
+                            <div class="form-text small">Deixe vazio para publicação imediata.</div>
                         </div>
 
                         <div class="col-md-6 d-flex align-items-center">
                             <div class="form-check nd-form-check mt-3">
                                 <input class="form-check-input" type="checkbox" id="createIsActive" name="is_active" value="1" <?= (!isset($old['is_active']) || (int)$old['is_active'] === 1 ? 'checked' : '') ?>>
                                 <label class="form-check-label text-dark fw-medium" for="createIsActive">
-                                    Visível no Portal
+                                    Disponível no Portal
                                 </label>
                             </div>
                         </div>
@@ -218,7 +218,7 @@ $old = $viewData['old'] ?? [];
 
                     <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
                         <button type="button" class="nd-btn nd-btn-outline" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="nd-btn nd-btn-primary">Criar Documento</button>
+                        <button type="submit" class="nd-btn nd-btn-primary">Publicar Documento</button>
                     </div>
                 </form>
             </div>
@@ -231,7 +231,7 @@ $old = $viewData['old'] ?? [];
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header border-bottom-0">
-                <h5 class="modal-title fw-bold">Alterar Status</h5>
+                <h5 class="modal-title fw-bold">Alterar Visibilidade</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
              <form method="post" id="toggleForm">
@@ -241,7 +241,7 @@ $old = $viewData['old'] ?? [];
                 </div>
                 <div class="modal-footer border-top-0">
                     <button type="button" class="nd-btn nd-btn-outline nd-btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="nd-btn nd-btn-primary nd-btn-sm">Confirmar</button>
+                    <button type="submit" class="nd-btn nd-btn-primary nd-btn-sm">Confirmar Alteração</button>
                 </div>
             </form>
         </div>
@@ -253,7 +253,7 @@ $old = $viewData['old'] ?? [];
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header border-bottom-0">
-                <h5 class="modal-title fw-bold text-danger">Excluir Documento</h5>
+                <h5 class="modal-title fw-bold text-danger">Remover Publicação</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="post" id="deleteForm">
@@ -261,12 +261,12 @@ $old = $viewData['old'] ?? [];
                     <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                     <p class="text-muted">
                         Tem certeza que deseja excluir o documento <strong id="deleteTitle" class="text-dark"></strong>?
-                        <br><span class="text-danger small">Esta ação não pode ser desfeita.</span>
+                        <br><span class="text-danger small">Esta ação removerá o arquivo do acervo permanentemente.</span>
                     </p>
                 </div>
                 <div class="modal-footer border-top-0">
                     <button type="button" class="nd-btn nd-btn-outline nd-btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="nd-btn nd-btn-sm bg-danger text-white border-danger">Excluir Permanentemente</button>
+                    <button type="submit" class="nd-btn nd-btn-sm bg-danger text-white border-danger">Remover Definitivamente</button>
                 </div>
             </form>
         </div>
@@ -285,8 +285,8 @@ toggleModal?.addEventListener('show.bs.modal', function(e) {
   const isActive = parseInt(btn.dataset.docActive);
   
   toggleMessage.textContent = isActive === 1 
-    ? 'Deseja desativar este documento? Ele deixará de ser visível no portal.'
-    : 'Deseja ativar este documento? Ele ficará visível para os usuários.';
+    ? 'Deseja arquivar este documento? Ele deixará de ser visível no portal.'
+    : 'Deseja publicar este documento? Ele ficará disponível para download.';
   
   toggleForm.action = `/admin/general-documents/${docId}/toggle`;
 });
