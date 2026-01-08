@@ -28,7 +28,7 @@ $action = $isEdit
     ? '/admin/portal-users/' . (int)$user['id']
     : '/admin/portal-users';
 
-$pageTitleText = $isEdit ? 'Editar Usuário Final' : 'Novo Usuário Final';
+$pageTitleText = $isEdit ? 'Editar Dados do Usuário' : 'Novo Usuário';
 ?>
 
 <!-- Header -->
@@ -40,7 +40,7 @@ $pageTitleText = $isEdit ? 'Editar Usuário Final' : 'Novo Usuário Final';
         <div>
             <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);"><?= $pageTitleText ?></h1>
             <p class="text-muted mb-0 small">
-                <?= $isEdit ? 'Atualize as informações do usuário' : 'Adicione um novo usuário ao portal' ?>
+                <?= $isEdit ? 'Atualize as informações cadastrais do usuário' : 'Registro de novo usuário externo' ?>
             </p>
         </div>
     </div>
@@ -62,7 +62,7 @@ $pageTitleText = $isEdit ? 'Editar Usuário Final' : 'Novo Usuário Final';
                     <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
                     <div class="mb-3">
-                        <label class="nd-label" for="full_name">Nome completo <span class="text-danger">*</span></label>
+                        <label class="nd-label" for="full_name">Nome <span class="text-danger">*</span></label>
                         <div class="nd-input-group">
                             <input type="text"
                                 class="nd-input <?= isset($errors['full_name']) ? 'is-invalid' : '' ?>"
@@ -112,7 +112,7 @@ $pageTitleText = $isEdit ? 'Editar Usuário Final' : 'Novo Usuário Final';
                             <?php endif; ?>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="nd-label" for="phone_number">Telefone</label>
+                            <label class="nd-label" for="phone_number">Telefone/Celular</label>
                             <div class="nd-input-group">
                                 <input type="text" class="nd-input"
                                     id="phone_number" name="phone_number"
@@ -127,14 +127,14 @@ $pageTitleText = $isEdit ? 'Editar Usuário Final' : 'Novo Usuário Final';
                     </div>
 
                     <div class="mb-4">
-                        <label class="nd-label" for="status">Status</label>
+                        <label class="nd-label" for="status">Situação Cadastral</label>
                         <div class="nd-input-group">
                             <select class="nd-input <?= isset($errors['status']) ? 'is-invalid' : '' ?>"
                                 id="status" name="status" style="padding-left: 1rem;">
-                                <option value="INVITED" <?= $values['status'] === 'INVITED'  ? 'selected' : '' ?>>Convidado (Pendente)</option>
                                 <option value="ACTIVE" <?= $values['status'] === 'ACTIVE'   ? 'selected' : '' ?>>Ativo</option>
+                                <option value="INVITED" <?= $values['status'] === 'INVITED'  ? 'selected' : '' ?>>Aguardando Cadastro</option>
                                 <option value="INACTIVE" <?= $values['status'] === 'INACTIVE' ? 'selected' : '' ?>>Inativo</option>
-                                <option value="BLOCKED" <?= $values['status'] === 'BLOCKED'  ? 'selected' : '' ?>>Bloqueado</option>
+                                <option value="BLOCKED" <?= $values['status'] === 'BLOCKED'  ? 'selected' : '' ?>>Suspenso</option>
                             </select>
                         </div>
                         <?php if (isset($errors['status'])): ?>
@@ -148,7 +148,7 @@ $pageTitleText = $isEdit ? 'Editar Usuário Final' : 'Novo Usuário Final';
                         <a href="/admin/portal-users" class="nd-btn nd-btn-outline">Cancelar</a>
                         <button type="submit" class="nd-btn nd-btn-primary">
                             <i class="bi bi-check-lg me-1"></i>
-                            <?= $isEdit ? 'Salvar alterações' : 'Cadastrar usuário' ?>
+                            <?= $isEdit ? 'Salvar Alterações' : 'Confirmar Cadastro' ?>
                         </button>
                     </div>
                 </form>
@@ -161,7 +161,7 @@ $pageTitleText = $isEdit ? 'Editar Usuário Final' : 'Novo Usuário Final';
                 <div class="nd-card-header d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-key text-warning"></i>
-                        <h5 class="nd-card-title mb-0">Códigos de Acesso</h5>
+                        <h5 class="nd-card-title mb-0">Credenciais Temporárias</h5>
                     </div>
                 </div>
                 
@@ -172,7 +172,7 @@ $pageTitleText = $isEdit ? 'Editar Usuário Final' : 'Novo Usuário Final';
                             <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
                             <div class="col-sm-8">
-                                <label class="nd-label mb-1" for="validity">Gerar novo código com validade de:</label>
+                                <label class="nd-label mb-1" for="validity">Válido por</label>
                                 <div class="nd-input-group">
                                     <select class="nd-input" id="validity" name="validity" style="padding-left: 1rem;">
                                         <option value="1h">1 hora</option>
@@ -183,7 +183,7 @@ $pageTitleText = $isEdit ? 'Editar Usuário Final' : 'Novo Usuário Final';
                             </div>
                             <div class="col-sm-4">
                                 <button type="submit" class="nd-btn nd-btn-gold w-100">
-                                    <i class="bi bi-magic me-1"></i> Gerar código
+                                    <i class="bi bi-magic me-1"></i> Gerar Código
                                 </button>
                             </div>
                         </form>

@@ -14,13 +14,13 @@
             <i class="bi bi-people-fill text-white"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Usuários do Portal</h1>
-            <p class="text-muted mb-0 small">Gerencie os usuários externos</p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Usuários Cadastrados</h1>
+            <p class="text-muted mb-0 small">Controle de acesso e cadastro de usuários externos</p>
         </div>
     </div>
     <a href="/admin/portal-users/create" class="nd-btn nd-btn-gold nd-btn-sm">
         <i class="bi bi-plus-lg me-1"></i>
-        Novo usuário
+        Novo Cadastro
     </a>
 </div>
 
@@ -33,14 +33,14 @@
                     <input type="text" name="search"
                         value="<?= htmlspecialchars($search, ENT_QUOTES) ?>"
                         class="nd-input"
-                        placeholder="Buscar por nome ou e-mail"
+                        placeholder="Pesquisar por Usuário ou E-mail..."
                         style="padding-left: 2.5rem;">
                     <i class="bi bi-search nd-input-icon"></i>
                 </div>
             </div>
             <div class="col-sm-6 col-md-4">
                 <button class="nd-btn nd-btn-primary" type="submit">
-                    Filtrar
+                    Filtrar Registros
                 </button>
                 <?php if (!empty($search)): ?>
                     <a href="/admin/portal-users" class="nd-btn nd-btn-outline ms-2">Limpar</a>
@@ -53,9 +53,9 @@
         <?php if (!$items): ?>
             <div class="text-center py-5">
                 <i class="bi bi-people text-muted mb-2" style="font-size: 2rem;"></i>
-                <p class="text-muted mb-0">Nenhum usuário do portal encontrado.</p>
+                <p class="text-muted mb-0">Nenhum usuário localizado.</p>
                 <?php if (!empty($search)): ?>
-                    <p class="text-muted small mt-1">Tente ajustar seus termos de busca.</p>
+                    <p class="text-muted small mt-1">Refine os termos da sua busca.</p>
                 <?php endif; ?>
             </div>
         <?php else: ?>
@@ -63,9 +63,9 @@
                 <table class="nd-table">
                     <thead>
                         <tr>
-                            <th>Nome / E-mail</th>
-                            <th>Documento</th>
-                            <th>Status</th>
+                            <th>Identificação do Usuário</th>
+                            <th>CPF</th>
+                            <th>Situação Cadastral</th>
                             <th class="text-end">Ações</th>
                         </tr>
                     </thead>
@@ -111,8 +111,8 @@
                                     };
                                     $statusLabel = match ($u['status'] ?? '') {
                                         'ACTIVE' => 'Ativo',
-                                        'INVITED' => 'Convidado',
-                                        'BLOCKED' => 'Bloqueado',
+                                        'INVITED' => 'Aguardando Cadastro',
+                                        'BLOCKED' => 'Suspenso',
                                         default => 'Inativo'
                                     };
                                     ?>
@@ -122,10 +122,10 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="btn-group">
-                                        <a href="/admin/portal-users/<?= (int)$u['id'] ?>" class="nd-btn nd-btn-outline nd-btn-sm" title="Detalhes">
+                                        <a href="/admin/portal-users/<?= (int)$u['id'] ?>" class="nd-btn nd-btn-outline nd-btn-sm" title="Ficha Técnica">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <a href="/admin/portal-users/<?= (int)$u['id'] ?>/edit" class="nd-btn nd-btn-outline nd-btn-sm" title="Editar">
+                                        <a href="/admin/portal-users/<?= (int)$u['id'] ?>/edit" class="nd-btn nd-btn-outline nd-btn-sm" title="Gerenciar Cadastro">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                     </div>

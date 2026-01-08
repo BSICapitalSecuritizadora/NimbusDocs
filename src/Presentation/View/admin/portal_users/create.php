@@ -4,7 +4,7 @@
 /** @var array $errors */
 /** @var array $old */
 ?>
-<h1 class="h4 mb-3">Novo usuário do portal</h1>
+<h1 class="h4 mb-3">Novo Cadastro de Titular</h1>
 
 <div class="card">
     <div class="card-body">
@@ -13,7 +13,7 @@
                 value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
 
             <div class="mb-3">
-                <label class="form-label">Nome completo</label>
+                <label class="form-label">Nome/label>
                 <input type="text"
                     name="full_name"
                     value="<?= htmlspecialchars($old['full_name'] ?? '', ENT_QUOTES) ?>"
@@ -26,7 +26,7 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">E-mail</label>
+                <label class="form-label">E-mail de Contato</label>
                 <input type="email"
                     name="email"
                     value="<?= htmlspecialchars($old['email'] ?? '', ENT_QUOTES) ?>"
@@ -39,7 +39,7 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Documento (opcional)</label>
+                <label class="form-label">CPF ou CNPJ</label>
                 <input type="text"
                     name="document"
                     value="<?= htmlspecialchars($old['document'] ?? '', ENT_QUOTES) ?>"
@@ -55,7 +55,7 @@
                 <input class="form-check-input" type="checkbox" id="is_active" name="is_active"
                     <?= ($old['is_active'] ?? 1) ? 'checked' : '' ?>>
                 <label class="form-check-label" for="is_active">
-                    Usuário ativo
+                    Cadastro Ativo
                 </label>
             </div>
 
