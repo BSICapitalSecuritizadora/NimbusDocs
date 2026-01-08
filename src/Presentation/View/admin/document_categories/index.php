@@ -19,13 +19,13 @@ $errors = $viewData['errors'] ?? [];
             <i class="bi bi-folder-fill text-white"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Categorias de Documentos</h1>
-            <p class="text-muted mb-0 small">Gerencie as categorias para organizar os documentos no portal</p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Gestão de Categorias</h1>
+            <p class="text-muted mb-0 small">Classificação e organização documental do portal</p>
         </div>
     </div>
     <button class="nd-btn nd-btn-gold nd-btn-sm" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
         <i class="bi bi-plus-lg me-1"></i>
-        Nova Categoria
+        Nova Classificação
     </button>
 </div>
 
@@ -49,9 +49,9 @@ $errors = $viewData['errors'] ?? [];
         <?php if (!$categories): ?>
              <div class="text-center py-5">
                 <i class="bi bi-folder-active text-muted mb-2" style="font-size: 2rem;"></i>
-                <p class="text-muted mb-2">Nenhuma categoria cadastrada.</p>
+                <p class="text-muted mb-2">Nenhuma classificação documental encontrada.</p>
                 <button class="btn btn-link text-decoration-none p-0" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
-                    Criar a primeira categoria
+                    Cadastrar Nova Classificação
                 </button>
             </div>
         <?php else: ?>
@@ -60,9 +60,9 @@ $errors = $viewData['errors'] ?? [];
                     <thead>
                         <tr>
                             <th style="width: 80px;">Ordem</th>
-                            <th>Nome</th>
+                            <th>Identificação</th>
                             <th>Descrição</th>
-                            <th>Criada em</th>
+                            <th>Data de Cadastro</th>
                             <th class="text-end">Ações</th>
                         </tr>
                     </thead>
@@ -105,7 +105,7 @@ $errors = $viewData['errors'] ?? [];
                                             data-bs-target="#deleteModal"
                                             data-cat-id="<?= (int)$cat['id'] ?>"
                                             data-cat-name="<?= htmlspecialchars($cat['name'], ENT_QUOTES, 'UTF-8') ?>"
-                                            title="Excluir">
+                                            title="Remover">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
@@ -124,7 +124,7 @@ $errors = $viewData['errors'] ?? [];
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold text-dark">Nova Categoria</h5>
+                <h5 class="modal-title fw-bold text-dark">Cadastro de Categoria</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body pt-4">
@@ -132,31 +132,32 @@ $errors = $viewData['errors'] ?? [];
                     <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
                     <div class="mb-3">
-                        <label class="nd-label">Nome <span class="text-danger">*</span></label>
+                        <label class="nd-label">Identificação da Categoria <span class="text-danger">*</span></label>
                         <div class="nd-input-group">
                             <input type="text" class="nd-input <?= !empty($errors['name']) ? 'is-invalid' : '' ?>" 
-                                name="name" placeholder="Ex: Financeiro" required style="padding-left: 2.5rem;">
+                                name="name" placeholder="Ex: Demonstrativos Financeiros, Jurídico..." required style="padding-left: 2.5rem;">
                             <i class="bi bi-tag nd-input-icon"></i>
                         </div>
                         <?php if (!empty($errors['name'])): ?>
                             <div class="text-danger small mt-1"><?= htmlspecialchars($errors['name'], ENT_QUOTES, 'UTF-8') ?></div>
                         <?php endif; ?>
+                         <small class="text-muted mt-1 d-block font-size-sm">A identificação deve ser única para garantir a integridade da organização.</small>
                     </div>
 
                     <div class="mb-3">
                         <label class="nd-label">Descrição</label>
-                        <textarea class="nd-input w-100" name="description" rows="2" placeholder="Opcional"></textarea>
+                        <textarea class="nd-input w-100" name="description" rows="2" placeholder="Opcional: Detalhe o propósito desta classificação"></textarea>
                     </div>
 
                     <div class="mb-3">
-                        <label class="nd-label">Ordem de Exibição</label>
+                        <label class="nd-label">Prioridade de Exibição</label>
                         <input type="number" class="nd-input w-100" name="sort_order" value="1" min="1">
-                        <div class="form-text small">Menor número aparece primeiro.</div>
+                        <div class="form-text small">Defina a sequência numérica para ordenação na listagem.</div>
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
                         <button type="button" class="nd-btn nd-btn-outline" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="nd-btn nd-btn-primary">Criar Categoria</button>
+                        <button type="submit" class="nd-btn nd-btn-primary">Salvar Classificação</button>
                     </div>
                 </form>
             </div>
@@ -177,12 +178,12 @@ $errors = $viewData['errors'] ?? [];
                     <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                     <p class="text-muted">
                         Tem certeza que deseja excluir a categoria <strong id="deleteName" class="text-dark"></strong>?
-                        <br><span class="text-danger small">Isso pode afetar documentos vinculados.</span>
+                        <br><span class="text-danger small">Esta ação removerá permanentemente a classificação e seus vínculos.</span>
                     </p>
                 </div>
                 <div class="modal-footer border-top-0">
                     <button type="button" class="nd-btn nd-btn-outline nd-btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="nd-btn nd-btn-sm bg-danger text-white border-danger">Excluir Permanentemente</button>
+                    <button type="submit" class="nd-btn nd-btn-sm bg-danger text-white border-danger">Remover Permanentemente</button>
                 </div>
             </form>
         </div>
