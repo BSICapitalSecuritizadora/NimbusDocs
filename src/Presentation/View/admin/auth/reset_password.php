@@ -106,8 +106,8 @@ $primaryColor = $branding['primary_color'] ?? '#00205b';
             <div class="icon-wrapper">
                 <i class="bi bi-shield-lock"></i>
             </div>
-            <h1>Redefinir Senha</h1>
-            <p>Olá, <strong><?= htmlspecialchars($resetData['name'] ?? '') ?></strong>! Digite sua nova senha abaixo.</p>
+            <h1>Definição de Nova Senha</h1>
+            <p>Olá, <strong><?= htmlspecialchars($resetData['name'] ?? '') ?></strong>! Por favor, defina uma nova credencial segura.</p>
         </div>
 
         <?php if (!empty($error)): ?>
@@ -123,20 +123,20 @@ $primaryColor = $branding['primary_color'] ?? '#00205b';
             <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
 
             <div class="mb-3">
-                <label for="password" class="form-label">Nova Senha</label>
+                <label for="password" class="form-label">Nova Senha Segura</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-lock"></i></span>
                     <input type="password" class="form-control" id="password" name="password" 
-                           placeholder="Digite sua nova senha" required minlength="8">
+                           placeholder="Mínimo 8 caracteres" required minlength="8">
                     <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                         <i class="bi bi-eye"></i>
                     </button>
                 </div>
                 <ul class="password-requirements mt-2 ps-3">
-                    <li id="req-length">Mínimo 8 caracteres</li>
-                    <li id="req-upper">Uma letra maiúscula</li>
-                    <li id="req-lower">Uma letra minúscula</li>
-                    <li id="req-number">Um número</li>
+                    <li id="req-length">Pelo menos 8 caracteres</li>
+                    <li id="req-upper">Caractere maiúsculo</li>
+                    <li id="req-lower">Caractere minúsculo</li>
+                    <li id="req-number">Pelo menos um número</li>
                 </ul>
             </div>
 
@@ -145,14 +145,14 @@ $primaryColor = $branding['primary_color'] ?? '#00205b';
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
                     <input type="password" class="form-control" id="password_confirm" name="password_confirm" 
-                           placeholder="Confirme sua nova senha" required>
+                           placeholder="Repita a nova senha para confirmação" required>
                 </div>
                 <div id="password-match" class="form-text"></div>
             </div>
 
             <div class="d-grid">
                 <button type="submit" class="btn btn-primary" id="submitBtn">
-                    <i class="bi bi-check-lg me-2"></i>Redefinir Senha
+                    <i class="bi bi-check-lg me-2"></i>Atualizar Credencial
                 </button>
             </div>
         </form>
@@ -206,10 +206,10 @@ $primaryColor = $branding['primary_color'] ?? '#00205b';
             }
             
             if (password.value === passwordConfirm.value) {
-                passwordMatch.textContent = '✓ Senhas coincidem';
+                passwordMatch.textContent = '✓ Confirmação válida';
                 passwordMatch.className = 'form-text text-success';
             } else {
-                passwordMatch.textContent = '✗ Senhas não coincidem';
+                passwordMatch.textContent = '✗ As senhas divergem';
                 passwordMatch.className = 'form-text text-danger';
             }
         }

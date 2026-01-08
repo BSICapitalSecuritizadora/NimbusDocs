@@ -201,7 +201,7 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
             
             <!-- Title -->
             <h1 class="nd-login-title"><?= htmlspecialchars($appName) ?></h1>
-            <p class="nd-login-subtitle">Acesso Administrativo</p>
+            <p class="nd-login-subtitle">Portal Corporativo</p>
             
             <!-- Error Alert -->
             <?php $error = $errorMessage ?? \App\Support\Session::getFlash('error'); ?>
@@ -220,13 +220,13 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
                 <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 
                 <div class="mb-3">
-                    <label for="email" class="nd-label">E-mail</label>
+                    <label for="email" class="nd-label">E-mail Corporativo</label>
                     <div class="nd-input-group">
                         <input type="email" 
                                class="nd-input" 
                                id="email" 
                                name="email" 
-                               placeholder="seu@email.com"
+                               placeholder="usuario@bsicapital.com.be"
                                value="<?= htmlspecialchars($oldEmail ?? '', ENT_QUOTES, 'UTF-8') ?>" 
                                required 
                                autofocus>
@@ -249,23 +249,23 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
 
                 <button type="submit" class="nd-btn nd-btn-gold nd-btn-lg" style="width: 100%;">
                     <i class="bi bi-box-arrow-in-right"></i>
-                    Entrar
+                    Acessar Plataforma
                 </button>
             </form>
             
             <div class="nd-forgot-link">
-                <a href="/admin/forgot-password">Esqueci minha senha</a>
+                <a href="/admin/forgot-password">Recuperar Credenciais</a>
             </div>
             
             <div class="nd-login-divider">ou</div>
             
             <a href="/admin/login/microsoft" class="nd-btn nd-btn-microsoft nd-btn-lg">
                 <i class="bi bi-microsoft"></i>
-                Entrar com Microsoft
+                Login Corporativo (SSO)
             </a>
             
             <p class="nd-login-footer">
-                Acesso restrito ao departamento administrativo.
+                Ambiente seguro e monitorado. Acesso restrito.
             </p>
         </div>
     </div>

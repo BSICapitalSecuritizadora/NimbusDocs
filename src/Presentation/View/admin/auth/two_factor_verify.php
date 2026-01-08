@@ -108,8 +108,8 @@ $primaryColor = $branding['primary_color'] ?? '#00205b';
             <div class="icon-wrapper">
                 <i class="bi bi-shield-lock"></i>
             </div>
-            <h1>Verificação 2FA</h1>
-            <p>Digite o código do seu aplicativo autenticador</p>
+            <h1>Verificação de Segurança</h1>
+            <p>Informe o código gerado pelo seu aplicativo autenticador para continuar.</p>
         </div>
 
         <?php if (!empty($error)): ?>
@@ -137,14 +137,14 @@ $primaryColor = $branding['primary_color'] ?? '#00205b';
 
             <div class="d-grid">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-lg me-2"></i>Verificar
+                    <i class="bi bi-check-lg me-2"></i>Validar Acesso
                 </button>
             </div>
         </form>
 
         <div class="back-link">
             <a href="/admin/login">
-                <i class="bi bi-arrow-left me-1"></i>Voltar para o login
+                <i class="bi bi-arrow-left me-1"></i>Cancelar
             </a>
         </div>
     </div>

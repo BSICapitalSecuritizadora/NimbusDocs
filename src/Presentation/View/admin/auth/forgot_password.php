@@ -102,8 +102,8 @@ $primaryColor = $branding['primary_color'] ?? '#00205b';
             <div class="icon-wrapper">
                 <i class="bi bi-key"></i>
             </div>
-            <h1>Esqueceu sua senha?</h1>
-            <p>Digite seu e-mail e enviaremos um link para redefinir sua senha.</p>
+            <h1>Recuperação de Credencial</h1>
+            <p>Informe seu e-mail corporativo para receber as instruções de redefinição de segurança.</p>
         </div>
 
         <?php if (!empty($error)): ?>
@@ -126,24 +126,24 @@ $primaryColor = $branding['primary_color'] ?? '#00205b';
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
 
             <div class="mb-4">
-                <label for="email" class="form-label">E-mail</label>
+                <label for="email" class="form-label">E-mail Corporativo</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                     <input type="email" class="form-control" id="email" name="email" 
-                           placeholder="seu@email.com" required autofocus>
+                           placeholder="usuario@bsicapital.com.br" required autofocus>
                 </div>
             </div>
 
             <div class="d-grid">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-send me-2"></i>Enviar Link de Recuperação
+                    <i class="bi bi-send me-2"></i>Enviar Instruções
                 </button>
             </div>
         </form>
 
         <div class="back-link">
             <a href="/admin/login">
-                <i class="bi bi-arrow-left me-1"></i>Voltar para o login
+                <i class="bi bi-arrow-left me-1"></i>Retornar ao Acesso
             </a>
         </div>
     </div>
