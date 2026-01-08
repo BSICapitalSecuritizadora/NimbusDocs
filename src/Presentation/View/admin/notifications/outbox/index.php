@@ -15,8 +15,8 @@ use App\Support\Auth;
             <i class="bi bi-envelope-paper-fill text-white"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Fila de Notificações</h1>
-            <p class="text-muted mb-0 small">Monitoramento de envios de e-mail (Outbox)</p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Auditoria de Envios</h1>
+            <p class="text-muted mb-0 small">Monitoramento e rastreabilidade de comunicados externos (Outbox)</p>
         </div>
     </div>
 </div>
@@ -39,49 +39,69 @@ use App\Support\Auth;
 <div class="nd-card mb-4">
     <div class="nd-card-header d-flex align-items-center gap-2">
         <i class="bi bi-funnel-fill" style="color: var(--nd-gold-500);"></i>
-        <h5 class="nd-card-title mb-0">Filtros</h5>
+        <h5 class="nd-card-title mb-0">Filtros de Busca</h5>
     </div>
     <div class="nd-card-body">
         <form class="row g-3">
             <div class="col-md-3">
-                <label class="nd-label">De</label>
+                <label class="nd-label">Período (De)</label>
                 <div class="nd-input-group">
                     <input type="date" name="from_date" class="nd-input"
                         value="<?= htmlspecialchars($filters['from_date'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
             </div>
             <div class="col-md-3">
-                <label class="nd-label">Até</label>
+                <label class="nd-label">Período (Até)</label>
                 <div class="nd-input-group">
                     <input type="date" name="to_date" class="nd-input"
                         value="<?= htmlspecialchars($filters['to_date'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
             </div>
             <div class="col-md-3">
-                <label class="nd-label">Status</label>
+                <label class="nd-label">Situação</label>
                 <select name="status" class="nd-input form-select">
-                    <option value="">Todos</option>
+                    <option value="">Todas</option>
                     <?php foreach ($statuses as $st): ?>
+                        <?php
+                        $stLabel = match($st) {
+                            'PENDING' => 'Aguardando',
+                            'SENDING' => 'Em Trânsito',
+                            'SENT' => 'Concluído',
+                            'FAILED' => 'Falha no Envio',
+                            'CANCELLED' => 'Cancelado',
+                            default => $st
+                        };
+                        ?>
                         <option value="<?= htmlspecialchars($st) ?>" <?= (($filters['status'] ?? '') === $st) ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($st) ?>
+                            <?= htmlspecialchars($stLabel) ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="nd-label">Tipo</label>
+                <label class="nd-label">Finalidade</label>
                 <select name="type" class="nd-input form-select">
-                    <option value="">Todos</option>
+                    <option value="">Todas</option>
                     <?php foreach ($types as $tp): ?>
+                        <?php
+                        $tpLabel = match(strtolower($tp)) {
+                            'token_created' => 'Criação de Token',
+                            'password_reset' => 'Redefinição de Senha',
+                            'welcome_email' => 'Boas-vindas',
+                            'submission_received' => 'Protocolo Recebido',
+                            'user_precreated' => 'Pré-cadastro de Usuário',
+                            default => ucwords(str_replace(['_', '-'], ' ', strtolower($tp)))
+                        };
+                        ?>
                         <option value="<?= htmlspecialchars($tp) ?>" <?= (($filters['type'] ?? '') === $tp) ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($tp) ?>
+                            <?= htmlspecialchars($tpLabel) ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
             </div>
             
             <div class="col-md-9">
-                <label class="nd-label">E-mail do Destinatário</label>
+                <label class="nd-label">Destinatário (E-mail)</label>
                 <div class="nd-input-group">
                     <input type="text" name="email" class="nd-input"
                         placeholder="Ex: usuario@empresa.com"
@@ -93,7 +113,7 @@ use App\Support\Auth;
 
             <div class="col-md-3 d-flex align-items-end">
                 <button type="submit" class="nd-btn nd-btn-primary w-100">
-                    <i class="bi bi-search me-1"></i> Filtrar
+                    <i class="bi bi-search me-1"></i> Localizar Registros
                 </button>
             </div>
         </form>
@@ -105,16 +125,16 @@ use App\Support\Auth;
     <div class="nd-card-header d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-2">
             <i class="bi bi-list-ul" style="color: var(--nd-gold-500);"></i>
-            <h5 class="nd-card-title mb-0">Resultados</h5>
+            <h5 class="nd-card-title mb-0">Registros Localizados</h5>
         </div>
-        <small class="text-muted">Máx. 200 registros</small>
+        <small class="text-muted">Mostrando últimos 200 registros</small>
     </div>
     
     <div class="nd-card-body p-0">
         <?php if (!$rows): ?>
             <div class="text-center py-5">
                 <i class="bi bi-inbox text-muted mb-2" style="font-size: 2rem;"></i>
-                <p class="text-muted mb-0">Nenhum registro encontrado.</p>
+                <p class="text-muted mb-0">Nenhum registro de envio encontrado.</p>
             </div>
         <?php else: ?>
             <div class="table-responsive">
@@ -122,10 +142,10 @@ use App\Support\Auth;
                     <thead>
                         <tr>
                             <th style="width: 60px;">ID</th>
-                            <th>Data</th>
-                            <th>Status/Tipo</th>
-                            <th>Destinatário/Assunto</th>
-                            <th class="text-end">Tentativas</th>
+                            <th>Data/Hora</th>
+                            <th>Situação/Finalidade</th>
+                            <th>Destino/Conteúdo</th>
+                            <th class="text-end">Ciclos</th>
                             <th class="text-end">Ações</th>
                         </tr>
                     </thead>
@@ -139,15 +159,15 @@ use App\Support\Auth;
                             switch ($status) {
                                 case 'PENDING':
                                     $badge = 'bg-warning text-dark border-warning';
-                                    $label = 'Pendente';
+                                    $label = 'Aguardando';
                                     break;
                                 case 'SENDING':
                                     $badge = 'bg-info text-white border-info';
-                                    $label = 'Enviando';
+                                    $label = 'Em Trânsito';
                                     break;
                                 case 'SENT':
                                     $badge = 'nd-badge-success';
-                                    $label = 'Enviado';
+                                    $label = 'Concluído';
                                     break;
                                 case 'FAILED':
                                     $badge = 'nd-badge-danger';
@@ -160,6 +180,8 @@ use App\Support\Auth;
                                 'token_created' => 'Criação de Token',
                                 'password_reset' => 'Redefinição de Senha',
                                 'welcome_email' => 'Boas-vindas',
+                                'submission_received' => 'Protocolo Recebido',
+                                'user_precreated' => 'Pré-cadastro de Usuário',
                                 default => ucwords(str_replace(['_', '-'], ' ', strtolower($typeKey)))
                             };
                             ?>
@@ -220,7 +242,7 @@ use App\Support\Auth;
                                         <?php if (in_array(($r['status'] ?? ''), ['FAILED', 'CANCELLED'], true) && Auth::hasRole('SUPER_ADMIN')): ?>
                                             <form method="post" action="/admin/notifications/outbox/<?= (int)$r['id'] ?>/reset" class="d-inline">
                                                 <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken) ?>">
-                                                <button class="nd-btn nd-btn-outline nd-btn-sm text-secondary border-start-0" title="Reset (Super Admin)">
+                                                <button class="nd-btn nd-btn-outline nd-btn-sm text-secondary border-start-0" title="Reiniciar (Super Admin)">
                                                     <i class="bi bi-bootstrap-reboot"></i>
                                                 </button>
                                             </form>

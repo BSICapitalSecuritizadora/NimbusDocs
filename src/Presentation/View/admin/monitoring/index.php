@@ -11,12 +11,12 @@
             <i class="bi bi-speedometer2"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Monitoramento</h1>
-            <p class="text-muted mb-0 small">Métricas de performance e erros (24h)</p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Saúde do Sistema</h1>
+            <p class="text-muted mb-0 small">Indicadores de disponibilidade, performance e auditoria técnica (24h)</p>
         </div>
     </div>
     <button class="nd-btn nd-btn-outline nd-btn-sm" onclick="location.reload()">
-        <i class="bi bi-arrow-clockwise me-1"></i> Atualizar
+        <i class="bi bi-arrow-clockwise me-1"></i> Atualizar Dados
     </button>
 </div>
 
@@ -26,9 +26,9 @@
         <div class="nd-card h-100 border-start border-4 border-success">
             <div class="nd-card-body">
                 <div class="h3 fw-bold mb-1" style="color: var(--nd-navy-900);"><?php echo $data['stats']['total_requests']; ?></div>
-                <div class="text-muted small text-uppercase fw-semibold">Requisições</div>
+                <div class="text-muted small text-uppercase fw-semibold">Volume de Acessos</div>
                 <div class="mt-2 small text-success">
-                    <i class="bi bi-check-circle-fill me-1"></i> <?php echo $data['stats']['success']; ?> sucesso
+                    <i class="bi bi-check-circle-fill me-1"></i> <?php echo $data['stats']['success']; ?> processados
                 </div>
             </div>
         </div>
@@ -38,7 +38,7 @@
         <div class="nd-card h-100 border-start border-4 border-info">
             <div class="nd-card-body">
                 <div class="h3 fw-bold mb-1" style="color: var(--nd-navy-900);"><?php echo $data['successRate']; ?>%</div>
-                <div class="text-muted small text-uppercase fw-semibold">Taxa de Sucesso</div>
+                <div class="text-muted small text-uppercase fw-semibold">Taxa de Disponibilidade</div>
                 <div class="progress mt-2" style="height: 4px;">
                     <div class="progress-bar bg-info" style="width: <?php echo $data['successRate']; ?>%"></div>
                 </div>
@@ -50,9 +50,9 @@
         <div class="nd-card h-100 border-start border-4 border-danger">
             <div class="nd-card-body">
                 <div class="h3 fw-bold mb-1" style="color: var(--nd-navy-900);"><?php echo $data['stats']['errors']; ?></div>
-                <div class="text-muted small text-uppercase fw-semibold">Erros</div>
+                <div class="text-muted small text-uppercase fw-semibold">Falhas Técnicas</div>
                 <div class="mt-2 small text-danger">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i> <?php echo $data['errorRate']; ?>% falha
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> <?php echo $data['errorRate']; ?>% de erro
                 </div>
             </div>
         </div>
@@ -64,7 +64,7 @@
                 <div class="h3 fw-bold mb-1" style="color: var(--nd-navy-900);"><?php echo $data['stats']['avg_duration_ms']; ?>ms</div>
                 <div class="text-muted small text-uppercase fw-semibold">Latência Média</div>
                 <div class="mt-2 small text-warning">
-                    <i class="bi bi-hourglass-split me-1"></i> <?php echo $data['stats']['slow_requests']; ?> lentas
+                    <i class="bi bi-hourglass-split me-1"></i> <?php echo $data['stats']['slow_requests']; ?> críticas
                 </div>
             </div>
         </div>
@@ -76,19 +76,19 @@
     <div class="nd-card-header d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-2">
             <i class="bi bi-bell text-muted"></i>
-            <h6 class="nd-card-title mb-0">Alertas Recentes</h6>
+            <h6 class="nd-card-title mb-0">Alertas de Conformidade</h6>
         </div>
         <div class="btn-group btn-group-sm">
             <a href="/admin/monitoring?filter=all" class="nd-btn nd-btn-sm <?php echo $data['filter'] === 'all' ? 'nd-btn-primary' : 'nd-btn-outline'; ?>">Todos</a>
             <a href="/admin/monitoring?filter=errors" class="nd-btn nd-btn-sm <?php echo $data['filter'] === 'errors' ? 'nd-btn-primary' : 'nd-btn-outline'; ?>">Erros</a>
-            <a href="/admin/monitoring?filter=slow" class="nd-btn nd-btn-sm <?php echo $data['filter'] === 'slow' ? 'nd-btn-primary' : 'nd-btn-outline'; ?>">Lentos</a>
+            <a href="/admin/monitoring?filter=slow" class="nd-btn nd-btn-sm <?php echo $data['filter'] === 'slow' ? 'nd-btn-primary' : 'nd-btn-outline'; ?>">Lentidão</a>
         </div>
     </div>
     <div class="nd-card-body p-0">
         <?php if (empty($data['alerts'])): ?>
             <div class="p-4 text-center text-muted">
-                <i class="bi bi-check-circle display-4 d-block mb-3 text-success"></i>
-                Nenhum alerta encontrado no período.
+                <i class="bi bi-shield-check display-4 d-block mb-3 text-success"></i>
+                Sistema operando conforme parâmetros de segurança e performance.
             </div>
         <?php else: ?>
             <div class="list-group list-group-flush">
@@ -98,11 +98,11 @@
                             <div>
                                 <div class="d-flex align-items-center gap-2 mb-1">
                                     <?php if (($alert['type'] ?? '') === 'error'): ?>
-                                        <span class="nd-badge nd-badge-danger">Erro</span>
+                                        <span class="nd-badge nd-badge-danger">Falha Crítica</span>
                                     <?php elseif (($alert['type'] ?? '') === 'unauthorized'): ?>
-                                        <span class="nd-badge nd-badge-warning">Auth</span>
+                                        <span class="nd-badge nd-badge-warning">Segurança</span>
                                     <?php else: ?>
-                                        <span class="nd-badge nd-badge-secondary">Lento</span>
+                                        <span class="nd-badge nd-badge-secondary">Performance</span>
                                     <?php endif; ?>
                                     
                                     <code class="text-dark fw-bold small">
@@ -124,7 +124,7 @@
                                     <span class="fw-semibold"><?php echo $alert['duration_ms'] ?? 0; ?>ms</span>
                                 </div>
                             </div>
-                            <small class="text-muted font-monospace">#<?php echo htmlspecialchars(substr($alert['request_id'] ?? '', 0, 6)); ?></small>
+                            <small class="text-muted font-monospace">ID: <?php echo htmlspecialchars(substr($alert['request_id'] ?? '', 0, 6)); ?></small>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -138,7 +138,7 @@
     <div class="col-lg-6 mb-4">
         <div class="nd-card h-100">
             <div class="nd-card-header">
-                <h6 class="nd-card-title mb-0">Endpoints Mais Acessados</h6>
+                <h6 class="nd-card-title mb-0">Recursos Mais Consumidos</h6>
             </div>
             <div class="nd-card-body p-0">
                 <div class="table-responsive">
@@ -152,7 +152,7 @@
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
-                                <tr><td class="text-center text-muted p-3">Sem dados</td></tr>
+                                <tr><td class="text-center text-muted p-3">Sem dados registrados</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -165,7 +165,7 @@
     <div class="col-lg-6 mb-4">
         <div class="nd-card h-100">
             <div class="nd-card-header">
-                <h6 class="nd-card-title mb-0">IPs Ativos</h6>
+                <h6 class="nd-card-title mb-0">Origens de Tráfego</h6>
             </div>
             <div class="nd-card-body p-0">
                  <div class="table-responsive">
@@ -179,7 +179,7 @@
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
-                                <tr><td class="text-center text-muted p-3">Sem dados</td></tr>
+                                <tr><td class="text-center text-muted p-3">Sem dados registrados</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -192,18 +192,18 @@
 <!-- Tabela de Requisições -->
 <div class="nd-card">
     <div class="nd-card-header">
-        <h6 class="nd-card-title mb-0">Histórico Recente</h6>
+        <h6 class="nd-card-title mb-0">Registro de Transações Recentes</h6>
     </div>
     <div class="table-responsive">
         <table class="nd-table">
             <thead>
                 <tr>
-                    <th>Status</th>
-                    <th>Método</th>
-                    <th>URI</th>
-                    <th>IP</th>
-                    <th>Tempo</th>
-                    <th>Data</th>
+                    <th>Estado</th>
+                    <th>Operação</th>
+                    <th>Recurso</th>
+                    <th>Endereço IP</th>
+                    <th>Duração</th>
+                    <th>Horário</th>
                 </tr>
             </thead>
             <tbody>
@@ -241,7 +241,7 @@
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <tr><td colspan="6" class="text-center text-muted p-4">Nenhum registro encontrado</td></tr>
+                    <tr><td colspan="6" class="text-center text-muted p-4">Nenhuma transação registrada recentemente</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
