@@ -13,12 +13,12 @@
         </div>
         <div>
             <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Novo Administrador</h1>
-            <p class="text-muted mb-0 small">Cadastre um novo administrador no sistema</p>
+            <p class="text-muted mb-0 small">Preencha os dados abaixo para conceder acesso administrativo.</p>
         </div>
     </div>
     <a href="/admin/admin-users" class="nd-btn nd-btn-outline nd-btn-sm">
         <i class="bi bi-arrow-left me-1"></i>
-        Voltar
+        Cancelar
     </a>
 </div>
 
@@ -27,7 +27,7 @@
         <div class="nd-card">
             <div class="nd-card-header d-flex align-items-center gap-2">
                 <i class="bi bi-person-lines-fill" style="color: var(--nd-gold-500);"></i>
-                <h5 class="nd-card-title mb-0">Dados Cadastrais</h5>
+                <h5 class="nd-card-title mb-0">Informações do Usuário</h5>
             </div>
 
             <div class="nd-card-body">
@@ -37,7 +37,7 @@
 
                     <div class="row gx-3 gy-2">
                         <div class="col-md-12 mb-3">
-                            <label class="nd-label" for="full_name">Nome completo</label>
+                            <label class="nd-label" for="full_name">Nome do Responsável</label>
                             <div class="nd-input-group">
                                 <input type="text"
                                     class="nd-input <?= isset($errors['full_name']) ? 'is-invalid' : '' ?>"
@@ -55,7 +55,7 @@
                         </div>
 
                         <div class="col-md-12 mb-3">
-                            <label class="nd-label" for="email">E-mail</label>
+                            <label class="nd-label" for="email">E-mail Corporativo</label>
                             <div class="nd-input-group">
                                 <input type="email"
                                     class="nd-input <?= isset($errors['email']) ? 'is-invalid' : '' ?>"
@@ -75,14 +75,14 @@
 
                     <div class="row gx-3 gy-2">
                         <div class="col-md-6 mb-3">
-                            <label class="nd-label" for="role">Papel</label>
+                            <label class="nd-label" for="role">Nível de Acesso</label>
                             <select class="nd-input form-select" id="role" name="role">
                                 <?php
                                 $role = $old['role'] ?? 'ADMIN';
                                 ?>
-                                <option value="SUPER_ADMIN" <?= $role === 'SUPER_ADMIN' ? 'selected' : '' ?>>Super Admin</option>
-                                <option value="ADMIN" <?= $role === 'ADMIN' ? 'selected' : '' ?>>Admin</option>
-                                <option value="AUDITOR" <?= $role === 'AUDITOR' ? 'selected' : '' ?>>Auditor</option>
+                                <option value="SUPER_ADMIN" <?= $role === 'SUPER_ADMIN' ? 'selected' : '' ?>>Administrador Master</option>
+                                <option value="ADMIN" <?= $role === 'ADMIN' ? 'selected' : '' ?>>Administrador</option>
+                                <option value="AUDITOR" <?= $role === 'AUDITOR' ? 'selected' : '' ?>>Apenas Leitura (Auditor)</option>
                             </select>
                         </div>
 
@@ -91,7 +91,7 @@
                                 <input class="form-check-input" type="checkbox" id="is_active" name="is_active"
                                     <?= ($old['is_active'] ?? 1) ? 'checked' : '' ?>>
                                 <label class="form-check-label text-dark fw-medium" for="is_active">
-                                    Usuário Ativo
+                                    Acesso Ativo
                                 </label>
                             </div>
                         </div>
@@ -100,7 +100,7 @@
                     <div class="p-3 my-3 rounded" style="background: var(--nd-gray-50); border: 1px dashed var(--nd-gray-300);">
                         <div class="d-flex align-items-center mb-3">
                             <i class="bi bi-key-fill me-2" style="color: var(--nd-navy-500);"></i>
-                            <h6 class="fw-bold mb-0 text-dark">Segurança</h6>
+                            <h6 class="fw-bold mb-0 text-dark">Credenciais de Acesso</h6>
                         </div>
 
                         <div class="row gx-3">
@@ -117,7 +117,7 @@
                                 <?php endif; ?>
                             </div>
                             <div class="col-md-6">
-                                <label class="nd-label" for="password_confirmation">Confirme a senha</label>
+                                <label class="nd-label" for="password_confirmation">Confirmar Senha</label>
                                 <input type="password"
                                     class="nd-input"
                                     id="password_confirmation" name="password_confirmation"
@@ -129,7 +129,7 @@
                     <div class="text-end mt-4">
                         <button type="submit" class="nd-btn nd-btn-primary">
                             <i class="bi bi-check-lg me-1"></i>
-                            Salvar
+                            Cadastrar Administrador
                         </button>
                     </div>
                 </form>

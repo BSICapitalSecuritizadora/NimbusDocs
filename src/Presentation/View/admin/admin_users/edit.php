@@ -37,7 +37,7 @@ $errors = $errors ?? [];
         <div class="nd-card mb-4">
             <div class="nd-card-header d-flex align-items-center gap-2">
                 <i class="bi bi-person-lines-fill" style="color: var(--nd-gold-500);"></i>
-                <h5 class="nd-card-title mb-0">Dados Cadastrais</h5>
+                <h5 class="nd-card-title mb-0">Informações do Usuário</h5>
             </div>
 
             <div class="nd-card-body">
@@ -46,7 +46,7 @@ $errors = $errors ?? [];
 
                     <div class="row gx-3 gy-2">
                         <div class="col-md-12 mb-3">
-                            <label class="nd-label" for="full_name">Nome Completo</label>
+                            <label class="nd-label" for="full_name">Nome do Responsável</label>
                             <div class="nd-input-group">
                                 <input
                                     type="text"
@@ -67,7 +67,7 @@ $errors = $errors ?? [];
                         </div>
 
                         <div class="col-md-12 mb-3">
-                            <label class="nd-label" for="email">E-mail</label>
+                            <label class="nd-label" for="email">E-mail Corporativo</label>
                             <div class="nd-input-group">
                                 <input
                                     type="email"
@@ -86,20 +86,20 @@ $errors = $errors ?? [];
                                 </div>
                             <?php endif; ?>
                             <div class="form-text small text-muted ms-1">
-                                Se o e-mail for alterado, pode ser necessário re-autenticar.
+                                Se o e-mail for alterado, o usuário precisará usar o novo endereço para login.
                             </div>
                         </div>
                     </div>
 
                     <div class="row gx-3 gy-2">
                         <div class="col-md-6 mb-3">
-                            <label class="nd-label" for="role">Perfil</label>
+                            <label class="nd-label" for="role">Nível de Acesso</label>
                             <select class="nd-input form-select <?= isset($errors['role']) ? 'is-invalid' : '' ?>" id="role" name="role" required>
                                 <option value="ADMIN" <?= ($user['role'] ?? '') === 'ADMIN' ? 'selected' : '' ?>>
                                     Administrador
                                 </option>
                                 <option value="SUPER_ADMIN" <?= ($user['role'] ?? '') === 'SUPER_ADMIN' ? 'selected' : '' ?>>
-                                    Super Administrador
+                                    Administrador Master
                                 </option>
                             </select>
                             <?php if (isset($errors['role'])): ?>
@@ -108,7 +108,7 @@ $errors = $errors ?? [];
                                 </div>
                             <?php endif; ?>
                             <div class="form-text small text-muted ms-1">
-                                Super Administradores têm acesso total ao sistema.
+                                Permissões avançadas de sistema.
                             </div>
                         </div>
 
@@ -122,10 +122,10 @@ $errors = $errors ?? [];
                                     value="1"
                                     <?= ($user['status'] ?? 'ACTIVE') === 'ACTIVE' ? 'checked' : '' ?>>
                                 <label class="form-check-label text-dark fw-medium" for="is_active">
-                                    Usuário Ativo
+                                    Acesso Ativo
                                 </label>
                                 <div class="small text-muted" style="font-size: 0.75rem;">
-                                    Desmarque para suspender o acesso.
+                                    Desmarque para revogar o acesso.
                                 </div>
                             </div>
                         </div>
@@ -134,7 +134,7 @@ $errors = $errors ?? [];
                     <div class="p-3 my-3 rounded" style="background: var(--nd-gray-50); border: 1px dashed var(--nd-gray-300);">
                         <div class="d-flex align-items-center mb-3">
                             <i class="bi bi-key-fill me-2" style="color: var(--nd-navy-500);"></i>
-                            <h6 class="fw-bold mb-0 text-dark">Segurança</h6>
+                            <h6 class="fw-bold mb-0 text-dark">Credenciais de Acesso</h6>
                         </div>
 
                         <div class="row gx-3">

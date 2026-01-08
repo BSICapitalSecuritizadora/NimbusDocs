@@ -16,13 +16,13 @@ $pages   = $pagination['pages'] ?? 1;
             <i class="bi bi-shield-lock-fill text-white"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Administradores do Sistema</h1>
-            <p class="text-muted mb-0 small">Gerencie as permissões e acessos administrativos</p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Gestão de Administradores</h1>
+            <p class="text-muted mb-0 small">Controle de credenciais e níveis de acesso ao painel administrativo.</p>
         </div>
     </div>
     <a href="/admin/users/create" class="nd-btn nd-btn-gold nd-btn-sm">
         <i class="bi bi-plus-lg me-1"></i>
-        Novo administrador
+        Novo Administrador
     </a>
 </div>
 
@@ -48,10 +48,10 @@ $pages   = $pagination['pages'] ?? 1;
             <table class="nd-table">
                 <thead>
                     <tr>
-                        <th>Administrador</th>
-                        <th>Perfil</th>
+                        <th>Usuário</th>
+                        <th>Nível de Acesso</th>
                         <th>Status</th>
-                        <th>Último login</th>
+                        <th>Último Acesso</th>
                         <th class="text-end">Ações</th>
                     </tr>
                 </thead>
@@ -60,7 +60,7 @@ $pages   = $pagination['pages'] ?? 1;
                         <tr>
                             <td colspan="5" class="text-center py-5">
                                 <i class="bi bi-people text-muted mb-2" style="font-size: 2rem;"></i>
-                                <p class="text-muted mb-0">Nenhum administrador encontrado.</p>
+                                <p class="text-muted mb-0">Nenhum administrador cadastrado no sistema.</p>
                             </td>
                         </tr>
                     <?php else: ?>
@@ -80,7 +80,7 @@ $pages   = $pagination['pages'] ?? 1;
                                 <td>
                                     <?php if ($user['role'] === 'SUPER_ADMIN'): ?>
                                         <span class="d-inline-flex align-items-center gap-1 text-primary small fw-semibold">
-                                            <i class="bi bi-shield-shaded"></i> Super Admin
+                                            <i class="bi bi-shield-shaded"></i> Master
                                         </span>
                                     <?php else: ?>
                                         <span class="text-muted small">Administrador</span>
@@ -97,7 +97,7 @@ $pages   = $pagination['pages'] ?? 1;
                                         'ACTIVE' => 'Ativo',
                                         'BLOCKED' => 'Bloqueado',
                                         'INACTIVE' => 'Inativo',
-                                        default => 'Desconhecido'
+                                        default => 'Não Identificado'
                                     };
                                     ?>
                                     <span class="nd-badge nd-badge-<?= $statusClass ?>">
@@ -111,7 +111,7 @@ $pages   = $pagination['pages'] ?? 1;
                                             <?= (new DateTime($user['last_login_at']))->format('d/m/Y H:i') ?>
                                         </div>
                                     <?php else: ?>
-                                        <span class="text-muted small">-</span>
+                                        <span class="text-muted small">Nunca acessou</span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-end">
