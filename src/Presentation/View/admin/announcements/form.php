@@ -36,7 +36,7 @@ $endsDate   = $data['ends_at']   ? substr($data['ends_at'],   0, 10) : '';
     </div>
     <a href="/admin/announcements" class="nd-btn nd-btn-outline nd-btn-sm">
         <i class="bi bi-arrow-left me-1"></i>
-        Voltar
+        Cancelar
     </a>
 </div>
 
@@ -45,7 +45,7 @@ $endsDate   = $data['ends_at']   ? substr($data['ends_at'],   0, 10) : '';
         <div class="nd-card">
             <div class="nd-card-header d-flex align-items-center gap-2">
                 <i class="bi bi-pencil-square" style="color: var(--nd-gold-500);"></i>
-                <h5 class="nd-card-title mb-0">Informações do Comunicado</h5>
+                <h5 class="nd-card-title mb-0">Detalhes do Aviso</h5>
             </div>
 
             <div class="nd-card-body">
@@ -53,13 +53,13 @@ $endsDate   = $data['ends_at']   ? substr($data['ends_at'],   0, 10) : '';
                     <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
                     <div class="mb-4">
-                        <label class="nd-label">Título</label>
+                        <label class="nd-label">Assunto</label>
                         <div class="nd-input-group">
                             <input type="text"
                                 name="title"
                                 class="nd-input"
                                 required
-                                placeholder="E.g. Manutenção Programada"
+                                placeholder="Ex: Manutenção Programada do Sistema"
                                 value="<?= htmlspecialchars($data['title'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                 style="padding-left: 2.5rem;">
                             <i class="bi bi-type-h1 nd-input-icon"></i>
@@ -67,21 +67,21 @@ $endsDate   = $data['ends_at']   ? substr($data['ends_at'],   0, 10) : '';
                     </div>
 
                     <div class="mb-4">
-                        <label class="nd-label">Mensagem</label>
+                        <label class="nd-label">Conteúdo da Mensagem</label>
                         <textarea name="body"
                             rows="5"
                             class="nd-input"
                             required
-                            placeholder="Digite o conteúdo do comunicado aqui..."><?= htmlspecialchars($data['body'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                            placeholder="Descreva as informações importantes que serão exibidas aos usuários..."><?= htmlspecialchars($data['body'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                     </div>
 
                     <div class="row gx-3">
                         <div class="col-md-6 mb-4">
-                            <label class="nd-label">Nível de Prioridade</label>
+                            <label class="nd-label">Prioridade</label>
                             <div class="nd-input-group">
                                 <select name="level" class="nd-input form-select" style="padding-left: 2.5rem;">
                                     <?php
-                                    $levels = ['info' => 'Informativo', 'success' => 'Sucesso', 'warning' => 'Alerta', 'danger' => 'Crítico'];
+                                    $levels = ['info' => 'Informativo (Padrão)', 'success' => 'Positivo (Sucesso)', 'warning' => 'Atenção (Alerta)', 'danger' => 'Urgente (Crítico)'];
                                     foreach ($levels as $key => $label):
                                         $selected = (($data['level'] ?? 'info') === $key) ? 'selected' : '';
                                     ?>
@@ -103,9 +103,9 @@ $endsDate   = $data['ends_at']   ? substr($data['ends_at'],   0, 10) : '';
                                     value="1"
                                     <?= ((int)($data['is_active'] ?? 1) === 1) ? 'checked' : '' ?>>
                                 <label class="form-check-label text-dark fw-medium" for="is_active">
-                                    Comunicado Ativo
+                                    Publicação Ativa
                                 </label>
-                                <div class="small text-muted" style="font-size: 0.75rem;">Visível no portal durante o período</div>
+                                <div class="small text-muted" style="font-size: 0.75rem;">Disponível para visualização no portal</div>
                             </div>
                         </div>
                     </div>
@@ -113,18 +113,18 @@ $endsDate   = $data['ends_at']   ? substr($data['ends_at'],   0, 10) : '';
                     <div class="p-3 mb-4 rounded" style="background: var(--nd-gray-50); border: 1px dashed var(--nd-gray-300);">
                         <div class="d-flex align-items-center mb-3">
                             <i class="bi bi-calendar-range me-2" style="color: var(--nd-navy-500);"></i>
-                            <h6 class="fw-bold mb-0 text-dark">Período de Exibição (Opcional)</h6>
+                            <h6 class="fw-bold mb-0 text-dark">Vigência (Opcional)</h6>
                         </div>
                         <div class="row gx-3">
                             <div class="col-md-6 mb-3 mb-md-0">
-                                <label class="nd-label">Início</label>
+                                <label class="nd-label">Data de Início</label>
                                 <input type="date"
                                     name="starts_at"
                                     class="nd-input"
                                     value="<?= htmlspecialchars($startsDate, ENT_QUOTES, 'UTF-8') ?>">
                             </div>
                             <div class="col-md-6">
-                                <label class="nd-label">Fim</label>
+                                <label class="nd-label">Data de Término</label>
                                 <input type="date"
                                     name="ends_at"
                                     class="nd-input"
@@ -139,11 +139,6 @@ $endsDate   = $data['ends_at']   ? substr($data['ends_at'],   0, 10) : '';
                         </a>
                         <button type="submit" class="nd-btn nd-btn-primary">
                             <i class="bi bi-check-lg me-1"></i>
-                            Salvar Comunicado
+                            Salvar Publicação
                         </button>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>

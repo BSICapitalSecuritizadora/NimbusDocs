@@ -12,13 +12,13 @@
             <i class="bi bi-megaphone-fill text-white"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Comunicados do Portal</h1>
-            <p class="text-muted mb-0 small">Mensagens institucionais exibidas aos usuários do portal</p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Gestão de Comunicados</h1>
+            <p class="text-muted mb-0 small">Publique avisos e notificações importantes para os usuários do portal.</p>
         </div>
     </div>
     <a href="/admin/announcements/new" class="nd-btn nd-btn-gold nd-btn-sm">
         <i class="bi bi-plus-lg me-1"></i>
-        Novo comunicado
+        Novo Comunicado
     </a>
 </div>
 
@@ -44,7 +44,7 @@
         <?php if (!$announcements): ?>
             <div class="text-center py-5">
                 <i class="bi bi-chat-square-quote text-muted mb-2" style="font-size: 2rem;"></i>
-                <p class="text-muted mb-2">Nenhum comunicado cadastrado.</p>
+                <p class="text-muted mb-2">Nenhum comunicado cadastrado no sistema.</p>
                 <a href="/admin/announcements/new" class="btn btn-link text-decoration-none p-0">
                     Criar o primeiro comunicado
                 </a>
@@ -55,10 +55,10 @@
                     <thead>
                         <tr>
                             <th style="width: 60px;">ID</th>
-                            <th>Título</th>
-                            <th>Nível</th>
-                            <th>Período</th>
-                            <th>Status</th>
+                            <th>Assunto</th>
+                            <th>Prioridade</th>
+                            <th>Vigência</th>
+                            <th>Situação</th>
                             <th class="text-end">Ações</th>
                         </tr>
                     </thead>
@@ -72,30 +72,31 @@
                                 <td>
                                     <?php
                                     $level = $a['level'];
-                                    // Mapping levels to our palette roughly (or bootstrap classes if nd-badge not fully distinctive per generic level)
                                     $badgeClass = 'nd-badge-secondary';
                                     $icon = '';
+                                    $label = ucfirst($level);
                                     
                                     if ($level === 'info') {
-                                        $badgeClass = 'bg-info text-white'; // Custom override or use nd-badge classes if available
+                                        $badgeClass = 'bg-info text-white'; 
                                         $icon = 'bi-info-circle';
+                                        $label = 'Informativo';
                                     } elseif ($level === 'success') {
                                         $badgeClass = 'nd-badge-success';
                                         $icon = 'bi-check-circle';
+                                        $label = 'Positivo';
                                     } elseif ($level === 'warning') {
                                         $badgeClass = 'bg-warning text-dark';
                                         $icon = 'bi-exclamation-triangle';
+                                        $label = 'Atenção';
                                     } elseif ($level === 'danger') {
                                         $badgeClass = 'nd-badge-danger';
                                         $icon = 'bi-exclamation-octagon';
+                                        $label = 'Urgente';
                                     }
-                                    
-                                    // For simplicity and premium look, let's use standard bootstrap colors inside our badge shape if nd-badges are limited
-                                    // Actually we have nd-badge-success/danger/secondary. Let's stick to bootstrap standard for warning/info to ensure meaning.
                                     ?>
                                     <span class="badge rounded-pill fw-normal <?= $badgeClass ?>" style="font-size: 0.75rem;">
                                         <?php if($icon): ?><i class="bi <?= $icon ?> me-1"></i><?php endif; ?>
-                                        <?= ucfirst(htmlspecialchars($level, ENT_QUOTES, 'UTF-8')) ?>
+                                        <?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>
                                     </span>
                                 </td>
                                 <td>
@@ -110,7 +111,7 @@
                                         <?php if ($end): ?>
                                             <span><i class="bi bi-arrow-down-right me-1 ms-1"></i> Até <?= $end ?></span>
                                         <?php else: ?>
-                                            <span><i class="bi bi-infinite me-1 ms-1"></i> Indefinido</span>
+                                            <span><i class="bi bi-infinity me-1 ms-1"></i> Indefinido</span>
                                         <?php endif; ?>
                                     </div>
                                 </td>
@@ -132,7 +133,7 @@
                                         <form method="post"
                                             action="/admin/announcements/<?= (int)$a['id'] ?>/delete"
                                             class="d-inline"
-                                            onsubmit="return confirm('Remover este comunicado?');">
+                                            onsubmit="return confirm('Deseja realmente remover este comunicado?');">
                                             <input type="hidden" name="_token"
                                                 value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                                             <button type="submit" class="nd-btn nd-btn-outline nd-btn-sm text-danger border-start-0" title="Excluir">
