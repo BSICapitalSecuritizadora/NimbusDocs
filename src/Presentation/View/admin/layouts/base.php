@@ -50,7 +50,7 @@ $adminInitials = strtoupper(substr($adminName, 0, 2));
                         <input type="text" 
                                name="q" 
                                class="nd-input" 
-                               placeholder="Buscar..." 
+                               placeholder="Pesquisar no sistema..." 
                                style="width: 240px; padding-left: 2.5rem; padding-right: 1rem; height: 38px;">
                         <i class="bi bi-search position-absolute" 
                            style="left: 0.875rem; top: 50%; transform: translateY(-50%); color: var(--nd-gray-400);"></i>
@@ -70,7 +70,7 @@ $adminInitials = strtoupper(substr($adminName, 0, 2));
                     <ul class="dropdown-menu dropdown-menu-end" style="min-width: 300px;">
                         <li><h6 class="dropdown-header">Notificações</h6></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><span class="dropdown-item-text text-muted small">Nenhuma notificação</span></li>
+                        <li><span class="dropdown-item-text text-muted small">Nenhuma notificação recente</span></li>
                     </ul>
                 </div>
                 
@@ -88,13 +88,13 @@ $adminInitials = strtoupper(substr($adminName, 0, 2));
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
                             <a class="dropdown-item" href="/admin/2fa/setup">
-                                <i class="bi bi-shield-lock me-2"></i>Autenticação 2FA
+                                <i class="bi bi-shield-lock me-2"></i>Segurança da Conta (2FA)
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <a class="dropdown-item text-danger" href="/admin/logout">
-                                <i class="bi bi-box-arrow-left me-2"></i>Sair
+                                <i class="bi bi-box-arrow-left me-2"></i>Encerrar Sessão
                             </a>
                         </li>
                     </ul>

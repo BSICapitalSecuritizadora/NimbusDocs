@@ -32,7 +32,7 @@ $logoUrl  = $branding['admin_logo_url'] ?? '';
             <?php endif; ?>
 
             <a href="/admin/logout" class="btn btn-outline-danger btn-sm">
-                <i class="bi bi-box-arrow-right"></i> Sair
+                <i class="bi bi-box-arrow-right"></i> Encerrar Sessão
             </a>
         </div>
 
