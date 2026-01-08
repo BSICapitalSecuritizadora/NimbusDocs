@@ -40,7 +40,7 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
             
             <a href="/admin/submissions" class="nd-nav-item <?= isActive('/admin/submissions', $currentUri) ? 'active' : '' ?>">
                 <i class="bi bi-inbox-fill nd-nav-icon"></i>
-                Protocolos de Envio
+                Envios
             </a>
         </div>
         
@@ -50,12 +50,12 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
             
             <a href="/admin/users" class="nd-nav-item <?= isActive('/admin/users', $currentUri) ? 'active' : '' ?>">
                 <i class="bi bi-person-gear nd-nav-icon"></i>
-                Gestores do Sistema
+                Administradores
             </a>
 
             <a href="/admin/portal-users" class="nd-nav-item <?= isActive('/admin/portal-users', $currentUri) ? 'active' : '' ?>">
                 <i class="bi bi-people-fill nd-nav-icon"></i>
-                Titulares Cadastrados
+                Usuários
             </a>
 
             <a href="/admin/tokens" class="nd-nav-item <?= isActive('/admin/tokens', $currentUri) ? 'active' : '' ?>">
@@ -69,18 +69,18 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
             <div class="nd-nav-section-title">Gestão Documental</div>
 
             <a href="/admin/document-categories" class="nd-nav-item <?= isActive('/admin/document-categories', $currentUri) ? 'active' : '' ?>">
-                <i class="bi bi-tags-fill nd-nav-icon"></i>
-                Classificações
+                <i class="bi bi-bookmark-fill nd-nav-icon"></i>
+                Categorias
             </a>
 
             <a href="/admin/general-documents" class="nd-nav-item <?= isActive('/admin/general-documents', $currentUri) ? 'active' : '' ?>">
                 <i class="bi bi-folder-fill nd-nav-icon"></i>
-                Biblioteca Digital
+                Documentos Gerais
             </a>
 
             <a href="/admin/documents" class="nd-nav-item <?= isActive('/admin/documents', $currentUri) ? 'active' : '' ?>">
                 <i class="bi bi-folder-fill nd-nav-icon"></i>
-                Acervo de Titulares
+                Documentos Usuários
             </a>
         </div>
         
