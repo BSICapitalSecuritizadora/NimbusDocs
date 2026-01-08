@@ -14,13 +14,13 @@
     <!-- Page Header -->
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
-            <h1 class="h4 mb-1 fw-semibold" style="color: var(--nd-gray-900);">Dashboard</h1>
-            <p class="text-muted mb-0" style="font-size: 0.875rem;">Visão geral do sistema</p>
+            <h1 class="h4 mb-1 fw-semibold" style="color: var(--nd-gray-900);">Visão Geral</h1>
+            <p class="text-muted mb-0" style="font-size: 0.875rem;">Monitoramento de indicadores e performance do sistema</p>
         </div>
         <div class="d-flex gap-2">
             <a href="/admin/reports/submissions" class="nd-btn nd-btn-outline nd-btn-sm">
                 <i class="bi bi-download"></i>
-                Exportar
+                Exportar Relatório
             </a>
         </div>
     </div>
@@ -35,7 +35,7 @@
                     <i class="bi bi-inbox-fill"></i>
                 </div>
                 <div class="nd-metric-value"><?= number_format($totalSubmissions) ?></div>
-                <div class="nd-metric-label">Total de Submissões</div>
+                <div class="nd-metric-label">Envios Recebidos</div>
             </div>
         </div>
         
@@ -47,7 +47,7 @@
                     <i class="bi bi-clock-fill"></i>
                 </div>
                 <div class="nd-metric-value"><?= number_format($pendingSubmissions) ?></div>
-                <div class="nd-metric-label">Pendentes</div>
+                <div class="nd-metric-label">Aguardando Análise</div>
             </div>
         </div>
         
@@ -59,7 +59,7 @@
                     <i class="bi bi-check-circle-fill"></i>
                 </div>
                 <div class="nd-metric-value"><?= number_format($approvedSubmissions) ?></div>
-                <div class="nd-metric-label">Aprovadas</div>
+                <div class="nd-metric-label">Aprovados</div>
             </div>
         </div>
         
@@ -71,7 +71,7 @@
                     <i class="bi bi-x-circle-fill"></i>
                 </div>
                 <div class="nd-metric-value"><?= number_format($rejectedSubmissions) ?></div>
-                <div class="nd-metric-label">Rejeitadas</div>
+                <div class="nd-metric-label">Rejeitados</div>
             </div>
         </div>
     </div>
@@ -86,7 +86,7 @@
                     <i class="bi bi-people-fill"></i>
                 </div>
                 <div class="nd-metric-value"><?= number_format($totalPortalUsers) ?></div>
-                <div class="nd-metric-label">Usuários do Portal</div>
+                <div class="nd-metric-label">Usuários Cadastrados</div>
             </div>
         </div>
         
@@ -98,7 +98,7 @@
                     <i class="bi bi-file-earmark-text-fill"></i>
                 </div>
                 <div class="nd-metric-value"><?= number_format($publishedDocuments) ?></div>
-                <div class="nd-metric-label">Documentos Publicados</div>
+                <div class="nd-metric-label">Documentos Vigentes</div>
             </div>
         </div>
     </div>
@@ -111,26 +111,25 @@
                 <div class="nd-card-header d-flex align-items-center justify-content-between">
                     <h5 class="nd-card-title mb-0">
                         <i class="bi bi-inbox me-2" style="color: var(--nd-gold-500);"></i>
-                        Últimas Submissões
+                        Envios Recentes
                     </h5>
                     <a href="/admin/submissions" class="nd-btn nd-btn-outline nd-btn-sm">
-                        Ver tudo
+                        Ver Todas
                     </a>
                 </div>
                 <div class="nd-card-body p-0">
                     <?php if (!$recentSubmissions): ?>
                         <div class="text-center py-5">
                             <i class="bi bi-inbox" style="font-size: 3rem; color: var(--nd-gray-300);"></i>
-                            <p class="text-muted mt-2 mb-0">Nenhuma submissão recente.</p>
+                            <p class="text-muted mt-2 mb-0">Nenhuma submissão recente encontrada.</p>
                         </div>
                     <?php else: ?>
                         <table class="nd-table">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Usuário</th>
-                                    <th>Data</th>
-                                    <th>Status</th>
+                                    <th>Solicitante</th>
+                                    <th>Data de Envio</th>
+                                    <th>Situação</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -147,9 +146,6 @@
                                     };
                                     ?>
                                     <tr>
-                                        <td>
-                                            <span class="fw-bold" style="color: var(--nd-navy-700);">#<?= $s['id'] ?></span>
-                                        </td>
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="nd-avatar nd-avatar-xs text-white" style="background-color: var(--nd-navy-500); width: 24px; height: 24px; font-size: 0.75rem;">
@@ -191,13 +187,13 @@
                 <div class="nd-card-header d-flex align-items-center justify-content-between">
                     <h5 class="nd-card-title mb-0">
                         <i class="bi bi-activity me-2" style="color: var(--nd-gold-500);"></i>
-                        Atividade Recente
+                        Últimas Atividades
                     </h5>
-                    <a href="/admin/audit-logs" class="nd-btn nd-btn-link nd-btn-sm p-0 text-decoration-none" style="font-size: 0.8rem;">Ver tudo</a>
+                    <a href="/admin/audit-logs" class="nd-btn nd-btn-link nd-btn-sm p-0 text-decoration-none" style="font-size: 0.8rem;">Histórico Completo</a>
                 </div>
                 <div class="nd-card-body p-0">
                     <?php if (!$recentLogs): ?>
-                        <div class="p-3 text-center text-muted small">Nenhuma atividade registrada.</div>
+                        <div class="p-3 text-center text-muted small">Nenhuma atividade recente registrada.</div>
                     <?php else: ?>
                         <div class="list-group list-group-flush">
                             <?php foreach (array_slice($recentLogs, 0, 6) as $log): ?>
@@ -206,13 +202,13 @@
                                     
                                     // Map text
                                     $actionText = match($actionKey) {
-                                        'LOGIN_SUCCESS' => 'Login realizado',
-                                        'LOGIN_FAILED' => 'Falha no login',
-                                        'PORTAL_USER_CREATED' => 'Usuário criado',
-                                        'PORTAL_USER_UPDATED' => 'Usuário atualizado',
-                                        'PORTAL_ACCESS_LINK_GENERATED' => 'Link gerado',
-                                        'SUBMISSION_CREATED' => 'Submissão recebida',
-                                        'PORTAL_SUBMISSION_CREATED' => 'Submissão (Portal)',
+                                        'LOGIN_SUCCESS' => 'Acesso realizado',
+                                        'LOGIN_FAILED' => 'Tentativa de acesso falhou',
+                                        'PORTAL_USER_CREATED' => 'Usuário cadastrado',
+                                        'PORTAL_USER_UPDATED' => 'Dados de usuário atualizados',
+                                        'PORTAL_ACCESS_LINK_GENERATED' => 'Link de acesso gerado',
+                                        'SUBMISSION_CREATED' => 'Nova submissão recebida',
+                                        'PORTAL_SUBMISSION_CREATED' => 'Submissão via Portal',
                                         default => ucwords(strtolower(str_replace('_', ' ', $actionKey)))
                                     };
 
@@ -265,20 +261,20 @@
                 <div class="nd-card-header">
                     <h5 class="nd-card-title mb-0">
                         <i class="bi bi-bell me-2" style="color: var(--nd-warning);"></i>
-                        Alertas
+                        Atenção Necessária
                     </h5>
                 </div>
                 <div class="nd-card-body">
                     <?php $a = $alerts ?? []; ?>
                     <?php if(empty($a['oldPending']) && empty($a['expiredTokens']) && empty($a['inactiveUsers30'])): ?>
-                        <div class="text-center text-muted small">Tudo certo! Sem alertas no momento.</div>
+                        <div class="text-center text-muted small">Nenhum alerta pendente no momento.</div>
                     <?php else: ?>
                         <div class="d-flex flex-column gap-2">
                             <?php if (!empty($a['oldPending'])): ?>
                                 <div class="alert alert-warning d-flex align-items-center p-2 mb-0 border-0 bg-warning-subtle text-warning-emphasis small">
                                     <i class="bi bi-clock-history me-2 fs-6"></i>
                                     <div>
-                                        <strong><?= (int)$a['oldPending'] ?> submissões</strong> pendentes há > 7 dias.
+                                        <strong><?= (int)$a['oldPending'] ?> envios</strong> aguardando análise há > 7 dias.
                                     </div>
                                 </div>
                             <?php endif; ?>
@@ -287,7 +283,7 @@
                                 <div class="alert alert-danger d-flex align-items-center p-2 mb-0 border-0 bg-danger-subtle text-danger-emphasis small">
                                     <i class="bi bi-shield-x me-2 fs-6"></i>
                                     <div>
-                                        <strong><?= (int)$a['expiredTokens'] ?> tokens</strong> expirados.
+                                        <strong><?= (int)$a['expiredTokens'] ?> tokens</strong> de acesso expirados.
                                     </div>
                                 </div>
                             <?php endif; ?>
@@ -296,7 +292,7 @@
                                 <div class="alert alert-secondary d-flex align-items-center p-2 mb-0 border-0 bg-secondary-subtle text-secondary-emphasis small">
                                     <i class="bi bi-person-dash me-2 fs-6"></i>
                                     <div>
-                                        <strong><?= (int)$a['inactiveUsers30'] ?> usuários</strong> inativos há +30 dias.
+                                        <strong><?= (int)$a['inactiveUsers30'] ?> usuários</strong> sem acesso há > 30 dias.
                                     </div>
                                 </div>
                             <?php endif; ?>
@@ -314,7 +310,7 @@
                 <div class="nd-card-header">
                     <h5 class="nd-card-title mb-0">
                         <i class="bi bi-pie-chart me-2" style="color: var(--nd-gold-500);"></i>
-                        Submissões por Status
+                        Distribuição por Situação
                     </h5>
                 </div>
                 <div class="nd-card-body">
@@ -328,7 +324,7 @@
                 <div class="nd-card-header">
                     <h5 class="nd-card-title mb-0">
                         <i class="bi bi-graph-up me-2" style="color: var(--nd-gold-500);"></i>
-                        Submissões (30 dias)
+                        Volume de Envios (30 Dias)
                     </h5>
                 </div>
                 <div class="nd-card-body">
@@ -347,7 +343,7 @@
     const dailyData  = <?= json_encode($chartDailyCounts ?? [], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>;
 
     // Chart 1 - Status (Doughnut)
-    const statusLabels = ['Aprovado', 'Rejeitado', 'Pendente', 'Em análise'];
+    const statusLabels = ['Aprovada', 'Rejeitada', 'Pendente', 'Em Análise'];
     const statusKeys   = ['APPROVED', 'REJECTED', 'PENDING', 'IN_REVIEW'];
     const statusValues = statusKeys.map(k => statusData[k] ?? 0);
     
