@@ -13,13 +13,13 @@
             <i class="bi bi-file-earmark-text text-white"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Detalhes do Documento</h1>
-            <p class="text-muted mb-0 small">Documento #<?= (int)$document['id'] ?></p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Consulta Documental</h1>
+            <p class="text-muted mb-0 small">Protocolo #<?= (int)$document['id'] ?></p>
         </div>
     </div>
     <a href="/admin/documents" class="nd-btn nd-btn-outline nd-btn-sm">
         <i class="bi bi-arrow-left me-1"></i>
-        Voltar
+        Voltar à Listagem
     </a>
 </div>
 
@@ -29,12 +29,12 @@
         <div class="nd-card mb-4">
             <div class="nd-card-header d-flex align-items-center gap-2">
                 <i class="bi bi-file-earmark-text" style="color: var(--nd-gold-500);"></i>
-                <h5 class="nd-card-title mb-0">Informações do Documento</h5>
+                <h5 class="nd-card-title mb-0">Dados do Arquivo</h5>
             </div>
             <div class="nd-card-body">
                 <div class="row g-3">
                     <div class="col-md-12">
-                        <label class="nd-label">Título</label>
+                        <label class="nd-label">Assunto/Identificação</label>
                         <div class="p-3 bg-light rounded">
                             <?= htmlspecialchars($document['title'] ?? 'Sem título', ENT_QUOTES, 'UTF-8') ?>
                         </div>
@@ -42,7 +42,7 @@
 
                     <?php if (!empty($document['description'])): ?>
                     <div class="col-md-12">
-                        <label class="nd-label">Descrição</label>
+                        <label class="nd-label">Observações</label>
                         <div class="p-3 bg-light rounded">
                             <?= nl2br(htmlspecialchars($document['description'], ENT_QUOTES, 'UTF-8')) ?>
                         </div>
@@ -50,14 +50,14 @@
                     <?php endif; ?>
 
                     <div class="col-md-6">
-                        <label class="nd-label">Nome do Arquivo</label>
+                        <label class="nd-label">Arquivo Original</label>
                         <div class="p-3 bg-light rounded font-monospace small">
                             <?= htmlspecialchars($document['file_original_name'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?>
                         </div>
                     </div>
 
                     <div class="col-md-6">
-                        <label class="nd-label">Tamanho</label>
+                        <label class="nd-label">Dimensão</label>
                         <div class="p-3 bg-light rounded">
                             <?php
                             $size = (int)($document['file_size'] ?? 0);
@@ -80,7 +80,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="nd-label">Data de Envio</label>
+                        <label class="nd-label">Data de Registro</label>
                         <div class="p-3 bg-light rounded">
                             <?= htmlspecialchars(date('d/m/Y H:i', strtotime($document['created_at'])) ?? 'N/A', ENT_QUOTES, 'UTF-8') ?>
                         </div>
@@ -92,7 +92,7 @@
                 <div class="mt-4 pt-3 border-top">
                     <a href="/admin/files/<?= (int)$document['id'] ?>/download" class="nd-btn nd-btn-gold">
                         <i class="bi bi-download me-1"></i>
-                        Baixar Arquivo
+                        Baixar Cópia Digital
                     </a>
                 </div>
                 <?php endif; ?>
@@ -105,7 +105,7 @@
         <div class="nd-card mb-4">
             <div class="nd-card-header d-flex align-items-center gap-2">
                 <i class="bi bi-person" style="color: var(--nd-gold-500);"></i>
-                <h5 class="nd-card-title mb-0">Usuário Destinatário</h5>
+                <h5 class="nd-card-title mb-0">Titular Vinculado</h5>
             </div>
             <div class="nd-card-body">
                 <?php if ($user): ?>
@@ -123,7 +123,7 @@
 
                 <div class="small">
                     <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Status:</span>
+                        <span class="text-muted">Situação Cadastral:</span>
                         <?php
                         $status = $user['status'] ?? 'ACTIVE';
                         $statusLabels = [
@@ -153,12 +153,12 @@
 
                 <a href="/admin/portal-users/<?= (int)$user['id'] ?>" class="nd-btn nd-btn-outline nd-btn-sm w-100 mt-3">
                     <i class="bi bi-person-lines-fill me-1"></i>
-                    Ver Perfil Completo
+                    Acessar Perfil
                 </a>
                 <?php else: ?>
                 <div class="text-center py-3">
                     <i class="bi bi-person-x text-muted" style="font-size: 2rem;"></i>
-                    <p class="text-muted mb-0 mt-2">Usuário não encontrado</p>
+                    <p class="text-muted mb-0 mt-2">Titular não localizado</p>
                 </div>
                 <?php endif; ?>
             </div>
@@ -168,15 +168,15 @@
         <div class="nd-card">
             <div class="nd-card-header d-flex align-items-center gap-2">
                 <i class="bi bi-gear" style="color: var(--nd-gold-500);"></i>
-                <h5 class="nd-card-title mb-0">Ações</h5>
+                <h5 class="nd-card-title mb-0">Controles</h5>
             </div>
             <div class="nd-card-body">
                 <form method="post" action="/admin/documents/<?= (int)$document['id'] ?>/delete" 
-                      onsubmit="return confirm('Tem certeza que deseja excluir este documento? Esta ação não pode ser desfeita.');">
+                      onsubmit="return confirm('Confirma a exclusão definitiva deste documento?');">
                     <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                     <button type="submit" class="nd-btn nd-btn-outline text-danger w-100">
                         <i class="bi bi-trash me-1"></i>
-                        Excluir Documento
+                        Excluir Definitivamente
                     </button>
                 </form>
             </div>

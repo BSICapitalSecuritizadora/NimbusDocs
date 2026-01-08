@@ -13,13 +13,13 @@ $documents = $documents ?? [];
             <i class="bi bi-folder-fill text-white"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Documentos do Portal</h1>
-            <p class="text-muted mb-0 small">Gerencie os documentos enviados pelos usuários</p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Gestão de Documentos Portal</h1>
+            <p class="text-muted mb-0 small">Administração do acervo digital de clientes</p>
         </div>
     </div>
     <a href="/admin/documents/new" class="nd-btn nd-btn-primary nd-btn-sm">
-        <i class="bi bi-plus-lg me-1"></i>
-        Novo documento
+        <i class="bi bi-cloud-arrow-up me-1"></i>
+        Novo Upload
     </a>
 </div>
 
@@ -29,9 +29,9 @@ $documents = $documents ?? [];
          <?php if (!$documents): ?>
             <div class="text-center py-5">
                 <i class="bi bi-folder-x text-muted mb-2" style="font-size: 2rem;"></i>
-                <p class="text-muted mb-2">Nenhum documento encontrado.</p>
+                <p class="text-muted mb-2">Nenhum documento digitalizado localizado.</p>
                 <a href="/admin/documents/new" class="btn btn-link text-decoration-none p-0">
-                    Enviar o primeiro documento
+                    Realizar primeiro upload
                 </a>
             </div>
         <?php else: ?>
@@ -39,18 +39,16 @@ $documents = $documents ?? [];
                 <table class="nd-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Usuário</th>
-                            <th>Documento</th>
-                            <th>Arquivo</th>
-                            <th>Data</th>
+                            <th>Titular do Documento</th>
+                            <th>Identificação do Arquivo</th>
+                            <th>Arquivo Original</th>
+                            <th>Data de Cadastro</th>
                             <th class="text-end">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($documents as $d): ?>
                         <tr>
-                            <td><span class="text-muted small">#<?= (int)$d['id'] ?></span></td>
                             <td>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="nd-avatar nd-avatar-sm nd-avatar-initials" style="background: var(--nd-primary-100); color: var(--nd-primary-700);">
@@ -80,9 +78,9 @@ $documents = $documents ?? [];
                                     <a href="/admin/documents/<?= (int)$d['id'] ?>" class="nd-btn nd-btn-outline nd-btn-sm" title="Visualizar Detalhes">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <form method="post" action="/admin/documents/<?= (int)$d['id'] ?>/delete" onsubmit="return confirm('Excluir este documento?');" class="d-inline">
+                                    <form method="post" action="/admin/documents/<?= (int)$d['id'] ?>/delete" onsubmit="return confirm('Confirma a exclusão deste documento? Esta ação é irreversível.');" class="d-inline">
                                         <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES, 'UTF-8') ?>">
-                                        <button class="nd-btn nd-btn-outline nd-btn-sm text-danger border-start-0" title="Excluir">
+                                        <button class="nd-btn nd-btn-outline nd-btn-sm text-danger border-start-0" title="Remover">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>

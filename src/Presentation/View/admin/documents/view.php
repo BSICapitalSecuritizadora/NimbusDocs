@@ -27,12 +27,12 @@ if (!$docId) {
              <i class="bi bi-file-text"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Detalhes do Documento</h1>
-            <p class="text-muted mb-0 small">#<?= $docId ?> &bull; Visualização de detalhes</p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Consulta de Documento</h1>
+            <p class="text-muted mb-0 small">Protocolo #<?= $docId ?> &bull; Visualização Detalhada</p>
         </div>
     </div>
     <a href="/admin/documents" class="nd-btn nd-btn-outline nd-btn-sm">
-        <i class="bi bi-arrow-left me-1"></i> Voltar
+        <i class="bi bi-arrow-left me-1"></i> Retornar
     </a>
 </div>
 
@@ -60,7 +60,7 @@ if (!$docId) {
          <div class="nd-avatar nd-avatar-sm" style="background: var(--nd-primary-100); color: var(--nd-primary-700);">
             <i class="bi bi-file-text"></i>
          </div>
-         <h5 class="nd-card-title mb-0">Informações do Documento</h5>
+         <h5 class="nd-card-title mb-0">Dados do Documento</h5>
       </div>
       <div class="nd-card-body">
          <h4 class="h5 fw-bold text-dark mb-2"><?= htmlspecialchars($document['title'] ?? '', ENT_QUOTES, 'UTF-8') ?></h4>
@@ -69,16 +69,16 @@ if (!$docId) {
                 <?= nl2br(htmlspecialchars($document['description'], ENT_QUOTES, 'UTF-8')) ?>
             </p>
          <?php else: ?>
-            <p class="text-muted fst-italic mb-4">Sem descrição disponível.</p>
+            <p class="text-muted fst-italic mb-4">Sem observações registradas.</p>
          <?php endif; ?>
 
          <div class="d-flex gap-4 border-top pt-3">
              <div>
-                 <small class="text-muted d-block text-uppercase" style="font-size: 0.7rem;">Criado em</small>
+                 <small class="text-muted d-block text-uppercase" style="font-size: 0.7rem;">Data de Cadastro</small>
                  <span class="text-dark fw-medium"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($document['created_at'] ?? 'now')), ENT_QUOTES, 'UTF-8') ?></span>
              </div>
              <div>
-                 <small class="text-muted d-block text-uppercase" style="font-size: 0.7rem;">Tipo</small>
+                 <small class="text-muted d-block text-uppercase" style="font-size: 0.7rem;">Formato</small>
                  <span class="text-dark font-monospace"><?= htmlspecialchars($document['file_mime'] ?? 'UNK', ENT_QUOTES, 'UTF-8') ?></span>
              </div>
          </div>
@@ -88,7 +88,7 @@ if (!$docId) {
     <!-- Arquivo -->
     <div class="nd-card mb-4">
       <div class="nd-card-header">
-         <h6 class="nd-card-title mb-0">Arquivo Anexado</h6>
+         <h6 class="nd-card-title mb-0">Anexo Digital</h6>
       </div>
       <div class="nd-card-body">
         <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded border border-light mb-3">
@@ -115,14 +115,14 @@ if (!$docId) {
               <a href="<?= htmlspecialchars($document['file_path'], ENT_QUOTES, 'UTF-8') ?>" 
                 class="nd-btn nd-btn-primary nd-btn-sm" 
                 download>
-                <i class="bi bi-download me-1"></i> Baixar
+                <i class="bi bi-download me-1"></i> Baixar Cópia
               </a>
             <?php endif; ?>
         </div>
         
         <div class="small text-muted">
             <i class="bi bi-hdd-network me-1"></i>
-            Caminho do sistema: <span class="font-monospace user-select-all"><?= htmlspecialchars($document['file_path'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+            Armazenamento: <span class="font-monospace user-select-all"><?= htmlspecialchars($document['file_path'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
         </div>
       </div>
     </div>
@@ -130,16 +130,16 @@ if (!$docId) {
     <!-- Ações -->
     <div class="nd-card mb-4">
       <div class="nd-card-header">
-        <h6 class="nd-card-title mb-0 text-danger">Zona de Perigo</h6>
+        <h6 class="nd-card-title mb-0 text-danger">Área Crítica</h6>
       </div>
       <div class="nd-card-body">
         <p class="small text-muted mb-3">
-             A exclusão deste documento é permanente e removerá o acesso do usuário ao arquivo.
+             A exclusão deste documento é permanente e removerá o acesso do titular ao arquivo.
         </p>
-        <form method="post" action="/admin/documents/<?= $docId ?>/delete" onsubmit="return confirm('Tem certeza que deseja deletar este documento? Ação irreversível.');">
+        <form method="post" action="/admin/documents/<?= $docId ?>/delete" onsubmit="return confirm('Confirma a exclusão deste arquivo? Ação irreversível.');">
             <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
             <button type="submit" class="nd-btn w-100 bg-danger text-white border-0 hover-opacity-90">
-              <i class="bi bi-trash me-1"></i> Excluir Documento Permanentemente
+              <i class="bi bi-trash me-1"></i> Remover do Acervo
             </button>
         </form>
       </div>
