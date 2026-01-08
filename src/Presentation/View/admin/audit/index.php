@@ -16,8 +16,8 @@ $totalPages = max(1, (int)ceil($total / $perPage));
             <i class="bi bi-shield-check text-white"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Auditoria do Sistema</h1>
-            <p class="text-muted mb-0 small">Rastreabilidade completa de ações e segurança</p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Trilha de Auditoria</h1>
+            <p class="text-muted mb-0 small">Registro histórico de todas as operações realizadas no sistema.</p>
         </div>
     </div>
 </div>
@@ -26,12 +26,12 @@ $totalPages = max(1, (int)ceil($total / $perPage));
 <div class="nd-card mb-4">
     <div class="nd-card-header d-flex align-items-center gap-2">
         <i class="bi bi-funnel-fill" style="color: var(--nd-gold-500);"></i>
-        <h5 class="nd-card-title mb-0">Filtros Avançados</h5>
+        <h5 class="nd-card-title mb-0">Filtros de Pesquisa</h5>
     </div>
     <div class="nd-card-body">
         <form class="row g-3" method="get" action="/admin/audit-logs">
             <div class="col-md-3">
-                <label class="nd-label">Tipo de Ator</label>
+                <label class="nd-label">Tipo de Usuário</label>
                 <div class="nd-input-group">
                     <select name="actor_type" class="nd-input form-select" style="padding-left: 2.5rem;">
                         <option value="">Todos</option>
@@ -44,23 +44,23 @@ $totalPages = max(1, (int)ceil($total / $perPage));
             </div>
             
             <div class="col-md-3">
-                <label class="nd-label">Ação</label>
+                <label class="nd-label">Atividade</label>
                 <div class="nd-input-group">
                     <input type="text" name="action"
                         value="<?= htmlspecialchars($filters['action'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                         class="nd-input"
-                        placeholder="Ex: LOGIN_SUCCESS"
+                        placeholder="Ex: Login, Atualização..."
                         style="padding-left: 2.5rem;">
                     <i class="bi bi-lightning nd-input-icon"></i>
                 </div>
             </div>
 
              <div class="col-md-3">
-                <label class="nd-label">Contexto (Opcional)</label>
+                <label class="nd-label">Objeto Afetado (Opcional)</label>
                 <input type="text" name="context_type"
                     value="<?= htmlspecialchars($filters['context_type'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                     class="nd-input"
-                    placeholder="Ex: submission">
+                    placeholder="Ex: Submissão, Usuário...">
             </div>
 
             <div class="col-md-3">
@@ -88,7 +88,7 @@ $totalPages = max(1, (int)ceil($total / $perPage));
     <div class="nd-card-header d-flex justify-content-between align-items-center">
          <div class="d-flex align-items-center gap-2">
             <i class="bi bi-list-columns" style="color: var(--nd-navy-500);"></i>
-            <h5 class="nd-card-title mb-0">Registros de Auditoria</h5>
+            <h5 class="nd-card-title mb-0">Registros de Atividade</h5>
         </div>
         <span class="badge bg-light text-dark border">Total: <?= (int)$total ?></span>
     </div>
@@ -96,19 +96,19 @@ $totalPages = max(1, (int)ceil($total / $perPage));
         <?php if (!$logs): ?>
             <div class="text-center py-5">
                 <i class="bi bi-shield-slash text-muted mb-2" style="font-size: 2rem;"></i>
-                <p class="text-muted mb-0">Nenhum registro de auditoria encontrado.</p>
+                <p class="text-muted mb-0">Nenhum registro de auditoria encontrado para os filtros selecionados.</p>
             </div>
         <?php else: ?>
             <div class="table-responsive">
                 <table class="nd-table">
                     <thead>
                         <tr>
-                            <th style="width: 180px;">Data / Hora</th>
-                            <th>Ação</th>
-                            <th>Ator</th>
-                            <th>Detalhes</th>
-                            <th>Contexto</th>
-                            <th class="text-end">IP</th>
+                            <th style="width: 180px;">Data da Ocorrência</th>
+                            <th>Ação Registrada</th>
+                            <th>Responsável</th>
+                            <th>Detalhes da Operação</th>
+                            <th>Objeto</th>
+                            <th class="text-end">Endereço IP</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -123,21 +123,41 @@ $totalPages = max(1, (int)ceil($total / $perPage));
                                 <td>
                                     <?php
                                         $action = $log['action'];
-                                        $badgeClass = 'bg-light text-dark border'; // Default
+                                        $label = $action;
+                                        $badgeClass = 'bg-light text-dark border'; 
                                         
-                                        if (str_contains($action, '_SUCCESS')) $badgeClass = 'nd-badge-success-soft'; // Soft green custom class or similar
-                                        elseif (str_contains($action, '_FAILED')) $badgeClass = 'nd-badge-danger-soft';
-                                        elseif (str_contains($action, 'DELETE')) $badgeClass = 'bg-danger text-white';
-                                        elseif (str_contains($action, 'CREATE')) $badgeClass = 'bg-primary text-white';
-                                        elseif (str_contains($action, 'UPDATE')) $badgeClass = 'bg-info text-dark';
-                                        
-                                        // Specific overrides based on user image perception (pink text for success/fail?)
-                                        // Let's make it look premium readable:
-                                        if ($action === 'LOGIN_SUCCESS') $badgeClass = 'nd-badge-success';
-                                        if ($action === 'LOGIN_FAILED') $badgeClass = 'nd-badge-danger';
+                                        // Friendly mappings
+                                        if (str_contains($action, 'LOGIN_SUCCESS')) {
+                                            $badgeClass = 'nd-badge-success';
+                                            $label = 'Acesso Realizado';
+                                        }
+                                        elseif (str_contains($action, 'LOGIN_FAILED')) {
+                                            $badgeClass = 'nd-badge-danger';
+                                            $label = 'Falha de Acesso';
+                                        }
+                                        elseif (str_contains($action, 'LOGOUT')) {
+                                            $badgeClass = 'nd-badge-secondary';
+                                            $label = 'Saída do Sistema';
+                                        }
+                                        elseif (str_contains($action, 'CREATE') || str_contains($action, 'STORE')) {
+                                            $badgeClass = 'bg-success text-white';
+                                            $label = 'Criação';
+                                        }
+                                        elseif (str_contains($action, 'UPDATE') || str_contains($action, 'EDIT')) {
+                                            $badgeClass = 'bg-warning text-dark';
+                                            $label = 'Atualização';
+                                        }
+                                        elseif (str_contains($action, 'DELETE') || str_contains($action, 'DESTROY')) {
+                                            $badgeClass = 'bg-danger text-white';
+                                            $label = 'Remoção';
+                                        }
+                                        elseif (str_contains($action, 'DOWNLOAD')) {
+                                            $badgeClass = 'bg-info text-white';
+                                            $label = 'Download';
+                                        }
                                     ?>
-                                    <span class="badge font-monospace fw-normal <?= $badgeClass ?>">
-                                        <?= htmlspecialchars($action, ENT_QUOTES, 'UTF-8') ?>
+                                    <span class="badge font-monospace fw-normal <?= $badgeClass ?>" title="<?= htmlspecialchars($action, ENT_QUOTES, 'UTF-8') ?>">
+                                        <?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>
                                     </span>
                                 </td>
                                 <td>

@@ -24,8 +24,8 @@ $actionMap = [
             <i class="bi bi-shield-lock-fill text-white"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Registros de Auditoria</h1>
-            <p class="text-muted mb-0 small">Histórico detalhado de segurança e ações do sistema</p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Trilha de Auditoria</h1>
+            <p class="text-muted mb-0 small">Histórico detalhado de segurança e operações do sistema</p>
         </div>
     </div>
 </div>
@@ -34,7 +34,7 @@ $actionMap = [
 <div class="nd-card mb-4">
     <div class="nd-card-header d-flex align-items-center gap-2">
         <i class="bi bi-search" style="color: var(--nd-gold-500);"></i>
-        <h5 class="nd-card-title mb-0">Pesquisar Auditoria</h5>
+        <h5 class="nd-card-title mb-0">Filtros de Pesquisa</h5>
     </div>
     <div class="nd-card-body">
         <form class="row g-3" method="get" action="/admin/audit-logs">
@@ -52,10 +52,10 @@ $actionMap = [
             </div>
             
             <div class="col-md-3">
-                <label class="nd-label">Ação</label>
+                <label class="nd-label">Atividade</label>
                 <div class="nd-input-group">
                     <select name="action" class="nd-input form-select" style="padding-left: 2.5rem;">
-                        <option value="">Todas as Ações</option>
+                        <option value="">Todas as Atividades</option>
                         <?php foreach ($actionMap as $key => $label): ?>
                             <option value="<?= htmlspecialchars($key) ?>" <?= ($_GET['action'] ?? '') === $key ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($label) ?>
@@ -80,7 +80,7 @@ $actionMap = [
 
             <div class="col-md-2 d-flex align-items-end">
                 <button class="nd-btn nd-btn-primary w-100" type="submit">
-                    <i class="bi bi-filter me-1"></i> Filtrar
+                    <i class="bi bi-filter me-1"></i> Aplicar Filtros
                 </button>
             </div>
         </form>
@@ -91,7 +91,7 @@ $actionMap = [
     <div class="nd-card-header d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-2">
              <i class="bi bi-list-check" style="color: var(--nd-navy-500);"></i>
-             <h5 class="nd-card-title mb-0">Logs de Atividade</h5>
+             <h5 class="nd-card-title mb-0">Registros de Atividade</h5>
         </div>
         <span class="badge bg-light text-dark border">Página <?= (int)$pagination['page'] ?> de <?= (int)($pagination['pages'] ?? 1) ?></span>
     </div>
@@ -100,19 +100,19 @@ $actionMap = [
          <?php if (!$items): ?>
              <div class="text-center py-5">
                 <i class="bi bi-clipboard-x text-muted mb-2" style="font-size: 2rem;"></i>
-                <p class="text-muted mb-0">Nenhum registro de auditoria encontrado.</p>
+                <p class="text-muted mb-0">Nenhum registro de auditoria encontrado para os critérios selecionados.</p>
             </div>
         <?php else: ?>
             <div class="table-responsive">
                 <table class="nd-table">
                     <thead>
                          <tr>
-                            <th style="width: 180px;">Data</th>
-                            <th>Ação</th>
-                            <th>Ator</th>
-                            <th>Alvo</th>
-                            <th>Detalhes (JSON)</th>
-                            <th class="text-end">IP</th>
+                            <th style="width: 180px;">Data da Ocorrência</th>
+                            <th>Ação Registrada</th>
+                            <th>Responsável</th>
+                            <th>Recurso / Objeto</th>
+                            <th>Detalhes Técnicos</th>
+                            <th class="text-end">Endereço IP</th>
                         </tr>
                     </thead>
                     <tbody>
