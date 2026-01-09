@@ -23,7 +23,7 @@ $query = http_build_query([
         <i class="bi bi-inbox-fill text-white"></i>
     </div>
     <div>
-        <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Protocolos Recebidos</h1>
+        <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Envios Recebidos</h1>
         <p class="text-muted mb-0 small">Gestão de solicitações e documentos enviados pelo portal</p>
     </div>
   </div>
@@ -83,7 +83,7 @@ $query = http_build_query([
           <table class="nd-table">
             <thead>
               <tr>
-                <th style="width: 120px;">Protocolo</th>
+                <th style="width: 120px;">Código</th>
                 <th>Assunto</th>
                 <th>Solicitante</th>
                 <th style="width: 140px;">Situação</th>
@@ -146,7 +146,7 @@ $query = http_build_query([
                             try {
                                 $date = new DateTime($submittedAt);
                                 $formattedDate = $date->format('d/m/Y H:i');
-                            } catch (Exception $e) {Relatório de Submissões
+                            } catch (Exception $e) {
                                 $formattedDate = $submittedAt;
                             }
                         } else {
