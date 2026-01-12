@@ -11,7 +11,7 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
 ?>
 
 <div class="d-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 fw-bold text-dark mb-0">Nova Solicitação de Cadastro</h1>
+    <h1 class="h3 fw-bold text-dark mb-0">Novo Envio</h1>
     <a href="/portal/submissions" class="nd-btn nd-btn-sm nd-btn-outline">Cancelar</a>
 </div>
 
@@ -59,7 +59,7 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
                             value="<?= htmlspecialchars($old['company_cnpj'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         <button class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none pe-3" 
                                 type="button" id="btnSearchCnpj" style="z-index: 5;">
-                            <i class="bi bi-search text-primary"></i> <span class="fw-medium">Buscar</span>
+                            <i class="bi bi-search text-primary"></i> <span class="fw-medium">Preencher</span>
                         </button>
                     </div>
                     <?php if (isset($errors['company_cnpj'])): ?>
@@ -67,7 +67,7 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
                     <?php endif; ?>
                     <div class="form-text small text-muted mt-1">
                         <i class="bi bi-info-circle me-1"></i>
-                        Clique em "Buscar" para preencher automaticamente
+                        Clique em "Preencher" para buscar os dados automaticamente
                     </div>
                 </div>
 
@@ -182,7 +182,7 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
         <div class="nd-card-header d-flex justify-content-between align-items-center">
             <h2 class="nd-card-title mb-0">Composição Societária</h2>
             <button type="button" class="nd-btn nd-btn-sm nd-btn-outline" id="btnAddShareholder">
-                <i class="bi bi-plus-lg me-1"></i> Adicionar Sócio
+                <i class="bi bi-plus-lg me-1"></i> Incluir Sócio
             </button>
         </div>
         <div class="nd-card-body">
@@ -247,7 +247,7 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
     <!-- Responsável pelo Cadastro -->
     <div class="nd-card mb-4">
         <div class="nd-card-header">
-            <h2 class="nd-card-title">Dados do Solicitante</h2>
+            <h2 class="nd-card-title">Seus Dados</h2>
         </div>
         <div class="nd-card-body">
             <div class="row g-3">
@@ -297,7 +297,7 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
     <div class="d-flex justify-content-end gap-3 mb-5">
         <a href="/portal/submissions" class="nd-btn nd-btn-lg nd-btn-outline px-4">Cancelar</a>
         <button type="submit" class="nd-btn nd-btn-lg nd-btn-primary px-5">
-            <i class="bi bi-send me-2"></i> Transmitir Solicitação
+            <i class="bi bi-send me-2"></i> Enviar
         </button>
     </div>
 </form>

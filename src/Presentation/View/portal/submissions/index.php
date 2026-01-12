@@ -12,7 +12,7 @@ $error   = $flash['error']   ?? null;
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 fw-bold text-dark mb-0">Meus Envios</h1>
     <a href="/portal/submissions/create" class="nd-btn nd-btn-primary">
-        <i class="bi bi-plus-lg me-1"></i> Nova Solicitação
+        <i class="bi bi-plus-lg me-1"></i> Novo Envio
     </a>
 </div>
 
@@ -56,8 +56,8 @@ $error   = $flash['error']   ?? null;
                                 <div class="mb-3">
                                     <i class="bi bi-inbox fs-1 opacity-25"></i>
                                 </div>
-                                <h6 class="fw-medium">Nenhum protocolo localizado</h6>
-                                <p class="small mb-0">Você ainda não realizou nenhuma solicitação.</p>
+                                <h6 class="fw-medium">Nenhum envio localizado</h6>
+                                <p class="small mb-0">Você ainda não enviou nenhum documento.</p>
                             </td>
                         </tr>
                     <?php else: ?>
@@ -138,7 +138,7 @@ $error   = $flash['error']   ?? null;
                 <!-- Anterior -->
                 <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
                     <a class="page-link" href="/portal/submissions?page=<?= max(1, $page - 1) ?>" aria-label="Anterior">
-                        <span aria-hidden="true">&laquo;</span>
+                        <i class="bi bi-chevron-left"></i>
                     </a>
                 </li>
                 
@@ -154,7 +154,7 @@ $error   = $flash['error']   ?? null;
                 <!-- Próximo -->
                 <li class="page-item <?= $page >= $pages ? 'disabled' : '' ?>">
                     <a class="page-link" href="/portal/submissions?page=<?= min($pages, $page + 1) ?>" aria-label="Próximo">
-                        <span aria-hidden="true">&raquo;</span>
+                        <i class="bi bi-chevron-right"></i>
                     </a>
                 </li>
             </ul>
