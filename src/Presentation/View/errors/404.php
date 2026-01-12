@@ -36,23 +36,23 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
 
             <!-- Error Code -->
             <h1 class="display-1 fw-bold text-dark mb-0" style="color: var(--nd-navy-900);">404</h1>
-            <h2 class="h4 text-muted mb-4">Página não encontrada</h2>
+            <h2 class="h4 text-muted mb-4">Recurso Não Localizado</h2>
 
             <!-- Message -->
             <p class="text-secondary mb-4">
-                O recurso que você está procurando pode ter sido removido, 
-                renomeado ou não está disponível temporariamente.
+                O endereço solicitado não está disponível ou foi movido. 
+                Verifique a URL ou utilize o menu de navegação.
             </p>
 
             <!-- Actions -->
             <div class="d-flex flex-column gap-2">
                 <a href="/admin/dashboard" class="nd-btn nd-btn-primary w-100 justify-content-center">
                     <i class="bi bi-grid-1x2-fill"></i>
-                    Voltar ao Dashboard
+                    Retornar ao Painel
                 </a>
                 <a href="javascript:history.back()" class="nd-btn nd-btn-outline w-100 justify-content-center">
                     <i class="bi bi-arrow-left"></i>
-                    Voltar
+                    Voltar Página
                 </a>
             </div>
 

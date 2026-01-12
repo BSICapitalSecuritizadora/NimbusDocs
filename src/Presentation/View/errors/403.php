@@ -36,29 +36,29 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
 
             <!-- Error Code -->
             <h1 class="display-1 fw-bold text-dark mb-0" style="color: var(--nd-navy-900);">403</h1>
-            <h2 class="h4 text-muted mb-4">Acesso Restrito</h2>
+            <h2 class="h4 text-muted mb-4">Permissão Negada</h2>
 
             <!-- Message -->
             <p class="text-secondary mb-4">
-                Desculpe, mas sua conta não possui as permissões necessárias
-                para acessar este recurso. Entre em contato com seu administrador.
+                Sua credencial atual não possui nível de acesso suficiente para este recurso. 
+                Por favor, contate o administrador do sistema.
             </p>
 
             <!-- Actions -->
             <div class="d-flex flex-column gap-2">
                 <a href="/admin/dashboard" class="nd-btn nd-btn-primary w-100 justify-content-center">
                     <i class="bi bi-grid-1x2-fill"></i>
-                    Voltar ao Dashboard
+                    Retornar ao Painel
                 </a>
                 <a href="javascript:history.back()" class="nd-btn nd-btn-outline w-100 justify-content-center">
                     <i class="bi bi-arrow-left"></i>
-                    Voltar
+                    Voltar Página
                 </a>
             </div>
             
             <div class="mt-4 pt-4 border-top">
                 <small class="text-muted d-block">
-                    Protocolo de Segurança: <span class="fw-bold text-dark">ND-SEC-<?= rand(1000, 9999) ?></span>
+                    ID do Incidente: <span class="fw-bold text-dark">SEC-<?= rand(1000, 9999) ?></span>
                 </small>
             </div>
         </div>

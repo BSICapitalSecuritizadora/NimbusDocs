@@ -36,17 +36,17 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
 
             <!-- Error Code -->
             <h1 class="display-1 fw-bold text-dark mb-0" style="color: var(--nd-navy-900);">500</h1>
-            <h2 class="h4 text-muted mb-4">Erro Interno do Servidor</h2>
+            <h2 class="h4 text-muted mb-4">Indisponibilidade Temporária</h2>
 
             <!-- Message -->
             <p class="text-secondary mb-4">
-                Ocorreu uma falha inesperada em nossos sistemas.
-                Nossa equipe técnica foi notificada automaticamente.
+                Identificamos uma inconsistência no processamento da sua solicitação. 
+                O registro do incidente foi encaminhado automaticamente à equipe técnica.
             </p>
 
             <?php if (!empty($error)): ?>
                 <div class="d-none d-md-block text-start bg-light p-3 rounded mb-4 overflow-auto" style="max-height: 200px; font-size: 0.8rem; border: 1px solid var(--nd-gray-200);">
-                    <strong class="d-block mb-2 text-danger">Detalhes Técnicos:</strong>
+                    <strong class="d-block mb-2 text-danger">Log do Incidente:</strong>
                     <code class="text-secondary"><?= nl2br(htmlspecialchars($error, ENT_QUOTES, 'UTF-8')) ?></code>
                 </div>
             <?php endif; ?>
@@ -55,11 +55,11 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
             <div class="d-flex flex-column gap-2">
                 <a href="/admin/dashboard" class="nd-btn nd-btn-primary w-100 justify-content-center">
                     <i class="bi bi-grid-1x2-fill"></i>
-                    Voltar ao Dashboard
+                    Retornar ao Painel
                 </a>
                 <a href="javascript:location.reload()" class="nd-btn nd-btn-outline w-100 justify-content-center">
                     <i class="bi bi-arrow-clockwise"></i>
-                    Tentar Novamente
+                    Recarregar Aplicação
                 </a>
             </div>
         </div>
