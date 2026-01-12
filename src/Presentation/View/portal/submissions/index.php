@@ -10,9 +10,9 @@ $success = $flash['success'] ?? null;
 $error   = $flash['error']   ?? null;
 ?>
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 fw-bold text-dark mb-0">Minhas Submissões</h1>
+    <h1 class="h3 fw-bold text-dark mb-0">Meus Envios</h1>
     <a href="/portal/submissions/create" class="nd-btn nd-btn-primary">
-        <i class="bi bi-plus-lg me-1"></i> Nova Submissão
+        <i class="bi bi-plus-lg me-1"></i> Nova Solicitação
     </a>
 </div>
 
@@ -42,10 +42,10 @@ $error   = $flash['error']   ?? null;
             <table class="nd-table">
                 <thead>
                     <tr>
-                        <th class="ps-4">Código</th>
-                        <th>Título</th>
-                        <th>Status</th>
-                        <th>Enviado em</th>
+                        <th class="ps-4">Protocolo</th>
+                        <th>Assunto</th>
+                        <th>Situação</th>
+                        <th>Data de Envio</th>
                         <th class="text-end pe-4">Ações</th>
                     </tr>
                 </thead>
@@ -56,8 +56,8 @@ $error   = $flash['error']   ?? null;
                                 <div class="mb-3">
                                     <i class="bi bi-inbox fs-1 opacity-25"></i>
                                 </div>
-                                <h6 class="fw-medium">Nenhuma submissão encontrada</h6>
-                                <p class="small mb-0">Você ainda não realizou nenhum envio de documento.</p>
+                                <h6 class="fw-medium">Nenhum protocolo localizado</h6>
+                                <p class="small mb-0">Você ainda não realizou nenhuma solicitação.</p>
                             </td>
                         </tr>
                     <?php else: ?>

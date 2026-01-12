@@ -46,7 +46,7 @@ $dateFormatted = !empty($submission['submitted_at'])
         <a href="/portal/submissions" class="nd-btn nd-btn-sm nd-btn-outline mb-2">
             <i class="bi bi-arrow-left"></i> Voltar
         </a>
-        <h1 class="h3 fw-bold text-dark mb-0">Detalhes do Envio</h1>
+        <h1 class="h3 fw-bold text-dark mb-0">Detalhes da Solicitação</h1>
     </div>
     <div class="text-end">
         <span class="nd-badge <?= $badgeClass ?> fs-6 px-3 py-2">
@@ -61,7 +61,7 @@ $dateFormatted = !empty($submission['submitted_at'])
         <!-- Main details -->
         <div class="nd-card mb-4">
             <div class="nd-card-header">
-                <h2 class="nd-card-title">Informações Principais</h2>
+                <h2 class="nd-card-title">Resumo do Protocolo</h2>
             </div>
             <div class="nd-card-body">
                 <div class="row gy-3">
@@ -77,7 +77,7 @@ $dateFormatted = !empty($submission['submitted_at'])
                 
                 <div class="row gy-3">
                     <div class="col-md-6">
-                        <label class="nd-label text-muted mb-1">Código de Referência</label>
+                        <label class="nd-label text-muted mb-1">Protocolo</label>
                         <div class="font-monospace text-secondary bg-light rounded px-2 py-1 d-inline-block">
                             <?= htmlspecialchars($submission['reference_code'], ENT_QUOTES, 'UTF-8') ?>
                         </div>
@@ -150,7 +150,7 @@ $dateFormatted = !empty($submission['submitted_at'])
                     </div>
                     
                     <div class="col-12 border-top border-light-subtle pt-3 mt-3">
-                        <h6 class="text-secondary small fw-bold text-uppercase mb-3">Dados do Responsável pelo Cadastro</h6>
+                        <h6 class="text-secondary small fw-bold text-uppercase mb-3">Dados do Solicitante</h6>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="nd-label text-muted mb-1">Nome Completo</label>
@@ -264,7 +264,7 @@ $dateFormatted = !empty($submission['submitted_at'])
         <!-- Files sent by user -->
         <div class="nd-card mb-4">
             <div class="nd-card-header">
-                <h2 class="nd-card-title">Arquivos Enviados</h2>
+                <h2 class="nd-card-title">Documentos Anexados</h2>
             </div>
             <div class="nd-card-body p-0">
                 <?php if (!$files): ?>
@@ -317,7 +317,7 @@ $dateFormatted = !empty($submission['submitted_at'])
                 <div class="nd-card-header bg-primary-subtle bg-opacity-10">
                     <h2 class="nd-card-title text-primary-emphasis">
                         <i class="bi bi-reply-all-fill me-2"></i>
-                        Resposta da BSI
+                        Parecer / Documentos de Retorno
                     </h2>
                 </div>
                 <div class="nd-card-body p-0">

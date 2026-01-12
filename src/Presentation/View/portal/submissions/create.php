@@ -11,7 +11,7 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
 ?>
 
 <div class="d-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 fw-bold text-dark mb-0">Novo Cadastro de Cliente</h1>
+    <h1 class="h3 fw-bold text-dark mb-0">Nova Solicitação de Cadastro</h1>
     <a href="/portal/submissions" class="nd-btn nd-btn-sm nd-btn-outline">Cancelar</a>
 </div>
 
@@ -31,7 +31,7 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
     <!-- Informações da Empresa -->
     <div class="nd-card mb-4">
         <div class="nd-card-header">
-            <h2 class="nd-card-title">Informações da Empresa</h2>
+            <h2 class="nd-card-title">Dados da Empresa</h2>
         </div>
         <div class="nd-card-body">
             <div class="row g-3">
@@ -247,7 +247,7 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
     <!-- Responsável pelo Cadastro -->
     <div class="nd-card mb-4">
         <div class="nd-card-header">
-            <h2 class="nd-card-title">Responsável pelo Cadastro</h2>
+            <h2 class="nd-card-title">Dados do Solicitante</h2>
         </div>
         <div class="nd-card-body">
             <div class="row g-3">
@@ -297,7 +297,7 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
     <div class="d-flex justify-content-end gap-3 mb-5">
         <a href="/portal/submissions" class="nd-btn nd-btn-lg nd-btn-outline px-4">Cancelar</a>
         <button type="submit" class="nd-btn nd-btn-lg nd-btn-primary px-5">
-            <i class="bi bi-send me-2"></i> Enviar Cadastro
+            <i class="bi bi-send me-2"></i> Transmitir Solicitação
         </button>
     </div>
 </form>
