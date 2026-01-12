@@ -18,8 +18,8 @@ $csrfToken = $viewData['csrfToken'] ?? '';
 ?>
 
 <div class="mb-4">
-  <h1 class="h4 mb-3">Biblioteca de Documentos</h1>
-  <p class="text-muted">Acesso centralizado aos arquivos e manuais disponibilizados pela organização.</p>
+  <h1 class="h4 mb-3">Biblioteca</h1>
+  <p class="text-muted">Encontre manuais, políticas e arquivos importantes.</p>
 </div>
 
 <!-- Barra de Filtro -->
@@ -28,7 +28,7 @@ $csrfToken = $viewData['csrfToken'] ?? '';
     <form method="get" action="/portal/documents" class="row g-3">
       <!-- Busca -->
       <div class="col-md-6">
-        <label for="searchTerm" class="form-label">Pesquisar Arquivos</label>
+        <label for="searchTerm" class="form-label">Buscar</label>
         <div class="input-group">
           <span class="input-group-text"><i class="bi bi-search"></i></span>
           <input type="text" class="form-control" id="searchTerm" name="search" 
@@ -39,9 +39,9 @@ $csrfToken = $viewData['csrfToken'] ?? '';
 
       <!-- Filtro por Categoria -->
       <div class="col-md-4">
-        <label for="categoryId" class="form-label">Filtrar por Área</label>
+        <label for="categoryId" class="form-label">Categorias</label>
         <select class="form-select" id="categoryId" name="category">
-          <option value="">Todas as áreas</option>
+          <option value="">Tudo</option>
           <?php foreach ($categories as $cat): ?>
             <option value="<?= (int)$cat['id'] ?>" <?= ((int)$selectedCategoryId === (int)$cat['id'] ? 'selected' : '') ?>>
               <?= htmlspecialchars($cat['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>
@@ -66,7 +66,7 @@ $csrfToken = $viewData['csrfToken'] ?? '';
     <button class="nav-link active" id="generalTab" data-bs-toggle="tab" 
       data-bs-target="#generalTabContent" type="button" role="tab" 
       aria-controls="generalTabContent" aria-selected="true">
-      <i class="bi bi-files"></i> Acervo Corporativo
+      <i class="bi bi-files"></i> Biblioteca
       <?php if (!empty($documents)): ?>
         <span class="badge bg-secondary ms-2"><?= count($documents) ?></span>
       <?php endif; ?>
@@ -76,7 +76,7 @@ $csrfToken = $viewData['csrfToken'] ?? '';
     <button class="nav-link" id="myDocsTab" data-bs-toggle="tab" 
       data-bs-target="#myDocsTabContent" type="button" role="tab" 
       aria-controls="myDocsTabContent" aria-selected="false">
-      <i class="bi bi-file-earmark"></i> Meus Arquivos
+      <i class="bi bi-file-earmark"></i> Seus Arquivos
       <?php if (!empty($userDocs)): ?>
         <span class="badge bg-secondary ms-2"><?= count($userDocs) ?></span>
       <?php endif; ?>
@@ -152,7 +152,7 @@ $csrfToken = $viewData['csrfToken'] ?? '';
                   <!-- Botão Download -->
                   <a href="<?= htmlspecialchars($doc['file_path'], ENT_QUOTES, 'UTF-8') ?>" 
                     class="btn btn-sm btn-primary w-100" download>
-                    <i class="bi bi-download"></i> Download
+                    <i class="bi bi-download"></i> Baixar
                   </a>
                 </div>
               </div>
@@ -234,7 +234,7 @@ $csrfToken = $viewData['csrfToken'] ?? '';
 <!-- Seção de Categorias (alternativa visual) -->
 <?php if (!empty($categories) && empty($searchTerm)): ?>
   <div class="mt-5 pt-4 border-top">
-    <h5 class="mb-4">Navegue por Áreas</h5>
+    <h5 class="mb-4">Navegar por Categorias</h5>
     <div class="row g-3">
       <?php foreach ($categories as $cat): ?>
         <div class="col-md-4">
