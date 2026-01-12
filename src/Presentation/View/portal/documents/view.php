@@ -18,8 +18,8 @@ $csrfToken = $viewData['csrfToken'] ?? '';
 ?>
 
 <div class="mb-4">
-  <h1 class="h4 mb-3">Documentos da Plataforma</h1>
-  <p class="text-muted">Acesse documentos compartilhados pela plataforma NimbusDocs.</p>
+  <h1 class="h4 mb-3">Biblioteca de Documentos</h1>
+  <p class="text-muted">Acesso centralizado aos arquivos e manuais disponibilizados pela organização.</p>
 </div>
 
 <!-- Barra de Filtro -->
@@ -28,20 +28,20 @@ $csrfToken = $viewData['csrfToken'] ?? '';
     <form method="get" action="/portal/documents" class="row g-3">
       <!-- Busca -->
       <div class="col-md-6">
-        <label for="searchTerm" class="form-label">Buscar documentos</label>
+        <label for="searchTerm" class="form-label">Pesquisar Arquivos</label>
         <div class="input-group">
           <span class="input-group-text"><i class="bi bi-search"></i></span>
           <input type="text" class="form-control" id="searchTerm" name="search" 
-            placeholder="Digite o título ou descrição..." 
+            placeholder="Digite palavras-chave..." 
             value="<?= htmlspecialchars($searchTerm, ENT_QUOTES, 'UTF-8') ?>">
         </div>
       </div>
 
       <!-- Filtro por Categoria -->
       <div class="col-md-4">
-        <label for="categoryId" class="form-label">Categoria</label>
+        <label for="categoryId" class="form-label">Filtrar por Área</label>
         <select class="form-select" id="categoryId" name="category">
-          <option value="">Todas as categorias</option>
+          <option value="">Todas as áreas</option>
           <?php foreach ($categories as $cat): ?>
             <option value="<?= (int)$cat['id'] ?>" <?= ((int)$selectedCategoryId === (int)$cat['id'] ? 'selected' : '') ?>>
               <?= htmlspecialchars($cat['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>
@@ -66,7 +66,7 @@ $csrfToken = $viewData['csrfToken'] ?? '';
     <button class="nav-link active" id="generalTab" data-bs-toggle="tab" 
       data-bs-target="#generalTabContent" type="button" role="tab" 
       aria-controls="generalTabContent" aria-selected="true">
-      <i class="bi bi-files"></i> Documentos Gerais
+      <i class="bi bi-files"></i> Acervo Corporativo
       <?php if (!empty($documents)): ?>
         <span class="badge bg-secondary ms-2"><?= count($documents) ?></span>
       <?php endif; ?>
@@ -76,7 +76,7 @@ $csrfToken = $viewData['csrfToken'] ?? '';
     <button class="nav-link" id="myDocsTab" data-bs-toggle="tab" 
       data-bs-target="#myDocsTabContent" type="button" role="tab" 
       aria-controls="myDocsTabContent" aria-selected="false">
-      <i class="bi bi-file-earmark"></i> Meus Documentos
+      <i class="bi bi-file-earmark"></i> Meus Arquivos
       <?php if (!empty($userDocs)): ?>
         <span class="badge bg-secondary ms-2"><?= count($userDocs) ?></span>
       <?php endif; ?>
@@ -92,8 +92,8 @@ $csrfToken = $viewData['csrfToken'] ?? '';
       <div class="alert alert-info" role="alert">
         <i class="bi bi-info-circle"></i> 
         <?= !empty($searchTerm) || !empty($selectedCategoryId) 
-          ? 'Nenhum documento encontrado com os filtros aplicados.'
-          : 'Nenhum documento disponível no momento.' ?>
+          ? 'Nenhum arquivo localizado com os filtros aplicados.'
+          : 'Nenhum documento disponível no acervo.' ?>
       </div>
     <?php else: ?>
       <div class="row g-4">
@@ -168,7 +168,7 @@ $csrfToken = $viewData['csrfToken'] ?? '';
     <?php if (!$userDocs): ?>
       <div class="alert alert-info" role="alert">
         <i class="bi bi-info-circle"></i> 
-        Você ainda não possui documentos pessoais carregados na plataforma.
+        Você ainda não possui arquivos pessoais vinculados à sua conta.
       </div>
     <?php else: ?>
       <div class="table-responsive">
@@ -230,10 +230,11 @@ $csrfToken = $viewData['csrfToken'] ?? '';
   </div>
 </div>
 
+
 <!-- Seção de Categorias (alternativa visual) -->
 <?php if (!empty($categories) && empty($searchTerm)): ?>
   <div class="mt-5 pt-4 border-top">
-    <h5 class="mb-4">Navegue por Categoria</h5>
+    <h5 class="mb-4">Navegue por Áreas</h5>
     <div class="row g-3">
       <?php foreach ($categories as $cat): ?>
         <div class="col-md-4">
