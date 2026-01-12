@@ -43,17 +43,17 @@ $appName  = $branding['app_name'] ?? 'NimbusDocs';
         <div class="nd-glass-card nd-page-card-anim">
             <!-- Logo -->
             <div class="d-flex justify-content-center mb-4">
-                <div class="nd-login-logo mb-0 overflow-hidden d-flex align-items-center justify-content-center bg-white p-2">
+                <div class="nd-login-logo mb-0 overflow-hidden d-flex align-items-center justify-content-center bg-white">
                     <?php if (!empty($branding['portal_logo_url'])): ?>
-                        <img src="<?= htmlspecialchars($branding['portal_logo_url'], ENT_QUOTES, 'UTF-8') ?>" alt="Logo" class="img-fluid" style="max-height: 48px; max-width: 48px; object-fit: contain;">
+                        <img src="<?= htmlspecialchars($branding['portal_logo_url'], ENT_QUOTES, 'UTF-8') ?>" alt="Logo" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
                     <?php else: ?>
-                        <img src="/assets/images/logo.jpg" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0iIzc4MzUwZiIgY2xhc3M9ImJpIGJpLWJ1aWxkaW5ncy1maWxsIj48cGF0aCBkPSJNMTUuNSAyaC0xMC41YTEgMSAwIDAgMC0xIDF2MTMuNWEwLjUgMC41IDAgMCAwIC41LjVoMTFhMC41IDAuNSAwIDAgMCAuNS0uNXYtMTMuNWExIDEgMCAwIDAtMS0xem0tMS41IDFoLjl2MWgtLjl2LTF6bTAgMy41aC45djFoLS45di0xeiIvPjwvc3ZnPg=='" alt="Logo" class="img-fluid" style="height: 32px;">
+                        <img src="/assets/images/logo.jpg" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0iIzc4MzUwZiIgY2xhc3M9ImJpIGJpLWJ1aWxkaW5ncy1maWxsIj48cGF0aCBkPSJNMTUuNSAyaC0xMC41YTEgMSAwIDAgMC0xIDF2MTMuNWEwLjUgMC41IDAgMCAwIC41LjVoMTFhMC41IDAuNSAwIDAgMCAuNS0uNXYtMTMuNWExIDEgMCAwIDAtMS0xem0tMS41IDFoLjl2MWgtLjl2LTF6bTAgMy41aC45djFoLS45di0xeiIvPjwvc3ZnPg=='" alt="Logo" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
                     <?php endif; ?>
                 </div>
             </div>
             
             <!-- Title -->
-            <h1 class="nd-login-title text-center">BSI Capital Cadastros</h1>
+            <h1 class="nd-login-title text-center">BSI Capital Documentos</h1>
             
             <!-- Alerts -->
             <?php if ($error): ?>
