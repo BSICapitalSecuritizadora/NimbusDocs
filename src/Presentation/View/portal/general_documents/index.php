@@ -8,8 +8,8 @@
 ?>
 <div class="row mb-4">
     <div class="col-12">
-        <h1 class="h3 mb-3 fw-bold text-dark">Acervo Corporativo</h1>
-        <p class="text-secondary">Acesso centralizado a documentos, manuais e políticas da organização.</p>
+        <h1 class="h3 mb-3 fw-bold text-dark">Biblioteca de Arquivos</h1>
+        <p class="text-secondary">Encontre manuais, políticas e documentos importantes.</p>
     </div>
 </div>
 
@@ -20,7 +20,7 @@
             <div class="nd-card-body">
                 <form action="/portal/documents/general" method="get">
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase text-secondary">Pesquisar Arquivo</label>
+                        <label class="form-label small fw-bold text-uppercase text-secondary">Buscar</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
                             <input type="text" name="q" class="form-control bg-light border-start-0 ps-0" placeholder="Palavras-chave..." value="<?= htmlspecialchars($term ?? '', ENT_QUOTES, 'UTF-8') ?>">
@@ -28,10 +28,10 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase text-secondary">Filtrar por Área</label>
+                        <label class="form-label small fw-bold text-uppercase text-secondary">Categorias</label>
                         <div class="d-flex flex-column gap-1">
                             <a href="/portal/documents/general" class="btn btn-sm text-start <?= empty($currentCategory) ? 'btn-primary' : 'btn-light text-dark' ?>">
-                                <i class="bi bi-grid-fill me-2 opacity-50"></i> Todas as Áreas
+                                <i class="bi bi-grid-fill me-2 opacity-50"></i> Tudo
                             </a>
                             <?php foreach ($categories as $cat): ?>
                                 <a href="/portal/documents/general?category_id=<?= $cat['id'] ?>" 
@@ -45,7 +45,7 @@
                     <?php if (!empty($term)): ?>
                         <div class="mt-3">
                             <a href="/portal/documents/general" class="btn btn-sm btn-outline-secondary w-100">
-                                <i class="bi bi-x-circle me-2"></i> Limpar Busca
+                                <i class="bi bi-x-circle me-2"></i> Limpar filtros
                             </a>
                         </div>
                     <?php endif; ?>
@@ -62,9 +62,9 @@
                     <div class="mb-3">
                         <i class="bi bi-folder2-open display-4 text-muted opacity-25"></i>
                     </div>
-                    <h5 class="fw-normal text-muted">Nenhum arquivo localizado no acervo</h5>
+                    <h5 class="fw-normal text-muted">Nenhum documento encontrado</h5>
                     <?php if (!empty($term) || !empty($currentCategory)): ?>
-                        <p class="small text-secondary">Ajuste os filtros para refinar sua busca.</p>
+                        <p class="small text-secondary">Tente buscar por outros termos.</p>
                     <?php endif; ?>
                 </div>
             </div>
