@@ -10,7 +10,7 @@
     <div class="col-lg-8">
         
         <div class="d-flex align-items-center mb-4">
-            <h1 class="h3 fw-bold text-dark mb-0">Meu Perfil</h1>
+            <h1 class="h3 fw-bold text-dark mb-0">Gerenciar Meu Perfil</h1>
         </div>
 
         <?php if (!empty($flash['success'])): ?>
@@ -33,8 +33,8 @@
                     <?= strtoupper(substr($user['full_name'] ?? $user['email'], 0, 1)) ?>
                 </div>
                 <div>
-                    <h5 class="mb-0 fw-bold text-dark">Informações Pessoais</h5>
-                    <p class="mb-0 small text-secondary">Gerencie suas informações de cadastro</p>
+                    <h5 class="mb-0 fw-bold text-dark">Dados Pessoais</h5>
+                    <p class="mb-0 small text-secondary">Atualize suas informações de contato</p>
                 </div>
             </div>
             
@@ -62,14 +62,14 @@
                             ?>
                             <input type="text" class="nd-input bg-light" id="document_number" 
                                    value="<?= htmlspecialchars($maskedDoc) ?>" readonly disabled>
-                            <div class="form-text small">O documento não pode ser alterado.</div>
+                            <div class="form-text small">Para alterar o documento, contate sua agência de relacionamento.</div>
                         </div>
 
                         <div class="col-md-6">
-                            <label for="email" class="nd-label">E-mail</label>
+                            <label for="email" class="nd-label">E-mail Corporativo</label>
                             <input type="email" class="nd-input bg-light" id="email" 
                                    value="<?= htmlspecialchars($user['email'] ?? '') ?>" readonly disabled>
-                             <div class="form-text small">Para alterar o e-mail, entre em contato com o suporte.</div>
+                             <div class="form-text small">Para alteração de e-mail, solicite ao suporte técnico.</div>
                         </div>
 
                         <div class="col-md-6">
@@ -80,7 +80,7 @@
 
                         <div class="col-12 text-end pt-2 border-top border-light-subtle mt-2">
                             <button type="submit" class="nd-btn nd-btn-primary px-4">
-                                <i class="bi bi-check-lg me-2"></i> Salvar Alterações
+                                <i class="bi bi-check-lg me-2"></i> Confirmar Atualização
                             </button>
                         </div>
                     </div>
