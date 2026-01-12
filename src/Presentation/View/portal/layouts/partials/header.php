@@ -39,17 +39,17 @@ $isActive = fn($path) =>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <?= str_starts_with($_SERVER['REQUEST_URI'], '/portal/submissions') && $_SERVER['REQUEST_URI'] !== '/portal/submissions/new' ? 'active' : '' ?>" href="/portal/submissions">
-                        <i class="bi bi-inbox-fill"></i> Meus envios
+                        <i class="bi bi-inbox-fill"></i> Meus Envios
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <?= $_SERVER['REQUEST_URI'] === '/portal/submissions/new' ? 'active' : '' ?>" href="/portal/submissions/new">
-                        <i class="bi bi-plus-circle-fill"></i> Nova submissão
+                        <i class="bi bi-plus-circle-fill"></i> Nova Solicitação
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="/portal/documents/general" class="nav-link <?= str_starts_with($_SERVER['REQUEST_URI'], '/portal/documents/general') ? 'active' : '' ?>">
-                        <i class="bi bi-folder-fill"></i> Documentos gerais
+                        <i class="bi bi-folder-fill"></i> Documentos
                     </a>
                 </li>
             </ul>
@@ -68,7 +68,7 @@ $isActive = fn($path) =>
                     <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 p-2 rounded-3 text-small" aria-labelledby="dropdownUser1">
                         <li>
                             <h6 class="dropdown-header text-uppercase small fw-bold text-muted mb-2">
-                                Conta
+                                Minha Conta
                             </h6>
                             <div class="px-3 pb-2 mb-2 border-bottom">
                                 <strong class="d-block text-dark"><?= htmlspecialchars($user['full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></strong>
@@ -77,13 +77,13 @@ $isActive = fn($path) =>
                         </li>
                         <li>
                             <a class="dropdown-item rounded-2 py-2 mb-1" href="/portal/profile">
-                                <i class="bi bi-person-gear me-2 text-secondary"></i> Meu Perfil
+                                <i class="bi bi-person-gear me-2 text-secondary"></i> Gerenciar Perfil
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <a class="dropdown-item rounded-2 py-2 text-danger" href="/portal/logout">
-                                <i class="bi bi-box-arrow-right me-2"></i> Sair
+                                <i class="bi bi-box-arrow-right me-2"></i> Encerrar Sessão
                             </a>
                         </li>
                     </ul>
