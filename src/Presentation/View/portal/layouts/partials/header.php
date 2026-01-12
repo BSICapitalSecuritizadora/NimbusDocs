@@ -17,11 +17,11 @@ $isActive = fn($path) =>
                      alt="Logo"
                      class="navbar-logo">
             <?php else: ?>
-                <div class="brand-icon">
-                    <i class="bi bi-cloud-check-fill"></i>
-                </div>
+                <img src="/assets/images/bsi_logo.png" 
+                     alt="BSI Capital" 
+                     class="img-fluid"
+                     style="max-height: 40px; width: auto;">
             <?php endif; ?>
-            <span class="brand-text"><?= htmlspecialchars($appName, ENT_QUOTES, 'UTF-8') ?></span>
         </a>
 
         <button class="navbar-toggler border-0 shadow-none text-white" type="button" data-bs-toggle="collapse"
