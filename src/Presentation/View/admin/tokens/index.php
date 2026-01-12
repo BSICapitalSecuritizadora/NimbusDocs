@@ -16,8 +16,8 @@ $search = $filters['search'] ?? '';
             <i class="bi bi-key-fill text-white"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Tokens de Acesso</h1>
-            <p class="text-muted mb-0 small">Gerencie os links de acesso "mágico" gerados</p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Histórico de Credenciais</h1>
+            <p class="text-muted mb-0 small">Monitoramento de links de autenticação temporária</p>
         </div>
     </div>
 </div>
@@ -29,10 +29,10 @@ $search = $filters['search'] ?? '';
             <div class="col-sm-6 col-md-3">
                 <div class="nd-input-group">
                     <select name="status" class="nd-input form-select" style="padding-left: 2.5rem;">
-                        <option value="">Todos os status</option>
+                        <option value="">Todas as situações</option>
                         <option value="valid" <?= $status === 'valid' ? 'selected' : '' ?>>Válidos</option>
                         <option value="expired" <?= $status === 'expired' ? 'selected' : '' ?>>Expirados</option>
-                        <option value="used" <?= $status === 'used' ? 'selected' : '' ?>>Usados/Revogados</option>
+                        <option value="used" <?= $status === 'used' ? 'selected' : '' ?>>Utilizados/Revogados</option>
                     </select>
                     <i class="bi bi-filter nd-input-icon"></i>
                 </div>
@@ -41,7 +41,7 @@ $search = $filters['search'] ?? '';
                 <div class="nd-input-group">
                     <input type="text" name="search"
                         class="nd-input"
-                        placeholder="Buscar por nome ou e-mail"
+                        placeholder="Pesquisar por Titular ou E-mail..."
                         value="<?= htmlspecialchars($search, ENT_QUOTES, 'UTF-8') ?>"
                         style="padding-left: 2.5rem;">
                     <i class="bi bi-search nd-input-icon"></i>
@@ -49,7 +49,7 @@ $search = $filters['search'] ?? '';
             </div>
             <div class="col-sm-6 col-md-2">
                 <button type="submit" class="nd-btn nd-btn-primary w-100">
-                    Filtrar
+                    Filtrar Registros
                 </button>
             </div>
         </form>
@@ -59,17 +59,17 @@ $search = $filters['search'] ?? '';
         <?php if (!$items): ?>
             <div class="text-center py-5">
                 <i class="bi bi-qr-code-scan text-muted mb-2" style="font-size: 2rem;"></i>
-                <p class="text-muted mb-0">Nenhum token encontrado com os filtros atuais.</p>
+                <p class="text-muted mb-0">Nenhuma credencial localizada.</p>
             </div>
         <?php else: ?>
             <div class="table-responsive">
                 <table class="nd-table">
                     <thead>
                         <tr>
-                            <th>Usuário</th>
-                            <th>Token</th>
-                            <th>Validade</th>
-                            <th>Status</th>
+                            <th>Titular</th>
+                            <th>Código da Credencial</th>
+                            <th>Vigência</th>
+                            <th>Situação</th>
                             <th class="text-end">Ações</th>
                         </tr>
                     </thead>
@@ -115,17 +115,17 @@ $search = $filters['search'] ?? '';
                                 </td>
                                 <td>
                                     <?php if ($isUsed): ?>
-                                        <span class="nd-badge nd-badge-secondary">Usado</span>
+                                        <span class="nd-badge nd-badge-secondary">Utilizado</span>
                                     <?php elseif ($isExpired): ?>
                                         <span class="nd-badge nd-badge-danger">Expirado</span>
                                     <?php else: ?>
-                                        <span class="nd-badge nd-badge-success">Válido</span>
+                                        <span class="nd-badge nd-badge-success">Ativo</span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-end">
                                     <div class="btn-group">
                                         <a href="/admin/tokens/<?= (int)$t['id'] ?>"
-                                            class="nd-btn nd-btn-outline nd-btn-sm" title="Detalhes">
+                                            class="nd-btn nd-btn-outline nd-btn-sm" title="Ver Detalhes">
                                             <i class="bi bi-eye"></i>
                                         </a>
 
@@ -133,11 +133,11 @@ $search = $filters['search'] ?? '';
                                             <form method="post"
                                                 action="/admin/tokens/<?= (int)$t['id'] ?>/revoke"
                                                 class="d-inline"
-                                                onsubmit="return confirm('Revogar este token? O usuário não poderá mais utilizá-lo.');">
+                                                onsubmit="return confirm('Deseja realmente revogar esta credencial?');">
                                                 <input type="hidden" name="_token"
                                                     value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                                                 <button type="submit"
-                                                    class="nd-btn nd-btn-outline nd-btn-sm text-danger border-start-0" title="Revogar">
+                                                    class="nd-btn nd-btn-outline nd-btn-sm text-danger border-start-0" title="Revogar Credencial">
                                                     <i class="bi bi-x-circle"></i>
                                                 </button>
                                             </form>
