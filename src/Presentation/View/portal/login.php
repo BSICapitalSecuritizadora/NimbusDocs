@@ -49,7 +49,7 @@ $appName  = $branding['app_name'] ?? 'NimbusDocs';
             </div>
             
             <!-- Title -->
-            <h1 class="nd-login-title text-center">Portal do Cliente</h1>
+            <h1 class="nd-login-title text-center">Ambiente Corporativo</h1>
             <p class="nd-login-subtitle text-center mb-4">Acesso Seguro</p>
             
             <!-- Alerts -->
@@ -78,7 +78,7 @@ $appName  = $branding['app_name'] ?? 'NimbusDocs';
                 <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                 
                 <div class="mb-4">
-                    <label for="access_code" class="nd-label text-center d-block">Código de Acesso</label>
+                    <label for="access_code" class="nd-label text-center d-block">Credencial de Acesso</label>
                     <div class="nd-input-group">
                         <input type="text"
                                class="nd-input nd-input-code text-center ps-5 pe-5"
@@ -93,15 +93,15 @@ $appName  = $branding['app_name'] ?? 'NimbusDocs';
                 </div>
 
                 <button type="submit" class="nd-btn nd-btn-gold nd-btn-lg w-100">
-                    <i class="bi bi-box-arrow-in-right"></i>
-                    Acessar Portal
+                    <i class="bi bi-shield-lock-fill me-2"></i>
+                    Entrar no Portal
                 </button>
             </form>
             
             <div class="mt-4 pt-3 border-top border-light-subtle text-center">
                 <p class="nd-login-footer mb-0">
-                    Utilize o código fornecido pelo administrador.<br>
-                    Em caso de dúvidas, entre em contato com o suporte.
+                    Insira sua chave de identificação única.<br>
+                    Para suporte, contate seu gerente de relacionamento.
                 </p>
             </div>
         </div>
