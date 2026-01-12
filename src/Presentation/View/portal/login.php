@@ -43,14 +43,17 @@ $appName  = $branding['app_name'] ?? 'NimbusDocs';
         <div class="nd-glass-card nd-page-card-anim">
             <!-- Logo -->
             <div class="d-flex justify-content-center mb-4">
-                <div class="nd-login-logo mb-0">
-                    <i class="bi bi-buildings-fill"></i>
+                <div class="nd-login-logo mb-0 overflow-hidden d-flex align-items-center justify-content-center bg-white p-2">
+                    <?php if (!empty($branding['portal_logo_url'])): ?>
+                        <img src="<?= htmlspecialchars($branding['portal_logo_url'], ENT_QUOTES, 'UTF-8') ?>" alt="Logo" class="img-fluid" style="max-height: 48px; max-width: 48px; object-fit: contain;">
+                    <?php else: ?>
+                        <img src="/assets/images/logo.jpg" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0iIzc4MzUwZiIgY2xhc3M9ImJpIGJpLWJ1aWxkaW5ncy1maWxsIj48cGF0aCBkPSJNMTUuNSAyaC0xMC41YTEgMSAwIDAgMC0xIDF2MTMuNWEwLjUgMC41IDAgMCAwIC41LjVoMTFhMC41IDAuNSAwIDAgMCAuNS0uNXYtMTMuNWExIDEgMCAwIDAtMS0xem0tMS41IDFoLjl2MWgtLjl2LTF6bTAgMy41aC45djFoLS45di0xeiIvPjwvc3ZnPg=='" alt="Logo" class="img-fluid" style="height: 32px;">
+                    <?php endif; ?>
                 </div>
             </div>
             
             <!-- Title -->
-            <h1 class="nd-login-title text-center">Ambiente Corporativo</h1>
-            <p class="nd-login-subtitle text-center mb-4">Acesso Seguro</p>
+            <h1 class="nd-login-title text-center">BSI Capital Cadastros</h1>
             
             <!-- Alerts -->
             <?php if ($error): ?>
@@ -100,8 +103,8 @@ $appName  = $branding['app_name'] ?? 'NimbusDocs';
             
             <div class="mt-4 pt-3 border-top border-light-subtle text-center">
                 <p class="nd-login-footer mb-0">
-                    Insira sua chave de identificação única.<br>
-                    Para suporte, contate seu gerente de relacionamento.
+                    Insira seu token de acesso único.<br>
+                    Para suporte, contate o suporte técnico.
                 </p>
             </div>
         </div>
