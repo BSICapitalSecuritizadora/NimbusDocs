@@ -33,8 +33,8 @@
                     <?= strtoupper(substr($user['full_name'] ?? $user['email'], 0, 1)) ?>
                 </div>
                 <div>
-                    <h5 class="mb-0 fw-bold text-dark">Dados Cadastrais</h5>
-                    <p class="mb-0 small text-secondary">Visualize e mantenha seus dados atualizados.</p>
+                    <h5 class="mb-0 fw-bold text-dark">Meus Dados</h5>
+                    <p class="mb-0 small text-secondary">Mantenha suas informações sempre atualizadas.</p>
                 </div>
             </div>
             
@@ -50,7 +50,7 @@
                         </div>
                         
                         <div class="col-md-6">
-                            <label for="document_number" class="nd-label">Documento (CPF/CNPJ)</label>
+                            <label for="document_number" class="nd-label">Documento (CPF)</label>
                             <?php
                                 $doc = preg_replace('/\D/', '', $user['document_number'] ?? '');
                                 $maskedDoc = $doc;
@@ -62,14 +62,13 @@
                             ?>
                             <input type="text" class="nd-input bg-light" id="document_number" 
                                    value="<?= htmlspecialchars($maskedDoc) ?>" readonly disabled>
-                            <div class="form-text small">Este dado é gerenciado pela sua agência de relacionamento.</div>
                         </div>
 
                         <div class="col-md-6">
                             <label for="email" class="nd-label">E-mail Corporativo</label>
                             <input type="email" class="nd-input bg-light" id="email" 
                                    value="<?= htmlspecialchars($user['email'] ?? '') ?>" readonly disabled>
-                             <div class="form-text small">Para alterar seu e-mail, fale com nosso suporte técnico.</div>
+                             <div class="form-text small">Mudou de e-mail? Avise nosso suporte.</div>
                         </div>
 
                         <div class="col-md-6">
@@ -80,7 +79,7 @@
 
                         <div class="col-12 text-end pt-2 border-top border-light-subtle mt-2">
                             <button type="submit" class="nd-btn nd-btn-primary px-4">
-                                <i class="bi bi-check-lg me-2"></i> Salvar Dados
+                                <i class="bi bi-check-lg me-2"></i> Salvar
                             </button>
                         </div>
                     </div>
