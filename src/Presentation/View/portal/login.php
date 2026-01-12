@@ -81,7 +81,7 @@ $appName  = $branding['app_name'] ?? 'NimbusDocs';
                 <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                 
                 <div class="mb-4">
-                    <label for="access_code" class="nd-label text-center d-block">Credencial de Acesso</label>
+                    <label for="access_code" class="nd-label text-center d-block">Código de Acesso</label>
                     <div class="nd-input-group">
                         <input type="text"
                                class="nd-input nd-input-code text-center ps-5 pe-5"
@@ -97,14 +97,14 @@ $appName  = $branding['app_name'] ?? 'NimbusDocs';
 
                 <button type="submit" class="nd-btn nd-btn-gold nd-btn-lg w-100">
                     <i class="bi bi-shield-lock-fill me-2"></i>
-                    Entrar no Portal
+                    Entrar
                 </button>
             </form>
             
             <div class="mt-4 pt-3 border-top border-light-subtle text-center">
                 <p class="nd-login-footer mb-0">
-                    Insira seu token de acesso único.<br>
-                    Para suporte, contate o suporte técnico.
+                    Informe o código recebido para continuar.<br>
+                    Precisa de ajuda? Fale com nosso suporte.
                 </p>
             </div>
         </div>
