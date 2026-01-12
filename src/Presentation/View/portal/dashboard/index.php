@@ -22,12 +22,12 @@
     <div class="col-12 col-lg-8">
         <h1 class="h3 fw-bold text-dark mb-1">Olá, <?= htmlspecialchars($user['full_name'] ?? $user['email'], ENT_QUOTES, 'UTF-8') ?>!</h1>
         <p class="text-secondary mb-0">
-            Bem-vindo ao seu portal exclusivo. Acompanhe seus envios e documentos.
+            Seu ambiente exclusivo para envio de documentos e acompanhamento de solicitações em tempo real.
         </p>
     </div>
     <div class="col-12 col-lg-4 text-lg-end mt-3 mt-lg-0">
         <a href="/portal/submissions/new" class="nd-btn nd-btn-gold shadow-sm">
-            <i class="bi bi-plus-lg"></i> Novo Envio
+            <i class="bi bi-plus-lg"></i> Nova Solicitação
         </a>
     </div>
 </div>
@@ -83,7 +83,7 @@
             <div class="d-flex justify-content-between align-items-start position-relative">
                 <div>
                     <div class="nd-metric-value mb-1"><?= $pendentes ?></div>
-                    <div class="nd-metric-label">Aguardando Análise</div>
+                    <div class="nd-metric-label">Em Análise</div>
                 </div>
                 <div class="nd-metric-icon">
                     <i class="bi bi-hourglass-split"></i>
@@ -99,7 +99,7 @@
             <div class="d-flex justify-content-between align-items-start position-relative">
                 <div>
                     <div class="nd-metric-value mb-1"><?= $concluidas ?></div>
-                    <div class="nd-metric-label">Processados / Concluídos</div>
+                    <div class="nd-metric-label">Concluídos</div>
                 </div>
                 <div class="nd-metric-icon">
                     <i class="bi bi-check-circle-fill"></i>
@@ -118,7 +118,7 @@
             <h2 class="nd-card-title fs-5">Envios Recentes</h2>
         </div>
         <a href="/portal/submissions" class="nd-btn nd-btn-outline nd-btn-sm">
-            Ver Todos
+            Ver Histórico Completo
         </a>
     </div>
     
@@ -128,10 +128,10 @@
                 <div class="mb-3 text-muted opacity-25">
                     <i class="bi bi-inbox fs-1"></i>
                 </div>
-                <h6 class="text-secondary fw-normal mb-1">Nenhum envio encontrado</h6>
-                <p class="small text-muted mb-3">Você ainda não realizou nenhum envio de documento.</p>
+                <h6 class="text-secondary fw-normal mb-1">Nenhuma solicitação encontrada</h6>
+                <p class="small text-muted mb-3">Você ainda não iniciou nenhuma solicitação.</p>
                 <a href="/portal/submissions/new" class="nd-btn nd-btn-primary nd-btn-sm">
-                    <i class="bi bi-plus-lg"></i> Criar Primeiro Envio
+                    <i class="bi bi-plus-lg"></i> Iniciar Nova Solicitação
                 </a>
             </div>
         <?php else: ?>
@@ -139,9 +139,9 @@
                 <table class="nd-table">
                     <thead>
                         <tr>
-                            <th>Assunto / Título</th>
-                            <th>Data</th>
-                            <th>Status</th>
+                            <th>Assunto</th>
+                            <th>Data de Criação</th>
+                            <th>Situação</th>
                             <th class="text-end pe-4">Ações</th>
                         </tr>
                     </thead>
@@ -203,7 +203,7 @@
                                 <td class="text-end pe-4">
                                     <a href="/portal/submissions/<?= (int)$s['id'] ?>"
                                         class="nd-btn nd-btn-outline nd-btn-sm">
-                                        Detalhes
+                                        Acompanhar
                                     </a>
                                 </td>
                             </tr>
