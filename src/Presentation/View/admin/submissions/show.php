@@ -34,6 +34,13 @@ $statusIcon = match($submission['status'] ?? '') {
 
 <div class="d-flex flex-column gap-4">
 
+    <!-- Header com Botão Voltar -->
+    <div class="d-flex align-items-center justify-content-between">
+        <a href="/admin/submissions" class="nd-btn nd-btn-outline nd-btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Voltar para Lista
+        </a>
+    </div>
+
     <!-- Informações da Submissão e Alteração de Status -->
     <div class="nd-card">
         <div class="nd-card-header d-flex align-items-center justify-content-between">

@@ -343,8 +343,8 @@
     const dailyData  = <?= json_encode($chartDailyCounts ?? [], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>;
 
     // Chart 1 - Status (Doughnut)
-    const statusLabels = ['Aprovada', 'Rejeitada', 'Pendente', 'Em Análise'];
-    const statusKeys   = ['APPROVED', 'REJECTED', 'PENDING', 'IN_REVIEW'];
+    const statusLabels = ['Aprovada', 'Rejeitada', 'Pendente', 'Em Análise', 'Concluída'];
+    const statusKeys   = ['APPROVED', 'REJECTED', 'PENDING', 'UNDER_REVIEW', 'COMPLETED'];
     const statusValues = statusKeys.map(k => statusData[k] ?? 0);
     
     new Chart(document.getElementById('chartStatus'), {
@@ -353,7 +353,7 @@
             labels: statusLabels,
             datasets: [{
                 data: statusValues,
-                backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6'],
+                backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6', '#14b8a6'],
                 borderWidth: 0,
                 hoverOffset: 4
             }]

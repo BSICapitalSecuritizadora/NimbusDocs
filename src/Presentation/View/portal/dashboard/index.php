@@ -173,6 +173,7 @@
                                             $icon = 'bi-hourglass';
                                             break;
                                         case 'IN_REVIEW':
+                                        case 'UNDER_REVIEW':
                                             $label = 'Em Análise';
                                             $badgeClass = 'nd-badge-info';
                                             $icon = 'bi-search';

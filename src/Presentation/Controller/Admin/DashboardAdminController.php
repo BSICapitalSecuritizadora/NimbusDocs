@@ -54,7 +54,7 @@ final class DashboardAdminController
         $recentLogs        = $this->auditRepo->latest(10);
 
         // Gráficos
-        $statusCounts = $this->submissionRepo->countsByStatuses(['APPROVED','REJECTED','PENDING','IN_REVIEW']);
+        $statusCounts = $this->submissionRepo->countsByStatuses(['APPROVED','REJECTED','PENDING','UNDER_REVIEW','COMPLETED']);
         $dailyCounts  = $this->submissionRepo->countsPerDay(30);
         $docsPerMonth = $this->documentRepo->countsPerMonth(12);
 

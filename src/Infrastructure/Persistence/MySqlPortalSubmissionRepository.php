@@ -291,7 +291,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
     {
         $sql = "SELECT COUNT(*)
                 FROM portal_submissions
-                WHERE status IN ('PENDING','IN_REVIEW')
+                WHERE status IN ('PENDING','UNDER_REVIEW')
                   AND submitted_at < DATE_SUB(NOW(), INTERVAL :days DAY)";
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':days', $days, PDO::PARAM_INT);
