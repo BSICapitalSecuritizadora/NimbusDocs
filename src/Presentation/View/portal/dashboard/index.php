@@ -1,22 +1,14 @@
 <?php
-
-/** @var array $user */
-/** @var int $total */
-/** @var int $pendentes */
-/** @var int $concluidas */
-/** @var array $submissions */
-/** @var array $announcements */
-
-?>
-<?php
-
-/** @var array $user */
-/** @var int $total */
-/** @var int $pendentes */
-/** @var int $concluidas */
-/** @var array $submissions */
-/** @var array $announcements */
-
+/**
+ * Portal Dashboard
+ * 
+ * @var array $user
+ * @var int $total
+ * @var int $pendentes
+ * @var int $concluidas
+ * @var array $submissions
+ * @var array $announcements
+ */
 ?>
 <div class="row mb-4 align-items-center">
     <div class="col-12 col-lg-8">
