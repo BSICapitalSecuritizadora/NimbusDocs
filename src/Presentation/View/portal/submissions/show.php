@@ -258,6 +258,52 @@ $dateFormatted = !empty($submission['submitted_at'])
                 </div>
             </div>
         <?php endif; ?>
+
+        <!-- Observações da Análise (Notas do Admin visíveis ao usuário) -->
+        <?php if (!empty($notes)): ?>
+            <div class="nd-card mb-4 border-primary-subtle">
+                <div class="nd-card-header bg-primary-subtle bg-opacity-10">
+                    <h2 class="nd-card-title text-primary-emphasis">
+                        <i class="bi bi-chat-left-quote-fill me-2"></i>
+                        Observações da Análise
+                    </h2>
+                </div>
+                <div class="nd-card-body">
+                    <div class="d-flex flex-column gap-3">
+                        <?php foreach ($notes as $note): ?>
+                            <div class="p-3 rounded border-start border-3 border-primary" style="background: var(--nd-gray-50);">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                                             style="width: 28px; height: 28px; font-size: 0.7rem;">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+                                        <span class="fw-medium small text-secondary">Equipe de Análise</span>
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock me-1"></i>
+                                        <?php
+                                        $noteDate = $note['created_at'] ?? '';
+                                        if ($noteDate) {
+                                            try {
+                                                $d = new DateTime($noteDate);
+                                                echo $d->format('d/m/Y H:i');
+                                            } catch (Exception $e) {
+                                                echo htmlspecialchars($noteDate, ENT_QUOTES, 'UTF-8');
+                                            }
+                                        }
+                                        ?>
+                                    </small>
+                                </div>
+                                <div class="text-dark">
+                                    <?= nl2br(htmlspecialchars($note['message'] ?? '', ENT_QUOTES, 'UTF-8')) ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
     
     <div class="col-lg-4">
