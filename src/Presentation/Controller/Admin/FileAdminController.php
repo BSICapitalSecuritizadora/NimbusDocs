@@ -42,7 +42,7 @@ final class FileAdminController
             return;
         }
 
-        $storageBase = dirname(__DIR__, 5) . '/storage/';
+        $storageBase = dirname(__DIR__, 4) . '/storage/';
         // Normalize path separators (Windows compatibility)
         $storagePath = str_replace('\\', '/', $file['storage_path']);
         $fullPath  = $storageBase . ltrim($storagePath, '/');
@@ -85,7 +85,7 @@ final class FileAdminController
             return;
         }
 
-        $storageBase = dirname(__DIR__, 5) . '/storage/';
+        $storageBase = dirname(__DIR__, 4) . '/storage/';
         // Normalize path separators (Windows compatibility)
         $storagePath = str_replace('\\', '/', $file['storage_path']);
         $fullPath  = $storageBase . ltrim($storagePath, '/');

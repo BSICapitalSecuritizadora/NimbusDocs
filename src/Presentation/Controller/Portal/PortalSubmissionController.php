@@ -277,7 +277,7 @@ final class PortalSubmissionController
 
         // Salva arquivos obrigatórios com tipo específico
         $userId = (int)$user['id'];
-        $storageBase = dirname(__DIR__, 5) . '/storage/portal_uploads/' . $userId . '/';
+        $storageBase = dirname(__DIR__, 4) . '/storage/portal_uploads/' . $userId . '/';
 
         $fileTypeMap = [
             'ultimo_balanco'            => 'BALANCE_SHEET',

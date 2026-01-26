@@ -40,7 +40,7 @@ final class PortalFileController
             $logger->log((int)$user['id'], 'DOWNLOAD_SUBMISSION_FILE', 'submission_file', (int)$id);
         }
 
-        $storageBase = dirname(__DIR__, 5) . '/storage/';
+        $storageBase = dirname(__DIR__, 4) . '/storage/';
         // Normalize path separators (Windows compatibility)
         $storagePath = str_replace('\\', '/', $file['storage_path']);
         $fullPath    = $storageBase . ltrim($storagePath, '/');
@@ -83,7 +83,7 @@ final class PortalFileController
             $logger->log((int)$user['id'], 'PREVIEW_SUBMISSION_FILE', 'submission_file', (int)$id);
         }
 
-        $storageBase = dirname(__DIR__, 5) . '/storage/';
+        $storageBase = dirname(__DIR__, 4) . '/storage/';
         // Normalize path separators (Windows compatibility)
         $storagePath = str_replace('\\', '/', $file['storage_path']);
         $fullPath    = $storageBase . ltrim($storagePath, '/');
