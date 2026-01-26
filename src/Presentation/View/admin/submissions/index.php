@@ -171,22 +171,16 @@ $query = http_build_query([
     <!-- Pagination -->
     <?php if (($pagination['pages'] ?? 1) > 1): ?>
     <div class="nd-card-footer p-3 border-top">
-        <nav aria-label="Paginação">
-          <ul class="pagination pagination-sm justify-content-end mb-0">
-            <?php $page=(int)($pagination['page']??1); $pages=(int)($pagination['pages']??1); ?>
-            <li class="page-item <?= $page<=1?'disabled':''; ?>">
-              <a class="page-link" href="?page=<?= max(1,$page-1) ?>&status=<?= urlencode($filters['status']??'') ?>&portal_user_id=<?= urlencode($filters['portal_user_id']??'') ?>">Anterior</a>
-            </li>
-            <?php for($p=1;$p<=$pages;$p++): ?>
-              <li class="page-item <?= $p===$page?'active':''; ?>">
-                <a class="page-link" href="?page=<?= $p ?>&status=<?= urlencode($filters['status']??'') ?>&portal_user_id=<?= urlencode($filters['portal_user_id']??'') ?>"><?= $p ?></a>
-              </li>
-            <?php endfor; ?>
-            <li class="page-item <?= $page>=$pages?'disabled':''; ?>">
-              <a class="page-link" href="?page=<?= min($pages,$page+1) ?>&status=<?= urlencode($filters['status']??'') ?>&portal_user_id=<?= urlencode($filters['portal_user_id']??'') ?>">Próxima</a>
-            </li>
-          </ul>
-        </nav>
+        <?php
+        $page = (int)($pagination['page'] ?? 1);
+        $pages = (int)($pagination['pages'] ?? 1);
+        $baseUrl = '/admin/submissions';
+        $queryParams = [
+            'status' => $filters['status'] ?? '',
+            'portal_user_id' => $filters['portal_user_id'] ?? '',
+        ];
+        include __DIR__ . '/../partials/pagination.php';
+        ?>
     </div>
     <?php endif; ?>
 </div>

@@ -134,31 +134,10 @@ $error   = $flash['error']   ?? null;
 
 <?php if ($pages > 1): ?>
     <div class="d-flex justify-content-center mt-4">
-        <nav aria-label="Navegação de página">
-            <ul class="pagination mb-0">
-                <!-- Anterior -->
-                <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                    <a class="page-link" href="/portal/submissions?page=<?= max(1, $page - 1) ?>" aria-label="Anterior">
-                        <i class="bi bi-chevron-left"></i>
-                    </a>
-                </li>
-                
-                <!-- Números -->
-                <?php for ($p = 1; $p <= $pages; $p++): ?>
-                    <li class="page-item <?= $p === $page ? 'active' : '' ?>">
-                        <a class="page-link" href="/portal/submissions?page=<?= $p ?>">
-                            <?= $p ?>
-                        </a>
-                    </li>
-                <?php endfor; ?>
-                
-                <!-- Próximo -->
-                <li class="page-item <?= $page >= $pages ? 'disabled' : '' ?>">
-                    <a class="page-link" href="/portal/submissions?page=<?= min($pages, $page + 1) ?>" aria-label="Próximo">
-                        <i class="bi bi-chevron-right"></i>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+        <?php
+        $baseUrl = '/portal/submissions';
+        $queryParams = [];
+        include __DIR__ . '/../partials/pagination.php';
+        ?>
     </div>
 <?php endif; ?>
