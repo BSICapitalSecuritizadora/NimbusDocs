@@ -41,8 +41,10 @@ final class DashboardAdminController
 
         // KPIs
         $totalSubmissions     = $this->submissionRepo->countAll();
-        $pendingSubmissions   = $this->submissionRepo->countByStatus('PENDING');
-        $approvedSubmissions  = $this->submissionRepo->countByStatus('APPROVED');
+        $pendingSubmissions   = $this->submissionRepo->countByStatus('PENDING')
+                              + $this->submissionRepo->countByStatus('UNDER_REVIEW');
+        $approvedSubmissions  = $this->submissionRepo->countByStatus('APPROVED')
+                              + $this->submissionRepo->countByStatus('COMPLETED');
         $rejectedSubmissions  = $this->submissionRepo->countByStatus('REJECTED');
         $totalPortalUsers     = $this->portalUserRepo->countAll();
         $publishedDocuments   = $this->documentRepo->countAll();

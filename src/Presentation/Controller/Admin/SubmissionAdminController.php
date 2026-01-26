@@ -136,9 +136,9 @@ final class SubmissionAdminController
             $visible = 'USER_VISIBLE';
         }
 
-        // antes de alterar:
-        $submission = $this->repo->findById($id);
-        $oldStatus = $submission['status'] ?? null;
+        // Guarda status anterior
+        $submissionData = $this->repo->findById($id);
+        $oldStatus = $submissionData['status'] ?? null;
 
         // Atualiza status
         $admin = Auth::requireAdmin();
@@ -146,37 +146,7 @@ final class SubmissionAdminController
 
         $this->repo->updateStatus($id, $status, $adminId ? (int)$adminId : null);
 
-        // Busca submissão atualizada
-        $updated = $this->repo->findById($id);
-        
-        // Busca usuário do portal para notificação
-        if ($updated && isset($updated['portal_user_id'])) {
-            $portalUserRepo = new \App\Infrastructure\Persistence\MySqlPortalUserRepository($this->config['pdo']);
-            $portalUser = $portalUserRepo->findById($updated['portal_user_id']);
-            
-            // Envia notificação
-            if ($portalUser && $oldStatus && $this->config['notification']) {
-                $this->config['notification']->notifySubmissionStatusChanged(
-                    $updated,
-                    $portalUser,
-                    $oldStatus,
-                    $status
-                );
-            }
-        }
-
-        $this->config['audit']->log(
-            $adminId ? (int)$adminId : null,
-            'submission.status.updated',
-            'submission',
-            $id,
-            [
-                'new_status' => $status,
-                'note'       => $noteText,
-            ]
-        );
-
-        // Cria nota (opcional, mas quase sempre haverá algo)
+        // Cria nota (opcional)
         if ($noteText !== '') {
             $this->noteRepo->create([
                 'submission_id' => $id,
@@ -186,17 +156,13 @@ final class SubmissionAdminController
             ]);
         }
 
-        $this->audit->log('ADMIN', $adminId ? (int)$adminId : null, 'SUBMISSION_STATUS_UPDATED', 'PORTAL_SUBMISSION', $id, [
-            'status' => $status,
-            'note_visibility' => $visible,
-        ]);
-
-        // depois de atualizar:
+        // Busca submissão atualizada
         $updatedSubmission = $this->repo->findById($id);
 
-        // buscar o usuário do portal
+        // Busca usuário do portal para notificação
         $portalUser = $this->portalUserRepo->findById((int)$updatedSubmission['portal_user_id']);
 
+        // Envia notificação se status mudou
         $notifications = $this->config['notifications_service'] ?? null;
         if ($notifications && $portalUser && $oldStatus !== $updatedSubmission['status']) {
             $notifications->portalSubmissionStatusChanged(
@@ -207,18 +173,19 @@ final class SubmissionAdminController
             );
         }
 
-        $this->config['audit']->adminAction([
-            'actor_id'    => $adminId ? (int)$adminId : null,
-            'actor_name'  => $admin['name'] ?? null,
-            'action'      => 'SUBMISSION_STATUS_CHANGED',
-            'summary'     => 'Status da submissão alterado para ' . $status,
-            'context_type' => 'submission',
-            'context_id'  => $id,
-            'details'     => [
+        // Log de auditoria
+        $this->audit->log(
+            'ADMIN',
+            $adminId ? (int)$adminId : null,
+            'SUBMISSION_STATUS_CHANGED',
+            'submission',
+            $id,
+            [
+                'old_status' => $oldStatus,
                 'new_status' => $status,
                 'note'       => $noteText,
-            ],
-        ]);
+            ]
+        );
 
         Session::flash('success', 'Status atualizado com sucesso.');
         $this->redirect('/admin/submissions/' . $id);

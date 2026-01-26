@@ -44,10 +44,11 @@ final class MySqlPortalSubmissionNoteRepository implements PortalSubmissionNoteR
 
     public function listAllForSubmission(int $submissionId): array
     {
-        $sql = "SELECT *
-                FROM portal_submission_notes
-                WHERE submission_id = :sid
-                ORDER BY created_at ASC";
+        $sql = "SELECT n.*, a.name AS admin_name
+                FROM portal_submission_notes n
+                LEFT JOIN admin_users a ON a.id = n.admin_user_id
+                WHERE n.submission_id = :sid
+                ORDER BY n.created_at DESC";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':sid' => $submissionId]);
