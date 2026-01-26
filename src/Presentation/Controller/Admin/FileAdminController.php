@@ -42,8 +42,10 @@ final class FileAdminController
             return;
         }
 
-        $uploadDir = rtrim($this->config['upload_dir'] ?? $this->config['upload']['dir'] ?? dirname(__DIR__, 5) . '/storage/uploads', '/');
-        $fullPath  = $uploadDir . '/' . ltrim($file['storage_path'], '/');
+        $storageBase = dirname(__DIR__, 5) . '/storage/';
+        // Normalize path separators (Windows compatibility)
+        $storagePath = str_replace('\\', '/', $file['storage_path']);
+        $fullPath  = $storageBase . ltrim($storagePath, '/');
 
         if (!is_file($fullPath)) {
             http_response_code(404);
@@ -83,8 +85,10 @@ final class FileAdminController
             return;
         }
 
-        $uploadDir = rtrim($this->config['upload_dir'] ?? $this->config['upload']['dir'] ?? dirname(__DIR__, 5) . '/storage/uploads', '/');
-        $fullPath  = $uploadDir . '/' . ltrim($file['storage_path'], '/');
+        $storageBase = dirname(__DIR__, 5) . '/storage/';
+        // Normalize path separators (Windows compatibility)
+        $storagePath = str_replace('\\', '/', $file['storage_path']);
+        $fullPath  = $storageBase . ltrim($storagePath, '/');
 
         if (!is_file($fullPath)) {
             http_response_code(404);

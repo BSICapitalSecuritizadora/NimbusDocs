@@ -41,7 +41,9 @@ final class PortalFileController
         }
 
         $storageBase = dirname(__DIR__, 5) . '/storage/';
-        $fullPath    = $storageBase . ltrim($file['storage_path'], '/');
+        // Normalize path separators (Windows compatibility)
+        $storagePath = str_replace('\\', '/', $file['storage_path']);
+        $fullPath    = $storageBase . ltrim($storagePath, '/');
 
         if (!is_file($fullPath)) {
             http_response_code(404);
@@ -82,7 +84,9 @@ final class PortalFileController
         }
 
         $storageBase = dirname(__DIR__, 5) . '/storage/';
-        $fullPath    = $storageBase . ltrim($file['storage_path'], '/');
+        // Normalize path separators (Windows compatibility)
+        $storagePath = str_replace('\\', '/', $file['storage_path']);
+        $fullPath    = $storageBase . ltrim($storagePath, '/');
 
         if (!is_file($fullPath)) {
             http_response_code(404);
