@@ -162,7 +162,7 @@ $statusIcon = match($submission['status'] ?? '') {
                                     <i class="bi bi-check-lg me-1"></i> Aprovar
                                 </button>
                                 <button type="submit" class="nd-btn nd-btn-outline" style="border-color: var(--nd-danger); color: var(--nd-danger);" 
-                                    onclick="document.getElementById('status').value='REJECTED';">
+                                    onclick="document.getElementById('status').value='REJECTED'; return confirm('⚠️ Tem certeza que deseja REJEITAR este envio?\n\nEsta ação notificará o solicitante.');">
                                     <i class="bi bi-x-lg me-1"></i> Rejeitar
                                 </button>
                                 <button type="submit" class="nd-btn nd-btn-gold">
