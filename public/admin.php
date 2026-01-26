@@ -77,6 +77,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/admin/settings/notifications',        [SettingsController::class, 'notificationsForm']);
     $r->addRoute('POST', '/admin/settings/notifications/save',   [SettingsController::class, 'saveNotifications']);
     $r->addRoute('GET', '/admin/submissions/export/csv', [SubmissionAdminController::class, 'exportCsv']);
+    $r->addRoute('GET', '/admin/submissions/export/print', [SubmissionAdminController::class, 'exportPrint']);
     $r->addRoute('GET', '/admin/access-log/portal', [PortalAccessLogAdminController::class, 'index']);
     $r->addRoute('GET', '/admin/reports/submissions', [ReportsAdminController::class, 'submissionsReport']);
     $r->addRoute('GET', '/admin/reports/submissions/export', [ReportsAdminController::class, 'submissionsReportExportCsv']);

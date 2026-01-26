@@ -27,9 +27,23 @@ $query = http_build_query([
         <p class="text-muted mb-0 small">Gestão de solicitações e documentos enviados pelo portal</p>
     </div>
   </div>
-  <a href="/admin/submissions/export/csv?<?= $query ?>" class="nd-btn nd-btn-outline nd-btn-sm">
-    <i class="bi bi-file-earmark-spreadsheet me-2"></i> Exportar Relatório
-  </a>
+  <div class="dropdown">
+    <button class="nd-btn nd-btn-outline nd-btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-download me-2"></i> Exportar
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+      <li>
+        <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="/admin/submissions/export/csv?<?= $query ?>">
+            <i class="bi bi-file-earmark-spreadsheet text-success"></i> Exportar CSV
+        </a>
+      </li>
+      <li>
+        <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="/admin/submissions/export/print?<?= $query ?>" target="_blank">
+            <i class="bi bi-printer-fill text-dark"></i> Imprimir / PDF
+        </a>
+      </li>
+    </ul>
+  </div>
 </div>
 
 <?php if (!empty($flash['success'])): ?>

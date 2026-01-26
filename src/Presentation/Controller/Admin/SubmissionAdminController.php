@@ -366,4 +366,23 @@ final class SubmissionAdminController
 
         \App\Support\CsvResponse::output($fields, $data, 'submissoes_export.csv');
     }
+
+    public function exportPrint(array $vars = []): void
+    {
+        $this->requireAdmin();
+
+        $filters = [
+            'status'         => $_GET['status']         ?? null,
+            'portal_user_id' => $_GET['portal_user_id'] ?? null,
+        ];
+
+        // Fetch all filtered records (limit reasonable amount for print)
+        $submissions = $this->repo->paginateAll($filters, 1, 500)['items'];
+
+        $pageTitle = 'Relatório de Submissões';
+        
+        // Render special print layout
+        require __DIR__ . '/../../View/admin/submissions/print.php';
+        exit;
+    }
 }
