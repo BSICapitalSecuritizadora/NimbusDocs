@@ -1,5 +1,7 @@
 <?php
 
+use App\Support\StatusHelper;
+
 /** @var array $pagination */
 /** @var array $flash */
 
@@ -102,42 +104,10 @@ $error   = $flash['error']   ?? null;
                                     </span>
                                 </td>
                                 <td>
-                                    <?php
-                                    $statusRaw = $s['status'] ?? '';
-                                    $label = $statusRaw;
-                                    $badgeClass = 'nd-badge-secondary';
-                                    $icon = 'bi-circle';
-                                    
-                                    switch ($statusRaw) {
-                                        case 'PENDING':
-                                            $label = 'Pendente';
-                                            $badgeClass = 'nd-badge-warning';
-                                            $icon = 'bi-hourglass';
-                                            break;
-                                        case 'IN_REVIEW':
-                                        case 'UNDER_REVIEW':
-                                            $label = 'Em Análise';
-                                            $badgeClass = 'nd-badge-info';
-                                            $icon = 'bi-search';
-                                            break;
-                                        case 'APPROVED':
-                                        case 'COMPLETED':
-                                        case 'FINALIZADA':
-                                            $label = 'Concluído';
-                                            $badgeClass = 'nd-badge-success';
-                                            $icon = 'bi-check2-circle';
-                                            break;
-                                        case 'REJECTED':
-                                        case 'REJEITADA':
-                                            $label = 'Rejeitado';
-                                            $badgeClass = 'nd-badge-danger';
-                                            $icon = 'bi-x-circle';
-                                            break;
-                                    }
-                                    ?>
-                                    <span class="nd-badge <?= $badgeClass ?>">
-                                        <i class="bi <?= $icon ?> me-1"></i>
-                                        <?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>
+                                    <?php $statusInfo = StatusHelper::translate($s['status'] ?? ''); ?>
+                                    <span class="nd-badge <?= $statusInfo['badge'] ?>">
+                                        <i class="bi <?= $statusInfo['icon'] ?> me-1"></i>
+                                        <?= htmlspecialchars($statusInfo['label'], ENT_QUOTES, 'UTF-8') ?>
                                     </span>
                                 </td>
                                 <td>

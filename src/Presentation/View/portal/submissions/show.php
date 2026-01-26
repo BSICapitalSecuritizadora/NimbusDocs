@@ -1,41 +1,18 @@
 <?php
+
+use App\Support\StatusHelper;
+
 /** @var array $submission */
 /** @var array $files */
 /** @var array $notes */
 /** @var array $responseFiles */
 
-// Status translations & format
+// Status translations via helper centralizado
 $statusRaw = $submission['status'] ?? '';
-$statusLabel = $statusRaw;
-$badgeClass = 'nd-badge-secondary';
-$icon = 'bi-circle';
-
-switch ($statusRaw) {
-    case 'PENDING':
-        $statusLabel = 'Pendente';
-        $badgeClass = 'nd-badge-warning';
-        $icon = 'bi-hourglass';
-        break;
-    case 'IN_REVIEW':
-    case 'UNDER_REVIEW':
-        $statusLabel = 'Em Análise';
-        $badgeClass = 'nd-badge-info';
-        $icon = 'bi-search';
-        break;
-    case 'APPROVED':
-    case 'COMPLETED':
-    case 'FINALIZADA':
-        $statusLabel = 'Concluído';
-        $badgeClass = 'nd-badge-success';
-        $icon = 'bi-check2-circle';
-        break;
-    case 'REJECTED':
-    case 'REJEITADA':
-        $statusLabel = 'Rejeitado';
-        $badgeClass = 'nd-badge-danger';
-        $icon = 'bi-x-circle';
-        break;
-}
+$statusInfo = StatusHelper::translate($statusRaw);
+$statusLabel = $statusInfo['label'];
+$badgeClass = $statusInfo['badge'];
+$icon = $statusInfo['icon'];
 
 $dateFormatted = !empty($submission['submitted_at']) 
     ? date('d/m/Y \à\s H:i', strtotime($submission['submitted_at'])) 
