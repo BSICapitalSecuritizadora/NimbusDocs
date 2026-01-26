@@ -8,6 +8,7 @@ use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionNoteRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionShareholderRepository;
+use App\Infrastructure\Integration\CachedCnpjService;
 use App\Infrastructure\Integration\CnpjWsService;
 use App\Support\Csrf;
 use App\Support\AuditLogger;
@@ -24,7 +25,7 @@ final class PortalSubmissionController
     private MySqlPortalSubmissionNoteRepository $noteRepo;
     private MySqlPortalSubmissionShareholderRepository $shareholderRepo;
     private AuditLogger $audit;
-    private CnpjWsService $cnpjService;
+    private CachedCnpjService $cnpjService;
 
     public function __construct(private array $config)
     {
@@ -33,7 +34,13 @@ final class PortalSubmissionController
         $this->noteRepo        = new MySqlPortalSubmissionNoteRepository($config['pdo']);
         $this->shareholderRepo = new MySqlPortalSubmissionShareholderRepository($config['pdo']);
         $this->audit           = new AuditLogger($config['pdo']);
-        $this->cnpjService     = new CnpjWsService($config['logger']);
+        
+        // Usa o serviço de CNPJ com cache do bootstrap
+        $this->cnpjService     = $config['cnpj_service'] ?? new CachedCnpjService(
+            new CnpjWsService($config['logger']),
+            $config['cache'],
+            $config['logger']
+        );
     }
 
     public function getCnpjData(array $vars = []): void

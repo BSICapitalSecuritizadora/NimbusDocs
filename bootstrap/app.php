@@ -126,6 +126,25 @@ $logger->pushHandler(
 $config['logger'] = $logger;
 
 // -------------------------------------------------------------------------
+// File Cache (cache baseado em arquivos)
+// -------------------------------------------------------------------------
+$cacheDir = __DIR__ . '/../storage/cache';
+$fileCache = new \App\Support\FileCache($cacheDir, 86400); // 24h default TTL
+$config['cache'] = $fileCache;
+
+// -------------------------------------------------------------------------
+// CNPJ Service com Cache
+// -------------------------------------------------------------------------
+$cnpjWsService = new \App\Infrastructure\Integration\CnpjWsService($logger);
+$cachedCnpjService = new \App\Infrastructure\Integration\CachedCnpjService(
+    $cnpjWsService,
+    $fileCache,
+    $logger,
+    604800 // 7 dias de cache para dados de CNPJ
+);
+$config['cnpj_service'] = $cachedCnpjService;
+
+// -------------------------------------------------------------------------
 // Request Logger (logging avançado de requisições HTTP)
 // -------------------------------------------------------------------------
 $requestLogger = new RequestLogger($logger);
