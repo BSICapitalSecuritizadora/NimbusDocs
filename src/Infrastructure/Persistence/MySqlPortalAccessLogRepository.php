@@ -55,9 +55,11 @@ final class MySqlPortalAccessLogRepository
             SELECT 
                 l.*,
                 u.full_name AS user_name,
-                u.email     AS user_email
+                u.email     AS user_email,
+                f.original_name AS file_name
             FROM portal_access_log l
             JOIN portal_users u ON u.id = l.portal_user_id
+            LEFT JOIN portal_submission_files f ON (l.resource_type = 'submission_file' AND f.id = l.resource_id)
             {$whereSql}
             ORDER BY l.created_at DESC
             LIMIT 200

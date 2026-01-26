@@ -143,9 +143,19 @@
                                 <td>
                                     <div class="small">
                                         <span class="text-muted text-uppercase x-small d-block">Categoria</span>
-                                        <?= htmlspecialchars($log['resource_type'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
-                                        <?php if (!empty($log['resource_id'])): ?>
-                                            <span class="text-muted ms-1">#<?= (int)$log['resource_id'] ?></span>
+                                        <?php if (!empty($log['file_name'])): ?>
+                                            <div class="fw-medium text-dark mb-1">
+                                                <i class="bi bi-file-earmark-text me-1 text-primary"></i>
+                                                <?= htmlspecialchars($log['file_name'], ENT_QUOTES, 'UTF-8') ?>
+                                            </div>
+                                            <span class="badge bg-light text-secondary border">
+                                                ID: #<?= (int)$log['resource_id'] ?>
+                                            </span>
+                                        <?php else: ?>
+                                            <?= htmlspecialchars($log['resource_type'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                                            <?php if (!empty($log['resource_id'])): ?>
+                                                <span class="text-muted ms-1">#<?= (int)$log['resource_id'] ?></span>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     </div>
                                 </td>
