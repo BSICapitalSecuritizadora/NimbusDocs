@@ -390,11 +390,25 @@ $dateFormatted = !empty($submission['submitted_at'])
                                             </div>
                                         </div>
                                     </div>
-                                    <a href="/portal/files/<?= (int)$f['id'] ?>/download" 
-                                       class="btn btn-sm btn-primary rounded-circle shadow-sm"
-                                       title="Baixar arquivo">
-                                        <i class="bi bi-download"></i>
-                                    </a>
+                                    <div class="d-flex gap-2">
+                                        <?php
+                                        $previewableMimes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                                        $mime = $f['mime_type'] ?? '';
+                                        if (in_array($mime, $previewableMimes, true)):
+                                        ?>
+                                            <a href="/portal/files/<?= (int)$f['id'] ?>/preview" 
+                                               target="_blank"
+                                               class="btn btn-sm btn-outline-primary rounded-circle"
+                                               title="Visualizar arquivo">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        <?php endif; ?>
+                                        <a href="/portal/files/<?= (int)$f['id'] ?>/download" 
+                                           class="btn btn-sm btn-primary rounded-circle shadow-sm"
+                                           title="Baixar arquivo">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                    </div>
                                 </div>
                             </li>
                         <?php endforeach; ?>

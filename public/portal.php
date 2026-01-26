@@ -43,6 +43,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
 
     // Downloads de arquivos de submissão pelo usuário final
     $r->addRoute('GET', '/portal/files/{id:\d+}/download', [PortalFileController::class, 'download']);
+    $r->addRoute('GET', '/portal/files/{id:\d+}/preview', [PortalFileController::class, 'preview']);
 
     // Dashboard/Home do portal
     $r->addRoute('GET', '/portal', [PortalHomeController::class, 'index']);

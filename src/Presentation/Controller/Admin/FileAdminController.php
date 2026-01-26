@@ -66,4 +66,60 @@ final class FileAdminController
         readfile($fullPath);
         exit;
     }
+
+    /**
+     * Preview file inline (PDFs and images)
+     */
+    public function preview(array $vars = []): void
+    {
+        $this->requireAdmin();
+
+        $id   = (int)($vars['id'] ?? 0);
+        $file = $this->fileRepo->findById($id);
+
+        if (!$file) {
+            http_response_code(404);
+            echo 'Arquivo não encontrado.';
+            return;
+        }
+
+        $uploadDir = rtrim($this->config['upload_dir'] ?? $this->config['upload']['dir'] ?? dirname(__DIR__, 5) . '/storage/uploads', '/');
+        $fullPath  = $uploadDir . '/' . ltrim($file['storage_path'], '/');
+
+        if (!is_file($fullPath)) {
+            http_response_code(404);
+            echo 'Arquivo físico não encontrado.';
+            return;
+        }
+
+        $mime = $file['mime_type'] ?: 'application/octet-stream';
+        
+        // Only allow preview for safe file types
+        $previewableMimes = [
+            'application/pdf',
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'image/svg+xml',
+            'text/plain',
+        ];
+
+        if (!in_array($mime, $previewableMimes, true)) {
+            // Fallback to download for non-previewable files
+            $this->download($vars);
+            return;
+        }
+
+        $admin = Session::get('admin');
+        $this->audit->log('ADMIN', $admin['id'] ?? null, 'FILE_PREVIEW', 'PORTAL_SUBMISSION_FILE', $id);
+
+        header('Content-Type: ' . $mime);
+        header('Content-Length: ' . (string)$file['size_bytes']);
+        header('Content-Disposition: inline; filename="' . basename($file['original_name']) . '"');
+        header('Cache-Control: private, max-age=3600');
+        
+        readfile($fullPath);
+        exit;
+    }
 }

@@ -256,9 +256,20 @@ $statusIcon = match($submission['status'] ?? '') {
                                     </div>
                                 </div>
                             </div>
-                            <a href="/admin/files/<?= (int)$f['id'] ?>/download" class="nd-btn nd-btn-outline nd-btn-sm">
-                                <i class="bi bi-download"></i> Download
-                            </a>
+                            <div class="d-flex gap-2">
+                                <?php
+                                $previewableMimes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                                $mime = $f['mime_type'] ?? '';
+                                if (in_array($mime, $previewableMimes, true)):
+                                ?>
+                                    <a href="/admin/files/<?= (int)$f['id'] ?>/preview" target="_blank" class="nd-btn nd-btn-ghost nd-btn-sm" title="Visualizar">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                <?php endif; ?>
+                                <a href="/admin/files/<?= (int)$f['id'] ?>/download" class="nd-btn nd-btn-outline nd-btn-sm">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
