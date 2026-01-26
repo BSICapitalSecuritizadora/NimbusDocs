@@ -36,6 +36,34 @@ $error   = $flash['error']   ?? null;
     </div>
 <?php endif; ?>
 
+<!-- Search Form -->
+<form action="" method="GET" class="mb-4">
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="bi bi-search text-muted"></i>
+                </span>
+                <input type="text" name="q" class="form-control border-start-0 ps-0" 
+                       placeholder="Buscar por protocolo ou assunto..." 
+                       value="<?= htmlspecialchars($pagination['search'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="nd-btn nd-btn-secondary w-100">
+                Buscar
+            </button>
+        </div>
+        <?php if (!empty($pagination['search'])): ?>
+            <div class="col-md-2">
+                <a href="/portal/submissions" class="nd-btn nd-btn-text text-muted w-100">
+                    <i class="bi bi-x-lg me-1"></i> Limpar
+                </a>
+            </div>
+        <?php endif; ?>
+    </div>
+</form>
+
 <div class="nd-card">
     <div class="nd-card-body p-0">
         <div class="table-responsive">
@@ -136,7 +164,9 @@ $error   = $flash['error']   ?? null;
     <div class="d-flex justify-content-center mt-4">
         <?php
         $baseUrl = '/portal/submissions';
-        $queryParams = [];
+        $queryParams = [
+            'q' => $pagination['search'] ?? null
+        ];
         include __DIR__ . '/../partials/pagination.php';
         ?>
     </div>

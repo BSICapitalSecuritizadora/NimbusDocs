@@ -13,24 +13,36 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
 
     // --------- PORTAL (usuário final) ---------
 
-    public function paginateByUser(int $portalUserId, int $page, int $perPage): array
+    public function paginateByUser(int $portalUserId, int $page, int $perPage, ?string $search = null): array
     {
         $offset = max(0, ($page - 1) * $perPage);
+        $search = $search ? trim($search) : null;
+        
+        $where = "WHERE portal_user_id = :uid";
+        $params = [':uid' => $portalUserId];
+        
+        if ($search) {
+            $where .= " AND (reference_code LIKE :search OR title LIKE :search2)";
+            $params[':search'] = '%' . $search . '%';
+            $params[':search2'] = '%' . $search . '%';
+        }
 
         $stmtTotal = $this->pdo->prepare(
-            "SELECT COUNT(*) FROM portal_submissions WHERE portal_user_id = :uid"
+            "SELECT COUNT(*) FROM portal_submissions $where"
         );
-        $stmtTotal->execute([':uid' => $portalUserId]);
+        $stmtTotal->execute($params);
         $total = (int)$stmtTotal->fetchColumn();
 
         $sql = "SELECT *
                 FROM portal_submissions
-                WHERE portal_user_id = :uid
+                $where
                 ORDER BY submitted_at DESC
                 LIMIT :perPage OFFSET :offset";
 
         $stmt = $this->pdo->prepare($sql);
-        $stmt->bindValue(':uid', $portalUserId, PDO::PARAM_INT);
+        foreach ($params as $k => $v) {
+            $stmt->bindValue($k, $v);
+        }
         $stmt->bindValue(':perPage', $perPage, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
@@ -43,6 +55,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             'page'    => $page,
             'perPage' => $perPage,
             'pages'   => (int)ceil($total / $perPage),
+            'search'  => $search
         ];
     }
 
