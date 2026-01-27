@@ -70,9 +70,9 @@ $query = http_build_query([
                 <select class="nd-input" id="f_status" name="status" style="padding-left: 1rem;">
                   <?php $st = $filters['status'] ?? ''; ?>
                   <option value="">Todas as situações</option>
-                  <option value="PENDING" <?= $st==='PENDING'?'selected':''; ?>>Pendente</option>
-                  <option value="UNDER_REVIEW" <?= $st==='UNDER_REVIEW'?'selected':''; ?>>Em Análise</option>
                   <option value="COMPLETED" <?= $st==='COMPLETED'?'selected':''; ?>>Concluído</option>
+                  <option value="UNDER_REVIEW" <?= $st==='UNDER_REVIEW'?'selected':''; ?>>Em Análise</option>
+                  <option value="PENDING" <?= $st==='PENDING'?'selected':''; ?>>Pendente</option>
                   <option value="REJECTED" <?= $st==='REJECTED'?'selected':''; ?>>Rejeitado</option>
                 </select>
             </div>
