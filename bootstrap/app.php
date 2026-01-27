@@ -19,8 +19,8 @@ use App\Infrastructure\Persistence\MySqlNotificationOutboxRepository;
 use App\Infrastructure\Auth\AzureAdminAuthClient;
 use App\Infrastructure\Logging\PortalAccessLogger;
 use App\Infrastructure\Logging\RequestLogger;
+use App\Support\Translator;
 use App\Infrastructure\ErrorHandler;
-
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -30,6 +30,9 @@ $dotenv->safeLoad();
 
 // Timezone
 date_default_timezone_set($_ENV['APP_TIMEZONE'] ?? 'America/Sao_Paulo');
+
+// Inicializa Tradutor
+Translator::init(__DIR__ . '/../resources/lang', $_ENV['APP_LOCALE'] ?? 'pt-BR');
 
 // Sessão - configure cookies properly for HTTPS
 $appUrl = $_ENV['APP_URL'] ?? '';
