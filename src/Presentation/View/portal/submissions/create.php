@@ -165,14 +165,15 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
                     </label>
                 </div>
                 <div class="form-check nd-checkbox">
-                    <input class="form-check-input" type="checkbox" id="is_none_compliant">
+                    <input class="form-check-input" type="checkbox" id="is_none_compliant" name="is_none_compliant"
+                        <?= !empty($old['is_none_compliant']) ? 'checked' : '' ?>>
                     <label class="form-check-label" for="is_none_compliant">
                         Não me enquadro nas opções
                     </label>
                 </div>
             </div>
-            <div id="complianceError" class="text-danger small mt-1" style="display: none;">
-                Selecione pelo menos uma opção.
+            <div id="complianceError" class="text-danger small mt-1" style="<?= isset($errors['compliance']) ? 'display: block;' : 'display: none;' ?>">
+                <?= $errors['compliance'] ?? 'Selecione pelo menos uma opção.' ?>
             </div>
         </div>
     </div>

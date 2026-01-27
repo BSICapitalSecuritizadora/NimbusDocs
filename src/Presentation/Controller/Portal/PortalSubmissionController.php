@@ -142,6 +142,7 @@ final class PortalSubmissionController
             'annual_revenue'       => $this->parseMoney($post['annual_revenue'] ?? ''),
             'is_us_person'         => isset($post['is_us_person']) ? 1 : 0,
             'is_pep'               => isset($post['is_pep']) ? 1 : 0,
+            'is_none_compliant'    => isset($post['is_none_compliant']) ? 1 : 0,
             'registrant_name'      => trim($post['registrant_name'] ?? ''),
             'registrant_position'  => trim($post['registrant_position'] ?? ''),
             'registrant_rg'        => trim($post['registrant_rg'] ?? ''),
@@ -150,6 +151,16 @@ final class PortalSubmissionController
 
         // Validações
         $errors = [];
+
+        // =========================================================================
+        // Validação de Compliance (US Person / PEP / Não se enquadra)
+        // CRÍTICO: Esta validação é obrigatória por razões regulatórias
+        // =========================================================================
+        $hasComplianceDeclaration = $data['is_us_person'] || $data['is_pep'] || $data['is_none_compliant'];
+        
+        if (!$hasComplianceDeclaration) {
+            $errors['compliance'] = 'É obrigatório informar se você é US Person, PEP ou se não se enquadra nessas categorias.';
+        }
 
         if (empty($data['responsible_name'])) {
             $errors['responsible_name'] = 'Nome do responsável é obrigatório.';
@@ -165,6 +176,8 @@ final class PortalSubmissionController
 
         if (empty($data['phone'])) {
             $errors['phone'] = 'Telefone é obrigatório.';
+        } elseif (!$this->isValidPhone($data['phone'])) {
+            $errors['phone'] = 'Formato de telefone inválido. Use (XX) XXXXX-XXXX ou similar.';
         }
 
         if ($data['net_worth'] === null || $data['net_worth'] <= 0) {
@@ -453,5 +466,16 @@ final class PortalSubmissionController
         }
 
         return true;
+    }
+
+    /**
+     * Valida formato de telefone
+     * Aceita: (11) 99999-9999, (11) 3333-3333, 11999999999
+     */
+    private function isValidPhone(string $phone): bool
+    {
+        $phone = preg_replace('/\D/', '', $phone);
+        // Verifica se tem 10 ou 11 dígitos (DDD + número)
+        return strlen($phone) >= 10 && strlen($phone) <= 11;
     }
 }
