@@ -132,14 +132,14 @@ class GlobalSearchService
             SELECT 
                 id,
                 title,
-                file_name,
+                file_original_name AS file_name,
                 description,
                 created_at,
                 'document' AS type
             FROM general_documents
             WHERE title LIKE :term1
                OR description LIKE :term2
-               OR file_name LIKE :term3
+               OR file_original_name LIKE :term3
             ORDER BY created_at DESC
             LIMIT :lim
         ";

@@ -14,7 +14,7 @@ $total = $results['total'] ?? 0;
 
 $statusLabels = [
     'PENDING'      => ['label' => 'Pendente',   'class' => 'nd-badge-warning'],
-    'UNDER_REVIEW' => ['label' => 'Em Análise', 'class' => 'nd-badge-info'], // Use secondary if info not available, but let's assume standard colors
+    'UNDER_REVIEW' => ['label' => 'Em Análise', 'class' => 'nd-badge-info'],
     'COMPLETED'    => ['label' => 'Concluída',  'class' => 'nd-badge-success'],
     'REJECTED'     => ['label' => 'Rejeitada',  'class' => 'nd-badge-danger'],
 ];
@@ -30,7 +30,6 @@ $userStatusLabels = [
     'BLOCKED'  => ['label' => 'Bloqueado', 'class' => 'nd-badge-danger'],
 ];
 ?>
-<?php require __DIR__ . '/../layouts/header.php'; ?>
 
 <!-- Page Header -->
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -238,7 +237,3 @@ $userStatusLabels = [
         <?php endif; ?>
     </div>
 <?php endif; ?>
-
-<div class="mt-5">
-    <?php require __DIR__ . '/../layouts/footer.php'; ?>
-</div>

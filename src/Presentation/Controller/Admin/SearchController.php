@@ -82,8 +82,15 @@ class SearchController
 
         $query = trim($_GET['q'] ?? '');
         $results = $this->searchService->search($query, 50);
-        $branding = $this->config['branding'] ?? [];
+        
+        $pageTitle = 'Busca Global';
+        $viewData = [
+            'query' => $query,
+            'results' => $results,
+            'branding' => $this->config['branding'] ?? []
+        ];
+        $contentView = __DIR__ . '/../../View/admin/search/results.php';
 
-        require __DIR__ . '/../../View/admin/search/results.php';
+        require __DIR__ . '/../../View/admin/layouts/base.php';
     }
 }
