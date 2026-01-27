@@ -253,126 +253,169 @@ final class PortalSubmissionController
             $this->redirect('/portal/submissions/create');
         }
 
-        // --- Cria submissão ---
-        $refCode = sprintf(
-            'SUB-%s-%s',
-            date('Ymd'),
-            substr(RandomToken::shortCode(8), 0, 8)
-        );
+        // --- Início da Persistência ---
+        try {
+            // Se possível, iniciar transação aqui (dependendo da implementação do repo)
+            // $this->repo->beginTransaction();
 
-        $ip = $_SERVER['REMOTE_ADDR']      ?? '';
-        $ua = $_SERVER['HTTP_USER_AGENT']  ?? '';
+            $refCode = sprintf(
+                'SUB-%s-%s',
+                date('Ymd'),
+                substr(RandomToken::shortCode(8), 0, 8)
+            );
 
-        $submissionId = $this->repo->createForUser((int)$user['id'], [
-            'reference_code'      => $refCode,
-            'title'               => $data['title'],
-            'message'             => $data['message'],
-            'status'              => 'PENDING',
-            'created_ip'          => $ip,
-            'created_user_agent'  => $ua,
-            'responsible_name'    => $data['responsible_name'],
-            'company_cnpj'        => $data['company_cnpj'],
-            'company_name'        => $data['company_name'],
-            'main_activity'       => $data['main_activity'],
-            'phone'               => $data['phone'],
-            'website'             => $data['website'],
-            'net_worth'           => $data['net_worth'],
-            'annual_revenue'      => $data['annual_revenue'],
-            'is_us_person'        => $data['is_us_person'],
-            'is_pep'              => $data['is_pep'],
-            'registrant_name'     => $data['registrant_name'],
-            'registrant_position' => $data['registrant_position'],
-            'registrant_rg'       => $data['registrant_rg'],
-            'registrant_cpf'      => $data['registrant_cpf'],
-        ]);
+            $ip = $_SERVER['REMOTE_ADDR']      ?? '';
+            $ua = $_SERVER['HTTP_USER_AGENT']  ?? '';
 
-        // Salva composição societária
-        foreach ($shareholders as $shareholder) {
-            $this->shareholderRepo->create($submissionId, [
-                'name'          => $shareholder['name'],
-                'document_rg'   => $shareholder['rg'] ?? null,
-                'document_cnpj' => preg_replace('/\D/', '', $shareholder['cnpj'] ?? ''),
-                'percentage'    => (float)$shareholder['percentage'],
+            $submissionId = $this->repo->createForUser((int)$user['id'], [
+                'reference_code'      => $refCode,
+                'title'               => $data['title'],
+                'message'             => $data['message'],
+                'status'              => 'PENDING',
+                'created_ip'          => $ip,
+                'created_user_agent'  => $ua,
+                'responsible_name'    => $data['responsible_name'],
+                'company_cnpj'        => $data['company_cnpj'],
+                'company_name'        => $data['company_name'],
+                'main_activity'       => $data['main_activity'],
+                'phone'               => $data['phone'],
+                'website'             => $data['website'],
+                'net_worth'           => $data['net_worth'],
+                'annual_revenue'      => $data['annual_revenue'],
+                'is_us_person'        => $data['is_us_person'],
+                'is_pep'              => $data['is_pep'],
+                'is_none_compliant'   => $data['is_none_compliant'],
+                'registrant_name'     => $data['registrant_name'],
+                'registrant_position' => $data['registrant_position'],
+                'registrant_rg'       => $data['registrant_rg'],
+                'registrant_cpf'      => $data['registrant_cpf'],
             ]);
-        }
 
-        // Salva arquivos obrigatórios com tipo específico
-        $userId = (int)$user['id'];
-        $storageBase = dirname(__DIR__, 4) . '/storage/portal_uploads/' . $userId . '/';
+            // Salva composição societária
+            foreach ($shareholders as $shareholder) {
+                $this->shareholderRepo->create($submissionId, [
+                    'name'          => $shareholder['name'],
+                    'document_rg'   => $shareholder['rg'] ?? null,
+                    'document_cnpj' => preg_replace('/\D/', '', $shareholder['cnpj'] ?? ''),
+                    'percentage'    => (float)$shareholder['percentage'],
+                ]);
+            }
 
-        $fileTypeMap = [
-            'ultimo_balanco'            => 'BALANCE_SHEET',
-            'dre'                       => 'DRE',
-            'politicas'                 => 'POLICIES',
-            'cartao_cnpj'               => 'CNPJ_CARD',
-            'procuracao'                => 'POWER_OF_ATTORNEY',
-            'ata'                       => 'MINUTES',
-            'contrato_social'           => 'ARTICLES_OF_INCORPORATION',
-            'estatuto'                  => 'BYLAWS',
-        ];
+            // Salva arquivos obrigatórios com tipo específico
+            $userId = (int)$user['id'];
+            $storageBase = dirname(__DIR__, 4) . '/storage/portal_uploads/' . $userId . '/';
 
-        foreach ($fileTypeMap as $field => $docType) {
-            if (isset($_FILES[$field]) && $_FILES[$field]['error'] === UPLOAD_ERR_OK) {
-                try {
-                    $stored = FileUpload::store($_FILES[$field], $storageBase);
-                    
-                    $storedName   = basename($stored['path']);
-                    $checksum     = is_file($stored['path']) ? hash_file('sha256', $stored['path']) : null;
-                    $relativePath = 'portal_uploads/' . $userId . '/' . $storedName;
+            $fileTypeMap = [
+                'ultimo_balanco'            => 'BALANCE_SHEET',
+                'dre'                       => 'DRE',
+                'politicas'                 => 'POLICIES',
+                'cartao_cnpj'               => 'CNPJ_CARD',
+                'procuracao'                => 'POWER_OF_ATTORNEY',
+                'ata'                       => 'MINUTES',
+                'contrato_social'           => 'ARTICLES_OF_INCORPORATION',
+                'estatuto'                  => 'BYLAWS',
+            ];
 
-                    $this->fileRepo->create($submissionId, [
-                        'origin'          => 'USER',
-                        'original_name'   => $stored['original_name'],
-                        'stored_name'     => $storedName,
-                        'mime_type'       => $stored['mime_type'],
-                        'size_bytes'      => (int)$stored['size'],
-                        'storage_path'    => $relativePath,
-                        'checksum'        => $checksum,
-                        'visible_to_user' => 0,
-                        'document_type'   => $docType,
-                    ]);
-                } catch (\Throwable $e) {
-                    $this->audit->log('PORTAL_USER', (int)$user['id'], 'USER_FILE_UPLOAD_FAILED', 'PORTAL_SUBMISSION', $submissionId, [
-                        'error' => $e->getMessage(),
-                        'file'  => $_FILES[$field]['name'] ?? null,
-                        'type'  => $docType,
-                    ]);
+            $uploadWarnings = [];
+
+            foreach ($fileTypeMap as $field => $docType) {
+                if (isset($_FILES[$field]) && $_FILES[$field]['error'] === UPLOAD_ERR_OK) {
+                    try {
+                        $stored = FileUpload::store($_FILES[$field], $storageBase);
+                        
+                        $storedName   = basename($stored['path']);
+                        $checksum     = is_file($stored['path']) ? hash_file('sha256', $stored['path']) : null;
+                        $relativePath = 'portal_uploads/' . $userId . '/' . $storedName;
+
+                        $this->fileRepo->create($submissionId, [
+                            'origin'          => 'USER',
+                            'original_name'   => $stored['original_name'],
+                            'stored_name'     => $storedName,
+                            'mime_type'       => $stored['mime_type'],
+                            'size_bytes'      => (int)$stored['size'],
+                            'storage_path'    => $relativePath,
+                            'checksum'        => $checksum,
+                            'visible_to_user' => 0,
+                            'document_type'   => $docType,
+                        ]);
+                    } catch (\Throwable $e) {
+                         // Loga falha de upload específico, mas não aborta tudo se não for crítico
+                         // Porém, como são documentos obrigatórios, idealmente deveríamos avisar
+                        $uploadWarnings[] = "Falha ao processar arquivo para $field: " . $e->getMessage();
+                        
+                        // Auditoria técnica
+                        $this->audit->log('PORTAL_USER', (int)$user['id'], 'USER_FILE_UPLOAD_FAILED', 'PORTAL_SUBMISSION', $submissionId, [
+                            'error' => $e->getMessage(),
+                            'file'  => $_FILES[$field]['name'] ?? null,
+                            'type'  => $docType,
+                        ]);
+                    }
                 }
             }
-        }
 
-        $this->audit->log('PORTAL_USER', (int)$user['id'], 'SUBMISSION_CREATED', 'PORTAL_SUBMISSION', $submissionId, [
-            'reference_code' => $refCode,
-        ]);
+            // Auditoria de Sucesso
+            $this->audit->log('PORTAL_USER', (int)$user['id'], 'SUBMISSION_CREATED', 'PORTAL_SUBMISSION', $submissionId, [
+                'reference_code' => $refCode,
+            ]);
 
-        $this->config['audit']->portalUserAction([
-            'actor_id'     => (int)$user['id'],
-            'actor_name'   => $user['full_name'] ?? $user['name'] ?? $user['email'],
-            'action'       => 'PORTAL_SUBMISSION_CREATED',
-            'summary'      => 'Nova submissão de cadastro criada.',
-            'context_type' => 'submission',
-            'context_id'   => $submissionId,
-            'details'      => [
-                'company_name' => $data['company_name'],
-                'cnpj'         => CnpjWsService::formatCnpj($data['company_cnpj']),
-            ],
-        ]);
+            // Auditoria de Negócio
+            $this->config['audit']->portalUserAction([
+                'actor_id'     => (int)$user['id'],
+                'actor_name'   => $user['full_name'] ?? $user['name'] ?? $user['email'],
+                'action'       => 'PORTAL_SUBMISSION_CREATED',
+                'summary'      => 'Nova submissão de cadastro criada.',
+                'context_type' => 'submission',
+                'context_id'   => $submissionId,
+                'details'      => [
+                    'company_name' => $data['company_name'],
+                    'cnpj'         => CnpjWsService::formatCnpj($data['company_cnpj']),
+                ],
+            ]);
 
-        // Notificações
-        try {
-            $submission = $this->repo->findById($submissionId);
-            $portalUser = $this->config['portal_user_repo']->findById((int)$user['id']);
-            
-            if ($submission && $portalUser && $this->config['notification']) {
-                $this->config['notification']->notifySubmissionReceived($submission, $portalUser);
+            // Notificações
+            try {
+                $submission = $this->repo->findById($submissionId);
+                $portalUser = $this->config['portal_user_repo']->findById((int)$user['id']);
+                
+                if ($submission && $portalUser && $this->config['notification']) {
+                    $this->config['notification']->notifySubmissionReceived($submission, $portalUser);
+                }
+            } catch (\Exception $e) {
+                // Não impede a criação da submissão se notificação falhar
+                error_log('Erro ao notificar sobre nova submissão: ' . $e->getMessage());
             }
-        } catch (\Exception $e) {
-            // Não impede a criação da submissão se notificação falhar
-            error_log('Erro ao notificar sobre nova submissão: ' . $e->getMessage());
+
+            // Sucesso com warning se houver
+            if (!empty($uploadWarnings)) {
+                Session::flash('warning', 'Cadastro criado, mas houve erro em alguns arquivos: ' . implode(', ', $uploadWarnings));
+            } else {
+                Session::flash('success', 'Cadastro enviado com sucesso.');
+            }
+            
+            $this->redirect('/portal/submissions/' . $submissionId);
+
+        } catch (\Throwable $e) {
+            // Rollback se houvesse transação
+            // $this->repo->rollBack();
+
+            // Log detalhado do erro
+            error_log(sprintf(
+                "[PortalSubmissionController::store] Erro crítico ao salvar submissão. UserID: %d. Error: %s. Trace: %s",
+                $user['id'],
+                $e->getMessage(),
+                $e->getTraceAsString()
+            ));
+
+            // Feedback ao usuário
+            Session::flash('error', 'Ocorreu um erro interno ao processar seu cadastro. Sua solicitação não pôde ser completada. Por favor, tente novamente ou contate o suporte.');
+            
+            // Preserva dados preenchidos
+            Session::flash('old', $data);
+            Session::flash('old_shareholders', $shareholders ?? []);
+            
+            $this->redirect('/portal/submissions/create');
         }
 
-        Session::flash('success', 'Cadastro enviado com sucesso.');
-        $this->redirect('/portal/submissions/' . $submissionId);
     }
 
     public function show(array $vars = []): void
@@ -383,9 +426,8 @@ final class PortalSubmissionController
 
         $submission = $this->repo->findForUser($id, $userId);
         if (!$submission) {
-            http_response_code(404);
-            echo 'Envio não encontrado.';
-            return;
+            Session::flash('error', 'Submissão não encontrada ou você não tem acesso.');
+            $this->redirect('/portal/submissions');
         }
 
         // Log de acesso
