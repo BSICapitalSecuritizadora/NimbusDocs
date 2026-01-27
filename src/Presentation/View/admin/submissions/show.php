@@ -347,33 +347,37 @@ $statusIcon = match($submission['status'] ?? '') {
                     <p class="text-muted mb-0 mt-2 small">Nenhum anexo enviado.</p>
                 </div>
             <?php else: ?>
-                <div class="d-flex flex-column gap-2">
+                <div class="row g-3">
                     <?php foreach ($userFiles as $f): ?>
-                        <div class="d-flex align-items-center justify-content-between p-3 rounded" style="background: var(--nd-gray-50); border: 1px solid var(--nd-gray-200);">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="nd-avatar" style="width: 40px; height: 40px; background: rgba(26, 41, 66, 0.1); color: var(--nd-navy-700);">
-                                    <i class="bi bi-file-earmark-text"></i>
-                                </div>
-                                <div>
-                                    <div class="fw-medium text-dark"><?= htmlspecialchars($f['original_name'], ENT_QUOTES, 'UTF-8') ?></div>
-                                    <div class="small text-muted">
-                                        <?= number_format((int)$f['size_bytes'] / 1024, 1, ',', '.') ?> KB
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center justify-content-between p-3 rounded h-100" style="background: var(--nd-gray-50); border: 1px solid var(--nd-gray-200);">
+                                <div class="d-flex align-items-center gap-3 overflow-hidden">
+                                    <div class="nd-avatar flex-shrink-0" style="width: 40px; height: 40px; background: rgba(26, 41, 66, 0.1); color: var(--nd-navy-700);">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="fw-medium text-dark text-truncate" title="<?= htmlspecialchars($f['original_name'], ENT_QUOTES, 'UTF-8') ?>">
+                                            <?= htmlspecialchars($f['original_name'], ENT_QUOTES, 'UTF-8') ?>
+                                        </div>
+                                        <div class="small text-muted">
+                                            <?= number_format((int)$f['size_bytes'] / 1024, 1, ',', '.') ?> KB
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <?php
-                                $previewableMimes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-                                $mime = $f['mime_type'] ?? '';
-                                if (in_array($mime, $previewableMimes, true)):
-                                ?>
-                                    <a href="/admin/files/<?= (int)$f['id'] ?>/preview" target="_blank" class="nd-btn nd-btn-ghost nd-btn-sm" title="Visualizar">
-                                        <i class="bi bi-eye"></i>
+                                <div class="d-flex gap-2 ms-2 flex-shrink-0">
+                                    <?php
+                                    $previewableMimes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                                    $mime = $f['mime_type'] ?? '';
+                                    if (in_array($mime, $previewableMimes, true)):
+                                    ?>
+                                        <a href="/admin/files/<?= (int)$f['id'] ?>/preview" target="_blank" class="nd-btn nd-btn-ghost nd-btn-sm" title="Visualizar">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                    <a href="/admin/files/<?= (int)$f['id'] ?>/download" class="nd-btn nd-btn-outline nd-btn-sm" title="Download">
+                                        <i class="bi bi-download"></i>
                                     </a>
-                                <?php endif; ?>
-                                <a href="/admin/files/<?= (int)$f['id'] ?>/download" class="nd-btn nd-btn-outline nd-btn-sm">
-                                    <i class="bi bi-download"></i> Download
-                                </a>
+                                </div>
                             </div>
                         </div>
                     <?php endforeach; ?>
