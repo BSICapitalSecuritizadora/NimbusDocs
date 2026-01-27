@@ -135,7 +135,7 @@ $query = http_build_query([
                     };
                     ?>
                   <tr>
-                    <td><code class="px-2 py-1 rounded bg-light text-dark small border"><?= htmlspecialchars($row['reference_code'] ?? '', ENT_QUOTES, 'UTF-8') ?></code></td>
+                    <td><code class="px-2 py-1 rounded bg-light text-dark small border text-nowrap"><?= htmlspecialchars($row['reference_code'] ?? '', ENT_QUOTES, 'UTF-8') ?></code></td>
                     <td class="fw-medium text-dark"><?= htmlspecialchars($row['title'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
                     <td>
                       <div class="d-flex align-items-center gap-2">
