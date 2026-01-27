@@ -388,7 +388,7 @@
     });
 
     // Chart 2 - Daily (Line)
-    const dailyLabels = (dailyData||[]).map(r => r.date);
+    const dailyLabels = (dailyData||[]).map(r => r.date.split('-').reverse().join('/'));
     const dailyValues = (dailyData||[]).map(r => r.total);
     
     new Chart(document.getElementById('chartDaily'), {
@@ -440,6 +440,12 @@
             plugins: {
                 legend: {
                     display: false
+                }
+            },
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 25
                 }
             }
         }
