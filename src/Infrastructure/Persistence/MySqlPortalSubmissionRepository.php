@@ -140,9 +140,9 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             $params[':status'] = $filters['status'];
         }
 
-        if (!empty($filters['portal_user_id'])) {
-            $where[]                = 's.portal_user_id = :uid';
-            $params[':uid']         = (int)$filters['portal_user_id'];
+        if (!empty($filters['user_name'])) {
+            $where[]          = 'u.full_name LIKE :user_name';
+            $params[':user_name'] = '%' . $filters['user_name'] . '%';
         }
 
         // Date range filters
@@ -408,9 +408,9 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             $where[] = 's.status = :status';
             $params[':status'] = $filters['status'];
         }
-        if (!empty($filters['portal_user_id'])) {
-            $where[] = 's.portal_user_id = :uid';
-            $params[':uid'] = (int)$filters['portal_user_id'];
+        if (!empty($filters['user_name'])) {
+            $where[] = 'u.full_name LIKE :user_name';
+            $params[':user_name'] = '%' . $filters['user_name'] . '%';
         }
         if (!empty($filters['from_date'])) {
             $where[] = 's.submitted_at >= :from_date';

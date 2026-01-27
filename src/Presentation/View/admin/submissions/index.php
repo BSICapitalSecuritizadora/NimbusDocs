@@ -11,8 +11,8 @@ $filters    = $filters    ?? [];
 $items      = $pagination['items'] ?? [];
 
 $query = http_build_query([
-    'status'         => $filters['status'] ?? '',
-    'portal_user_id' => $filters['portal_user_id'] ?? '',
+    'status'    => $filters['status']    ?? '',
+    'user_name' => $filters['user_name'] ?? '',
 ]);
 ?>
 
@@ -78,8 +78,8 @@ $query = http_build_query([
             </div>
           </div>
           <div class="col-sm-3">
-            <label class="nd-label" for="f_uid">ID do Solicitante</label>
-            <input type="number" class="nd-input" id="f_uid" name="portal_user_id" placeholder="Ex: 123" value="<?= htmlspecialchars((string)($filters['portal_user_id'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+            <label class="nd-label" for="f_user">Solicitante</label>
+            <input type="text" class="nd-input" id="f_user" name="user_name" placeholder="Nome do usuário" value="<?= htmlspecialchars((string)($filters['user_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
           </div>
           <div class="col-sm-4">
             <div class="d-flex gap-2">
@@ -190,8 +190,8 @@ $query = http_build_query([
         $pages = (int)($pagination['pages'] ?? 1);
         $baseUrl = '/admin/submissions';
         $queryParams = [
-            'status' => $filters['status'] ?? '',
-            'portal_user_id' => $filters['portal_user_id'] ?? '',
+            'status'    => $filters['status']    ?? '',
+            'user_name' => $filters['user_name'] ?? '',
         ];
         include __DIR__ . '/../partials/pagination.php';
         ?>

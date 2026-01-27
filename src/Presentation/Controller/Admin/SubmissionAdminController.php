@@ -45,8 +45,8 @@ final class SubmissionAdminController
         $perPage = 15;
 
         $filters = [
-            'status'         => $_GET['status']         ?? null,
-            'portal_user_id' => $_GET['portal_user_id'] ?? null,
+            'status'    => $_GET['status']    ?? null,
+            'user_name' => $_GET['user_name'] ?? null,
         ];
 
         $pagination = $this->repo->paginateAll($filters, $page, $perPage);
@@ -333,8 +333,8 @@ final class SubmissionAdminController
 
         // Filtros vindos da query string
         $filters = [
-            'status'         => $_GET['status']         ?? null,
-            'portal_user_id' => $_GET['portal_user_id'] ?? null,
+            'status'    => $_GET['status']    ?? null,
+            'user_name' => $_GET['user_name'] ?? null,
             'from_date'      => $_GET['from_date']      ?? null,
             'to_date'        => $_GET['to_date']        ?? null,
         ];
@@ -372,8 +372,8 @@ final class SubmissionAdminController
         $this->requireAdmin();
 
         $filters = [
-            'status'         => $_GET['status']         ?? null,
-            'portal_user_id' => $_GET['portal_user_id'] ?? null,
+            'status'    => $_GET['status']    ?? null,
+            'user_name' => $_GET['user_name'] ?? null,
         ];
 
         // Fetch all filtered records (limit reasonable amount for print)
