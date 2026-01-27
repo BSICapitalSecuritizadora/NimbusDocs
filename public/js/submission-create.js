@@ -245,43 +245,126 @@
         const form = document.getElementById('submissionForm');
         if (form) {
             form.addEventListener('submit', function (e) {
-                let isValid = true;
+                if (!validateStep(3)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+        }
 
-                // Validar Compliance
+        // ==========================================
+        // Wizard Logic
+        // ==========================================
+        let currentStep = 1;
+        const totalSteps = 3;
+
+        function showStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.wizard-step').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show target step
+            const targetStepEl = document.querySelector(`.wizard-step[data-step="${step}"]`);
+            if (targetStepEl) {
+                targetStepEl.classList.add('active');
+            }
+
+            // Update Stepper UI
+            document.querySelectorAll('.nd-step').forEach(el => {
+                const s = parseInt(el.getAttribute('data-target'));
+                el.classList.remove('active', 'completed');
+                if (s === step) {
+                    el.classList.add('active');
+                } else if (s < step) {
+                    el.classList.add('completed');
+                    el.querySelector('.nd-step-indicator').innerHTML = '<i class="bi bi-check-lg" style="font-size: 1.5rem;"></i>'; // Check icon
+                } else {
+                    el.querySelector('.nd-step-indicator').textContent = s; // Reset number
+                }
+            });
+
+            currentStep = step;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function validateStep(step) {
+            let isValid = true;
+            const stepEl = document.querySelector(`.wizard-step[data-step="${step}"]`);
+
+            // 1. HTML5 Validation for inputs in this step
+            const inputs = stepEl.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                if (!input.checkValidity()) {
+                    isValid = false;
+                    input.classList.add('is-invalid');
+                    input.reportValidity(); // Optional: shows browser tooltip
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+
+            // 2. Custom Validation
+            if (step === 1) {
+                // Compliance Check
                 if (usPerson && pep && noneCompliant && !usPerson.checked && !pep.checked && !noneCompliant.checked) {
                     isValid = false;
                     if (complianceError) complianceError.style.display = 'block';
-
                     usPerson.classList.add('is-invalid');
                     pep.classList.add('is-invalid');
                     noneCompliant.classList.add('is-invalid');
-
-                    // A11y
-                    usPerson.setAttribute('aria-invalid', 'true');
-                    pep.setAttribute('aria-invalid', 'true');
-                    noneCompliant.setAttribute('aria-invalid', 'true');
-
-                    usPerson.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (complianceError) complianceError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
+            }
 
-                // Shareholder Percentage Validation
+            if (step === 2) {
+                // Shareholder Percentage Check
                 const totalEl = document.getElementById('totalPercentage');
                 if (totalEl) {
                     const total = parseFloat(totalEl.textContent);
+                    // Ensure at least one shareholder if strictly required (optional, but logical)
+                    // And check 100%
+                    if (shareholders.length === 0) {
+                        // Optional: Require at least one? The Controller validates it?
+                        // Let's assume yes.
+                        // alert('Adicione pelo menos um sócio.');
+                        // isValid = false; 
+                        // (Keeping loose to avoid blocking if optional, but 100% check implies data)
+                    }
+
                     if (shareholders.length > 0 && Math.abs(total - 100) > 0.01) {
                         isValid = false;
-                        alert('A soma das porcentagens dos sócios deve ser exatamente 100%');
                         const warning = document.getElementById('percentageWarning');
                         if (warning) {
                             warning.style.display = 'block';
                             warning.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         }
+                        alert('A soma das participações deve ser 100%');
                     }
                 }
+            }
 
-                if (!isValid) e.preventDefault();
-            });
+            return isValid;
         }
+
+        // Next Buttons
+        document.querySelectorAll('.btn-next').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const nextStep = parseInt(this.getAttribute('data-next'));
+                if (validateStep(currentStep)) {
+                    showStep(nextStep);
+                }
+            });
+        });
+
+        // Prev Buttons
+        document.querySelectorAll('.btn-prev').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const prevStep = parseInt(this.getAttribute('data-prev'));
+                showStep(prevStep);
+            });
+        });
+
     });
 
 })();

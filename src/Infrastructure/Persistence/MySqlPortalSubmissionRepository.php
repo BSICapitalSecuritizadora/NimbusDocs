@@ -13,7 +13,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
 
     // --------- PORTAL (usuário final) ---------
 
-    public function paginateByUser(int $portalUserId, int $page, int $perPage, ?string $search = null): array
+    public function paginateByUser(int $portalUserId, int $page, int $perPage, ?string $search = null, ?string $status = null): array
     {
         $offset = max(0, ($page - 1) * $perPage);
         $search = $search ? trim($search) : null;
@@ -25,6 +25,11 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             $where .= " AND (reference_code LIKE :search OR title LIKE :search2)";
             $params[':search'] = '%' . $search . '%';
             $params[':search2'] = '%' . $search . '%';
+        }
+
+        if ($status) {
+            $where .= " AND status = :status";
+            $params[':status'] = $status;
         }
 
         $stmtTotal = $this->pdo->prepare(
@@ -55,7 +60,8 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             'page'    => $page,
             'perPage' => $perPage,
             'pages'   => (int)ceil($total / $perPage),
-            'search'  => $search
+            'search'  => $search,
+            'status'  => $status
         ];
     }
 

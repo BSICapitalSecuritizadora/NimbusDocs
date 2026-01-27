@@ -86,8 +86,9 @@ final class PortalSubmissionController
         $page    = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
         $perPage = 10;
         $search  = $_GET['q'] ?? null;
+        $status  = $_GET['status'] ?? null;
 
-        $pagination = $this->repo->paginateByUser((int)$user['id'], $page, $perPage, $search);
+        $pagination = $this->repo->paginateByUser((int)$user['id'], $page, $perPage, $search, $status);
 
         $pageTitle   = 'Minhas submissões';
         $contentView = __DIR__ . '/../../View/portal/submissions/index.php';

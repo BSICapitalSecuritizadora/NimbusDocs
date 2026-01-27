@@ -7,7 +7,7 @@ namespace App\Domain\Repository;
 interface PortalSubmissionRepository
 {
     // PORTAL (usuário final)
-    public function paginateByUser(int $portalUserId, int $page, int $perPage): array;
+    public function paginateByUser(int $portalUserId, int $page, int $perPage, ?string $search = null, ?string $status = null): array;
 
     public function findByIdForUser(int $id, int $portalUserId): ?array;
 
