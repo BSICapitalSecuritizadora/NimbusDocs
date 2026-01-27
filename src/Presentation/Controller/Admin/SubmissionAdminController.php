@@ -379,49 +379,80 @@ final class SubmissionAdminController
         ];
 
         $items = $this->repo->exportForAdmin($filters);
+        $rowCount = count($items);
+        $lastRowIndex = $rowCount + 2; // Title + Header + Data
 
         header('Content-Type: application/vnd.ms-excel; charset=utf-8');
-        header('Content-Disposition: attachment; filename="submissoes_nimbus_' . date('Y-m-d_H-i') . '.xls"');
+        header('Content-Disposition: attachment; filename="relatorio_submissoes_' . date('Ymd_Hi') . '.xls"');
         header('Pragma: no-cache');
         header('Expires: 0');
 
-        echo '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
-        echo '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head>';
+        echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+        echo '<head>';
+        echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
+        echo '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Relatório</x:Name><x:WorksheetOptions><x:DisplayGridlines/><x:AutoFilter x:Range="A2:G' . $lastRowIndex . '"/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
+        echo '<style>
+                .header-brand { background-color: #0f172a; color: #ffffff; font-size: 16px; font-weight: bold; text-align: center; height: 40px; vertical-align: middle; }
+                .th-style { background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; font-weight: bold; height: 30px; vertical-align: middle; text-align: center; }
+                .td-style { border: 1px solid #cbd5e1; vertical-align: middle; padding: 5px; color: #334155; }
+                .status-badge { color: #ffffff; font-weight: bold; text-align: center; border: 1px solid #cbd5e1; vertical-align: middle; }
+                .odd { background-color: #ffffff; }
+                .even { background-color: #f8fafc; }
+                .text-center { text-align: center; }
+                .text-left { text-align: left; }
+              </style>';
+        echo '</head>';
         echo '<body>';
-        echo '<table border="1">';
-        echo '<thead><tr>';
-        echo '<th style="background-color:#eee;">Código</th>';
-        echo '<th style="background-color:#eee;">Status</th>';
-        echo '<th style="background-color:#eee;">Assunto</th>';
-        echo '<th style="background-color:#eee;">Data Envio</th>';
-        echo '<th style="background-color:#eee;">Solicitante</th>';
-        echo '<th style="background-color:#eee;">Email</th>';
-        echo '<th style="background-color:#eee;">Documento (CPF/CNPJ)</th>';
-        echo '</tr></thead>';
-        echo '<tbody>';
+        echo '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; border-color: #cbd5e1;">';
+        
+        // Branded Header (Row 1)
+        echo '<tr><td colspan="7" class="header-brand">NIMBUSDOCS — RELATÓRIO DE SUBMISSÕES</td></tr>';
+        
+        // Column Headers (Row 2)
+        echo '<tr>';
+        echo '<th class="th-style">Código</th>';
+        echo '<th class="th-style" style="width: 120px;">Situação</th>';
+        echo '<th class="th-style">Assunto</th>';
+        echo '<th class="th-style">Data Envio</th>';
+        echo '<th class="th-style">Solicitante</th>';
+        echo '<th class="th-style">Email</th>';
+        echo '<th class="th-style">Documento (CPF/CNPJ)</th>';
+        echo '</tr>';
 
+        $i = 0;
         foreach ($items as $row) {
-             $statusLabel = match($row['status'] ?? '') {
-                 'PENDING'      => 'Pendente',
-                 'UNDER_REVIEW' => 'Em Análise',
-                 'COMPLETED'    => 'Concluído',
-                 'APPROVED'     => 'Aprovado',
-                 'REJECTED'     => 'Rejeitado',
-                 default        => $row['status']
+             $i++;
+             $rowClass = ($i % 2 === 0) ? 'even' : 'odd';
+
+             $statusData = match($row['status'] ?? '') {
+                 'PENDING'      => ['label' => 'Pendente',   'bg' => '#f59e0b'],
+                 'UNDER_REVIEW' => ['label' => 'Em Análise', 'bg' => '#3b82f6'],
+                 'COMPLETED'    => ['label' => 'Concluído',  'bg' => '#10b981'],
+                 'APPROVED'     => ['label' => 'Aprovado',   'bg' => '#10b981'],
+                 'REJECTED'     => ['label' => 'Rejeitado',  'bg' => '#ef4444'],
+                 default        => ['label' => $row['status'], 'bg' => '#64748b']
              };
 
-            echo '<tr>';
-            echo '<td>' . htmlspecialchars($row['reference_code'] ?? '') . '</td>';
-            echo '<td>' . htmlspecialchars($statusLabel) . '</td>';
-            echo '<td>' . htmlspecialchars($row['title'] ?? '') . '</td>';
-            echo '<td>' . htmlspecialchars($row['submitted_at'] ?? '') . '</td>';
-            echo '<td>' . htmlspecialchars($row['user_name'] ?? '') . '</td>';
-            echo '<td>' . htmlspecialchars($row['user_email'] ?? '') . '</td>';
-            echo '<td>' . htmlspecialchars($row['user_document_number'] ?? '') . '</td>';
+            $doc = preg_replace('/\D/', '', $row['user_document_number'] ?? '');
+            $maskedDoc = $doc;
+            if (strlen($doc) === 11) {
+                $maskedDoc = preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $doc);
+            } elseif (strlen($doc) === 14) {
+                $maskedDoc = preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $doc);
+            }
+
+            echo '<tr class="' . $rowClass . '">';
+            echo '<td class="td-style text-center">' . htmlspecialchars($row['reference_code'] ?? '') . '</td>';
+            echo '<td class="status-badge" style="background-color:' . $statusData['bg'] . ';">' . htmlspecialchars($statusData['label']) . '</td>';
+            echo '<td class="td-style text-left">' . htmlspecialchars($row['title'] ?? '') . '</td>';
+            echo '<td class="td-style text-center">' . htmlspecialchars($row['submitted_at'] ?? '') . '</td>';
+            echo '<td class="td-style text-left">' . htmlspecialchars($row['user_name'] ?? '') . '</td>';
+            echo '<td class="td-style text-left">' . htmlspecialchars($row['user_email'] ?? '') . '</td>';
+            echo '<td class="td-style text-center" style="mso-number-format:\@;">' . htmlspecialchars($maskedDoc) . '</td>';
             echo '</tr>';
         }
 
-        echo '</tbody></table></body></html>';
+        echo '</table></body></html>';
         exit;
     }
 
