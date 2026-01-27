@@ -27,10 +27,10 @@ $dateFormatted = !empty($submission['submitted_at'])
         <a href="/portal/submissions" class="nd-btn nd-btn-sm nd-btn-outline mb-2">
             <i class="bi bi-arrow-left"></i> Voltar
         </a>
-        <h1 class="h3 fw-bold text-dark mb-0">Detalhes do Envio</h1>
+        <h1 class="h3 fw-bold text-dark mb-0">Detalhes do Protocolo <span class="text-secondary">#<?= htmlspecialchars($submission['reference_code'], ENT_QUOTES, 'UTF-8') ?></span></h1>
     </div>
     <div class="text-end">
-        <span class="nd-badge <?= $badgeClass ?> fs-6 px-3 py-2">
+        <span class="nd-badge <?= $badgeClass ?> fs-6 px-3 py-2 rounded-pill">
             <i class="bi <?= $icon ?> me-2"></i>
             <?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8') ?>
         </span>
@@ -41,362 +41,270 @@ $dateFormatted = !empty($submission['submitted_at'])
     <div class="col-lg-8">
         <!-- Main details -->
         <div class="nd-card mb-4">
-            <div class="nd-card-header">
-                <h2 class="nd-card-title">Resumo do Protocolo</h2>
+            <div class="nd-card-header d-flex justify-content-between align-items-center">
+                <h2 class="nd-card-title">Dados da Empresa</h2>
+                <span class="small text-muted"><i class="bi bi-building me-1"></i> Identificação</span>
             </div>
             <div class="nd-card-body">
-                <div class="row gy-3">
-                    <div class="col-12">
-                        <label class="nd-label text-muted mb-1">Assunto / Título</label>
-                        <div class="fw-semibold fs-5 text-dark">
-                            <?= htmlspecialchars($submission['title'], ENT_QUOTES, 'UTF-8') ?>
-                        </div>
-                    </div>
-                </div>
-                
-                <hr class="border-light-subtle my-3">
-                
-                <div class="row gy-3">
+                <div class="row g-4 mb-4">
                     <div class="col-md-6">
-                        <label class="nd-label text-muted mb-1">Protocolo</label>
-                        <div class="font-monospace text-secondary bg-light rounded px-2 py-1 d-inline-block">
-                            <?= htmlspecialchars($submission['reference_code'], ENT_QUOTES, 'UTF-8') ?>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="nd-label text-muted mb-1">Data de Envio</label>
-                        <div class="text-dark">
-                            <i class="bi bi-calendar3 me-1 text-secondary"></i>
-                            <?= $dateFormatted ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Details -->
-        <div class="nd-card mb-4">
-            <div class="nd-card-header">
-                <h2 class="nd-card-title">Detalhes da Empresa</h2>
-            </div>
-            <div class="nd-card-body">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="nd-label text-muted mb-1">Empresa</label>
-                        <div class="text-dark fw-medium">
+                        <label class="nd-label text-muted small mb-1">Razão Social</label>
+                        <div class="fw-semibold text-dark fs-5">
                             <?= htmlspecialchars($submission['company_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <label class="nd-label text-muted mb-1">CNPJ</label>
-                        <div class="text-dark font-monospace">
+                         <label class="nd-label text-muted small mb-1">Assunto da Submissão</label>
+                         <div class="text-dark fw-medium">
+                            <?= htmlspecialchars($submission['title'], ENT_QUOTES, 'UTF-8') ?>
+                         </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                     <!-- 4-Column Grid for Metrics -->
+                    <div class="col-6 col-md-3">
+                        <label class="nd-label text-muted small mb-1">CNPJ</label>
+                        <div class="font-monospace text-dark">
                             <?php 
                             $cnpj = $submission['company_cnpj'] ?? '';
                             echo htmlspecialchars(preg_replace("/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/", "$1.$2.$3/$4-$5", $cnpj), ENT_QUOTES, 'UTF-8');
                             ?>
                         </div>
                     </div>
-                    
-                    <div class="col-md-6">
-                        <label class="nd-label text-muted mb-1">Responsável</label>
+                    <div class="col-6 col-md-3">
+                        <label class="nd-label text-muted small mb-1">Telefone</label>
                         <div class="text-dark">
-                            <?= htmlspecialchars($submission['responsible_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                             <?= htmlspecialchars($submission['phone'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="nd-label text-muted mb-1">Telefone</label>
-                        <div class="text-dark">
-                            <?= htmlspecialchars($submission['phone'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
-                        </div>
-                    </div>
-
-                    <div class="col-12">
-                        <label class="nd-label text-muted mb-1">Atividade Principal</label>
-                        <div class="text-dark">
-                            <?= htmlspecialchars($submission['main_activity'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="nd-label text-muted mb-1">Patrimônio Líquido</label>
-                        <div class="text-dark">
-                            R$ <?= number_format((float)($submission['net_worth'] ?? 0), 2, ',', '.') ?>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="nd-label text-muted mb-1">Faturamento Anual</label>
+                    <div class="col-6 col-md-3">
+                        <label class="nd-label text-muted small mb-1">Faturamento</label>
                         <div class="text-dark">
                             R$ <?= number_format((float)($submission['annual_revenue'] ?? 0), 2, ',', '.') ?>
                         </div>
                     </div>
-                    
-                    <div class="col-12 border-top border-light-subtle pt-3 mt-3">
-                        <h6 class="text-secondary small fw-bold text-uppercase mb-3">Seus Dados</h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="nd-label text-muted mb-1">Nome Completo</label>
-                                <div class="text-dark">
-                                    <?= htmlspecialchars($submission['registrant_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="nd-label text-muted mb-1">Cargo</label>
-                                <div class="text-dark">
-                                    <?= htmlspecialchars($submission['registrant_position'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="nd-label text-muted mb-1">RG</label>
-                                <div class="text-dark">
-                                    <?= htmlspecialchars($submission['registrant_rg'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="nd-label text-muted mb-1">CPF</label>
-                                <div class="text-dark font-monospace">
-                                    <?php 
-                                    $cpf = $submission['registrant_cpf'] ?? '';
-                                    echo htmlspecialchars(preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "$1.$2.$3-$4", $cpf), ENT_QUOTES, 'UTF-8');
-                                    ?>
-                                </div>
-                            </div>
+                    <div class="col-6 col-md-3">
+                        <label class="nd-label text-muted small mb-1">Patrimômio Líq.</label>
+                        <div class="text-dark">
+                            R$ <?= number_format((float)($submission['net_worth'] ?? 0), 2, ',', '.') ?>
                         </div>
                     </div>
+                </div>
 
-                    <div class="col-12 border-top border-light-subtle pt-3 mt-3">
-                         <div class="d-flex gap-4">
+                <hr class="border-light-subtle my-4">
+
+                <div class="row g-4">
+                     <div class="col-12">
+                         <h6 class="text-secondary small fw-bold text-uppercase mb-3">Solicitante & Compliance</h6>
+                     </div>
+                     <div class="col-md-4">
+                        <label class="nd-label text-muted small mb-1">Solicitante</label>
+                        <div class="text-dark fw-medium">
+                            <?= htmlspecialchars($submission['registrant_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                        </div>
+                        <div class="small text-secondary">
+                             <?= htmlspecialchars($submission['registrant_position'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                         <label class="nd-label text-muted small mb-1">CPF</label>
+                         <div class="font-monospace text-secondary">
+                             <?php 
+                             $cpf = $submission['registrant_cpf'] ?? '';
+                             echo htmlspecialchars(preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "$1.$2.$3-$4", $cpf), ENT_QUOTES, 'UTF-8');
+                             ?>
+                         </div>
+                     </div>
+                     <div class="col-md-4">
+                         <div class="d-flex flex-column gap-2">
                             <div class="d-flex align-items-center">
-                                <i class="bi <?= !empty($submission['is_us_person']) ? 'bi-check-circle-fill text-warning' : 'bi-x-circle text-muted' ?> me-2"></i>
+                                <i class="bi <?= !empty($submission['is_us_person']) ? 'bi-check-circle-fill text-warning' : 'bi-dash-circle text-muted' ?> me-2"></i>
                                 <span class="small text-secondary">US Person</span>
                             </div>
                             <div class="d-flex align-items-center">
-                                <i class="bi <?= !empty($submission['is_pep']) ? 'bi-check-circle-fill text-danger' : 'bi-x-circle text-muted' ?> me-2"></i>
-                                <span class="small text-secondary">PEP (Pessoa Exposta Politicamente)</span>
+                                <i class="bi <?= !empty($submission['is_pep']) ? 'bi-check-circle-fill text-danger' : 'bi-dash-circle text-muted' ?> me-2"></i>
+                                <span class="small text-secondary">PEP</span>
                             </div>
                         </div>
-                    </div>
+                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Shareholders -->
-        <div class="nd-card mb-4">
+        <!-- History/Notes Timeline -->
+         <div class="nd-card mb-4">
             <div class="nd-card-header">
-                <h2 class="nd-card-title">Quadro Societário</h2>
+                <h2 class="nd-card-title">Histórico de Eventos</h2>
             </div>
-            <div class="nd-card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="px-4 py-3 text-secondary small text-uppercase">Nome</th>
-                                <th class="px-4 py-3 text-secondary small text-uppercase">RG</th>
-                                <th class="px-4 py-3 text-secondary small text-uppercase">CNPJ</th>
-                                <th class="px-4 py-3 text-secondary small text-uppercase text-end">Participação</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($shareholders)): ?>
-                                <tr>
-                                    <td colspan="4" class="px-4 py-3 text-center text-muted">Nenhum sócio cadastrado.</td>
-                                </tr>
-                            <?php else: ?>
-                                <?php foreach ($shareholders as $shareholder): ?>
-                                    <tr>
-                                        <td class="px-4 py-3 fw-medium text-dark">
-                                            <?= htmlspecialchars($shareholder['name'], ENT_QUOTES, 'UTF-8') ?>
-                                        </td>
-                                        <td class="px-4 py-3 text-secondary font-monospace">
-                                            <?= htmlspecialchars($shareholder['document_rg'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
-                                        </td>
-                                        <td class="px-4 py-3 text-secondary font-monospace">
-                                            <?php 
-                                            $sCnpj = $shareholder['document_cnpj'] ?? '';
-                                            echo htmlspecialchars(preg_replace("/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/", "$1.$2.$3/$4-$5", $sCnpj), ENT_QUOTES, 'UTF-8');
-                                            ?>
-                                        </td>
-                                        <td class="px-4 py-3 text-end fw-medium text-dark">
-                                            <?= number_format((float)($shareholder['percentage'] ?? 0), 2, ',', '.') ?>%
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <?php if (!empty($submission['message'])): ?>
-            <div class="nd-card mb-4">
-                <div class="nd-card-header">
-                    <h2 class="nd-card-title">Mensagem Original</h2>
-                </div>
-                <div class="nd-card-body">
-                    <div class="p-3 bg-light rounded text-secondary">
-                        <?= nl2br(htmlspecialchars($submission['message'], ENT_QUOTES, 'UTF-8')) ?>
-                    </div>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <!-- Observações da Análise (Notas do Admin visíveis ao usuário) -->
-        <?php if (!empty($notes)): ?>
-            <div class="nd-card mb-4 border-primary-subtle">
-                <div class="nd-card-header bg-primary-subtle bg-opacity-10">
-                    <h2 class="nd-card-title text-primary-emphasis">
-                        <i class="bi bi-chat-left-quote-fill me-2"></i>
-                        Observações da Análise
-                    </h2>
-                </div>
-                <div class="nd-card-body">
-                    <div class="d-flex flex-column gap-3">
-                        <?php foreach ($notes as $note): ?>
-                            <div class="p-3 rounded border-start border-3 border-primary" style="background: var(--nd-gray-50);">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
-                                             style="width: 28px; height: 28px; font-size: 0.7rem;">
-                                            <i class="bi bi-person-fill"></i>
-                                        </div>
-                                        <span class="fw-medium small text-secondary">Equipe de Análise</span>
-                                    </div>
-                                    <small class="text-muted">
-                                        <i class="bi bi-clock me-1"></i>
-                                        <?php
-                                        $noteDate = $note['created_at'] ?? '';
-                                        if ($noteDate) {
-                                            try {
-                                                $d = new DateTime($noteDate);
-                                                echo $d->format('d/m/Y H:i');
-                                            } catch (Exception $e) {
-                                                echo htmlspecialchars($noteDate, ENT_QUOTES, 'UTF-8');
-                                            }
-                                        }
-                                        ?>
-                                    </small>
+            <div class="nd-card-body">
+                <div class="nd-timeline">
+                    <!-- Submission Event (Start) -->
+                    <div class="nd-timeline-item">
+                        <div class="nd-timeline-marker user"></div>
+                        <div class="nd-timeline-content border-0 shadow-none bg-light ps-0 py-0">
+                            <div class="nd-timeline-header mb-1">
+                                <span class="nd-timeline-author text-primary">Envio Realizado</span>
+                                <span class="nd-timeline-date"><?= $dateFormatted ?></span>
+                            </div>
+                            <p class="mb-0 text-secondary small">
+                                Protocolo criado por <?= htmlspecialchars($submission['registrant_name'] ?? 'Usuário', ENT_QUOTES, 'UTF-8') ?>.
+                            </p>
+                            <?php if (!empty($submission['message'])): ?>
+                                <div class="mt-2 p-2 bg-white border rounded text-muted fst-italic small">
+                                    "<?= nl2br(htmlspecialchars($submission['message'], ENT_QUOTES, 'UTF-8')) ?>"
                                 </div>
-                                <div class="text-dark">
-                                    <?= nl2br(htmlspecialchars($note['message'] ?? '', ENT_QUOTES, 'UTF-8')) ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Notes Loop -->
+                    <?php if (!empty($notes)): ?>
+                        <?php foreach ($notes as $note): ?>
+                            <div class="nd-timeline-item">
+                                <div class="nd-timeline-marker admin"></div>
+                                <div class="nd-timeline-content">
+                                    <div class="nd-timeline-header">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="nd-timeline-author">Equipe de Análise</span>
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2" style="font-size: 0.65rem;">ADMIN</span>
+                                        </div>
+                                        <span class="nd-timeline-date">
+                                            <?php
+                                            $noteDate = $note['created_at'] ?? '';
+                                            if ($noteDate) {
+                                                try {
+                                                    echo (new DateTime($noteDate))->format('d/m/Y H:i');
+                                                } catch (Exception $e) { echo $noteDate; }
+                                            }
+                                            ?>
+                                        </span>
+                                    </div>
+                                    <div class="text-dark small">
+                                        <?= nl2br(htmlspecialchars($note['message'] ?? '', ENT_QUOTES, 'UTF-8')) ?>
+                                    </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
-        <?php endif; ?>
+        </div>
     </div>
     
     <div class="col-lg-4">
-        <!-- Files sent by user -->
+        <!-- Attachments -->
         <div class="nd-card mb-4">
-            <div class="nd-card-header">
-                <h2 class="nd-card-title">Documentos Anexados</h2>
+            <div class="nd-card-header d-flex justify-content-between align-items-center">
+                 <h2 class="nd-card-title">Anexos</h2>
+                 <span class="badge bg-secondary text-white rounded-pill"><?= count($files) ?></span>
             </div>
             <div class="nd-card-body p-0">
                 <?php if (!$files): ?>
                     <div class="p-4 text-center text-muted small">
-                        <i class="bi bi-paperclip fs-5 d-block mb-1 opacity-50"></i>
-                        Nenhum anexo enviado.
+                        Nenhum documento enviado.
                     </div>
                 <?php else: ?>
-                    <ul class="list-group list-group-flush">
-                        <?php 
-                        $docLabels = [
-                            'BALANCE_SHEET'             => 'Último Balanço',
-                            'DRE'                       => 'DRE',
-                            'POLICIES'                  => 'Políticas',
-                            'CNPJ_CARD'                 => 'Cartão CNPJ',
-                            'POWER_OF_ATTORNEY'         => 'Procuração',
-                            'MINUTES'                   => 'Ata',
-                            'ARTICLES_OF_INCORPORATION' => 'Contrato Social',
-                            'BYLAWS'                    => 'Estatuto',
-                        ];
-                        foreach ($files as $f): 
+                    <div class="list-group list-group-flush">
+                        <?php foreach ($files as $f): 
+                             $docLabels = [
+                                'BALANCE_SHEET' => 'Último Balanço',
+                                'DRE' => 'DRE',
+                                'POLICIES' => 'Políticas',
+                                'CNPJ_CARD' => 'Cartão CNPJ',
+                                'POWER_OF_ATTORNEY' => 'Procuração',
+                                'MINUTES' => 'Ata',
+                                'ARTICLES_OF_INCORPORATION' => 'Contrato Social',
+                                'BYLAWS' => 'Estatuto',
+                            ];
                             $label = $docLabels[$f['document_type'] ?? ''] ?? $f['original_name'];
+                            $ext = pathinfo($f['original_name'], PATHINFO_EXTENSION);
                         ?>
-                            <li class="list-group-item px-4 py-3 border-light-subtle">
-                                <div class="d-flex align-items-center">
-                                    <div class="me-3 text-secondary">
-                                        <i class="bi bi-file-earmark-text fs-4"></i>
-                                    </div>
-                                    <div class="overflow-hidden">
-                                        <div class="text-truncate fw-medium text-dark" title="<?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>">
-                                            <?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>
-                                        </div>
-                                        <?php if (isset($f['size_bytes'])): ?>
-                                            <div class="small text-muted">
-                                                <?= number_format((int)$f['size_bytes'] / 1024, 1, ',', '.') ?> KB
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
+                        <div class="list-group-item d-flex align-items-center px-4 py-3">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-file-earmark-text fs-5"></i>
                                 </div>
-                            </li>
+                            </div>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="text-dark fw-medium text-truncate" title="<?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>">
+                                    <?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>
+                                </div>
+                                <div class="text-muted small text-uppercase" style="font-size: 0.7rem;">
+                                    <?= strtoupper($ext) ?> &bull; <?= isset($f['size_bytes']) ? number_format((int)$f['size_bytes'] / 1024, 0, ',', '.') . ' KB' : '-' ?>
+                                </div>
+                            </div>
+                        </div>
                         <?php endforeach; ?>
-                    </ul>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <!-- Shareholders Summary (Compact) -->
+        <div class="nd-card mb-4">
+            <div class="nd-card-header">
+                <h2 class="nd-card-title">Sócios</h2>
+            </div>
+            <div class="nd-card-body p-0">
+                <?php if (empty($shareholders)): ?>
+                     <div class="p-3 text-center text-muted small">Nenhum sócio.</div>
+                <?php else: ?>
+                    <table class="table table-sm mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-3 border-0 small text-secondary">Nome</th>
+                                <th class="pe-3 border-0 small text-secondary text-end">%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($shareholders as $sh): ?>
+                            <tr>
+                                <td class="ps-3 border-bottom-0">
+                                    <div class="text-truncate" style="max-width: 150px;" title="<?= htmlspecialchars($sh['name'], ENT_QUOTES, 'UTF-8') ?>">
+                                        <?= htmlspecialchars($sh['name'], ENT_QUOTES, 'UTF-8') ?>
+                                    </div>
+                                </td>
+                                <td class="pe-3 border-bottom-0 text-end fw-medium">
+                                    <?= number_format((float)($sh['percentage'] ?? 0), 2, ',', '.') ?>%
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 <?php endif; ?>
             </div>
         </div>
 
-        <!-- Response files from admin -->
+        <!-- Response Files -->
         <?php if ($responseFiles): ?>
-            <div class="nd-card border-primary-subtle">
-                <div class="nd-card-header bg-primary-subtle bg-opacity-10">
-                    <h2 class="nd-card-title text-primary-emphasis">
-                        <i class="bi bi-reply-all-fill me-2"></i>
-                        Documentos de Retorno
-                    </h2>
+            <div class="nd-card border-primary-subtle shadow-sm">
+                <div class="nd-card-header bg-primary-subtle bg-opacity-10 border-bottom border-primary-subtle">
+                     <h2 class="nd-card-title text-primary-emphasis mb-0">
+                        Documentos Disponíveis
+                     </h2>
                 </div>
                 <div class="nd-card-body p-0">
-                    <div class="p-3 bg-light border-bottom border-light-subtle">
-                        <p class="small text-muted mb-0">
-                            Estes são os documentos gerados para sua análise.
-                        </p>
-                    </div>
-                    <ul class="list-group list-group-flush">
-                        <?php foreach ($responseFiles as $f): ?>
-                            <li class="list-group-item px-4 py-3 border-light-subtle">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="d-flex align-items-center overflow-hidden me-2">
-                                        <div class="me-3 text-primary">
-                                            <i class="bi bi-file-earmark-pdf-fill fs-4"></i>
-                                        </div>
-                                        <div class="overflow-hidden">
-                                            <div class="text-truncate fw-medium text-dark" title="<?= htmlspecialchars($f['original_name'], ENT_QUOTES, 'UTF-8') ?>">
-                                                <?= htmlspecialchars($f['original_name'], ENT_QUOTES, 'UTF-8') ?>
-                                            </div>
-                                            <div class="small text-muted">
-                                                <?= number_format((int)$f['size_bytes'] / 1024, 1, ',', '.') ?> KB
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex gap-2">
-                                        <?php
-                                        $previewableMimes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-                                        $mime = $f['mime_type'] ?? '';
-                                        if (in_array($mime, $previewableMimes, true)):
-                                        ?>
-                                            <a href="/portal/files/<?= (int)$f['id'] ?>/preview" 
-                                               target="_blank"
-                                               class="btn btn-sm btn-outline-primary rounded-circle"
-                                               title="Visualizar arquivo"
-                                               aria-label="Visualizar arquivo <?= htmlspecialchars($f['original_name'], ENT_QUOTES, 'UTF-8') ?>">
-                                                <i class="bi bi-eye" aria-hidden="true"></i>
-                                            </a>
-                                        <?php endif; ?>
-                                        <a href="/portal/files/<?= (int)$f['id'] ?>/download" 
-                                           class="btn btn-sm btn-primary rounded-circle shadow-sm"
-                                           title="Baixar arquivo"
-                                           aria-label="Baixar arquivo <?= htmlspecialchars($f['original_name'], ENT_QUOTES, 'UTF-8') ?>">
-                                            <i class="bi bi-download" aria-hidden="true"></i>
-                                        </a>
-                                    </div>
+                    <div class="list-group list-group-flush">
+                        <?php foreach ($responseFiles as $fr): ?>
+                        <div class="list-group-item px-3 py-3 d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center overflow-hidden">
+                                <i class="bi bi-file-earmark-pdf-fill text-danger fs-4 me-3"></i>
+                                <div class="overflow-hidden">
+                                     <div class="fw-medium text-dark text-truncate" style="max-width: 140px;" title="<?= htmlspecialchars($fr['original_name'], ENT_QUOTES, 'UTF-8') ?>">
+                                        <?= htmlspecialchars($fr['original_name'], ENT_QUOTES, 'UTF-8') ?>
+                                     </div>
                                 </div>
-                            </li>
+                            </div>
+                            <a href="/portal/files/<?= (int)$fr['id'] ?>/download" class="btn btn-sm btn-primary rounded-pill px-3">
+                                <i class="bi bi-download me-1"></i> Baixar
+                            </a>
+                        </div>
                         <?php endforeach; ?>
-                    </ul>
+                    </div>
                 </div>
             </div>
         <?php endif; ?>
+
     </div>
 </div>
