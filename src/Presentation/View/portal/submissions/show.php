@@ -376,14 +376,16 @@ $dateFormatted = !empty($submission['submitted_at'])
                                             <a href="/portal/files/<?= (int)$f['id'] ?>/preview" 
                                                target="_blank"
                                                class="btn btn-sm btn-outline-primary rounded-circle"
-                                               title="Visualizar arquivo">
-                                                <i class="bi bi-eye"></i>
+                                               title="Visualizar arquivo"
+                                               aria-label="Visualizar arquivo <?= htmlspecialchars($f['original_name'], ENT_QUOTES, 'UTF-8') ?>">
+                                                <i class="bi bi-eye" aria-hidden="true"></i>
                                             </a>
                                         <?php endif; ?>
                                         <a href="/portal/files/<?= (int)$f['id'] ?>/download" 
                                            class="btn btn-sm btn-primary rounded-circle shadow-sm"
-                                           title="Baixar arquivo">
-                                            <i class="bi bi-download"></i>
+                                           title="Baixar arquivo"
+                                           aria-label="Baixar arquivo <?= htmlspecialchars($f['original_name'], ENT_QUOTES, 'UTF-8') ?>">
+                                            <i class="bi bi-download" aria-hidden="true"></i>
                                         </a>
                                     </div>
                                 </div>

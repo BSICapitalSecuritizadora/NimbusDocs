@@ -16,8 +16,8 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
 </div>
 
 <?php if (isset($errors['general'])): ?>
-    <div class="nd-alert nd-alert-danger mb-4">
-        <i class="bi bi-exclamation-triangle-fill"></i>
+    <div class="nd-alert nd-alert-danger mb-4" role="alert" aria-live="assertive">
+        <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
         <div class="nd-alert-text">
             <?= htmlspecialchars($errors['general'], ENT_QUOTES, 'UTF-8') ?>
         </div>
@@ -37,33 +37,37 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="nd-label" for="responsible_name">
-                        Nome do Responsável <span class="text-danger">*</span>
+                        Nome do Responsável <span class="text-danger" aria-hidden="true">*</span>
+                        <span class="visually-hidden">obrigatório</span>
                     </label>
                     <input type="text" class="nd-input <?= isset($errors['responsible_name']) ? 'is-invalid' : '' ?>"
                         id="responsible_name" name="responsible_name" required
                         placeholder="Nome completo do responsável"
-                        value="<?= htmlspecialchars($old['responsible_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                        value="<?= htmlspecialchars($old['responsible_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                        <?= isset($errors['responsible_name']) ? 'aria-invalid="true" aria-describedby="error_responsible_name"' : '' ?>>
                     <?php if (isset($errors['responsible_name'])): ?>
-                        <div class="invalid-feedback"><?= htmlspecialchars($errors['responsible_name'], ENT_QUOTES, 'UTF-8') ?></div>
+                        <div id="error_responsible_name" class="invalid-feedback"><?= htmlspecialchars($errors['responsible_name'], ENT_QUOTES, 'UTF-8') ?></div>
                     <?php endif; ?>
                 </div>
 
                 <div class="col-md-6">
                     <label class="nd-label" for="company_cnpj">
-                        CNPJ <span class="text-danger">*</span>
+                        CNPJ <span class="text-danger" aria-hidden="true">*</span>
+                        <span class="visually-hidden">obrigatório</span>
                     </label>
                     <div class="nd-input-group">
                         <input type="text" class="nd-input pe-5 <?= isset($errors['company_cnpj']) ? 'is-invalid' : '' ?>"
                             id="company_cnpj" name="company_cnpj" required
                             placeholder="00.000.000/0000-00"
-                            value="<?= htmlspecialchars($old['company_cnpj'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                            value="<?= htmlspecialchars($old['company_cnpj'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                            <?= isset($errors['company_cnpj']) ? 'aria-invalid="true" aria-describedby="error_company_cnpj"' : '' ?>>
                         <button class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none pe-3" 
-                                type="button" id="btnSearchCnpj" style="z-index: 5;">
-                            <i class="bi bi-search text-primary"></i> <span class="fw-medium">Preencher</span>
+                                type="button" id="btnSearchCnpj" style="z-index: 5;" aria-label="Buscar dados do CNPJ">
+                            <i class="bi bi-search text-primary" aria-hidden="true"></i> <span class="fw-medium">Preencher</span>
                         </button>
                     </div>
                     <?php if (isset($errors['company_cnpj'])): ?>
-                        <div class="invalid-feedback d-block"><?= htmlspecialchars($errors['company_cnpj'], ENT_QUOTES, 'UTF-8') ?></div>
+                        <div id="error_company_cnpj" class="invalid-feedback d-block"><?= htmlspecialchars($errors['company_cnpj'], ENT_QUOTES, 'UTF-8') ?></div>
                     <?php endif; ?>
                     <div class="form-text small text-muted mt-1">
                         <i class="bi bi-info-circle me-1"></i>
@@ -172,7 +176,7 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
                     </label>
                 </div>
             </div>
-            <div id="complianceError" class="text-danger small mt-1" style="<?= isset($errors['compliance']) ? 'display: block;' : 'display: none;' ?>">
+            <div id="complianceError" class="text-danger small mt-1" role="alert" style="<?= isset($errors['compliance']) ? 'display: block;' : 'display: none;' ?>">
                 <?= $errors['compliance'] ?? 'Selecione pelo menos uma opção.' ?>
             </div>
         </div>
@@ -201,9 +205,9 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
             <div class="mt-4 p-3 bg-light rounded d-flex justify-content-between align-items-center border border-light-subtle">
                 <span class="text-secondary fw-medium">Total da Participação</span>
                 <div class="text-end">
-                    <strong class="fs-5 text-dark"><span id="totalPercentage">0.00</span>%</strong>
-                    <div id="percentageWarning" class="text-danger small mt-1" style="display: none;">
-                        <i class="bi bi-exclamation-circle me-1"></i>A soma deve ser exatamente 100%
+                    <strong class="fs-5 text-dark"><span id="totalPercentage" aria-live="polite">0.00</span>%</strong>
+                    <div id="percentageWarning" class="text-danger small mt-1" role="alert" style="display: none;">
+                        <i class="bi bi-exclamation-circle me-1" aria-hidden="true"></i>A soma deve ser exatamente 100%
                     </div>
                 </div>
             </div>
