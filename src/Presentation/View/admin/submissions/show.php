@@ -176,7 +176,105 @@ $statusIcon = match($submission['status'] ?? '') {
         </div>
     </div>
 
-    <!-- Histórico de Notas -->
+    <!-- Informações Complementares -->
+    <div class="nd-card">
+        <div class="nd-card-header d-flex align-items-center gap-2">
+            <i class="bi bi-info-circle" style="color: var(--nd-navy-500);"></i>
+            <h2 class="nd-card-title mb-0">Informações Complementares</h2>
+        </div>
+        <div class="nd-card-body">
+            <div class="row g-4">
+                <!-- Dados da Empresa -->
+                <div class="col-md-6">
+                    <h6 class="fw-bold mb-3 text-dark border-bottom pb-2">Dados da Empresa</h6>
+                    <div class="d-flex flex-column gap-2">
+                        <div class="row">
+                            <label class="col-sm-4 text-muted small">Razão Social</label>
+                            <div class="col-sm-8 fw-medium"><?= htmlspecialchars($submission['company_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?></div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-4 text-muted small">CNPJ</label>
+                            <div class="col-sm-8 fw-medium"><?= htmlspecialchars($submission['company_cnpj'] ?? '-', ENT_QUOTES, 'UTF-8') ?></div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-4 text-muted small">Atividade Principal</label>
+                            <div class="col-sm-8"><?= htmlspecialchars($submission['main_activity'] ?? '-', ENT_QUOTES, 'UTF-8') ?></div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-4 text-muted small">Telefone</label>
+                            <div class="col-sm-8"><?= htmlspecialchars($submission['phone'] ?? '-', ENT_QUOTES, 'UTF-8') ?></div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-4 text-muted small">Website</label>
+                            <div class="col-sm-8">
+                                <?php if (!empty($submission['website'])): ?>
+                                    <a href="<?= htmlspecialchars($submission['website'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" class="text-primary text-decoration-none">
+                                        <?= htmlspecialchars($submission['website'], ENT_QUOTES, 'UTF-8') ?> <i class="bi bi-box-arrow-up-right small ms-1"></i>
+                                    </a>
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados Financeiros & Compliance -->
+                <div class="col-md-6">
+                     <h6 class="fw-bold mb-3 text-dark border-bottom pb-2">Financeiro & Compliance</h6>
+                     <div class="d-flex flex-column gap-2">
+                        <div class="row">
+                            <label class="col-sm-5 text-muted small">Patrimônio Líquido</label>
+                            <div class="col-sm-7 fw-medium">
+                                <?= !empty($submission['net_worth']) ? 'R$ ' . number_format((float)$submission['net_worth'], 2, ',', '.') : '-' ?>
+                            </div>
+                        </div>
+                         <div class="row">
+                            <label class="col-sm-5 text-muted small">Faturamento Anual</label>
+                            <div class="col-sm-7 fw-medium">
+                                <?= !empty($submission['annual_revenue']) ? 'R$ ' . number_format((float)$submission['annual_revenue'], 2, ',', '.') : '-' ?>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <label class="col-sm-5 text-muted small">US Person?</label>
+                            <div class="col-sm-7">
+                                <?= !empty($submission['is_us_person']) ? '<span class="text-danger fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Sim</span>' : '<span class="text-secondary"><i class="bi bi-x-circle me-1"></i> Não</span>' ?>
+                            </div>
+                        </div>
+                         <div class="row">
+                            <label class="col-sm-5 text-muted small">Pessoa Exposta (PEP)?</label>
+                            <div class="col-sm-7">
+                                 <?= !empty($submission['is_pep']) ? '<span class="text-danger fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Sim</span>' : '<span class="text-secondary"><i class="bi bi-x-circle me-1"></i> Não</span>' ?>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+
+                <!-- Dados do Declarante -->
+                <div class="col-12">
+                     <h6 class="fw-bold mb-3 text-dark border-bottom pb-2">Dados do Declarante</h6>
+                     <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="text-muted small d-block">Nome do Declarante</label>
+                            <span class="fw-medium"><?= htmlspecialchars($submission['registrant_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?></span>
+                        </div>
+                         <div class="col-md-3">
+                            <label class="text-muted small d-block">Cargo / Função</label>
+                            <span class="fw-medium"><?= htmlspecialchars($submission['registrant_position'] ?? '-', ENT_QUOTES, 'UTF-8') ?></span>
+                        </div>
+                         <div class="col-md-3">
+                            <label class="text-muted small d-block">CPF do Declarante</label>
+                            <span class="fw-medium"><?= htmlspecialchars($submission['registrant_cpf'] ?? '-', ENT_QUOTES, 'UTF-8') ?></span>
+                        </div>
+                         <div class="col-md-3">
+                            <label class="text-muted small d-block">RG do Declarante</label>
+                            <span class="fw-medium"><?= htmlspecialchars($submission['registrant_rg'] ?? '-', ENT_QUOTES, 'UTF-8') ?></span>
+                        </div>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <?php if ($notes): ?>
     <div class="nd-card">
         <div class="nd-card-header d-flex align-items-center gap-2">
