@@ -2,10 +2,13 @@
 
 use App\Support\StatusHelper;
 
-/** @var array $submission */
-/** @var array $files */
-/** @var array $notes */
-/** @var array $responseFiles */
+/** 
+ * @var array{id: int, title: string, reference_code: string, status: string, submitted_at?: string|null, message?: string, ...} $submission
+ * @var array<int, array{original_name: string, size_bytes?: int, document_type?: string, id?: int}> $files
+ * @var array<int, array{created_at: string, message: string}> $notes
+ * @var array<int, array> $responseFiles
+ * @var array<int, array{name: string, document_rg?: string, document_cnpj?: string, percentage?: float|string}> $shareholders 
+ */
 
 // Status translations via helper centralizado
 $statusRaw = $submission['status'] ?? '';

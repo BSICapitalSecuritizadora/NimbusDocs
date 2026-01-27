@@ -2,8 +2,10 @@
 
 use App\Support\StatusHelper;
 
-/** @var array $pagination */
-/** @var array $flash */
+/** 
+ * @var array{items: array, page: int, pages: int, total?: int} $pagination 
+ * @var array{success?: ?string, warning?: ?string, error?: ?string} $flash 
+ */
 
 $items = $pagination['items'] ?? [];
 $page  = $pagination['page'] ?? 1;

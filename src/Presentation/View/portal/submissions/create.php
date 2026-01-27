@@ -1,8 +1,11 @@
 <?php
 
-/** @var string $csrfToken */
-/** @var array $errors */
-/** @var array $old */
+/** 
+ * @var string $csrfToken
+ * @var array<string, string> $errors 
+ * @var array<string, mixed> $old
+ * @var array<int, array{name?: string, rg?: string, cnpj?: string, percentage?: float|string}> $oldShareholders
+ */
 
 use App\Support\Csrf;
 use App\Support\Session;
