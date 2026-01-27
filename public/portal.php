@@ -96,6 +96,25 @@ if (str_starts_with($uri, '/portal') && !$isPublic && !Session::has('portal_user
     exit;
 }
 
+// ------------- Rate Limiting -------------
+if (str_starts_with($uri, '/portal/api')) {
+    $rateLimiter = new \App\Infrastructure\Security\RateLimiter($config['cache']);
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    
+    // Limite: 60 requisições por minuto por IP
+    if ($rateLimiter->tooManyAttempts($ip, 60, 60)) {
+        http_response_code(429);
+        header('Content-Type: application/json');
+        header('Retry-After: 60');
+        echo json_encode(['error' => 'Muitas requisições. Por favor, aguarde alguns instantes antes de tentar novamente.']);
+        
+        if ($requestLogger) {
+            $requestLogger->logError('Rate limit exceeded', 429);
+        }
+        exit;
+    }
+}
+
 // ------------- Dispatch -------------
 $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 

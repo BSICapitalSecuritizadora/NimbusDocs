@@ -187,6 +187,74 @@ class FileCache
     }
 
     /**
+     * Incrementa o valor de um item no cache.
+     * Se não existir, cria com o valor inicial.
+     * 
+     * @param string $key Chave do cache
+     * @param int $amount Quantidade a incrementar
+     * @param int|null $ttl Tempo de vida em segundos (apenas se criar novo)
+     * @return int Novo valor
+     */
+    public function increment(string $key, int $amount = 1, ?int $ttl = null): int
+    {
+        $file = $this->getFilePath($key);
+        
+        // Bloqueio exclusivo para garantir atomicidade
+        $fp = fopen($file, 'c+');
+        if (!$fp) {
+            return 0; // Falha ao abrir
+        }
+        
+        if (!flock($fp, LOCK_EX)) {
+            fclose($fp);
+            return 0; // Falha ao bloquear
+        }
+
+        $content = '';
+        while (!feof($fp)) {
+            $content .= fread($fp, 8192);
+        }
+        
+        $data = $content ? @unserialize($content) : null;
+        $currentValue = 0;
+        $expiresAt = null;
+
+        if ($data && is_array($data)) {
+            // Verifica expiração
+            if (isset($data['expires_at']) && $data['expires_at'] !== null && $data['expires_at'] < time()) {
+                // Expirou, reseta
+                $data = null;
+            } else {
+                $currentValue = (int)($data['value'] ?? 0);
+                $expiresAt = $data['expires_at'] ?? null;
+            }
+        }
+
+        $newValue = $currentValue + $amount;
+        
+        // Se criou agora ou resetou, define novo expire
+        if ($data === null) {
+            $ttl = $ttl ?? $this->defaultTtl;
+            $expiresAt = $ttl > 0 ? time() + $ttl : null;
+        }
+
+        $newData = [
+            'value' => $newValue,
+            'expires_at' => $expiresAt,
+            'created_at' => $data['created_at'] ?? time(),
+        ];
+
+        ftruncate($fp, 0); // Limpa arquivo
+        rewind($fp);      // Volta para o início
+        fwrite($fp, serialize($newData));
+        fflush($fp);      // Garante escrita
+        flock($fp, LOCK_UN);
+        fclose($fp);
+
+        return $newValue;
+    }
+
+    /**
      * Gera o caminho do arquivo de cache.
      */
     private function getFilePath(string $key): string
