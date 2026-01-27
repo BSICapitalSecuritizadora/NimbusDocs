@@ -38,6 +38,11 @@ $query = http_build_query([
         </a>
       </li>
       <li>
+        <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="/admin/submissions/export/excel?<?= $query ?>">
+            <i class="bi bi-file-earmark-excel text-success"></i> Exportar Excel
+        </a>
+      </li>
+      <li>
         <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="/admin/submissions/export/print?<?= $query ?>" target="_blank">
             <i class="bi bi-printer-fill text-dark"></i> Imprimir / PDF
         </a>

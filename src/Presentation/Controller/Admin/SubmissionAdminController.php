@@ -367,6 +367,64 @@ final class SubmissionAdminController
         \App\Support\CsvResponse::output($fields, $data, 'submissoes_export.csv');
     }
 
+    public function exportExcel(array $vars = []): void
+    {
+        $this->requireAdmin();
+
+        $filters = [
+            'status'    => $_GET['status']    ?? null,
+            'user_name' => $_GET['user_name'] ?? null,
+            'from_date' => $_GET['from_date'] ?? null,
+            'to_date'   => $_GET['to_date']   ?? null,
+        ];
+
+        $items = $this->repo->exportForAdmin($filters);
+
+        header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+        header('Content-Disposition: attachment; filename="submissoes_nimbus_' . date('Y-m-d_H-i') . '.xls"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        echo '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
+        echo '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head>';
+        echo '<body>';
+        echo '<table border="1">';
+        echo '<thead><tr>';
+        echo '<th style="background-color:#eee;">Código</th>';
+        echo '<th style="background-color:#eee;">Status</th>';
+        echo '<th style="background-color:#eee;">Assunto</th>';
+        echo '<th style="background-color:#eee;">Data Envio</th>';
+        echo '<th style="background-color:#eee;">Solicitante</th>';
+        echo '<th style="background-color:#eee;">Email</th>';
+        echo '<th style="background-color:#eee;">Documento (CPF/CNPJ)</th>';
+        echo '</tr></thead>';
+        echo '<tbody>';
+
+        foreach ($items as $row) {
+             $statusLabel = match($row['status'] ?? '') {
+                 'PENDING'      => 'Pendente',
+                 'UNDER_REVIEW' => 'Em Análise',
+                 'COMPLETED'    => 'Concluído',
+                 'APPROVED'     => 'Aprovado',
+                 'REJECTED'     => 'Rejeitado',
+                 default        => $row['status']
+             };
+
+            echo '<tr>';
+            echo '<td>' . htmlspecialchars($row['reference_code'] ?? '') . '</td>';
+            echo '<td>' . htmlspecialchars($statusLabel) . '</td>';
+            echo '<td>' . htmlspecialchars($row['title'] ?? '') . '</td>';
+            echo '<td>' . htmlspecialchars($row['submitted_at'] ?? '') . '</td>';
+            echo '<td>' . htmlspecialchars($row['user_name'] ?? '') . '</td>';
+            echo '<td>' . htmlspecialchars($row['user_email'] ?? '') . '</td>';
+            echo '<td>' . htmlspecialchars($row['user_document_number'] ?? '') . '</td>';
+            echo '</tr>';
+        }
+
+        echo '</tbody></table></body></html>';
+        exit;
+    }
+
     public function exportPrint(array $vars = []): void
     {
         $this->requireAdmin();
