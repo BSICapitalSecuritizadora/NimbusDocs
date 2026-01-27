@@ -348,7 +348,20 @@ $statusIcon = match($submission['status'] ?? '') {
                 </div>
             <?php else: ?>
                 <div class="row g-3">
-                    <?php foreach ($userFiles as $f): ?>
+                    <?php foreach ($userFiles as $f): 
+                         $docLabels = [
+                            'BALANCE_SHEET' => 'Último Balanço',
+                            'DRE' => 'DRE',
+                            'POLICIES' => 'Políticas',
+                            'CNPJ_CARD' => 'Cartão CNPJ',
+                            'POWER_OF_ATTORNEY' => 'Procuração',
+                            'MINUTES' => 'Ata',
+                            'ARTICLES_OF_INCORPORATION' => 'Contrato Social',
+                            'BYLAWS' => 'Estatuto',
+                        ];
+                        $label = $docLabels[$f['document_type'] ?? ''] ?? $f['original_name'];
+                        $ext = pathinfo($f['original_name'], PATHINFO_EXTENSION);
+                    ?>
                         <div class="col-md-6">
                             <div class="d-flex align-items-center justify-content-between p-3 rounded h-100" style="background: var(--nd-gray-50); border: 1px solid var(--nd-gray-200);">
                                 <div class="d-flex align-items-center gap-3 overflow-hidden">
@@ -356,11 +369,11 @@ $statusIcon = match($submission['status'] ?? '') {
                                         <i class="bi bi-file-earmark-text"></i>
                                     </div>
                                     <div class="min-w-0">
-                                        <div class="fw-medium text-dark text-truncate" title="<?= htmlspecialchars($f['original_name'], ENT_QUOTES, 'UTF-8') ?>">
-                                            <?= htmlspecialchars($f['original_name'], ENT_QUOTES, 'UTF-8') ?>
+                                        <div class="fw-medium text-dark text-truncate" title="<?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>">
+                                            <?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>
                                         </div>
-                                        <div class="small text-muted">
-                                            <?= number_format((int)$f['size_bytes'] / 1024, 1, ',', '.') ?> KB
+                                        <div class="text-muted small text-uppercase" style="font-size: 0.75rem;">
+                                            <?= strtoupper($ext) ?> &bull; <?= number_format((int)$f['size_bytes'] / 1024, 1, ',', '.') ?> KB
                                         </div>
                                     </div>
                                 </div>
