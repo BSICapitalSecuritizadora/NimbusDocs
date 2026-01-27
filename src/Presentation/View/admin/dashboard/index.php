@@ -25,80 +25,89 @@
         </div>
     </div>
 
-    <!-- Metrics Cards -->
+    <!-- Metrics Cards (3 Columns Grid) -->
     <div class="row g-4 mb-4">
         <!-- Total Submissions -->
-        <div class="col-6 col-lg-3">
-            <div class="nd-metric-card primary">
+        <div class="col-6 col-lg-4">
+            <div class="nd-metric-card primary d-flex align-items-center justify-content-between overflow-hidden">
                 <div class="nd-metric-card-gradient"></div>
-                <div class="nd-metric-icon">
+                <div class="nd-metric-icon mb-0 position-relative z-1">
                     <i class="bi bi-inbox-fill"></i>
                 </div>
-                <div class="nd-metric-value"><?= number_format($totalSubmissions) ?></div>
-                <div class="nd-metric-label">Envios Recebidos</div>
+                <div class="text-end position-relative z-1">
+                    <div class="nd-metric-value mb-0"><?= number_format($totalSubmissions) ?></div>
+                    <div class="nd-metric-label">Envios Recebidos</div>
+                </div>
             </div>
         </div>
         
         <!-- Pending -->
-        <div class="col-6 col-lg-3">
-            <div class="nd-metric-card warning">
+        <div class="col-6 col-lg-4">
+            <div class="nd-metric-card warning d-flex align-items-center justify-content-between overflow-hidden">
                 <div class="nd-metric-card-gradient"></div>
-                <div class="nd-metric-icon">
+                <div class="nd-metric-icon mb-0 position-relative z-1">
                     <i class="bi bi-clock-fill"></i>
                 </div>
-                <div class="nd-metric-value"><?= number_format($pendingSubmissions) ?></div>
-                <div class="nd-metric-label">Aguardando Análise</div>
+                <div class="text-end position-relative z-1">
+                    <div class="nd-metric-value mb-0"><?= number_format($pendingSubmissions) ?></div>
+                    <div class="nd-metric-label">Aguardando Análise</div>
+                </div>
             </div>
         </div>
         
         <!-- Approved -->
-        <div class="col-6 col-lg-3">
-            <div class="nd-metric-card success">
+        <div class="col-6 col-lg-4">
+            <div class="nd-metric-card success d-flex align-items-center justify-content-between overflow-hidden">
                 <div class="nd-metric-card-gradient"></div>
-                <div class="nd-metric-icon">
+                <div class="nd-metric-icon mb-0 position-relative z-1">
                     <i class="bi bi-check-circle-fill"></i>
                 </div>
-                <div class="nd-metric-value"><?= number_format($approvedSubmissions) ?></div>
-                <div class="nd-metric-label">Aprovados</div>
+                <div class="text-end position-relative z-1">
+                    <div class="nd-metric-value mb-0"><?= number_format($approvedSubmissions) ?></div>
+                    <div class="nd-metric-label">Aprovados</div>
+                </div>
             </div>
         </div>
         
         <!-- Rejected -->
-        <div class="col-6 col-lg-3">
-            <div class="nd-metric-card danger">
+        <div class="col-6 col-lg-4">
+            <div class="nd-metric-card danger d-flex align-items-center justify-content-between overflow-hidden">
                 <div class="nd-metric-card-gradient"></div>
-                <div class="nd-metric-icon">
+                <div class="nd-metric-icon mb-0 position-relative z-1">
                     <i class="bi bi-x-circle-fill"></i>
                 </div>
-                <div class="nd-metric-value"><?= number_format($rejectedSubmissions) ?></div>
-                <div class="nd-metric-label">Rejeitados</div>
+                <div class="text-end position-relative z-1">
+                    <div class="nd-metric-value mb-0"><?= number_format($rejectedSubmissions) ?></div>
+                    <div class="nd-metric-label">Rejeitados</div>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Second Row of Metrics -->
-    <div class="row g-4 mb-4">
+
         <!-- Portal Users -->
-        <div class="col-6 col-lg-3">
-            <div class="nd-metric-card gold">
+        <div class="col-6 col-lg-4">
+            <div class="nd-metric-card gold d-flex align-items-center justify-content-between overflow-hidden">
                 <div class="nd-metric-card-gradient"></div>
-                <div class="nd-metric-icon">
+                <div class="nd-metric-icon mb-0 position-relative z-1">
                     <i class="bi bi-people-fill"></i>
                 </div>
-                <div class="nd-metric-value"><?= number_format($totalPortalUsers) ?></div>
-                <div class="nd-metric-label">Usuários Cadastrados</div>
+                <div class="text-end position-relative z-1">
+                    <div class="nd-metric-value mb-0"><?= number_format($totalPortalUsers) ?></div>
+                    <div class="nd-metric-label">Usuários Cadastrados</div>
+                </div>
             </div>
         </div>
         
         <!-- Published Documents -->
-        <div class="col-6 col-lg-3">
-            <div class="nd-metric-card info">
+        <div class="col-6 col-lg-4">
+            <div class="nd-metric-card info d-flex align-items-center justify-content-between overflow-hidden">
                 <div class="nd-metric-card-gradient"></div>
-                <div class="nd-metric-icon">
+                <div class="nd-metric-icon mb-0 position-relative z-1">
                     <i class="bi bi-file-earmark-text-fill"></i>
                 </div>
-                <div class="nd-metric-value"><?= number_format($publishedDocuments) ?></div>
-                <div class="nd-metric-label">Documentos Vigentes</div>
+                <div class="text-end position-relative z-1">
+                    <div class="nd-metric-value mb-0"><?= number_format($publishedDocuments) ?></div>
+                    <div class="nd-metric-label">Documentos Vigentes</div>
+                </div>
             </div>
         </div>
     </div>
