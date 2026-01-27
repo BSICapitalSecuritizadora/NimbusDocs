@@ -194,7 +194,14 @@ $statusIcon = match($submission['status'] ?? '') {
                         </div>
                         <div class="row">
                             <label class="col-sm-4 text-muted small">CNPJ</label>
-                            <div class="col-sm-8 fw-medium"><?= htmlspecialchars($submission['company_cnpj'] ?? '-', ENT_QUOTES, 'UTF-8') ?></div>
+                            <div class="col-sm-8 fw-medium">
+                                <?php
+                                    $cnpj = preg_replace('/\D/', '', $submission['company_cnpj'] ?? '');
+                                    echo mb_strlen($cnpj) === 14 
+                                        ? preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $cnpj)
+                                        : htmlspecialchars($submission['company_cnpj'] ?? '-', ENT_QUOTES, 'UTF-8');
+                                ?>
+                            </div>
                         </div>
                         <div class="row">
                             <label class="col-sm-4 text-muted small">Atividade Principal</label>
