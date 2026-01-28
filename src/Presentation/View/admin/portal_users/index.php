@@ -14,13 +14,13 @@
             <i class="bi bi-people-fill text-white"></i>
         </div>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Usuários Cadastrados</h1>
-            <p class="text-muted mb-0 small">Controle de acesso e cadastro de usuários externos</p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Usuários do Portal</h1>
+            <p class="text-muted mb-0 small">Gerencie o acesso e cadastro de usuários externos</p>
         </div>
     </div>
     <a href="/admin/portal-users/create" class="nd-btn nd-btn-gold nd-btn-sm">
         <i class="bi bi-plus-lg me-1"></i>
-        Novo Cadastro
+        Novo Usuário
     </a>
 </div>
 
@@ -28,22 +28,24 @@
 <div class="nd-card">
     <div class="nd-card-header bg-white border-bottom p-3">
         <form class="row g-3 align-items-center" method="get" action="/admin/portal-users">
-            <div class="col-sm-6 col-md-4">
+            <div class="col-sm-6 col-md-5">
                 <div class="nd-input-group">
                     <input type="text" name="search"
                         value="<?= htmlspecialchars($search, ENT_QUOTES) ?>"
                         class="nd-input"
-                        placeholder="Pesquisar por Usuário ou E-mail..."
+                        placeholder="Buscar por nome, e-mail ou CPF..."
                         style="padding-left: 2.5rem;">
                     <i class="bi bi-search nd-input-icon"></i>
                 </div>
             </div>
             <div class="col-sm-6 col-md-4">
                 <button class="nd-btn nd-btn-primary" type="submit">
-                    Filtrar Registros
+                    <i class="bi bi-filter me-1"></i> Filtrar
                 </button>
                 <?php if (!empty($search)): ?>
-                    <a href="/admin/portal-users" class="nd-btn nd-btn-outline ms-2">Limpar</a>
+                    <a href="/admin/portal-users" class="nd-btn nd-btn-outline ms-2">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
                 <?php endif; ?>
             </div>
         </form>
@@ -52,10 +54,14 @@
     <div class="nd-card-body p-0">
         <?php if (!$items): ?>
             <div class="text-center py-5">
-                <i class="bi bi-people text-muted mb-2" style="font-size: 2rem;"></i>
-                <p class="text-muted mb-0">Nenhum usuário localizado.</p>
+                <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3" style="width: 64px; height: 64px;">
+                    <i class="bi bi-people text-muted" style="font-size: 1.5rem;"></i>
+                </div>
+                <p class="fw-medium text-dark mb-1">Nenhum usuário encontrado</p>
                 <?php if (!empty($search)): ?>
-                    <p class="text-muted small mt-1">Refine os termos da sua busca.</p>
+                    <p class="text-muted small">Tente ajustar os termos da sua busca.</p>
+                <?php else: ?>
+                    <p class="text-muted small">Comece cadastrando um novo usuário no sistema.</p>
                 <?php endif; ?>
             </div>
         <?php else: ?>
@@ -63,9 +69,9 @@
                 <table class="nd-table">
                     <thead>
                         <tr>
-                            <th>Identificação do Usuário</th>
+                            <th>Usuário</th>
                             <th>CPF</th>
-                            <th>Situação Cadastral</th>
+                            <th>Status</th>
                             <th class="text-end">Ações</th>
                         </tr>
                     </thead>
@@ -74,31 +80,34 @@
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="nd-avatar" style="width: 36px; height: 36px; background: var(--nd-gray-100); color: var(--nd-gray-600); font-size: 0.8rem;">
-                                            <?= strtoupper(substr($u['full_name'] ?? 'U', 0, 1)) ?>
+                                        <div class="nd-avatar nd-avatar-sm bg-light text-primary fw-bold border" style="width: 38px; height: 38px; font-size: 0.85rem;">
+                                            <?= strtoupper(substr($u['full_name'] ?? $u['name'] ?? 'U', 0, 2)) ?>
                                         </div>
                                         <div>
-                                            <div class="fw-medium text-dark"><?= htmlspecialchars($u['full_name'] ?? '', ENT_QUOTES) ?></div>
+                                            <div class="fw-bold text-dark text-nowrap"><?= htmlspecialchars($u['full_name'] ?? '', ENT_QUOTES) ?></div>
                                             <div class="small text-muted"><?= htmlspecialchars($u['email'] ?? '', ENT_QUOTES) ?></div>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
                                     <?php if (!empty($u['document_number'])): ?>
-                                        <code class="px-2 py-1 rounded bg-light text-dark small border">
-                                            <?php 
-                                                $doc = $u['document_number'];
-                                                $len = strlen($doc);
-                                                if ($len === 11) {
-                                                    $doc = preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $doc);
-                                                } elseif ($len === 14) {
-                                                    $doc = preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $doc);
-                                                }
-                                                echo htmlspecialchars($doc, ENT_QUOTES);
-                                            ?>
-                                        </code>
+                                        <div class="d-flex align-items-center text-dark">
+                                            <i class="bi bi-card-heading me-2 text-muted small"></i>
+                                            <span class="small font-monospace">
+                                                <?php 
+                                                    $doc = $u['document_number'];
+                                                    $len = strlen($doc);
+                                                    if ($len === 11) {
+                                                        $doc = preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $doc);
+                                                    } elseif ($len === 14) {
+                                                        $doc = preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $doc);
+                                                    }
+                                                    echo htmlspecialchars($doc, ENT_QUOTES);
+                                                ?>
+                                            </span>
+                                        </div>
                                     <?php else: ?>
-                                        <span class="text-muted">-</span>
+                                        <span class="text-muted small">-</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
@@ -107,12 +116,14 @@
                                         'ACTIVE' => 'success',
                                         'INVITED' => 'info',
                                         'BLOCKED' => 'danger',
+                                        'INACTIVE' => 'secondary',
                                         default => 'secondary'
                                     };
                                     $statusLabel = match ($u['status'] ?? '') {
                                         'ACTIVE' => 'Ativo',
-                                        'INVITED' => 'Aguardando Cadastro',
+                                        'INVITED' => 'Aguardando',
                                         'BLOCKED' => 'Suspenso',
+                                        'INACTIVE' => 'Inativo',
                                         default => 'Inativo'
                                     };
                                     ?>
@@ -122,10 +133,10 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="btn-group">
-                                        <a href="/admin/portal-users/<?= (int)$u['id'] ?>" class="nd-btn nd-btn-outline nd-btn-sm" title="Ficha Técnica">
+                                        <a href="/admin/portal-users/<?= (int)$u['id'] ?>" class="nd-btn nd-btn-outline nd-btn-sm" title="Ver Detalhes">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <a href="/admin/portal-users/<?= (int)$u['id'] ?>/edit" class="nd-btn nd-btn-outline nd-btn-sm" title="Gerenciar Cadastro">
+                                        <a href="/admin/portal-users/<?= (int)$u['id'] ?>/edit" class="nd-btn nd-btn-outline nd-btn-sm" title="Editar Usuário">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                     </div>
