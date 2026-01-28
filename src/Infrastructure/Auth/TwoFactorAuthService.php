@@ -35,9 +35,12 @@ class TwoFactorAuthService
     /**
      * Generate QR code URL for authenticator apps
      */
-    public function getQrCodeUrl(string $secret, string $email, string $issuer = 'NimbusDocs'): string
+    /**
+     * Generate OTP Auth URL (raw)
+     */
+    public function getOtpAuthUrl(string $secret, string $email, string $issuer = 'NimbusDocs'): string
     {
-        $otpAuthUrl = sprintf(
+        return sprintf(
             'otpauth://totp/%s:%s?secret=%s&issuer=%s&algorithm=SHA1&digits=%d&period=%d',
             rawurlencode($issuer),
             rawurlencode($email),
@@ -46,10 +49,17 @@ class TwoFactorAuthService
             self::CODE_LENGTH,
             self::TIME_STEP
         );
+    }
 
-        // Use Google Charts API to generate QR code
+    /**
+     * Generate QR code URL using quickchart.io (more reliable than Google)
+     */
+    public function getQrCodeUrl(string $secret, string $email, string $issuer = 'NimbusDocs'): string
+    {
+        $otpAuthUrl = $this->getOtpAuthUrl($secret, $email, $issuer);
+        
         return sprintf(
-            'https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=%s&choe=UTF-8',
+            'https://quickchart.io/qr?text=%s&size=200',
             urlencode($otpAuthUrl)
         );
     }

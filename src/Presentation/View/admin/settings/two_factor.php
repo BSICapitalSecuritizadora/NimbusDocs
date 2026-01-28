@@ -115,11 +115,8 @@
                                     </p>
                                 </div>
                                 
-                                <div class="bg-white p-3 border rounded shadow-sm mb-3 position-relative group-hover">
-                                    <img src="<?= htmlspecialchars($qrCodeUrl, ENT_QUOTES, 'UTF-8') ?>" alt="QR Code" class="img-fluid" style="max-width: 160px;">
-                                     <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-90 opacity-0 transition-fast hover-opacity-100">
-                                        <span class="small fw-bold text-dark"><i class="bi bi-camera-fill me-1"></i> Escaneie-me</span>
-                                    </div>
+                                <div class="bg-white p-3 border rounded shadow-sm mb-3 position-relative group-hover d-flex justify-content-center">
+                                    <canvas id="qr-code" class="img-fluid"></canvas>
                                 </div>
                                 
                                 <div class="w-100 px-3">
@@ -192,7 +189,19 @@
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 <script>
+    // QR Code Generator
+    const qrCanvas = document.getElementById('qr-code');
+    if (qrCanvas) {
+        new QRious({
+            element: qrCanvas,
+            value: '<?= htmlspecialchars_decode($otpAuthUrl ?? '') ?>', // decode to ensure & is correct
+            size: 200,
+            level: 'H'
+        });
+    }
+
 document.getElementById('code')?.addEventListener('input', function(e) {
     // Remove não numéricos
     let val = this.value.replace(/[^0-9]/g, '');

@@ -63,10 +63,17 @@ class TwoFactorController
         $pageTitle = 'Autenticação em Dois Fatores';
         $contentView = __DIR__ . '/../../View/admin/settings/two_factor.php';
         
+        $otpAuthUrl = $this->twoFactorService->getOtpAuthUrl(
+            $secret,
+            $user['email'],
+            $this->config['branding']['app_name'] ?? 'NimbusDocs'
+        );
+
         $viewData = [
             'admin'     => $admin,
             'csrfToken' => $csrfToken,
             'qrCodeUrl' => $qrCodeUrl,
+            'otpAuthUrl' => $otpAuthUrl,
             'secret'    => $secret,
             'isEnabled' => $isEnabled,
             'branding'  => $branding,
