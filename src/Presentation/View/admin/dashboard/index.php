@@ -280,30 +280,39 @@
                     <?php else: ?>
                         <div class="d-flex flex-column gap-2">
                             <?php if (!empty($a['oldPending'])): ?>
-                                <div class="alert alert-warning d-flex align-items-center p-2 mb-0 border-0 bg-warning-subtle text-warning-emphasis small">
-                                    <i class="bi bi-clock-history me-2 fs-6"></i>
-                                    <div>
-                                        <strong><?= (int)$a['oldPending'] ?> envios</strong> aguardando análise há > 7 dias.
+                                <a href="/admin/submissions?status=PENDING" class="alert alert-warning d-flex align-items-center justify-content-between p-2 mb-0 border-0 bg-warning-subtle text-warning-emphasis small text-decoration-none nav-link-hover">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-clock-history me-2 fs-6"></i>
+                                        <div>
+                                            <strong><?= (int)$a['oldPending'] ?> envios</strong> aguardando análise há > 7 dias.
+                                        </div>
                                     </div>
-                                </div>
+                                    <i class="bi bi-chevron-right opacity-50"></i>
+                                </a>
                             <?php endif; ?>
                             
                             <?php if (!empty($a['expiredTokens'])): ?>
-                                <div class="alert alert-danger d-flex align-items-center p-2 mb-0 border-0 bg-danger-subtle text-danger-emphasis small">
-                                    <i class="bi bi-shield-x me-2 fs-6"></i>
-                                    <div>
-                                        <strong><?= (int)$a['expiredTokens'] ?> tokens</strong> de acesso expirados.
+                                <a href="/admin/tokens" class="alert alert-danger d-flex align-items-center justify-content-between p-2 mb-0 border-0 bg-danger-subtle text-danger-emphasis small text-decoration-none nav-link-hover">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-shield-x me-2 fs-6"></i>
+                                        <div>
+                                            <strong><?= (int)$a['expiredTokens'] ?> tokens</strong> de acesso expirados.
+                                        </div>
                                     </div>
-                                </div>
+                                    <i class="bi bi-chevron-right opacity-50"></i>
+                                </a>
                             <?php endif; ?>
                             
                             <?php if (!empty($a['inactiveUsers30'])): ?>
-                                <div class="alert alert-secondary d-flex align-items-center p-2 mb-0 border-0 bg-secondary-subtle text-secondary-emphasis small">
-                                    <i class="bi bi-person-dash me-2 fs-6"></i>
-                                    <div>
-                                        <strong><?= (int)$a['inactiveUsers30'] ?> usuários</strong> sem acesso há > 30 dias.
+                                <a href="/admin/portal-users" class="alert alert-secondary d-flex align-items-center justify-content-between p-2 mb-0 border-0 bg-secondary-subtle text-secondary-emphasis small text-decoration-none nav-link-hover">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-person-dash me-2 fs-6"></i>
+                                        <div>
+                                            <strong><?= (int)$a['inactiveUsers30'] ?> usuários</strong> sem acesso há > 30 dias.
+                                        </div>
                                     </div>
-                                </div>
+                                    <i class="bi bi-chevron-right opacity-50"></i>
+                                </a>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
