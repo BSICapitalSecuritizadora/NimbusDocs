@@ -54,6 +54,8 @@ final class PortalLoginController
         $identifier = trim($post['identifier'] ?? '');
         $password   = (string)($post['password'] ?? '');
         $code       = strtoupper(trim($post['access_code'] ?? ''));
+        // Sanitize code (remove hyphens from mask)
+        $code = str_replace('-', '', $code);
 
         if ($code === '') {
             Session::flash('error', 'Informe um código de acesso válido.');
