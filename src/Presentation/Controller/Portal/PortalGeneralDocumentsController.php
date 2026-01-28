@@ -72,8 +72,29 @@ final class PortalGeneralDocumentsController
             return;
         }
 
-        header('Content-Type: ' . $doc['file_mime']);
-        header('Content-Disposition: attachment; filename="' . $doc['file_original_name'] . '"');
+        $disposition = isset($_GET['preview']) ? 'inline' : 'attachment';
+        $mime = $doc['file_mime'];
+        
+        // Force PDF mime type if previewing and extension is pdf
+        // (Fixes issue where application/octet-stream forces download)
+        if (isset($_GET['preview'])) {
+            $ext = strtolower(pathinfo($doc['file_original_name'], PATHINFO_EXTENSION));
+            if ($ext === 'pdf') {
+                $mime = 'application/pdf';
+            } elseif (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                 // Ensure images have correct mime type for preview
+                 $mime = match ($ext) {
+                     'jpg', 'jpeg' => 'image/jpeg',
+                     'png' => 'image/png',
+                     'gif' => 'image/gif',
+                     'webp' => 'image/webp',
+                     default => $mime
+                 };
+            }
+        }
+
+        header('Content-Type: ' . $mime);
+        header('Content-Disposition: ' . $disposition . '; filename="' . $doc['file_original_name'] . '"');
         header('Content-Length: ' . $doc['file_size']);
         readfile($doc['file_path']);
         exit;
