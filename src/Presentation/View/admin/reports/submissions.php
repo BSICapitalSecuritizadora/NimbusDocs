@@ -293,23 +293,27 @@ $queryExport = http_build_query([
                                 </td>
                                 <td>
                                     <?php
-                                    $st = $s['status'] ?? '';
-                                    $badge = 'bg-secondary';
-                                    $label = 'Desconhecido';
+                                    $st = strtoupper($s['status'] ?? '');
+                                    $badge = 'nd-badge-secondary';
+                                    $label = $st ?: 'Desconhecido';
                                     $icon = 'bi-question-circle';
                                     
-                                    if ($st === 'PENDENTE') {
+                                    if ($st === 'PENDING') {
                                         $badge = 'nd-badge-warning';
                                         $label = 'Pendente';
                                         $icon = 'bi-hourglass-split';
-                                    } elseif ($st === 'FINALIZADA') {
+                                    } elseif ($st === 'COMPLETED' || $st === 'FINALIZADA') { // Suporte a legado se houver
                                         $badge = 'nd-badge-success';
                                         $label = 'Concluída';
                                         $icon = 'bi-check-all';
-                                    } elseif ($st === 'REJEITADA') {
+                                    } elseif ($st === 'REJECTED') {
                                         $badge = 'nd-badge-danger';
                                         $label = 'Rejeitada';
                                         $icon = 'bi-x-circle';
+                                    } elseif ($st === 'UNDER_REVIEW') {
+                                        $badge = 'nd-badge-info';
+                                        $label = 'Em Análise';
+                                        $icon = 'bi-search';
                                     }
                                     ?>
                                     <span class="nd-badge <?= $badge ?>">
