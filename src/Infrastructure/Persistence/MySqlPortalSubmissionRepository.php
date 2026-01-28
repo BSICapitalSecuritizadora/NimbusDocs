@@ -22,9 +22,10 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $params = [':uid' => $portalUserId];
         
         if ($search) {
-            $where .= " AND (reference_code LIKE :search OR title LIKE :search2)";
+            $where .= " AND (reference_code LIKE :search OR title LIKE :search2 OR company_name LIKE :search3)";
             $params[':search'] = '%' . $search . '%';
             $params[':search2'] = '%' . $search . '%';
+            $params[':search3'] = '%' . $search . '%';
         }
 
         if ($status) {
