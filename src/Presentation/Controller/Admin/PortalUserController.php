@@ -87,7 +87,7 @@ final class PortalUserController
     {
         $this->requireAdmin();
 
-        $pageTitle   = 'Novo Usuário Final';
+        $pageTitle   = 'Novo Usuário';
         $contentView = __DIR__ . '/../../View/admin/portal_users/form.php';
         $viewData    = [
             'mode'      => 'create',
@@ -229,7 +229,7 @@ final class PortalUserController
 
         $tokens = $this->tokenRepo->listRecentForUser($id, 10);
 
-        $pageTitle   = 'Editar Usuário Final';
+        $pageTitle   = 'Editar Usuário';
         $contentView = __DIR__ . '/../../View/admin/portal_users/form.php';
         $viewData    = [
             'mode'      => 'edit',
