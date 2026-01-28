@@ -226,7 +226,7 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
                                class="nd-input" 
                                id="email" 
                                name="email" 
-                               placeholder="usuario@bsicapital.com.be"
+                               placeholder="usuario@bsicapital.com.br"
                                value="<?= htmlspecialchars($oldEmail ?? '', ENT_QUOTES, 'UTF-8') ?>" 
                                required 
                                autofocus>
@@ -257,11 +257,15 @@ $appName = $branding['app_name'] ?? 'NimbusDocs';
                 <a href="/admin/forgot-password">Recuperar Credenciais</a>
             </div>
             
-            <div class="nd-login-divider">ou</div>
+            <div class="d-flex align-items-center my-4">
+                <div class="flex-grow-1 border-top border-secondary-subtle"></div>
+                <span class="px-3 text-muted x-small fw-semibold text-uppercase">ou</span>
+                <div class="flex-grow-1 border-top border-secondary-subtle"></div>
+            </div>
             
-            <a href="/admin/login/microsoft" class="nd-btn nd-btn-microsoft nd-btn-lg">
-                <i class="bi bi-microsoft"></i>
-                Login Corporativo (SSO)
+            <a href="/admin/login/microsoft" class="btn btn-white w-100 py-2-5 border border-subtle d-flex align-items-center justify-content-center gap-2 shadow-sm nd-btn-microsoft hover-lift">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft" style="width: 18px; height: 18px;">
+                <span class="fw-medium text-dark" style="font-size: 0.9rem;">Entrar com Microsoft</span>
             </a>
             
             <p class="nd-login-footer">
