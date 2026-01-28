@@ -123,21 +123,37 @@
                                 </td>
                                 <td>
                                     <?php
-                                        $action = strtoupper($log['action'] ?? '');
-                                        $badgeClass = match(true) {
-                                            str_contains($action, 'LOGIN') => 'nd-badge-success',
-                                            str_contains($action, 'LOGOUT') => 'nd-badge-secondary',
-                                            str_contains($action, 'DOWNLOAD') => 'nd-badge-info',
-                                            str_contains($action, 'VIEW') => 'nd-badge-primary',
-                                            str_contains($action, 'CREATE') || str_contains($action, 'STORE') => 'nd-badge-success',
-                                            str_contains($action, 'UPDATE') || str_contains($action, 'EDIT') => 'nd-badge-warning',
-                                            str_contains($action, 'DELETE') || str_contains($action, 'REMOVE') => 'nd-badge-danger',
-                                            str_contains($action, 'ERROR') || str_contains($action, 'FAIL') => 'nd-badge-danger',
-                                            default => 'nd-badge-secondary'
+                                        $rawAction = strtoupper($log['action'] ?? '');
+                                        
+                                        $normalize = fn($s) => ucwords(strtolower(str_replace(['_', '-'], ' ', $s)));
+
+                                        // Mapeamento de ações para (Label, Classe, Ícone)
+                                        $actionMap = match(true) {
+                                            // Auth
+                                            str_contains($rawAction, 'LOGIN')      => ['Login Realizado',      'nd-badge-success',   'bi-box-arrow-in-right'],
+                                            str_contains($rawAction, 'LOGOUT')     => ['Logout',               'nd-badge-secondary', 'bi-box-arrow-left'],
+                                            
+                                            // Submissions
+                                            str_contains($rawAction, 'VIEW_SUBMISSION')   => ['Visualizou Submissão', 'nd-badge-primary',   'bi-eye'],
+                                            str_contains($rawAction, 'CREATE_SUBMISSION') => ['Criou Submissão',      'nd-badge-success',   'bi-plus-circle'],
+                                            
+                                            // Documents
+                                            str_contains($rawAction, 'DOWNLOAD')   => ['Download de Arquivo',  'bg-info text-white', 'bi-download'],
+                                            str_contains($rawAction, 'VIEW')       => ['Visualizou Recurso',   'nd-badge-primary',   'bi-eye'],
+                                            
+                                            // Default CRUD
+                                            str_contains($rawAction, 'CREATE') || str_contains($rawAction, 'STORE')  => ['Criação de Registro',  'nd-badge-success', 'bi-plus-lg'],
+                                            str_contains($rawAction, 'UPDATE') || str_contains($rawAction, 'EDIT')   => ['Edição de Registro',   'nd-badge-warning', 'bi-pencil'],
+                                            str_contains($rawAction, 'DELETE') || str_contains($rawAction, 'REMOVE') => ['Exclusão de Registro', 'nd-badge-danger',  'bi-trash'],
+                                            
+                                            // Errors
+                                            str_contains($rawAction, 'ERROR') || str_contains($rawAction, 'FAIL')    => ['Falha na Operação',    'nd-badge-danger',  'bi-x-octagon'],
+                                            
+                                            default => [$normalize($rawAction), 'nd-badge-secondary', 'bi-activity']
                                         };
                                     ?>
-                                    <span class="nd-badge <?= $badgeClass ?> font-monospace">
-                                        <?= htmlspecialchars($log['action'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                    <span class="nd-badge <?= $actionMap[1] ?>">
+                                        <i class="bi <?= $actionMap[2] ?> me-1"></i> <?= htmlspecialchars($actionMap[0], ENT_QUOTES, 'UTF-8') ?>
                                     </span>
                                 </td>
                                 <td>
