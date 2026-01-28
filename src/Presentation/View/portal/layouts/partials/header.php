@@ -21,9 +21,10 @@ $isNewSubmission = $_SERVER['REQUEST_URI'] === '/portal/submissions/new';
                      class="navbar-logo"
                      style="height: 40px; width: auto;">
             <?php else: ?>
-                <div class="brand-icon shadow-sm">
-                    <i class="bi bi-cloud-check-fill"></i>
-                </div>
+                <img src="https://media.licdn.com/dms/image/v2/D4D0BAQExaECDvucniw/company-logo_200_200/B4DZbwVBVeG0AI-/0/1747788764990/bsi_capital_securitizadora_s_a_logo?e=2147483647&v=beta&t=NwW3hFxem07njQLPtUFvIAOnOeq_tsRDcli7lc8drrI" 
+                     alt="BSI Capital" 
+                     class="shadow-sm rounded"
+                     style="height: 40px; width: auto;">
                 <div class="d-flex flex-column lh-1">
                     <span class="fw-bold text-white ls-1 text-uppercase" style="font-size: 0.95rem;">BSI Capital</span>
                     <span class="text-white-50 x-small text-uppercase ls-2" style="font-size: 0.65rem;">Securitizadora</span>
@@ -96,9 +97,6 @@ $isNewSubmission = $_SERVER['REQUEST_URI'] === '/portal/submissions/new';
                         <li class="p-2">
                             <a class="dropdown-item rounded-3 py-2 mb-1 d-flex align-items-center gap-2" href="/portal/profile">
                                 <i class="bi bi-person-gear text-primary"></i> Meus Dados
-                            </a>
-                            <a class="dropdown-item rounded-3 py-2 mb-1 d-flex align-items-center gap-2" href="/web/change-password">
-                                <i class="bi bi-shield-lock text-primary"></i> Alterar Senha
                             </a>
                         </li>
                         <li><hr class="dropdown-divider m-0 opacity-50"></li>
