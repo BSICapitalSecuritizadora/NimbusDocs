@@ -24,87 +24,109 @@ $has = fn(string $key, bool $default = true)
 </div>
 
 <?php if (!empty($success)): ?>
-    <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        <div><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></div>
+    <div class="alert alert-success d-flex align-items-center mb-4 nd-alert" role="alert">
+        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+        <div class="small fw-medium"><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 <?php endif; ?>
 
 <?php if (!empty($error)): ?>
-    <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        <div><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
+    <div class="alert alert-danger d-flex align-items-center mb-4 nd-alert" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+        <div class="small fw-medium"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 <?php endif; ?>
 
-<div class="row">
+<div class="row g-4">
     <div class="col-lg-8">
-        <div class="nd-card">
+        <div class="nd-card h-100">
             <div class="nd-card-header d-flex align-items-center gap-2">
-                <i class="bi bi-envelope text-muted"></i>
+                <i class="bi bi-person-workspace text-primary"></i>
                 <h5 class="nd-card-title mb-0">Portal do Usuário</h5>
             </div>
             <div class="nd-card-body">
                 <form method="post" action="/admin/settings/notifications/save">
                     <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
-                    <div class="d-flex flex-column gap-3">
+                    <div class="d-flex flex-column gap-0">
                         <!-- Notify New Submission -->
-                        <div class="p-3 bg-light rounded d-flex align-items-center justify-content-between">
-                            <div>
-                                <label class="fw-bold text-dark mb-1" for="portal_notify_new_submission">Nova Submissão</label>
-                                <div class="small text-muted">Enviar e-mail ao usuário quando ele criar uma nova submissão.</div>
+                        <div class="p-3 bg-white rounded border border-light-subtle mb-3 d-flex align-items-center justify-content-between hover-shadow-sm transition-fast">
+                            <div class="d-flex gap-3 align-items-center">
+                                <div class="bg-primary-subtle rounded-circle p-2 text-primary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-file-earmark-plus-fill"></i>
+                                </div>
+                                <div>
+                                    <label class="fw-bold text-dark mb-1 d-block" for="portal_notify_new_submission">Nova Submissão</label>
+                                    <div class="small text-muted" style="max-width: 400px;">Enviar e-mail ao usuário confirmando o recebimento de uma nova submissão.</div>
+                                </div>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch"
                                     id="portal_notify_new_submission"
                                     name="portal_notify_new_submission"
-                                    style="width: 3em; height: 1.5em;"
+                                    style="width: 3em; height: 1.5em; cursor: pointer;"
                                     <?= $has('portal.notify.new_submission') ? 'checked' : '' ?>>
                             </div>
                         </div>
 
                         <!-- Notify Status Change -->
-                        <div class="p-3 bg-light rounded d-flex align-items-center justify-content-between">
-                            <div>
-                                <label class="fw-bold text-dark mb-1" for="portal_notify_status_change">Alteração de Status</label>
-                                <div class="small text-muted">Enviar e-mail quando o status de um documento mudar (ex: Aprovado).</div>
+                        <div class="p-3 bg-white rounded border border-light-subtle mb-3 d-flex align-items-center justify-content-between hover-shadow-sm transition-fast">
+                            <div class="d-flex gap-3 align-items-center">
+                                <div class="bg-success-subtle rounded-circle p-2 text-success d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                </div>
+                                <div>
+                                    <label class="fw-bold text-dark mb-1 d-block" for="portal_notify_status_change">Alteração de Status</label>
+                                    <div class="small text-muted" style="max-width: 400px;">Notificar o usuário quando o status de sua submissão for alterado pelo analista.</div>
+                                </div>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch"
                                     id="portal_notify_status_change"
                                     name="portal_notify_status_change"
-                                    style="width: 3em; height: 1.5em;"
+                                    style="width: 3em; height: 1.5em; cursor: pointer;"
                                     <?= $has('portal.notify.status_change') ? 'checked' : '' ?>>
                             </div>
                         </div>
 
                         <!-- Notify Response Upload -->
-                        <div class="p-3 bg-light rounded d-flex align-items-center justify-content-between">
-                            <div>
-                                <label class="fw-bold text-dark mb-1" for="portal_notify_response_upload">Documento de Resposta</label>
-                                <div class="small text-muted">Enviar e-mail quando um administrador anexar um arquivo de resposta.</div>
+                        <div class="p-3 bg-white rounded border border-light-subtle mb-3 d-flex align-items-center justify-content-between hover-shadow-sm transition-fast">
+                             <div class="d-flex gap-3 align-items-center">
+                                <div class="bg-info-subtle rounded-circle p-2 text-info d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-cloud-arrow-up-fill"></i>
+                                </div>
+                                <div>
+                                    <label class="fw-bold text-dark mb-1 d-block" for="portal_notify_response_upload">Documento de Resposta</label>
+                                    <div class="small text-muted" style="max-width: 400px;">Avisar o usuário quando um administrador anexar um arquivo/resposta à submissão.</div>
+                                </div>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch"
                                     id="portal_notify_response_upload"
                                     name="portal_notify_response_upload"
-                                    style="width: 3em; height: 1.5em;"
+                                    style="width: 3em; height: 1.5em; cursor: pointer;"
                                     <?= $has('portal.notify.response_upload') ? 'checked' : '' ?>>
                             </div>
                         </div>
 
                         <!-- Notify Access Link -->
-                        <div class="p-3 bg-light rounded d-flex align-items-center justify-content-between">
-                            <div>
-                                <label class="fw-bold text-dark mb-1" for="portal_notify_access_link">Link de Acesso</label>
-                                <div class="small text-muted">Enviar e-mail automaticamente ao gerar um Magic Link de acesso.</div>
+                         <div class="p-3 bg-white rounded border border-light-subtle mb-0 d-flex align-items-center justify-content-between hover-shadow-sm transition-fast">
+                             <div class="d-flex gap-3 align-items-center">
+                                <div class="bg-warning-subtle rounded-circle p-2 text-warning d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-key-fill"></i>
+                                </div>
+                                <div>
+                                    <label class="fw-bold text-dark mb-1 d-block" for="portal_notify_access_link">Link de Acesso (Magic Link)</label>
+                                    <div class="small text-muted" style="max-width: 400px;">Enviar e-mail automático com o token de acesso sempre que solicitado.</div>
+                                </div>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch"
                                     id="portal_notify_access_link"
                                     name="portal_notify_access_link"
-                                    style="width: 3em; height: 1.5em;"
+                                    style="width: 3em; height: 1.5em; cursor: pointer;"
                                     <?= $has('portal.notify.access_link') ? 'checked' : '' ?>>
                             </div>
                         </div>
@@ -112,8 +134,8 @@ $has = fn(string $key, bool $default = true)
 
                     <div class="mt-4 pt-3 border-top d-flex justify-content-end">
                         <button type="submit" class="nd-btn nd-btn-primary">
-                            <i class="bi bi-save me-1"></i>
-                            Salvar Alterações
+                            <i class="bi bi-check-lg me-1"></i>
+                            Salvar Configurações
                         </button>
                     </div>
                 </form>
@@ -123,20 +145,43 @@ $has = fn(string $key, bool $default = true)
 
     <!-- Info Sidebar -->
     <div class="col-lg-4">
-        <div class="nd-card bg-light border-0">
+        <div class="nd-card mb-4 bg-light text-dark border-0">
+             <div class="nd-card-header bg-transparent border-bottom border-light-subtle d-flex align-items-center gap-2">
+                <i class="bi bi-info-circle-fill text-muted"></i>
+                <h6 class="fw-bold mb-0 text-muted text-uppercase small">Infraestrutura</h6>
+            </div>
             <div class="nd-card-body">
-                <h6 class="fw-bold text-dark mb-3">Sobre as Notificações</h6>
-                <p class="text-muted small">
-                    O sistema utiliza o Microsoft Graph API para envio de e-mails.
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <img src="https://img.icons8.com/color/48/microsoft.png" alt="Microsoft" width="32" height="32">
+                    <div>
+                        <h6 class="fw-bold mb-1 small text-uppercase text-muted">Provedor de E-mail</h6>
+                        <div class="fw-bold text-dark">Microsoft Graph API</div>
+                        <div class="badge bg-success bg-opacity-10 text-success mt-1 border border-success border-opacity-25">
+                            <i class="bi bi-check-circle me-1"></i>Conectado
+                        </div>
+                    </div>
+                </div>
+                <hr class="border-light-subtle">
+                 <p class="text-muted small mb-0">
+                    O sistema utiliza a API do Office 365 para garantir alta entregabilidade das mensagens transacionais.
                 </p>
-                <hr>
-                <h6 class="fw-bold text-dark mb-3">Logs de Envio</h6>
+            </div>
+        </div>
+
+        <div class="nd-card">
+            <div class="nd-card-header d-flex align-items-center gap-2">
+                <i class="bi bi-activity text-danger"></i>
+                <h5 class="nd-card-title mb-0">Fila e Logs</h5>
+            </div>
+            <div class="nd-card-body">
                 <p class="text-muted small mb-3">
-                    Pode ser monitorado o status de entrega dos e-mails através dos logs do sistema ou da caixa de saída.
+                    Monitore em tempo real o envio das mensagens. Caso algum e-mail falhe, você poderá reprocessá-lo na auditoria.
                 </p>
-                <a href="/admin/monitoring" class="nd-btn nd-btn-outline nd-btn-sm w-100">
-                    <i class="bi bi-activity me-1"></i> Ver Monitoramento
-                </a>
+                <div class="d-grid gap-2">
+                    <a href="/admin/notifications/outbox" class="nd-btn nd-btn-outline">
+                        <i class="bi bi-inbox me-2"></i> Ver Auditoria de Envios
+                    </a>
+                </div>
             </div>
         </div>
     </div>
