@@ -98,13 +98,16 @@ use App\Support\Auth;
                         <option value="">Todas</option>
                         <?php foreach ($types as $tp): ?>
                             <?php
-                            $tpLabel = match(strtolower($tp)) {
+                            $msgTypeLower = strtolower($tp);
+                            $tpLabel = match($msgTypeLower) {
                                 'token_created' => 'Criação de Token',
                                 'password_reset' => 'Redefinição de Senha',
                                 'welcome_email' => 'Boas-vindas',
                                 'submission_received' => 'Protocolo Recebido',
                                 'user_precreated' => 'Pré-cadastro de Usuário',
-                                default => ucwords(str_replace(['_', '-'], ' ', strtolower($tp)))
+                                'new_announcement' => 'Novo Comunicado',
+                                'new_general_document' => 'Novo Documento Publicado',
+                                default => ucwords(str_replace(['_', '-'], ' ', $msgTypeLower))
                             };
                             ?>
                             <option value="<?= htmlspecialchars($tp) ?>" <?= (($filters['type'] ?? '') === $tp) ? 'selected' : '' ?>>
@@ -174,49 +177,51 @@ use App\Support\Auth;
                             $status = $r['status'] ?? '';
                             $badge = 'nd-badge-secondary';
                             $label = $status;
-                            $icon = 'bi-circle';
+                            $statusIcon = 'bi-circle';
                             
                             switch ($status) {
                                 case 'PENDING':
                                     $badge = 'nd-badge-warning';
                                     $label = 'Aguardando';
-                                    $icon = 'bi-hourglass-split';
+                                    $statusIcon = 'bi-hourglass-split';
                                     break;
                                 case 'SENDING':
                                     $badge = 'bg-info text-white';
                                     $label = 'Enviando';
-                                    $icon = 'bi-arrow-right-circle';
+                                    $statusIcon = 'bi-arrow-right-circle';
                                     break;
                                 case 'SENT':
                                     $badge = 'nd-badge-success';
                                     $label = 'Concluído';
-                                    $icon = 'bi-check-all';
+                                    $statusIcon = 'bi-check-all';
                                     break;
                                 case 'FAILED':
                                     $badge = 'nd-badge-danger';
                                     $label = 'Falhou';
-                                    $icon = 'bi-x-circle';
+                                    $statusIcon = 'bi-x-circle';
                                     break;
                                 case 'CANCELLED':
                                     $badge = 'bg-secondary text-white';
                                     $label = 'Cancelado';
-                                    $icon = 'bi-dash-circle';
+                                    $statusIcon = 'bi-dash-circle';
                                     break;
                             }
                             
-                            $typeKey = $r['type'] ?? '';
-                            $typeLabel = match(strtolower($typeKey)) {
-                                'token_created' => 'Criação de Token',
-                                'password_reset' => 'Redef. de Senha',
-                                'welcome_email' => 'Boas-vindas',
-                                'submission_received' => 'Protocolo',
-                                'user_precreated' => 'Pré-cadastro',
-                                default => ucwords(str_replace(['_', '-'], ' ', strtolower($typeKey)))
+                            $typeKey = strtolower($r['type'] ?? '');
+                            $typeInfo = match($typeKey) {
+                                'token_created'       => ['label' => 'Criação de Token',      'icon' => 'bi-key-fill',            'color' => 'var(--nd-primary-700)', 'bg' => 'var(--nd-primary-100)'],
+                                'password_reset'      => ['label' => 'Redefinição de Senha',  'icon' => 'bi-shield-lock-fill',    'color' => 'var(--nd-danger-700)',  'bg' => 'var(--nd-danger-100)'],
+                                'welcome_email'       => ['label' => 'Boas-vindas',           'icon' => 'bi-person-plus-fill',    'color' => 'var(--nd-success-700)', 'bg' => 'var(--nd-success-100)'],
+                                'submission_received' => ['label' => 'Protocolo Recebido',    'icon' => 'bi-file-earmark-text',   'color' => 'var(--nd-navy-700)',    'bg' => 'var(--nd-navy-100)'],
+                                'user_precreated'     => ['label' => 'Pré-cadastro',          'icon' => 'bi-person-badge',        'color' => 'var(--nd-primary-700)', 'bg' => 'var(--nd-primary-100)'],
+                                'new_announcement'    => ['label' => 'Novo Comunicado',       'icon' => 'bi-megaphone-fill',      'color' => 'var(--nd-gold-700)',    'bg' => 'var(--nd-gold-100)'],
+                                'new_general_document'=> ['label' => 'Documento Publicado',   'icon' => 'bi-cloud-check-fill',    'color' => 'var(--nd-navy-700)',    'bg' => 'var(--nd-navy-100)'],
+                                default               => ['label' => ucwords(str_replace(['_', '-'], ' ', $typeKey)), 'icon' => 'bi-tag-fill', 'color' => 'var(--nd-gray-700)', 'bg' => 'var(--nd-gray-100)']
                             };
                             ?>
                             <tr>
                                 <td>
-                                    <span class="badge bg-light text-dark border font-monospace">#<?= (int)$r['id'] ?></span>
+                                    <span class="badge bg-light text-muted border font-monospace">#<?= (int)$r['id'] ?></span>
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2 text-dark small">
@@ -228,11 +233,15 @@ use App\Support\Auth;
                                 <td>
                                     <div class="d-flex flex-column align-items-start gap-1">
                                         <span class="nd-badge <?= $badge ?>">
-                                            <i class="bi <?= $icon ?> me-1"></i> <?= htmlspecialchars($label) ?>
+                                            <i class="bi <?= $statusIcon ?> me-1"></i> <?= htmlspecialchars($label) ?>
                                         </span>
-                                        <small class="text-muted fw-bold" style="font-size: 0.7rem;">
-                                            <?= htmlspecialchars(strtoupper($typeLabel)) ?>
-                                        </small>
+                                        <div class="d-flex align-items-center gap-1 rounded px-2 py-1 mt-1" 
+                                             style="background: <?= $typeInfo['bg'] ?>; color: <?= $typeInfo['color'] ?>;">
+                                            <i class="bi <?= $typeInfo['icon'] ?> small"></i>
+                                            <span class="fw-bold" style="font-size: 0.7rem;">
+                                                <?= htmlspecialchars(mb_strtoupper($typeInfo['label'])) ?>
+                                            </span>
+                                        </div>
                                     </div>
                                 </td>
                                 <td>
@@ -291,7 +300,7 @@ use App\Support\Auth;
                 </table>
             </div>
              <div class="nd-card-footer p-3 border-top text-end text-muted small">
-                Todos os horários estão em <strong>Brasília/DF</strong>
+                <i class="bi bi-clock me-1"></i> Fuso horário de referência: <strong>Brasília (GMT-3)</strong>
             </div>
         <?php endif; ?>
     </div>
