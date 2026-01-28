@@ -37,11 +37,11 @@ $search = $filters['search'] ?? '';
                     <i class="bi bi-filter nd-input-icon"></i>
                 </div>
             </div>
-            <div class="col-sm-6 col-md-4">
+            <div class="col-sm-6 col-md-5">
                 <div class="nd-input-group">
                     <input type="text" name="search"
                         class="nd-input"
-                        placeholder="Pesquisar por Titular ou E-mail..."
+                        placeholder="Buscar por usuário ou e-mail..."
                         value="<?= htmlspecialchars($search, ENT_QUOTES, 'UTF-8') ?>"
                         style="padding-left: 2.5rem;">
                     <i class="bi bi-search nd-input-icon"></i>
@@ -49,17 +49,27 @@ $search = $filters['search'] ?? '';
             </div>
             <div class="col-sm-6 col-md-2">
                 <button type="submit" class="nd-btn nd-btn-primary w-100">
-                    Filtrar Registros
+                    <i class="bi bi-funnel me-1"></i> Filtrar
                 </button>
             </div>
+            <?php if (!empty($search) || !empty($status)): ?>
+                <div class="col-sm-6 col-md-2">
+                     <a href="/admin/tokens" class="nd-btn nd-btn-outline w-100">
+                        <i class="bi bi-x-lg me-1"></i> Limpar
+                    </a>
+                </div>
+            <?php endif; ?>
         </form>
     </div>
 
     <div class="nd-card-body p-0">
         <?php if (!$items): ?>
             <div class="text-center py-5">
-                <i class="bi bi-qr-code-scan text-muted mb-2" style="font-size: 2rem;"></i>
-                <p class="text-muted mb-0">Nenhuma credencial localizada.</p>
+                 <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3" style="width: 64px; height: 64px;">
+                    <i class="bi bi-qr-code-scan text-muted" style="font-size: 1.5rem;"></i>
+                </div>
+                <p class="fw-medium text-dark mb-1">Nenhuma credencial localizada</p>
+                <p class="text-muted small">Tente ajustar os filtros da sua busca.</p>
             </div>
         <?php else: ?>
             <div class="table-responsive">
@@ -67,7 +77,7 @@ $search = $filters['search'] ?? '';
                     <thead>
                         <tr>
                             <th>Titular</th>
-                            <th>Código da Credencial</th>
+                            <th>Código</th>
                             <th>Vigência</th>
                             <th>Situação</th>
                             <th class="text-end">Ações</th>
@@ -82,11 +92,11 @@ $search = $filters['search'] ?? '';
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="nd-avatar" style="width: 32px; height: 32px; background: var(--nd-gray-100); color: var(--nd-gray-600); font-size: 0.75rem;">
-                                            <?= strtoupper(substr($t['user_name'] ?? 'U', 0, 1)) ?>
+                                        <div class="nd-avatar nd-avatar-sm bg-light text-primary fw-bold border" style="width: 38px; height: 38px; font-size: 0.85rem;">
+                                              <?= strtoupper(substr($t['user_name'] ?? 'U', 0, 2)) ?>
                                         </div>
                                         <div>
-                                            <div class="fw-medium text-dark"><?= htmlspecialchars($t['user_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?></div>
+                                            <div class="fw-bold text-dark"><?= htmlspecialchars($t['user_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?></div>
                                             <div class="small text-muted"><?= htmlspecialchars($t['user_email'] ?? '-', ENT_QUOTES, 'UTF-8') ?></div>
                                         </div>
                                     </div>
@@ -94,8 +104,8 @@ $search = $filters['search'] ?? '';
                                 <td>
                                     <?php $code = (string)($t['code'] ?? ''); ?>
                                     <?php if ($code !== ''): ?>
-                                        <code class="px-2 py-1 rounded bg-light text-dark small border">
-                                            <?= htmlspecialchars(substr($code, 0, 8) . '...', ENT_QUOTES, 'UTF-8') ?>
+                                        <code class="px-2 py-1 rounded bg-light text-dark small border font-monospace">
+                                            <?= htmlspecialchars($code, ENT_QUOTES, 'UTF-8') ?>
                                         </code>
                                     <?php else: ?>
                                         <span class="text-muted">-</span>
@@ -103,23 +113,26 @@ $search = $filters['search'] ?? '';
                                 </td>
                                 <td>
                                     <div class="d-flex flex-column small">
-                                        <span class="text-muted">
-                                            <i class="bi bi-calendar-plus me-1"></i>
+                                        <span class="text-muted d-flex align-items-center gap-1">
+                                            <i class="bi bi-calendar-plus"></i>
                                             <?= (new DateTime($t['created_at']))->format('d/m/Y H:i') ?>
                                         </span>
-                                        <span class="<?= $isExpired ? 'text-danger' : 'text-dark' ?>">
-                                            <i class="bi bi-calendar-x me-1"></i>
+                                        <span class="<?= $isExpired ? 'text-danger' : 'text-dark' ?> d-flex align-items-center gap-1">
+                                            <i class="bi bi-calendar-x"></i>
                                             <?= (new DateTime($t['expires_at']))->format('d/m/Y H:i') ?>
                                         </span>
                                     </div>
                                 </td>
                                 <td>
                                     <?php if ($isUsed): ?>
-                                        <span class="nd-badge nd-badge-secondary">Utilizado</span>
+                                         <div class="d-flex align-items-center gap-1 text-success small fw-medium">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                            <span>Utilizado</span>
+                                        </div>
                                     <?php elseif ($isExpired): ?>
-                                        <span class="nd-badge nd-badge-danger">Expirado</span>
+                                        <span class="nd-badge nd-badge-secondary">Expirado</span>
                                     <?php else: ?>
-                                        <span class="nd-badge nd-badge-success">Ativo</span>
+                                        <span class="nd-badge nd-badge-warning">Válido</span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-end">
