@@ -147,17 +147,78 @@
                 </table>
             </div>
 
-            <?php if ($totalPages > 1): ?>
-                <div class="nd-card-footer p-3 border-top">
-                    <nav aria-label="Paginação">
-                        <ul class="pagination pagination-sm justify-content-end mb-0">
-                            <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+<?php if ($totalPages > 1): ?>
+                <?php
+                    // Helper para manter query params
+                    $queryParams = $_GET;
+                    unset($queryParams['page']);
+                    $buildUrl = function($p) use ($queryParams) {
+                        return '?' . http_build_query(array_merge($queryParams, ['page' => $p]));
+                    };
+
+                    $start = ($page - 1) * $perPage + 1;
+                    $end   = min($total, $page * $perPage);
+                ?>
+                <div class="nd-card-footer p-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+                    <div class="text-muted small">
+                         Exibindo <strong><?= $start ?></strong> a <strong><?= $end ?></strong> de <strong><?= number_format($total, 0, ',', '.') ?></strong> registros
+                    </div>
+
+                    <nav aria-label="Navegação de página">
+                        <ul class="pagination pagination-sm mb-0">
+                            <!-- Previous -->
+                            <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                                <a class="page-link" href="<?= $page <= 1 ? '#' : $buildUrl($page - 1) ?>" tabindex="<?= $page <= 1 ? '-1' : '0' ?>">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+
+                            <!-- Numbers -->
+                             <?php
+                            $rangeStart = max(1, $page - 2);
+                            $rangeEnd   = min($totalPages, $page + 2);
+                            
+                            if ($rangeEnd - $rangeStart < 4) {
+                                if ($rangeStart == 1) {
+                                    $rangeEnd = min($totalPages, $rangeStart + 4);
+                                } elseif ($rangeEnd == $totalPages) {
+                                    $rangeStart = max(1, $rangeEnd - 4);
+                                }
+                            }
+                            ?>
+
+                            <?php if ($rangeStart > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="<?= $buildUrl(1) ?>">1</a>
+                                </li>
+                                <?php if ($rangeStart > 2): ?>
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                <?php endif; ?>
+                            <?php endif; ?>
+
+                            <?php for ($p = $rangeStart; $p <= $rangeEnd; $p++): ?>
                                 <li class="page-item <?= $p === $page ? 'active' : '' ?>">
-                                    <a class="page-link" href="?page=<?= $p ?>&search=<?= urlencode($search) ?>">
+                                    <a class="page-link" href="<?= $buildUrl($p) ?>">
                                         <?= $p ?>
                                     </a>
                                 </li>
                             <?php endfor; ?>
+
+                            <?php if ($rangeEnd < $totalPages): ?>
+                                <?php if ($rangeEnd < $totalPages - 1): ?>
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                <?php endif; ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="<?= $buildUrl($totalPages) ?>"><?= $totalPages ?></a>
+                                </li>
+                            <?php endif; ?>
+
+                            <!-- Next -->
+                            <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
+                                <a class="page-link" href="<?= $page >= $totalPages ? '#' : $buildUrl($page + 1) ?>">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
                         </ul>
                     </nav>
                 </div>
