@@ -32,18 +32,19 @@ $errors = $errors ?? [];
     </div>
 <?php endif; ?>
 
-<div class="row justify-content-center">
+<div class="row">
+    <!-- Main Form Column -->
     <div class="col-lg-8">
-        <div class="nd-card mb-4">
-            <div class="nd-card-header d-flex align-items-center gap-2">
-                <i class="bi bi-person-lines-fill" style="color: var(--nd-gold-500);"></i>
-                <h5 class="nd-card-title mb-0">Informações do Usuário</h5>
-            </div>
+        <form method="post" action="/admin/admin-users/<?= (int)$user['id'] ?>">
+            <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
-            <div class="nd-card-body">
-                <form method="post" action="/admin/admin-users/<?= (int)$user['id'] ?>">
-                    <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+            <div class="nd-card mb-4">
+                <div class="nd-card-header d-flex align-items-center gap-2">
+                    <i class="bi bi-person-lines-fill" style="color: var(--nd-gold-500);"></i>
+                    <h5 class="nd-card-title mb-0">Informações do Usuário</h5>
+                </div>
 
+                <div class="nd-card-body">
                     <div class="row gx-3 gy-2">
                         <div class="col-md-12 mb-3">
                             <label class="nd-label" for="full_name">Nome do Responsável</label>
@@ -92,16 +93,19 @@ $errors = $errors ?? [];
                     </div>
 
                     <div class="row gx-3 gy-2">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-12 mb-3">
                             <label class="nd-label" for="role">Nível de Acesso</label>
-                            <select class="nd-input form-select <?= isset($errors['role']) ? 'is-invalid' : '' ?>" id="role" name="role" required>
-                                <option value="ADMIN" <?= ($user['role'] ?? '') === 'ADMIN' ? 'selected' : '' ?>>
-                                    Administrador
-                                </option>
-                                <option value="SUPER_ADMIN" <?= ($user['role'] ?? '') === 'SUPER_ADMIN' ? 'selected' : '' ?>>
-                                    Administrador Master
-                                </option>
-                            </select>
+                            <div class="nd-input-group">
+                                <select class="nd-input form-select <?= isset($errors['role']) ? 'is-invalid' : '' ?>" id="role" name="role" required style="padding-left: 2.5rem;">
+                                    <option value="ADMIN" <?= ($user['role'] ?? '') === 'ADMIN' ? 'selected' : '' ?>>
+                                        Administrador
+                                    </option>
+                                    <option value="SUPER_ADMIN" <?= ($user['role'] ?? '') === 'SUPER_ADMIN' ? 'selected' : '' ?>>
+                                        Administrador Master
+                                    </option>
+                                </select>
+                                <i class="bi bi-shield-lock nd-input-icon"></i>
+                            </div>
                             <?php if (isset($errors['role'])): ?>
                                 <div class="text-danger small mt-1">
                                     <?= htmlspecialchars($errors['role'], ENT_QUOTES, 'UTF-8') ?>
@@ -111,35 +115,25 @@ $errors = $errors ?? [];
                                 Permissões avançadas de sistema.
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
 
-                        <div class="col-md-6 mb-3 d-flex align-items-center">
-                            <div class="form-check nd-form-check mt-3">
-                                <input
-                                    type="checkbox"
-                                    class="form-check-input"
-                                    id="is_active"
-                                    name="is_active"
-                                    value="1"
-                                    <?= ($user['status'] ?? 'ACTIVE') === 'ACTIVE' ? 'checked' : '' ?>>
-                                <label class="form-check-label text-dark fw-medium" for="is_active">
-                                    Acesso Ativo
-                                </label>
-                                <div class="small text-muted" style="font-size: 0.75rem;">
-                                    Desmarque para revogar o acesso.
-                                </div>
-                            </div>
-                        </div>
+            <!-- Credentials Card -->
+            <div class="nd-card mb-4">
+                <div class="nd-card-header d-flex align-items-center gap-2">
+                    <i class="bi bi-key-fill" style="color: var(--nd-gold-500);"></i>
+                    <h5 class="nd-card-title mb-0">Credenciais de Acesso</h5>
+                </div>
+                <div class="nd-card-body">
+                     <div class="p-3 mb-3 rounded" style="background: var(--nd-gray-50); border-left: 3px solid var(--nd-warning);">
+                        <small class="text-muted">Preencha apenas se desejar alterar a senha atual.</small>
                     </div>
 
-                    <div class="p-3 my-3 rounded" style="background: var(--nd-gray-50); border: 1px dashed var(--nd-gray-300);">
-                        <div class="d-flex align-items-center mb-3">
-                            <i class="bi bi-key-fill me-2" style="color: var(--nd-navy-500);"></i>
-                            <h6 class="fw-bold mb-0 text-dark">Credenciais de Acesso</h6>
-                        </div>
-
-                        <div class="row gx-3">
-                            <div class="col-md-6 mb-3 mb-md-0">
-                                <label class="nd-label" for="password">Nova Senha (opcional)</label>
+                    <div class="row gx-3">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label class="nd-label" for="password">Nova Senha</label>
+                            <div class="nd-input-group">
                                 <input
                                     type="password"
                                     class="nd-input <?= isset($errors['password']) ? 'is-invalid' : '' ?>"
@@ -148,15 +142,19 @@ $errors = $errors ?? [];
                                     minlength="8"
                                     maxlength="72"
                                     autocomplete="new-password"
-                                    placeholder="******">
-                                <?php if (isset($errors['password'])): ?>
-                                    <div class="text-danger small mt-1">
-                                        <?= htmlspecialchars($errors['password'], ENT_QUOTES, 'UTF-8') ?>
-                                    </div>
-                                <?php endif; ?>
+                                    placeholder="******"
+                                    style="padding-left: 2.5rem;">
+                                <i class="bi bi-lock nd-input-icon"></i>
                             </div>
-                            <div class="col-md-6">
-                                <label class="nd-label" for="password_confirmation">Confirmar Nova Senha</label>
+                            <?php if (isset($errors['password'])): ?>
+                                <div class="text-danger small mt-1">
+                                    <?= htmlspecialchars($errors['password'], ENT_QUOTES, 'UTF-8') ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="nd-label" for="password_confirmation">Confirmar Nova Senha</label>
+                             <div class="nd-input-group">
                                 <input
                                     type="password"
                                     class="nd-input"
@@ -165,49 +163,95 @@ $errors = $errors ?? [];
                                     minlength="8"
                                     maxlength="72"
                                     autocomplete="new-password"
-                                    placeholder="******">
+                                    placeholder="******"
+                                    style="padding-left: 2.5rem;">
+                                <i class="bi bi-lock-fill nd-input-icon"></i>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <div class="d-flex gap-2 justify-content-end mt-4">
-                        <a href="/admin/admin-users" class="nd-btn nd-btn-outline">
-                            Cancelar
-                        </a>
-                        <button type="submit" class="nd-btn nd-btn-primary">
-                            <i class="bi bi-check-lg me-1"></i>
-                            Salvar Alterações
-                        </button>
-                    </div>
-                </form>
+            <div class="d-flex gap-2 justify-content-end mb-4">
+                <a href="/admin/admin-users" class="nd-btn nd-btn-outline">
+                    Cancelar
+                </a>
+                <button type="submit" class="nd-btn nd-btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>
+                    Salvar Alterações
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sidebar Column -->
+    <div class="col-lg-4">
+        <!-- Status Card -->
+        <div class="nd-card mb-4">
+            <div class="nd-card-header">
+                <h5 class="nd-card-title mb-0">Status da Conta</h5>
+            </div>
+            <div class="nd-card-body">
+                <div class="form-check form-switch p-0 m-0 d-flex justify-content-between align-items-center">
+                    <label class="form-check-label text-dark fw-medium" for="is_active">
+                        Acesso Ativo
+                    </label>
+                    <input
+                        class="form-check-input ms-0" 
+                        type="checkbox" 
+                        role="switch" 
+                        id="is_active" 
+                        name="is_active" 
+                        value="1" 
+                        <?= ($user['status'] ?? 'ACTIVE') === 'ACTIVE' ? 'checked' : '' ?>
+                        style="width: 2.5em; height: 1.25em; cursor: pointer;">
+                </div>
+                <div class="small text-muted mt-2">
+                    Desativar o acesso impedirá que este usuário faça login no painel administrativo imediatamente.
+                </div>
             </div>
         </div>
 
-        <!-- Informações do Registro -->
-        <div class="nd-card bg-light">
+        <!-- Metadata Card -->
+        <div class="nd-card bg-light border-0">
             <div class="nd-card-body py-3">
-                <h6 class="nd-card-title small text-muted mb-3 border-bottom pb-2">Informações do Registro</h6>
-                <div class="row g-2 small">
-                    <div class="col-sm-4 text-muted">Criado em:</div>
-                    <div class="col-sm-8 text-dark">
-                        <?= $user['created_at'] ? htmlspecialchars(date('d/m/Y H:i', strtotime($user['created_at'])), ENT_QUOTES, 'UTF-8') : '-' ?>
+                <h6 class="nd-card-title small text-muted mb-3 border-bottom pb-2">Metadados do Registro</h6>
+                <div class="d-flex flex-column gap-2 small">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">ID:</span>
+                        <span class="text-dark fw-medium">#<?= (int)$user['id'] ?></span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Criado em:</span>
+                        <span class="text-dark">
+                            <?= $user['created_at'] ? htmlspecialchars(date('d/m/Y H:i', strtotime($user['created_at'])), ENT_QUOTES, 'UTF-8') : '-' ?>
+                        </span>
                     </div>
 
-                    <div class="col-sm-4 text-muted">Última atualização:</div>
-                    <div class="col-sm-8 text-dark">
-                        <?= $user['updated_at'] ? htmlspecialchars(date('d/m/Y H:i', strtotime($user['updated_at'])), ENT_QUOTES, 'UTF-8') : '-' ?>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Atualizado em:</span>
+                        <span class="text-dark">
+                            <?= $user['updated_at'] ? htmlspecialchars(date('d/m/Y H:i', strtotime($user['updated_at'])), ENT_QUOTES, 'UTF-8') : '-' ?>
+                        </span>
                     </div>
 
-                    <div class="col-sm-4 text-muted">Último login:</div>
-                    <div class="col-sm-8 text-dark">
-                        <?= $user['last_login_at'] ? htmlspecialchars(date('d/m/Y H:i', strtotime($user['last_login_at'])), ENT_QUOTES, 'UTF-8') : 'Nunca' ?>
+                    <hr class="my-1 border-secondary-subtle">
+
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Último login:</span>
+                        <span class="text-dark">
+                            <?= $user['last_login_at'] ? htmlspecialchars(date('d/m/Y H:i', strtotime($user['last_login_at'])), ENT_QUOTES, 'UTF-8') : 'Nunca' ?>
+                        </span>
                     </div>
 
                     <?php if (!empty($user['last_login_provider'])): ?>
-                        <div class="col-sm-4 text-muted">Método de login:</div>
-                        <div class="col-sm-8 text-dark">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Via:</span>
+                        <span class="text-dark fw-medium">
                             <?= htmlspecialchars($user['last_login_provider'], ENT_QUOTES, 'UTF-8') ?>
-                        </div>
+                        </span>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>
