@@ -124,7 +124,8 @@ $query = http_build_query([
                 <?php foreach ($items as $row): ?>
                     <?php
                     $statusClass = match($row['status'] ?? '') {
-                        'PENDING', 'UNDER_REVIEW' => 'warning',
+                        'PENDING' => 'warning',
+                        'UNDER_REVIEW' => 'info',
                         'COMPLETED' => 'success',
                         'APPROVED' => 'success',
                         'REJECTED' => 'danger',

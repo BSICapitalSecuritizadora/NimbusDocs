@@ -51,7 +51,7 @@ final class SubmissionAdminController
 
         $pagination = $this->repo->paginateAll($filters, $page, $perPage);
 
-        $pageTitle   = 'Submissões do Portal';
+        $pageTitle   = 'Envios';
         $contentView = __DIR__ . '/../../View/admin/submissions/index.php';
         $viewData    = [
             'pagination' => $pagination,
