@@ -127,71 +127,87 @@ $actionMap = [
                                 <td>
                                     <?php
                                         $action = $log['action'] ?? 'UNKNOWN';
-                                        $displayAction = $actionMap[$action] ?? $action;
-
-                                        // Default fallback
-                                        $style = '';
-                                        $badgeClass = 'bg-light text-dark border'; 
-
-                                        // Specific color mapping (Unique colors for each)
-                                        switch ($action) {
-                                            case 'LOGIN_SUCCESS':
-                                                $badgeClass = 'nd-badge-success'; // Green
-                                                break;
+                                        
+                                        $normalize = fn($s) => ucwords(strtolower(str_replace(['_', '-'], ' ', $s)));
+                                        
+                                        // Mapa completo de ações do sistema
+                                        $display = match(true) {
+                                            // Auth & Security
+                                            $action === 'LOGIN_SUCCESS'              => ['Autenticação Bem-sucedida', 'nd-badge-success',   'bi-shield-check'],
+                                            $action === 'LOGIN_FAILED'               => ['Falha de Autenticação',     'nd-badge-danger',    'bi-shield-x'],
+                                            $action === 'LOGOUT'                     => ['Logout do Sistema',         'nd-badge-secondary', 'bi-box-arrow-left'],
                                             
-                                            case 'LOGIN_FAILED':
-                                                $badgeClass = 'nd-badge-danger'; // Red
-                                                break;
+                                            // Portal Users
+                                            $action === 'PORTAL_USER_CREATED'        => ['Usuário Portal Criado',     'nd-badge-primary',   'bi-person-plus-fill'],
+                                            $action === 'PORTAL_USER_UPDATED'        => ['Dados de Usuário Atualizados', 'nd-badge-info',   'bi-person-lines-fill'],
+                                            $action === 'PORTAL_ACCESS_LINK_GENERATED' => ['Link de Acesso Gerado',    'bg-secondary text-white', 'bi-link-45deg'],
+                                            $action === 'PORTAL_LOGIN_SUCCESS_CODE'  => ['Acesso via Token (Portal)', 'nd-badge-success',   'bi-key-fill'],
+                                            $action === 'PORTAL_LOGIN_CODE_FAILED'   => ['Falha de Token (Portal)',   'nd-badge-danger',    'bi-key'],
 
-                                            case 'PORTAL_USER_CREATED':
-                                                $badgeClass = 'bg-primary text-white'; // Blue
-                                                break;
+                                            // Submissions
+                                            $action === 'SUBMISSION_CREATED'         => ['Nova Submissão',            'nd-badge-success',   'bi-file-earmark-plus'],
+                                            $action === 'PORTAL_SUBMISSION_CREATED'  => ['Submissão Enviada (Portal)', 'nd-badge-success',  'bi-file-earmark-arrow-up'],
+                                            $action === 'SUBMISSION_STATUS_CHANGED'  => ['Alteração de Status',       'nd-badge-info',      'bi-arrow-repeat'],
+                                            $action === 'SUBMISSION_RESPONSE_FILES_UPLOADED' => ['Resposta Anexada',         'nd-badge-warning',   'bi-paperclip'],
                                             
-                                            case 'PORTAL_USER_UPDATED':
-                                                $badgeClass = 'bg-info text-dark bg-opacity-25 border-info border-opacity-25'; // Soft Cyan
-                                                break;
-
-                                            case 'PORTAL_ACCESS_LINK_GENERATED':
-                                                $badgeClass = 'text-white';
-                                                $style = 'background-color: #6f42c1;'; // Purple
-                                                break;
-
-                                            case 'PORTAL_LOGIN_CODE_FAILED':
-                                                $badgeClass = 'text-white';
-                                                $style = 'background-color: #fd7e14;'; // Orange
-                                                break;
+                                            // Documents & Files
+                                            $action === 'FILE_PREVIEW'               => ['Visualização de Arquivo',   'nd-badge-primary',   'bi-eye-fill'],
+                                            $action === 'FILE_DOWNLOAD'              => ['Download de Arquivo',       'bg-info text-white', 'bi-download'],
+                                            
+                                            // Default Fallback with Text Translation
+                                            default => (function() use ($action, $normalize) {
+                                                // Tenta traduzir termos comuns se não houver match exato
+                                                $translated = $action;
+                                                $replacements = [
+                                                    'CREATE' => 'Criação', 'CREATED' => 'Criado',
+                                                    'UPDATE' => 'Edição',  'UPDATED' => 'Atualizado',
+                                                    'DELETE' => 'Exclusão','DELETED' => 'Excluído',
+                                                    'VIEW'   => 'Visualização',
+                                                    'UPLOAD' => 'Envio',
+                                                    'SUBMISSION' => 'Submissão',
+                                                    'STATUS' => 'Status',
+                                                    'CHANGED' => 'Alterado',
+                                                    'FILE' => 'Arquivo',
+                                                    'USER' => 'Usuário',
+                                                    'ERROR' => 'Erro',
+                                                    'FAIL' => 'Falha',
+                                                    'SUCCESS' => 'Sucesso'
+                                                ];
                                                 
-                                            case 'PORTAL_LOGIN_SUCCESS_CODE':
-                                                $badgeClass = 'text-white';
-                                                $style = 'background-color: #20c997;'; // Teal
-                                                break;
-
-                                            case 'SUBMISSION_RESPONSE_FILES_UPLOADED':
-                                                $badgeClass = 'bg-warning text-dark bg-opacity-25 border-warning border-opacity-25'; // Soft Yellow
-                                                break;
-
-                                            case 'PORTAL_SUBMISSION_CREATED':
-                                                $badgeClass = 'text-white';
-                                                $style = 'background-color: #d63384;'; // Pink
-                                                break;
+                                                // Primeiro substitui underscores por espaços
+                                                $human = str_replace(['_', '-'], ' ', $translated);
                                                 
-                                            case 'SUBMISSION_CREATED':
-                                                $badgeClass = 'text-white';
-                                                $style = 'background-color: #6610f2;'; // Indigo
-                                                break;
-                                            
-                                            default:
-                                                // Fallback logic for unmapped system codes
-                                                if (str_contains($action, '_SUCCESS')) $badgeClass = 'nd-badge-success-soft';
-                                                elseif (str_contains($action, '_FAILED')) $badgeClass = 'nd-badge-danger-soft';
-                                                elseif (str_contains($action, 'DELETE')) $badgeClass = 'bg-danger text-white';
-                                                elseif (str_contains($action, 'CREATE')) $badgeClass = 'bg-success text-white';
-                                                elseif (str_contains($action, 'UPDATE')) $badgeClass = 'bg-info text-white';
-                                                break;
-                                        }
+                                                // Traduz palavras chave
+                                                foreach ($replacements as $en => $pt) {
+                                                    $human = preg_replace("/\b$en\b/i", $pt, $human);
+                                                }
+                                                
+                                                $label = ucwords(strtolower($human));
+                                                
+                                                // Define cor baseada no tipo de ação
+                                                $class = 'nd-badge-secondary';
+                                                $icon = 'bi-activity';
+                                                
+                                                if (str_contains($action, 'CREATE') || str_contains($action, 'SUCCESS')) {
+                                                    $class = 'nd-badge-success';
+                                                    $icon = 'bi-check-lg';
+                                                } elseif (str_contains($action, 'UPDATE') || str_contains($action, 'CHANGE')) {
+                                                    $class = 'nd-badge-warning';
+                                                    $icon = 'bi-pencil';
+                                                } elseif (str_contains($action, 'DELETE') || str_contains($action, 'FAIL') || str_contains($action, 'ERROR')) {
+                                                    $class = 'nd-badge-danger';
+                                                    $icon = 'bi-x-lg';
+                                                } elseif (str_contains($action, 'VIEW') || str_contains($action, 'PREVIEW')) {
+                                                    $class = 'nd-badge-primary';
+                                                    $icon = 'bi-eye';
+                                                }
+                                                
+                                                return [$label, $class, $icon];
+                                            })()
+                                        };
                                     ?>
-                                    <span class="badge fw-normal <?= $badgeClass ?>" style="<?= $style ?>">
-                                        <?= htmlspecialchars($displayAction, ENT_QUOTES, 'UTF-8') ?>
+                                    <span class="nd-badge <?= $display[1] ?>">
+                                        <i class="bi <?= $display[2] ?> me-1"></i> <?= htmlspecialchars($display[0], ENT_QUOTES, 'UTF-8') ?>
                                     </span>
                                 </td>
                                 <td>
