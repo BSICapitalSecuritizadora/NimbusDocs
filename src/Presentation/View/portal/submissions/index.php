@@ -59,9 +59,9 @@ $error   = $flash['error']   ?? null;
                         <label for="filterStatus" class="form-label small text-secondary fw-bold text-uppercase ls-1">Situação</label>
                         <select class="form-select nd-input bg-light border-0" id="filterStatus" name="status">
                             <option value="">Todos os status</option>
-                            <option value="PENDING" <?= ($pagination['status'] ?? '') === 'PENDING' ? 'selected' : '' ?>>Pendente</option>
-                            <option value="UNDER_REVIEW" <?= ($pagination['status'] ?? '') === 'UNDER_REVIEW' ? 'selected' : '' ?>>Em Análise</option>
                             <option value="APPROVED" <?= ($pagination['status'] ?? '') === 'APPROVED' ? 'selected' : '' ?>>Concluído</option>
+                            <option value="UNDER_REVIEW" <?= ($pagination['status'] ?? '') === 'UNDER_REVIEW' ? 'selected' : '' ?>>Em Análise</option>
+                            <option value="PENDING" <?= ($pagination['status'] ?? '') === 'PENDING' ? 'selected' : '' ?>>Pendente</option>
                             <option value="REJECTED" <?= ($pagination['status'] ?? '') === 'REJECTED' ? 'selected' : '' ?>>Rejeitado</option>
                         </select>
                     </div>
