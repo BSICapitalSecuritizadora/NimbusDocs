@@ -8,82 +8,103 @@ $logoUrl  = $branding['portal_logo_url'] ?? '';
 // Helper para verificar rota ativa
 $isActive = fn($path) => 
     $path === '/portal' ? $_SERVER['REQUEST_URI'] === '/portal' : str_starts_with($_SERVER['REQUEST_URI'], $path);
+
+$isNewSubmission = $_SERVER['REQUEST_URI'] === '/portal/submissions/new';
 ?>
-<nav class="navbar navbar-expand-lg portal-navbar py-3 sticky-top">
+<nav class="navbar navbar-expand-lg portal-navbar py-3 sticky-top transition-all">
     <div class="container-xxl">
-        <a class="navbar-brand d-flex align-items-center gap-2" href="/portal">
+        <!-- Brand -->
+        <a class="navbar-brand d-flex align-items-center gap-3" href="/portal">
             <?php if ($logoUrl): ?>
                 <img src="<?= htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8') ?>"
                      alt="Logo"
-                     class="navbar-logo">
+                     class="navbar-logo"
+                     style="height: 40px; width: auto;">
             <?php else: ?>
-                <img src="/assets/images/bsi_logo.png" 
-                     alt="BSI Capital" 
-                     class="img-fluid"
-                     style="max-height: 40px; width: auto;">
+                <div class="brand-icon shadow-sm">
+                    <i class="bi bi-cloud-check-fill"></i>
+                </div>
+                <div class="d-flex flex-column lh-1">
+                    <span class="fw-bold text-white ls-1 text-uppercase" style="font-size: 0.95rem;">BSI Capital</span>
+                    <span class="text-white-50 x-small text-uppercase ls-2" style="font-size: 0.65rem;">Securitizadora</span>
+                </div>
             <?php endif; ?>
         </a>
 
-        <button class="navbar-toggler border-0 shadow-none text-white" type="button" data-bs-toggle="collapse"
+        <!-- Toggler -->
+        <button class="navbar-toggler border-0 shadow-none text-white p-2" type="button" data-bs-toggle="collapse"
                 data-bs-target="#portalNavbar" aria-controls="portalNavbar"
                 aria-expanded="false" aria-label="Alternar navegação">
             <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
         </button>
 
+        <!-- Navbar Items -->
         <div class="collapse navbar-collapse" id="portalNavbar">
-            <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1 gap-lg-4 align-items-center">
                 <li class="nav-item">
-                    <a class="nav-link <?= $_SERVER['REQUEST_URI'] === '/portal' ? 'active' : '' ?>" href="/portal">
-                        <i class="bi bi-house-door-fill"></i> Início
+                    <a class="nav-link d-flex align-items-center gap-2 <?= $isActive('/portal') ? 'active' : '' ?>" href="/portal">
+                        <i class="bi bi-house-door<?= $isActive('/portal') ? '-fill' : '' ?>"></i> Início
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= str_starts_with($_SERVER['REQUEST_URI'], '/portal/submissions') && $_SERVER['REQUEST_URI'] !== '/portal/submissions/new' ? 'active' : '' ?>" href="/portal/submissions">
-                        <i class="bi bi-inbox-fill"></i> Meus Envios
+                    <a class="nav-link d-flex align-items-center gap-2 <?= $isActive('/portal/submissions') && !$isNewSubmission ? 'active' : '' ?>" href="/portal/submissions">
+                        <i class="bi bi-inbox<?= $isActive('/portal/submissions') && !$isNewSubmission ? '-fill' : '' ?>"></i> Meus Envios
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $_SERVER['REQUEST_URI'] === '/portal/submissions/new' ? 'active' : '' ?>" href="/portal/submissions/new">
-                        <i class="bi bi-plus-circle-fill"></i> Novo Envio
+                     <a class="nav-link d-flex align-items-center gap-2 <?= $isActive('/portal/documents/general') ? 'active' : '' ?>" href="/portal/documents/general">
+                        <i class="bi bi-folder<?= $isActive('/portal/documents/general') ? '-fill' : '' ?>"></i> Documentos
                     </a>
                 </li>
+                <li class="nav-item d-none d-lg-block">
+                    <div class="vr h-100 bg-white opacity-25 mx-2"></div>
+                </li>
                 <li class="nav-item">
-                    <a href="/portal/documents/general" class="nav-link <?= str_starts_with($_SERVER['REQUEST_URI'], '/portal/documents/general') ? 'active' : '' ?>">
-                        <i class="bi bi-folder-fill"></i> Documentos
+                    <a class="btn btn-sm nd-btn-gold text-dark fw-bold d-flex align-items-center gap-2 px-3 shadow-sm hover-scale" 
+                       href="/portal/submissions/new">
+                        <i class="bi bi-plus-lg"></i> Novo Envio
                     </a>
                 </li>
             </ul>
 
+            <!-- User Menu -->
             <?php if ($user): ?>
-                <div class="dropdown">
-                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle user-menu-toggle" 
+                <div class="dropdown mt-3 mt-lg-0">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle user-menu-toggle px-3 py-1" 
                        id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="user-avatar text-bg-primary rounded-circle d-flex align-items-center justify-content-center me-2">
+                        <div class="user-avatar text-bg-gold rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm border border-2 border-white-10">
                             <?= strtoupper(substr($user['full_name'] ?? $user['email'], 0, 1)) ?>
                         </div>
-                        <span class="d-none d-lg-inline fs-6 me-1">
-                            <?= htmlspecialchars(explode(' ', $user['full_name'] ?? $user['email'])[0], ENT_QUOTES, 'UTF-8') ?>
-                        </span>
+                        <div class="d-none d-lg-flex flex-column text-start me-1">
+                            <span class="fw-bold fs-7 lh-1 text-white">
+                                <?= htmlspecialchars(explode(' ', $user['full_name'] ?? $user['email'])[0], ENT_QUOTES, 'UTF-8') ?>
+                            </span>
+                        </div>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 p-2 rounded-3 text-small" aria-labelledby="dropdownUser1">
-                        <li>
-                            <h6 class="dropdown-header text-uppercase small fw-bold text-muted mb-2">
-                                Conta
-                            </h6>
-                            <div class="px-3 pb-2 mb-2 border-bottom">
-                                <strong class="d-block text-dark"><?= htmlspecialchars($user['full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></strong>
-                                <small class="text-muted d-block text-truncate"><?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?></small>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 p-0 rounded-4 overflow-hidden" aria-labelledby="dropdownUser1" style="min-width: 240px;">
+                        <li class="p-3 bg-light border-bottom">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="user-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                                    <?= strtoupper(substr($user['full_name'] ?? $user['email'], 0, 1)) ?>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <strong class="d-block text-dark text-truncate"><?= htmlspecialchars($user['full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></strong>
+                                    <small class="text-muted d-block text-truncate x-small"><?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?></small>
+                                </div>
                             </div>
                         </li>
-                        <li>
-                            <a class="dropdown-item rounded-2 py-2 mb-1" href="/portal/profile">
-                                <i class="bi bi-person-gear me-2 text-secondary"></i> Meus Dados
+                        <li class="p-2">
+                            <a class="dropdown-item rounded-3 py-2 mb-1 d-flex align-items-center gap-2" href="/portal/profile">
+                                <i class="bi bi-person-gear text-primary"></i> Meus Dados
+                            </a>
+                            <a class="dropdown-item rounded-3 py-2 mb-1 d-flex align-items-center gap-2" href="/web/change-password">
+                                <i class="bi bi-shield-lock text-primary"></i> Alterar Senha
                             </a>
                         </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item rounded-2 py-2 text-danger" href="/portal/logout">
-                                <i class="bi bi-box-arrow-right me-2"></i> Sair
+                        <li><hr class="dropdown-divider m-0 opacity-50"></li>
+                        <li class="p-2">
+                            <a class="dropdown-item rounded-3 py-2 text-danger d-flex align-items-center gap-2 hover-bg-danger-subtle" href="/portal/logout">
+                                <i class="bi bi-box-arrow-right"></i> Sair
                             </a>
                         </li>
                     </ul>
@@ -92,3 +113,23 @@ $isActive = fn($path) =>
         </div>
     </div>
 </nav>
+
+<style>
+/* Header CSS Overrides needed for specific tweaks */
+.nav-link {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    transition: all 0.2s;
+    color: rgba(255,255,255,0.7) !important;
+}
+.nav-link:hover, .nav-link.active {
+    color: #fff !important;
+    background: rgba(255,255,255,0.08);
+}
+.navbar-brand {
+    font-size: 1.5rem; 
+}
+.fs-7 { font-size: 0.85rem; }
+.hover-bg-danger-subtle:hover { background-color: var(--bs-danger-bg-subtle) !important; }
+</style>
