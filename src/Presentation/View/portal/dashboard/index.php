@@ -10,59 +10,65 @@
  * @var array $announcements
  */
 ?>
-<div class="row mb-4 align-items-center">
-    <div class="col-12 col-lg-8">
-        <h1 class="h3 fw-bold text-dark mb-1">Olá, <?= htmlspecialchars($user['full_name'] ?? $user['email'], ENT_QUOTES, 'UTF-8') ?>!</h1>
+<!-- Header Section -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5 gap-3">
+    <div>
+        <h1 class="h3 fw-bold text-dark mb-1">
+            Olá, <span style="color: var(--nd-primary);"><?= htmlspecialchars($user['full_name'] ?? $user['email'], ENT_QUOTES, 'UTF-8') ?></span>!
+        </h1>
         <p class="text-secondary mb-0">
-            Seu ambiente exclusivo para envio de documentos e acompanhamento de solicitações em tempo real.
+            Bem-vindo ao seu painel exclusivo de solicitações.
         </p>
     </div>
-    <div class="col-12 col-lg-4 text-lg-end mt-3 mt-lg-0">
-        <a href="/portal/submissions/new" class="nd-btn nd-btn-gold shadow-sm">
-            <i class="bi bi-plus-lg"></i> Nova Solicitação
-        </a>
-    </div>
+    
+    <a href="/portal/submissions/new" class="nd-btn nd-btn-gold shadow-sm d-flex align-items-center gap-2 px-4 py-2">
+        <i class="bi bi-plus-lg"></i>
+        <span>Nova Solicitação</span>
+    </a>
 </div>
 
+<!-- Announcements -->
 <?php if (!empty($announcements)): ?>
     <div class="mb-5">
         <?php foreach ($announcements as $a): ?>
             <?php
             $level = $a['level'] ?? 'info';
-            $class = 'nd-alert-info';
+            $class = 'bg-info-subtle text-info-emphasis border-info-subtle';
             $icon  = 'bi-info-circle-fill';
             
-            if ($level === 'success') { $class = 'nd-alert-success'; $icon = 'bi-check-circle-fill'; }
-            if ($level === 'warning') { $class = 'nd-alert-warning'; $icon = 'bi-exclamation-triangle-fill'; }
-            if ($level === 'danger')  { $class = 'nd-alert-danger';  $icon = 'bi-x-circle-fill'; }
+            if ($level === 'success') { $class = 'bg-success-subtle text-success-emphasis border-success-subtle'; $icon = 'bi-check-circle-fill'; }
+            if ($level === 'warning') { $class = 'bg-warning-subtle text-warning-emphasis border-warning-subtle'; $icon = 'bi-exclamation-triangle-fill'; }
+            if ($level === 'danger')  { $class = 'bg-danger-subtle text-danger-emphasis border-danger-subtle';  $icon = 'bi-x-circle-fill'; }
             ?>
-            <div class="nd-alert <?= $class ?> shadow-sm mb-3">
-                <i class="bi <?= $icon ?> fs-5"></i>
-                <div class="nd-alert-text">
-                    <h5 class="nd-alert-card-title mb-1">
+            <div class="alert <?= $class ?> d-flex align-items-center shadow-sm border mb-3" role="alert">
+                <i class="bi <?= $icon ?> fs-4 me-3"></i>
+                <div>
+                    <h6 class="alert-heading fw-bold mb-1">
                         <?= htmlspecialchars($a['title'], ENT_QUOTES, 'UTF-8') ?>
-                    </h5>
-                    <span>
+                    </h6>
+                    <div class="small">
                         <?= nl2br(htmlspecialchars($a['body'], ENT_QUOTES, 'UTF-8')) ?>
-                    </span>
+                    </div>
                 </div>
             </div>
         <?php endforeach; ?>
     </div>
 <?php endif; ?>
 
+<!-- Stats Cards -->
 <div class="row g-4 mb-5">
     <!-- Total -->
     <div class="col-12 col-md-4">
-        <div class="nd-metric-card primary h-100">
-            <div class="nd-metric-card-gradient"></div>
-            <div class="d-flex justify-content-between align-items-start position-relative">
-                <div>
-                    <div class="nd-metric-value mb-1"><?= $total ?></div>
-                    <div class="nd-metric-label">Total de Envios</div>
-                </div>
-                <div class="nd-metric-icon">
-                    <i class="bi bi-layers-fill"></i>
+        <div class="nd-card h-100 border-0 shadow-sm hover-shadow transition-fast position-relative overflow-hidden">
+            <div class="nd-card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <div class="small text-muted text-uppercase fw-bold ls-1">Total de Envios</div>
+                        <div class="h2 fw-bold mb-0 text-dark mt-2"><?= $total ?></div>
+                    </div>
+                    <div class="rounded-circle bg-primary-subtle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="bi bi-layers-fill text-primary fs-5"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -70,15 +76,16 @@
 
     <!-- Pendentes -->
     <div class="col-12 col-md-4">
-        <div class="nd-metric-card warning h-100">
-            <div class="nd-metric-card-gradient"></div>
-            <div class="d-flex justify-content-between align-items-start position-relative">
-                <div>
-                    <div class="nd-metric-value mb-1"><?= $pendentes ?></div>
-                    <div class="nd-metric-label">Em Análise</div>
-                </div>
-                <div class="nd-metric-icon">
-                    <i class="bi bi-hourglass-split"></i>
+        <div class="nd-card h-100 border-0 shadow-sm hover-shadow transition-fast position-relative overflow-hidden">
+            <div class="nd-card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <div class="small text-muted text-uppercase fw-bold ls-1">Em Análise</div>
+                        <div class="h2 fw-bold mb-0 text-dark mt-2"><?= $pendentes ?></div>
+                    </div>
+                    <div class="rounded-circle bg-warning-subtle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="bi bi-hourglass-split text-warning fs-5"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -86,117 +93,118 @@
 
     <!-- Concluídos -->
     <div class="col-12 col-md-4">
-        <div class="nd-metric-card success h-100">
-            <div class="nd-metric-card-gradient"></div>
-            <div class="d-flex justify-content-between align-items-start position-relative">
-                <div>
-                    <div class="nd-metric-value mb-1"><?= $concluidas ?></div>
-                    <div class="nd-metric-label">Concluídos</div>
-                </div>
-                <div class="nd-metric-icon">
-                    <i class="bi bi-check-circle-fill"></i>
+        <div class="nd-card h-100 border-0 shadow-sm hover-shadow transition-fast position-relative overflow-hidden">
+            <div class="nd-card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <div class="small text-muted text-uppercase fw-bold ls-1">Concluídos</div>
+                        <div class="h2 fw-bold mb-0 text-dark mt-2"><?= $concluidas ?></div>
+                    </div>
+                    <div class="rounded-circle bg-success-subtle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="nd-card mb-4">
-    <div class="nd-card-header d-flex justify-content-between align-items-center bg-white border-bottom-0 pt-4 px-4 pb-2">
+<!-- Recent Submissions -->
+<div class="nd-card border-0 shadow-sm mb-4">
+    <div class="nd-card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-2">
-            <div class="d-flex align-items-center justify-content-center rounded-2 bg-light text-primary" style="width: 32px; height: 32px;">
-                <i class="bi bi-clock-history"></i>
-            </div>
-            <h2 class="nd-card-title fs-5">Envios Recentes</h2>
+            <i class="bi bi-clock-history text-muted"></i>
+            <h5 class="nd-card-title mb-0">Envios Recentes</h5>
         </div>
-        <a href="/portal/submissions" class="nd-btn nd-btn-outline nd-btn-sm">
-            Ver Histórico Completo
+        <?php if ($submissions): ?>
+        <a href="/portal/submissions" class="text-decoration-none small fw-bold text-primary">
+            Ver todos <i class="bi bi-arrow-right"></i>
         </a>
+        <?php endif; ?>
     </div>
     
     <div class="nd-card-body p-0">
         <?php if (!$submissions): ?>
             <div class="text-center py-5">
-                <div class="mb-3 text-muted opacity-25">
-                    <i class="bi bi-inbox fs-1"></i>
+                <div class="mb-3">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light" style="width: 80px; height: 80px;">
+                        <i class="bi bi-inbox text-muted opacity-50 display-6"></i>
+                    </div>
                 </div>
-                <h6 class="text-secondary fw-normal mb-1">Nenhuma solicitação encontrada</h6>
-                <p class="small text-muted mb-3">Você ainda não iniciou nenhuma solicitação.</p>
-                <a href="/portal/submissions/new" class="nd-btn nd-btn-primary nd-btn-sm">
-                    <i class="bi bi-plus-lg"></i> Iniciar Nova Solicitação
+                <h6 class="text-secondary fw-bold mb-1">Nenhum envio recente</h6>
+                <p class="small text-muted mb-4">Seus envios aparecerão aqui.</p>
+                <a href="/portal/submissions/new" class="nd-btn nd-btn-sm nd-btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i> Começar Agora
                 </a>
             </div>
         <?php else: ?>
             <div class="table-responsive">
-                <table class="nd-table">
-                    <thead>
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
                         <tr>
-                            <th>Assunto</th>
-                            <th>Data de Criação</th>
-                            <th>Situação</th>
-                            <th class="text-end pe-4">Ações</th>
+                            <th class="ps-4 py-3 text-uppercase text-muted x-small fw-bold ls-1 border-bottom-0">Documento</th>
+                            <th class="py-3 text-uppercase text-muted x-small fw-bold ls-1 border-bottom-0">Enviado em</th>
+                            <th class="py-3 text-uppercase text-muted x-small fw-bold ls-1 border-bottom-0">Situação</th>
+                            <th class="pe-4 py-3 text-end text-uppercase text-muted x-small fw-bold ls-1 border-bottom-0">Detalhes</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($submissions as $s): ?>
                             <tr>
-                                <td>
-                                    <span class="d-block fw-medium text-dark">
-                                        <?= htmlspecialchars($s['title'] ?? 'Sem título', ENT_QUOTES, 'UTF-8') ?>
-                                    </span>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded bg-light p-2 d-flex align-items-center justify-content-center border" style="width: 40px; height: 40px;">
+                                            <i class="bi bi-file-earmark-text text-primary fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <span class="d-block fw-bold text-dark text-truncate" style="max-width: 250px;">
+                                                <?= htmlspecialchars($s['title'] ?? 'Sem título', ENT_QUOTES, 'UTF-8') ?>
+                                            </span>
+                                            <span class="small text-muted">ID: #<?= $s['id'] ?></span>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
-                                    <div class="d-flex align-items-center gap-2 text-secondary">
-                                        <i class="bi bi-calendar3 small"></i>
-                                        <?= date('d/m/Y H:i', strtotime($s['submitted_at'] ?? 'now')) ?>
+                                    <div class="d-flex align-items-center gap-2 text-secondary small">
+                                        <i class="bi bi-calendar3"></i>
+                                        <?= date('d/m/Y', strtotime($s['submitted_at'] ?? 'now')) ?>
+                                        <span class="text-muted opacity-50">às <?= date('H:i', strtotime($s['submitted_at'] ?? 'now')) ?></span>
                                     </div>
                                 </td>
                                 <td>
                                     <?php
-                                    $statusRaw = $s['status'] ?? '';
+                                    $statusRaw = strtoupper($s['status'] ?? '');
                                     $label = $statusRaw;
-                                    $badgeClass = 'nd-badge-secondary';
-                                    $icon = 'bi-circle';
+                                    $badge = 'bg-secondary-subtle text-secondary-emphasis';
+                                    $iconVal = 'bi-circle';
                                     
-                                    switch ($statusRaw) {
-                                        case 'PENDING':
-                                            $label = 'Pendente';
-                                            $badgeClass = 'nd-badge-warning';
-                                            $icon = 'bi-hourglass';
-                                            break;
-                                        case 'IN_REVIEW':
-                                        case 'UNDER_REVIEW':
-                                            $label = 'Em Análise';
-                                            $badgeClass = 'nd-badge-info';
-                                            $icon = 'bi-search';
-                                            break;
-                                        case 'APPROVED':
-                                        case 'COMPLETED':
-                                        case 'FINALIZADA':
-                                            $label = 'Concluído';
-                                            $badgeClass = 'nd-badge-success';
-                                            $icon = 'bi-check2-circle';
-                                            break;
-                                        case 'REJECTED':
-                                        case 'REJEITADA':
-                                            $label = 'Rejeitado';
-                                            $badgeClass = 'nd-badge-danger';
-                                            $icon = 'bi-x-circle';
-                                            break;
-                                        default:
-                                            // Mantém original se não mapeado
-                                            break;
+                                    if (in_array($statusRaw, ['PENDING', 'PENDENTE'])) {
+                                        $label = 'Pendente';
+                                        $badge = 'bg-warning-subtle text-warning-emphasis';
+                                        $iconVal = 'bi-hourglass-split';
+                                    } elseif (in_array($statusRaw, ['IN_REVIEW', 'UNDER_REVIEW', 'ANALISE'])) {
+                                        $label = 'Em Análise';
+                                        $badge = 'bg-info-subtle text-info-emphasis';
+                                        $iconVal = 'bi-search';
+                                    } elseif (in_array($statusRaw, ['APPROVED', 'COMPLETED', 'CONCLUIDO', 'FINALIZADA'])) {
+                                        $label = 'Concluído';
+                                        $badge = 'bg-success-subtle text-success-emphasis';
+                                        $iconVal = 'bi-check-circle-fill';
+                                    } elseif (in_array($statusRaw, ['REJECTED', 'REJEITADA'])) {
+                                        $label = 'Rejeitado';
+                                        $badge = 'bg-danger-subtle text-danger-emphasis';
+                                        $iconVal = 'bi-x-circle-fill';
                                     }
                                     ?>
-                                    <span class="nd-badge <?= $badgeClass ?>">
-                                        <i class="bi <?= $icon ?> me-1"></i>
-                                        <?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>
+                                    <span class="badge rounded-pill border <?= $badge ?> px-3 py-2 d-inline-flex align-items-center gap-1 fw-medium">
+                                        <i class="bi <?= $iconVal ?>"></i> <?= $label ?>
                                     </span>
                                 </td>
                                 <td class="text-end pe-4">
                                     <a href="/portal/submissions/<?= (int)$s['id'] ?>"
-                                        class="nd-btn nd-btn-outline nd-btn-sm">
-                                        Acompanhar
+                                        class="btn btn-sm btn-light text-muted hover-primary border transition-fast" 
+                                        title="Ver detalhes">
+                                        <i class="bi bi-chevron-right"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -206,4 +214,10 @@
             </div>
         <?php endif; ?>
     </div>
+</div>
+
+<div class="text-center mt-5 mb-4">
+    <p class="small text-muted">
+        <i class="bi bi-shield-lock me-1"></i> Ambiente seguro e monitorado.
+    </p>
 </div>

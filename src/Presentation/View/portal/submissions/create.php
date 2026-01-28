@@ -14,8 +14,8 @@ $oldShareholders = Session::getFlash('old_shareholders') ?? [];
 ?>
 
 <div class="d-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 fw-bold text-dark mb-0"><?= __('submissions.new_submission') ?></h1>
-    <a href="/portal/submissions" class="nd-btn nd-btn-sm nd-btn-outline"><?= __('actions.cancel') ?></a>
+    <h1 class="h3 fw-bold text-dark mb-0">Nova Solicitação</h1>
+    <a href="/portal/submissions" class="nd-btn nd-btn-sm nd-btn-outline">Cancelar</a>
 </div>
 
 <?php if (isset($errors['general'])): ?>
