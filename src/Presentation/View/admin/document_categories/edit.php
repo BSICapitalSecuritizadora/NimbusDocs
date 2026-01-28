@@ -35,11 +35,8 @@ if (!$catId) {
             </div>
         </a>
         <div>
-            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Gerenciar Classificação</h1>
-            <p class="text-muted mb-0 small">
-                <span class="badge bg-light text-dark border font-monospace">#<?= $catId ?></span>
-                &bull; <?= htmlspecialchars($category['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>
-            </p>
+            <h1 class="h4 mb-0 fw-bold" style="color: var(--nd-navy-900);">Gerenciar Categoria</h1>
+            <p class="text-muted mb-0 small">Edição de classificação documental</p>
         </div>
     </div>
     <a href="/admin/document-categories" class="nd-btn nd-btn-outline nd-btn-sm">
@@ -62,13 +59,15 @@ if (!$catId) {
     </div>
 <?php endif; ?>
 
-<!-- Main Content -->
-<div class="nd-card">
-    <div class="nd-card-body p-0">
-        <div class="row g-0">
-            <!-- Form Column -->
-            <div class="col-lg-8 p-4">
-                <form method="post" action="/admin/document-categories/<?= $catId ?>" novalidate>
+<div class="row">
+    <div class="col-lg-8">
+        <div class="nd-card mb-4">
+            <div class="nd-card-header d-flex align-items-center gap-2">
+                <i class="bi bi-pencil-square" style="color: var(--nd-gold-500);"></i>
+                <h5 class="nd-card-title mb-0">Dados da Categoria</h5>
+            </div>
+            <div class="nd-card-body">
+                <form method="post" action="/admin/document-categories/<?= $catId ?>" novalidate id="editForm">
                     <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                     <input type="hidden" name="_method" value="PUT">
 
@@ -79,7 +78,7 @@ if (!$catId) {
                             <input type="text" class="nd-input <?= !empty($errors['name']) ? 'is-invalid' : '' ?>" 
                                 id="name" name="name" 
                                 value="<?= htmlspecialchars($old['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                                placeholder="Ex: Demonstrativos Financeiros, Contratos..." 
+                                placeholder="Ex: Demonstrativos Financeiros..." 
                                 required style="padding-left: 2.5rem;">
                             <i class="bi bi-tag nd-input-icon"></i>
                         </div>
@@ -102,79 +101,97 @@ if (!$catId) {
                     <!-- Ordem de Exibição -->
                     <div class="mb-4">
                         <label for="sort_order" class="nd-label">Prioridade de Listagem</label>
-                        <div class="d-flex align-items-center gap-3">
-                            <input type="number" class="nd-input <?= !empty($errors['sort_order']) ? 'is-invalid' : '' ?>" 
+                        <div class="nd-input-group">
+                             <input type="number" class="nd-input <?= !empty($errors['sort_order']) ? 'is-invalid' : '' ?>" 
                                 id="sort_order" name="sort_order" 
                                 value="<?= htmlspecialchars($old['sort_order'] ?? '1', ENT_QUOTES, 'UTF-8') ?>" 
-                                min="1" max="999" style="width: 100px;">
-                            <div class="form-text small mb-0">Sequência numérica para ordenação visual.</div>
+                                min="1" max="999" style="padding-left: 2.5rem;">
+                            <i class="bi bi-sort-numeric-down nd-input-icon"></i>
                         </div>
+                        <div class="form-text small">Sequência numérica para ordenação visual na listagem.</div>
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 pt-3 border-top">
-                        <a href="/admin/document-categories" class="nd-btn nd-btn-outline">Cancelar</a>
+                        <a href="/admin/document-categories" class="nd-btn nd-btn-outline">
+                            <i class="bi bi-x-lg me-1"></i> Cancelar
+                        </a>
                         <button type="submit" class="nd-btn nd-btn-primary">
                             <i class="bi bi-check-lg me-1"></i> Salvar Alterações
                         </button>
                     </div>
                 </form>
             </div>
+        </div>
+    </div>
 
-            <!-- Info Sidebar -->
-            <div class="col-lg-4 border-start bg-light">
-                <!-- Informações -->
-                <div class="p-4 border-bottom">
-                    <h6 class="text-uppercase text-muted small fw-bold mb-3">Informações</h6>
-                    <div class="mb-3">
-                        <label class="small text-muted d-block">ID da Categoria</label>
-                        <span class="badge bg-white text-dark border shadow-sm font-monospace">#<?= $catId ?></span>
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Metadata -->
+        <div class="nd-card bg-light border-0 mb-4">
+            <div class="nd-card-body py-3">
+                <h6 class="nd-card-title small text-muted mb-3 border-bottom pb-2">Metadados do Registro</h6>
+                <div class="d-flex flex-column gap-3 small">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">ID Sistema</span>
+                        <span class="font-monospace bg-white border px-2 py-1 rounded">#<?= $catId ?></span>
                     </div>
-                    <div class="mb-0">
-                        <label class="small text-muted d-block">Data de Criação</label>
-                        <span class="small text-dark">
-                            <i class="bi bi-calendar3 me-1"></i>
-                            <?= htmlspecialchars(date('d/m/Y \à\s H:i', strtotime($category['created_at'] ?? 'now')), ENT_QUOTES, 'UTF-8') ?>
+                     <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Criado em</span>
+                        <span class="text-dark fw-medium">
+                            <i class="bi bi-calendar3 me-1"></i> 
+                            <?= htmlspecialchars(date('d/m/Y', strtotime($category['created_at'] ?? 'now')), ENT_QUOTES, 'UTF-8') ?>
                         </span>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Zona de Perigo -->
-                <div class="p-4">
-                    <h6 class="text-uppercase text-danger small fw-bold mb-3">
-                        <i class="bi bi-exclamation-octagon me-1"></i> Área Crítica
-                    </h6>
-                    <p class="small text-muted mb-3">
-                        A remoção desta classificação é <strong>definitiva</strong> e impactará a <strong>indexação dos documentos vinculados</strong>.
-                    </p>
-                    <button type="button" class="nd-btn nd-btn-sm w-100 bg-danger text-white border-danger" 
-                        data-bs-toggle="modal" data-bs-target="#deleteModal">
-                        <i class="bi bi-trash me-1"></i> Remover Classificação
-                    </button>
-                </div>
+        <!-- Danger Zone -->
+        <div class="nd-card border-danger">
+            <div class="nd-card-header bg-danger text-white d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <h5 class="nd-card-title mb-0 text-white">Zona de Perigo</h5>
+            </div>
+            <div class="nd-card-body">
+                <p class="small text-muted mb-3">
+                    A remoção desta classificação é <strong>definitiva</strong>. Certifique-se de que não existem documentos dependentes desta categoria.
+                </p>
+                <button type="button" class="nd-btn nd-btn-sm w-100 bg-danger text-white border-danger hover-danger-fill" 
+                    data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash me-2"></i> Remover Categoria
+                </button>
             </div>
         </div>
     </div>
 </div>
 
+
 <!-- Modal: Delete -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header border-bottom-0">
-                <h5 class="modal-title fw-bold text-danger">Remover Classificação</h5>
+            <div class="modal-header border-bottom py-3 bg-danger-subtle text-danger">
+                <div class="d-flex align-items-center gap-2">
+                     <i class="bi bi-trash-fill fs-5"></i>
+                    <h5 class="modal-title fw-bold">Remover Classificação</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="post" action="/admin/document-categories/<?= $catId ?>/delete">
-                <div class="modal-body py-0">
+                <div class="modal-body p-4">
                     <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
-                    <p class="text-muted">
+                    <p class="text-dark mb-0">
                         Tem certeza que deseja excluir a categoria <strong class="text-dark"><?= htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8') ?></strong>?
-                        <br><span class="text-danger small">Esta ação é irreversível.</span>
+                    </p>
+                    <p class="text-muted small mt-2 mb-0">
+                        Esta ação não pode ser desfeita e removerá permanentemente este registro.
                     </p>
                 </div>
-                <div class="modal-footer border-top-0">
+                <div class="modal-footer border-top-0 pt-0 pb-4 pe-4">
                     <button type="button" class="nd-btn nd-btn-outline nd-btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="nd-btn nd-btn-sm bg-danger text-white border-danger">Remover Permanentemente</button>
+                    <button type="submit" class="nd-btn nd-btn-sm bg-danger text-white border-danger hover-danger-fill">
+                         <i class="bi bi-trash me-1"></i> Confirmar Exclusão
+                    </button>
                 </div>
             </form>
         </div>
