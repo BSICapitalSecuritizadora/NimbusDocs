@@ -3,6 +3,15 @@
 /** @var array $user */
 /** @var array $tokens */
 /** @var string $csrfToken */
+
+// Formata CPF/CNPJ
+$doc = $user['document_number'] ?? '';
+$len = strlen($doc);
+if ($len === 11) {
+    $doc = preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $doc);
+} elseif ($len === 14) {
+    $doc = preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $doc);
+}
 ?>
 
 <!-- Page Header -->
@@ -55,61 +64,52 @@
     </div>
 <?php endif; ?>
 
-<div class="row g-4">
-    <!-- User Info Card -->
-    <div class="col-lg-12">
+<div class="row">
+    <!-- Main Content Column -->
+    <div class="col-lg-8">
+        <!-- User Info Card -->
         <div class="nd-card mb-4">
-            <div class="nd-card-header d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-person-fill" style="color: var(--nd-gold-500);"></i>
-                    <h5 class="nd-card-title mb-0">Dados Cadastrais</h5>
-                </div>
-                <div class="d-flex gap-2">
-                    <a href="/admin/portal-users/<?= (int)$user['id'] ?>/edit" class="nd-btn nd-btn-outline nd-btn-sm">
-                        <i class="bi bi-pencil me-1"></i> Gerenciar
-                    </a>
-                    
-                    <?php if (($user['status'] ?? '') === 'ACTIVE'): ?>
-                        <span class="nd-badge nd-badge-success">Ativo</span>
-                    <?php elseif (($user['status'] ?? '') === 'INVITED'): ?>
-                        <span class="nd-badge nd-badge-info">Aguardando Cadastro</span>
-                    <?php elseif (($user['status'] ?? '') === 'BLOCKED'): ?>
-                        <span class="nd-badge nd-badge-danger">Suspenso</span>
-                    <?php else: ?>
-                        <span class="nd-badge nd-badge-secondary">Inativo</span>
-                    <?php endif; ?>
-                </div>
+            <div class="nd-card-header d-flex align-items-center gap-2">
+                <i class="bi bi-person-vcard" style="color: var(--nd-gold-500);"></i>
+                <h5 class="nd-card-title mb-0">Dados Cadastrais</h5>
             </div>
             <div class="nd-card-body">
                 <div class="row g-3">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <label class="nd-label text-muted mb-1">Nome do Usuário</label>
-                        <div class="fs-6 fw-medium text-dark">
-                            <?= htmlspecialchars($user['full_name'] ?? $user['name'], ENT_QUOTES, 'UTF-8') ?>
+                        <div class="d-flex align-items-center gap-2">
+                             <div class="nd-avatar nd-avatar-sm bg-light text-primary fw-bold border">
+                                <?= strtoupper(substr($user['full_name'] ?? $user['name'] ?? 'U', 0, 2)) ?>
+                            </div>
+                            <div class="fs-6 fw-bold text-dark">
+                                <?= htmlspecialchars($user['full_name'] ?? $user['name'], ENT_QUOTES, 'UTF-8') ?>
+                            </div>
                         </div>
                     </div>
+                    
                     <div class="col-md-6">
                         <label class="nd-label text-muted mb-1">E-mail</label>
-                        <div class="fs-6 text-dark d-flex align-items-center gap-2">
-                            <i class="bi bi-envelope text-muted small"></i>
-                            <?= htmlspecialchars($user['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-envelope text-primary small"></i>
+                            <span class="text-dark"><?= htmlspecialchars($user['email'] ?? '-', ENT_QUOTES, 'UTF-8') ?></span>
                         </div>
                     </div>
+                    
+                    <div class="col-md-6">
+                        <label class="nd-label text-muted mb-1">Telefone/Celular</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-telephone text-primary small"></i>
+                            <span class="text-dark"><?= htmlspecialchars($user['phone_number'] ?? '-', ENT_QUOTES, 'UTF-8') ?></span>
+                        </div>
+                    </div>
+
                     <div class="col-md-6">
                         <label class="nd-label text-muted mb-1">CPF</label>
-                        <div class="fs-6 text-dark">
-                            <?php if (!empty($user['document_number'])): ?>
+                        <div>
+                            <?php if (!empty($doc)): ?>
                                 <code class="px-2 py-1 rounded bg-light text-dark border">
-                                    <?php 
-                                        $doc = $user['document_number'];
-                                        $len = strlen($doc);
-                                        if ($len === 11) {
-                                            $doc = preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $doc);
-                                        } elseif ($len === 14) {
-                                            $doc = preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $doc);
-                                        }
-                                        echo htmlspecialchars($doc, ENT_QUOTES, 'UTF-8');
-                                    ?>
+                                    <i class="bi bi-card-heading me-1 text-muted small"></i>
+                                    <?= htmlspecialchars($doc, ENT_QUOTES, 'UTF-8') ?>
                                 </code>
                             <?php else: ?>
                                 <span class="text-muted">-</span>
@@ -119,37 +119,15 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Access Management -->
-    <div class="col-lg-12">
-        <div class="nd-card">
+        <!-- Credentials History -->
+        <div class="nd-card mb-4">
             <div class="nd-card-header d-flex align-items-center gap-2">
-                <i class="bi bi-key-fill" style="color: var(--nd-navy-500);"></i>
-                <h5 class="nd-card-title mb-0">Credenciais de Acesso</h5>
+                <i class="bi bi-clock-history" style="color: var(--nd-navy-500);"></i>
+                <h5 class="nd-card-title mb-0">Histórico de Acesso</h5>
             </div>
             <div class="nd-card-body">
-                <div class="p-4 rounded mb-4" style="background: var(--nd-gray-50); border: 1px dashed var(--nd-gray-300);">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                        <div>
-                            <h6 class="fw-bold text-dark mb-1">Link de Autenticação</h6>
-                            <p class="text-muted small mb-0">
-                                Envie um link de acesso para permitir o acesso do usuário ao sistema.
-                                O link expira em até 24 horas.
-                            </p>
-                        </div>
-                        <form method="post" action="/admin/portal-users/<?= (int)$user['id'] ?>/access-link">
-                            <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
-                            <button type="submit" class="nd-btn nd-btn-primary">
-                                <i class="bi bi-magic me-2"></i>Gerar Credencial
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <h6 class="mb-3 fw-semibold text-dark">Histórico de Credenciais Emitidas</h6>
-                
-                <?php if (!$tokens): ?>
+                 <?php if (!$tokens): ?>
                     <div class="text-center py-4 border rounded bg-light">
                         <i class="bi bi-link-45deg text-muted mb-2" style="font-size: 1.5rem;"></i>
                         <p class="text-muted mb-0 small">Nenhuma credencial gerada até o momento.</p>
@@ -159,26 +137,30 @@
                         <table class="nd-table">
                             <thead>
                                 <tr>
-                                    <th>Data de Emissão</th>
+                                    <th>Criação</th>
                                     <th>Validade</th>
-                                    <th>Status de Uso</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($tokens as $t): ?>
                                     <tr>
                                         <td>
-                                            <i class="bi bi-clock me-1 text-muted"></i>
-                                            <?= (new DateTime($t['created_at']))->format('d/m/Y H:i') ?>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-calendar2-check text-muted small"></i>
+                                                <?= (new DateTime($t['created_at']))->format('d/m/Y H:i') ?>
+                                            </div>
                                         </td>
                                         <td>
-                                            <?= (new DateTime($t['expires_at']))->format('d/m/Y H:i') ?>
+                                            <span class="text-muted small">
+                                                Até <?= (new DateTime($t['expires_at']))->format('d/m/Y H:i') ?>
+                                            </span>
                                         </td>
                                         <td>
                                             <?php if ($t['used_at']): ?>
-                                                <div class="d-flex align-items-center gap-2 text-success small fw-medium">
+                                                <div class="d-flex align-items-center gap-1 text-success small fw-medium">
                                                     <i class="bi bi-check-circle-fill"></i>
-                                                    Utilizado em <?= (new DateTime($t['used_at']))->format('d/m/Y H:i') ?>
+                                                    <span>Usado em <?= (new DateTime($t['used_at']))->format('d/m/H:i') ?></span>
                                                 </div>
                                             <?php else: ?>
                                                 <?php 
@@ -187,7 +169,7 @@
                                                 ?>
                                                     <span class="nd-badge nd-badge-secondary">Expirado</span>
                                                 <?php else: ?>
-                                                    <span class="nd-badge nd-badge-warning">Disponível</span>
+                                                    <span class="nd-badge nd-badge-warning">Pendente</span>
                                                 <?php endif; ?>
                                             <?php endif; ?>
                                         </td>
@@ -195,6 +177,56 @@
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar Column -->
+    <div class="col-lg-4">
+        <!-- Actions Card -->
+        <div class="nd-card mb-4">
+            <div class="nd-card-header">
+                <h5 class="nd-card-title mb-0">Ações Rápidas</h5>
+            </div>
+            <div class="nd-card-body d-flex flex-column gap-2">
+                <a href="/admin/portal-users/<?= (int)$user['id'] ?>/edit" class="nd-btn nd-btn-outline w-100 justify-content-center">
+                    <i class="bi bi-pencil me-2"></i> Editar Dados
+                </a>
+                
+                <form method="post" action="/admin/portal-users/<?= (int)$user['id'] ?>/access-link" class="w-100">
+                    <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                    <button type="submit" class="nd-btn nd-btn-primary w-100 justify-content-center">
+                        <i class="bi bi-magic me-2"></i> Gerar Novo Acesso
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Status Card -->
+        <div class="nd-card mb-4">
+            <div class="nd-card-header">
+                <h5 class="nd-card-title mb-0">Status da Conta</h5>
+            </div>
+            <div class="nd-card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="text-muted">Situação Atual:</span>
+                     <?php if (($user['status'] ?? '') === 'ACTIVE'): ?>
+                        <span class="nd-badge nd-badge-success">Ativo</span>
+                    <?php elseif (($user['status'] ?? '') === 'INVITED'): ?>
+                        <span class="nd-badge nd-badge-info">Aguardando Cadastro</span>
+                    <?php elseif (($user['status'] ?? '') === 'BLOCKED'): ?>
+                        <span class="nd-badge nd-badge-danger">Suspenso</span>
+                    <?php else: ?>
+                        <span class="nd-badge nd-badge-secondary">Inativo</span>
+                    <?php endif; ?>
+                </div>
+
+                <?php if (!empty($user['external_id'])): ?>
+                    <div class="d-flex flex-column gap-1 p-2 bg-light rounded border">
+                        <span class="text-muted small text-uppercase fw-bold" style="font-size: 0.7rem;">ID Externo</span>
+                        <code class="text-dark"><?= htmlspecialchars($user['external_id'], ENT_QUOTES, 'UTF-8') ?></code>
                     </div>
                 <?php endif; ?>
             </div>
