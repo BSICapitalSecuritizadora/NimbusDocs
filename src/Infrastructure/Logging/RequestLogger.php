@@ -162,6 +162,9 @@ final class RequestLogger
     /**
      * Salva requisição em arquivo JSON (para dashboard)
      */
+    /**
+     * Salva requisição em arquivo JSON (para dashboard)
+     */
     private function saveToRequestLog(array $data, string $type): void
     {
         $logDir = dirname(__DIR__, 3) . '/storage/logs';
@@ -176,11 +179,43 @@ final class RequestLogger
         $data['timestamp'] = date('Y-m-d H:i:s');
         $data['type'] = $type;
 
+        // --- ANONIMIZAÇÃO (LGPD) ---
+        $data = $this->redactContext($data);
+        // ---------------------------
+
         // Salva como JSONL (uma linha por requisição)
         file_put_contents($logFile, json_encode($data) . "\n", FILE_APPEND);
 
         // Mantém apenas os últimos 10.000 logs (~2MB)
         $this->rotateRequestLog($logFile);
+    }
+
+    /**
+     * Remove/Mascar sensitive info recursivamente
+     */
+    private function redactContext(array $context): array
+    {
+        $sensitiveKeys = [
+            'password', 'password_confirmation', 'senha', 
+            'secret', 'token', 'access_code', 'code', 'auth_token',
+            'cpf', 'rg', 'credit_card', 'card_number', 'cvv'
+        ];
+
+        foreach ($context as $key => $value) {
+            if (is_array($value)) {
+                $context[$key] = $this->redactContext($value);
+            } elseif (is_string($key)) {
+                // Verifica se a chave está na lista negra
+                foreach ($sensitiveKeys as $sensitive) {
+                    if (stripos($key, $sensitive) !== false) {
+                        $context[$key] = '[REDACTED]';
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $context;
     }
 
     /**

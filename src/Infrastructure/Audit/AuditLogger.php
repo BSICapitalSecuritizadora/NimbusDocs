@@ -18,12 +18,46 @@ final class AuditLogger
         $ip  = $_SERVER['REMOTE_ADDR']     ?? null;
         $ua  = $_SERVER['HTTP_USER_AGENT'] ?? null;
 
+        // --- ANONIMIZAÇÃO (LGPD) ---
+        if (isset($data['details']) && is_array($data['details'])) {
+            $data['details'] = $this->redactDetails($data['details']);
+        }
+        // ---------------------------
+
         $payload = array_merge([
             'ip_address' => $ip,
             'user_agent' => $ua,
         ], $data);
 
         $this->repo->create($payload);
+    }
+
+    /**
+     * Mascara dados sensíveis no array de detalhes
+     */
+    private function redactDetails(array $context): array
+    {
+        $sensitiveKeys = [
+            'password', 'password_confirmation', 'senha', 
+            'secret', 'token', 'access_code', 'code', 'auth_token',
+            'cpf', 'rg', 'credit_card', 'card_number', 'cvv'
+        ];
+
+        foreach ($context as $key => $value) {
+            if (is_array($value)) {
+                $context[$key] = $this->redactDetails($value);
+            } elseif (is_string($key)) {
+                // Remove chaves sensíveis
+                foreach ($sensitiveKeys as $sensitive) {
+                    if (stripos($key, $sensitive) !== false) {
+                        $context[$key] = '[REDACTED]';
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $context;
     }
 
     public function adminAction(array $data): void
