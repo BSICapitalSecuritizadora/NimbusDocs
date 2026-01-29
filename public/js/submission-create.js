@@ -270,19 +270,46 @@
                 targetStepEl.classList.add('active');
             }
 
-            // Update Stepper UI
-            document.querySelectorAll('.nd-step').forEach(el => {
+            // Update Stepper UI (Premium Design)
+            const steps = document.querySelectorAll('.nd-step-item');
+            const progress = document.getElementById('stepperProgress');
+
+            steps.forEach(el => {
                 const s = parseInt(el.getAttribute('data-target'));
-                el.classList.remove('active', 'completed');
+                const box = el.querySelector('.nd-step-box');
+
+                el.classList.remove('active');
+
+                // Reset standard classes
+                box.className = 'nd-step-box border border-2 d-flex align-items-center justify-content-center mb-2 mx-auto transition-fast';
+                box.style.width = '48px';
+                box.style.height = '48px';
+                box.style.fontSize = '1.25rem';
+
                 if (s === step) {
+                    // Active Step (Warning Border, White BG)
                     el.classList.add('active');
+                    box.classList.add('bg-white', 'text-warning', 'border-warning', 'shadow-sm');
+                    box.classList.remove('text-muted', 'border-light-subtle', 'bg-success', 'border-success', 'text-white');
+                    box.innerHTML = s;
                 } else if (s < step) {
-                    el.classList.add('completed');
-                    el.querySelector('.nd-step-indicator').innerHTML = '<i class="bi bi-check-lg" style="font-size: 1.5rem;"></i>'; // Check icon
+                    // Completed Step (Success Border, White BG)
+                    box.classList.add('bg-white', 'text-success', 'border-success', 'shadow-sm');
+                    box.classList.remove('text-muted', 'border-light-subtle', 'bg-warning', 'border-warning', 'text-warning');
+                    box.innerHTML = '<i class="bi bi-check-lg"></i>';
                 } else {
-                    el.querySelector('.nd-step-indicator').textContent = s; // Reset number
+                    // Future Step (Muted Border, White BG)
+                    box.classList.add('bg-white', 'text-muted', 'border-light-subtle');
+                    box.classList.remove('bg-warning', 'text-warning', 'border-warning', 'bg-success', 'border-success', 'shadow-sm');
+                    box.innerHTML = s;
                 }
             });
+
+            // Update Progress Bar
+            if (progress && steps.length > 1) {
+                const percentage = ((step - 1) / (steps.length - 1)) * 100;
+                progress.style.width = percentage + '%';
+            }
 
             currentStep = step;
             window.scrollTo({ top: 0, behavior: 'smooth' });
