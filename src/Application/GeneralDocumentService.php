@@ -88,7 +88,24 @@ final class GeneralDocumentService
         try {
             $uploadResult = $this->fileUpload::store(
                 $_FILES['file'],
-                'storage/documents'
+                'storage/documents',
+                [
+                    'max_size_mb' => 50,
+                    'allowed_extensions' => ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'ppt', 'pptx', 'txt', 'zip', 'rar', 'jpg', 'jpeg', 'png'],
+                    'allowed_mime_prefixes' => [
+                        'application/pdf',
+                        'application/msword',
+                        'application/vnd.openxmlformats-officedocument',
+                        'application/vnd.ms-excel',
+                        'application/vnd.ms-powerpoint',
+                        'application/zip',
+                        'application/x-rar-compressed',
+                        'image/jpeg',
+                        'image/png',
+                        'text/plain',
+                        'text/csv',
+                    ]
+                ]
             );
 
             if (!$uploadResult['success']) {

@@ -110,11 +110,13 @@ final class FileUpload
             throw new \RuntimeException('Tipo de arquivo não permitido (extensão).');
         }
 
+        $allowedMimePrefixes = $options['allowed_mime_prefixes'] ?? self::$allowedMimePrefix;
+
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $mime  = $finfo->file($file['tmp_name']) ?: 'application/octet-stream';
 
         $isAllowedMime = false;
-        foreach (self::$allowedMimePrefix as $prefix) {
+        foreach ($allowedMimePrefixes as $prefix) {
             if (str_starts_with($mime, $prefix)) {
                 $isAllowedMime = true;
                 break;

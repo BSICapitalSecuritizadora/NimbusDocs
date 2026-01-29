@@ -322,7 +322,20 @@ final class PortalSubmissionController
             foreach ($fileTypeMap as $field => $docType) {
                 if (isset($_FILES[$field]) && $_FILES[$field]['error'] === UPLOAD_ERR_OK) {
                     try {
-                        $stored = FileUpload::store($_FILES[$field], $storageBase);
+                        $stored = FileUpload::store($_FILES[$field], $storageBase, [
+                            'max_size_mb' => 30, // 30 MB por arquivo para documentos
+                            'allowed_extensions' => ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'jpg', 'jpeg', 'png'],
+                            'allowed_mime_prefixes' => [
+                                'application/pdf',
+                                'application/msword',
+                                'application/vnd.openxmlformats-officedocument',
+                                'application/vnd.ms-excel',
+                                'image/jpeg',
+                                'image/png',
+                                'text/plain',
+                                'text/csv',
+                            ]
+                        ]);
                         
                         $storedName   = basename($stored['path']);
                         $checksum     = is_file($stored['path']) ? hash_file('sha256', $stored['path']) : null;
