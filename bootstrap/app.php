@@ -56,7 +56,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         'domain' => (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] !== $appUrlHost) ? null : ($appUrlHost ?: null),
         'secure' => $isHttps,
         'httponly' => true,
-        'samesite' => 'Lax',
+        'samesite' => 'Strict',
     ];
 
     session_set_cookie_params($cookieParams);

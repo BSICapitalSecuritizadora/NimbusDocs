@@ -19,6 +19,7 @@ final class PortalFileController
     public function download(array $vars = []): void
     {
         $user = Auth::requirePortalUser();
+        Auth::requireRecentLogin(10); // Exige login nos últimos 10 min
 
         $id   = (int)($vars['id'] ?? 0);
         $file = $this->fileRepo->findById($id);
@@ -72,6 +73,7 @@ final class PortalFileController
     public function preview(array $vars = []): void
     {
         $user = Auth::requirePortalUser();
+        Auth::requireRecentLogin(10); // Exige login nos últimos 10 min
 
         $id   = (int)($vars['id'] ?? 0);
         $file = $this->fileRepo->findById($id);

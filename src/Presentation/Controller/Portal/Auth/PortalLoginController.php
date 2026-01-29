@@ -148,6 +148,8 @@ final class PortalLoginController
 
         session_regenerate_id(true);
         Session::put('portal_user', $portalUser);
+        Session::put('login_time', time());
+        Session::put('last_activity', time());
 
         $logger = $this->config['portal_access_logger'] ?? null;
         if ($logger) {

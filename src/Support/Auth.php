@@ -123,6 +123,46 @@ final class Auth
             exit;
         }
 
+        self::checkInactivity();
+
         return $user;
+    }
+
+    /**
+     * Verifica inatividade da sessão (ex: 30 minutos).
+     * Se expirado, força logout e redireciona.
+     */
+    private static function checkInactivity(int $timeoutMinutes = 30): void
+    {
+        $lastActivity = Session::get('last_activity');
+        
+        if ($lastActivity && (time() - $lastActivity > ($timeoutMinutes * 60))) {
+            Session::destroy();
+            Session::flash('error', 'Sessão expirada por inatividade.');
+            header('Location: /portal/login');
+            exit;
+        }
+
+        // Atualiza timestamp de atividade
+        Session::put('last_activity', time());
+    }
+
+    /**
+     * Exige que o login tenha ocorrido nos últimos $minutes.
+     * Caso contrário, exige revalidação (por enquanto, redireciona para login).
+     */
+    public static function requireRecentLogin(int $minutes = 10): void
+    {
+        $loginTime = Session::get('login_time');
+        
+        // Se nunca logou (ou não tem timestamp), ou se passou do tempo
+        if (!$loginTime || (time() - $loginTime > ($minutes * 60))) {
+            // Em uma implementação completa, redirecionaria para tela de "Confirm Password"
+            // Por simplicidade (MVP), forçamos logout/login novo para garantir segurança.
+            Session::flash('error', 'Por segurança, faça login novamente para realizar esta ação.');
+            Session::forget('portal_user'); // Força logout limpo
+            header('Location: /portal/login');
+            exit;
+        }
     }
 }
