@@ -54,6 +54,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $stmt->execute();
 
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $items = $this->attachTags($items);
 
         return [
             'items'   => $items,
@@ -77,7 +78,10 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $stmt->execute([':id' => $id, ':uid' => $portalUserId]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ?: null;
+        if (!$row) return null;
+        
+        $rows = $this->attachTags([$row]);
+        return $rows[0];
     }
 
     public function createForUser(int $portalUserId, array $data): int
@@ -85,11 +89,11 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $sql = "INSERT INTO portal_submissions
                 (portal_user_id, reference_code, title, message, status, created_ip, created_user_agent,
                  responsible_name, company_cnpj, company_name, main_activity, phone, website,
-                 net_worth, annual_revenue, is_us_person, is_pep,
+                 net_worth, annual_revenue, is_us_person, is_pep, submission_type,
                  registrant_name, registrant_position, registrant_rg, registrant_cpf)
                 VALUES (:portal_user_id, :reference_code, :title, :message, :status, :created_ip, :created_user_agent,
                  :responsible_name, :company_cnpj, :company_name, :main_activity, :phone, :website,
-                 :net_worth, :annual_revenue, :is_us_person, :is_pep,
+                 :net_worth, :annual_revenue, :is_us_person, :is_pep, :submission_type,
                  :registrant_name, :registrant_position, :registrant_rg, :registrant_cpf)";
 
         $stmt = $this->pdo->prepare($sql);
@@ -115,6 +119,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             ':registrant_position' => $data['registrant_position'] ?? null,
             ':registrant_rg'       => $data['registrant_rg'] ?? null,
             ':registrant_cpf'      => $data['registrant_cpf'] ?? null,
+            ':submission_type'     => $data['submission_type'] ?? 'REGISTRATION',
         ]);
 
         return (int)$this->pdo->lastInsertId();
@@ -155,6 +160,17 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         if (!empty($filters['date_to'])) {
             $where[] = 's.submitted_at <= :date_to';
             $params[':date_to'] = $filters['date_to'] . ' 23:59:59';
+        }
+
+        if (!empty($filters['submission_type'])) {
+            $where[] = 's.submission_type = :submission_type';
+            $params[':submission_type'] = $filters['submission_type'];
+        }
+
+        if (!empty($filters['tag_id'])) {
+            // EXISTS clause for tag filtering
+            $where[] = 'EXISTS (SELECT 1 FROM submission_tags st_filter WHERE st_filter.submission_id = s.id AND st_filter.tag_id = :tag_filter)';
+            $params[':tag_filter'] = $filters['tag_id'];
         }
 
         // Search filter (searches in reference_code, title, user name/email)
@@ -202,6 +218,9 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $stmt->execute();
 
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        
+        // Attach tags
+        $items = $this->attachTags($items);
 
         return [
             'items'   => $items,
@@ -230,7 +249,12 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $stmt->execute([':id' => $id]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ?: null;
+        if (!$row) {
+            return null;
+        }
+        
+        $rowsWithTags = $this->attachTags([$row]);
+        return $rowsWithTags[0];
     }
 
     public function updateStatus(int $id, string $status, ?int $adminUserId): void
@@ -330,7 +354,8 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         );
         $stmt->bindValue(':l', $limit, \PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $items = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        return $this->attachTags($items);
     }
 
     public function countForUser(int $userId): int
@@ -374,8 +399,8 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $stmt->bindValue(':uid', $userId, \PDO::PARAM_INT);
         $stmt->bindValue(':lim', $limit, \PDO::PARAM_INT);
         $stmt->execute();
-
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        $items = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        return $this->attachTags($items);
     }
 
     public function findForUser(int $id, int $userId): ?array
@@ -392,7 +417,10 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         ]);
 
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-        return $row ?: null;
+        if (!$row) return null;
+        
+        $rows = $this->attachTags([$row]);
+        return $rows[0];
     }
 
     /**
@@ -428,6 +456,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             s.id,
             s.reference_code,
             s.status,
+            s.submission_type,
             s.title,
             s.message,
             s.submitted_at,
@@ -435,7 +464,13 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             u.email     AS user_email,
             u.document_number AS user_document_number,
             u.phone_number    AS user_phone_number,
-            s.portal_user_id
+            s.portal_user_id,
+            (
+                SELECT GROUP_CONCAT(t_inner.name SEPARATOR ', ')
+                FROM submission_tags st_inner
+                JOIN tags t_inner ON t_inner.id = st_inner.tag_id
+                WHERE st_inner.submission_id = s.id
+            ) AS tag_names
         FROM portal_submissions s
         JOIN portal_users u ON u.id = s.portal_user_id
         $whereSql
@@ -470,5 +505,49 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
     {
         $stmt = $this->pdo->prepare("DELETE FROM portal_submissions WHERE id = :id");
         return $stmt->execute([':id' => $id]);
+    }
+
+    /**
+     * Helper to attach tags to a list of submissions.
+     */
+    private function attachTags(array $submissions): array
+    {
+        if (empty($submissions)) {
+            return [];
+        }
+
+        $ids = array_column($submissions, 'id');
+        if (empty($ids)) {
+            return $submissions;
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        
+        $sql = "SELECT st.submission_id, t.id, t.name, t.color
+                FROM submission_tags st
+                JOIN tags t ON t.id = st.tag_id
+                WHERE st.submission_id IN ($placeholders)
+                ORDER BY t.name ASC";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($ids);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Group tags by submission_id
+        $tagsBySubmission = [];
+        foreach ($rows as $r) {
+            $tagsBySubmission[$r['submission_id']][] = [
+                'id' => $r['id'],
+                'name' => $r['name'],
+                'color' => $r['color']
+            ];
+        }
+
+        // Attach to submissions
+        foreach ($submissions as &$sub) {
+            $sub['tags'] = $tagsBySubmission[$sub['id']] ?? [];
+        }
+
+        return $submissions;
     }
 }
