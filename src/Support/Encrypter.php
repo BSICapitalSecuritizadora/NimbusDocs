@@ -96,4 +96,13 @@ class Encrypter
         }
         return substr($secret, 0, 32); // Trunca se for maior (ou usa direto se for 32 bytes raw)
     }
+
+    /**
+     * Gera um hash seguro (HMAC-SHA256) do valor usando a chave da aplicação.
+     * Determinístico: a mesma entrada gera sempre o mesmo hash.
+     */
+    public static function hash(string $value): string
+    {
+        return hash_hmac('sha256', $value, self::getKey());
+    }
 }

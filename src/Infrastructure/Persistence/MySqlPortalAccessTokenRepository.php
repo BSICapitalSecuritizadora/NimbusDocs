@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence;
 
 use App\Domain\Repository\PortalAccessTokenRepository;
+use App\Support\Encrypter;
 use DateTimeInterface;
 use PDO;
 
@@ -25,11 +26,12 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
 
         $stmt = $this->pdo->prepare($sql);
         // Aceita tanto 'code' (nome da coluna) quanto 'token' (nome antigo na camada de cima)
-        $code = $data['code'] ?? $data['token'] ?? null;
+        $rawCode = $data['code'] ?? $data['token'] ?? null;
+        $hashedCode = $rawCode ? Encrypter::hash($rawCode) : null;
 
         $stmt->execute([
             ':portal_user_id' => $data['portal_user_id'],
-            ':code'           => $code,
+            ':code'           => $hashedCode,
             ':expires_at'     => $data['expires_at'],
             ':status'         => 'PENDING',
         ]);
@@ -47,7 +49,7 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
                 LIMIT 1";
 
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':code' => $token]);
+        $stmt->execute([':code' => Encrypter::hash($token)]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
@@ -78,7 +80,7 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
                                 LIMIT 1";
 
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':code' => $code]);
+        $stmt->execute([':code' => Encrypter::hash($code)]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
@@ -93,7 +95,7 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
     {
         $sql = "SELECT * FROM portal_access_tokens WHERE code = :code ORDER BY created_at DESC LIMIT 1";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':code' => $code]);
+        $stmt->execute([':code' => Encrypter::hash($code)]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
     }

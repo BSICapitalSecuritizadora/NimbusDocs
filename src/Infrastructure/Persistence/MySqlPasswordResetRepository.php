@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence;
 
 use App\Domain\Repository\PasswordResetRepository;
+use App\Support\Encrypter;
 use PDO;
 
 /**
@@ -23,7 +24,7 @@ class MySqlPasswordResetRepository implements PasswordResetRepository
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
             'user_id' => $adminUserId,
-            'token' => $token,
+            'token' => Encrypter::hash($token),
             'expires_at' => $expiresAt->format('Y-m-d H:i:s'),
         ]);
 
@@ -43,7 +44,7 @@ class MySqlPasswordResetRepository implements PasswordResetRepository
         ";
 
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute(['token' => $token]);
+        $stmt->execute(['token' => Encrypter::hash($token)]);
 
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ?: null;
@@ -54,7 +55,7 @@ class MySqlPasswordResetRepository implements PasswordResetRepository
         $sql = "UPDATE password_reset_tokens SET used_at = NOW() WHERE token = :token";
         
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute(['token' => $token]);
+        $stmt->execute(['token' => Encrypter::hash($token)]);
 
         return $stmt->rowCount() > 0;
     }
