@@ -14,122 +14,121 @@
     </div>
 </div>
 
-<div class="row g-4">
+<div class="row g-5">
     <!-- Sidebar / Filters -->
     <div class="col-lg-3">
-        <div class="nd-card border-0 shadow-sm sticky-top" style="top: 2rem; z-index: 10;">
-            <div class="nd-card-body p-4">
-                <form action="/portal/documents/general" method="get">
-                    <!-- Search -->
-                    <div class="mb-4">
-                        <label class="form-label small fw-bold text-uppercase text-muted ls-1">Buscar</label>
-                        <div class="nd-input-group">
-                            <input type="text" name="q" class="nd-input bg-light border-0 ps-5" 
-                                   placeholder="Palavras-chave..." 
-                                   value="<?= htmlspecialchars($term ?? '', ENT_QUOTES, 'UTF-8') ?>">
-                            <i class="bi bi-search nd-input-icon text-muted opacity-50"></i>
-                        </div>
+        <div class="sticky-top" style="top: 2rem; z-index: 10;">
+            <form action="/portal/documents/general" method="get">
+                <!-- Search -->
+                <div class="mb-5">
+                    <label class="form-label small fw-bold text-uppercase text-secondary ls-1 mb-2">Buscar</label>
+                    <div class="nd-input-group position-relative">
+                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted opacity-50"></i>
+                        <input type="text" name="q" class="form-control border-0 bg-white shadow-sm ps-5 py-3 rounded-3" 
+                               placeholder="Palavras-chave..." 
+                               value="<?= htmlspecialchars($term ?? '', ENT_QUOTES, 'UTF-8') ?>">
                     </div>
-                    
-                    <!-- Categories -->
-                    <div>
-                        <label class="form-label small fw-bold text-uppercase text-muted ls-1 mb-2">Categorias</label>
-                        <div class="d-flex flex-column gap-1">
-                            <a href="/portal/documents/general" 
-                               class="btn btn-sm text-start py-2 px-3 rounded-3 d-flex align-items-center justify-content-between text-decoration-none transition-fast
-                               <?= empty($currentCategory) ? 'bg-primary text-white shadow-sm' : 'text-secondary hover-bg-light' ?>">
-                                <span><i class="bi bi-grid me-2 <?= empty($currentCategory) ? '' : 'opacity-50' ?>"></i> Todas</span>
-                                <?php if(empty($currentCategory)): ?>
+                </div>
+                
+                <!-- Categories -->
+                <div>
+                    <label class="form-label small fw-bold text-uppercase text-secondary ls-1 mb-3">Categorias</label>
+                    <div class="d-flex flex-column gap-2">
+                        <a href="/portal/documents/general" 
+                           class="btn text-start py-2 px-3 rounded-3 d-flex align-items-center justify-content-between transition-fast border-0
+                           <?= empty($currentCategory) ? 'bg-primary text-white shadow-sm fw-medium' : 'bg-white text-secondary shadow-sm hover-shadow' ?>">
+                            <span><i class="bi bi-grid me-2 <?= empty($currentCategory) ? '' : 'opacity-50' ?>"></i> Todas</span>
+                            <?php if(empty($currentCategory)): ?>
+                                <i class="bi bi-check-lg small"></i>
+                            <?php endif; ?>
+                        </a>
+                        
+                        <?php foreach ($categories as $cat): ?>
+                            <?php $isActive = ($currentCategory == $cat['id']); ?>
+                            <a href="/portal/documents/general?category_id=<?= $cat['id'] ?>" 
+                               class="btn text-start py-2 px-3 rounded-3 d-flex align-items-center justify-content-between transition-fast border-0
+                               <?= $isActive ? 'bg-primary text-white shadow-sm fw-medium' : 'bg-white text-secondary shadow-sm hover-shadow' ?>">
+                                <span class="text-truncate">
+                                    <i class="bi bi-folder2-open me-2 <?= $isActive ? '' : 'opacity-50' ?>"></i> 
+                                    <?= htmlspecialchars($cat['name']) ?>
+                                </span>
+                                <?php if($isActive): ?>
                                     <i class="bi bi-check-lg small"></i>
                                 <?php endif; ?>
                             </a>
-                            
-                            <?php foreach ($categories as $cat): ?>
-                                <?php $isActive = ($currentCategory == $cat['id']); ?>
-                                <a href="/portal/documents/general?category_id=<?= $cat['id'] ?>" 
-                                   class="btn btn-sm text-start py-2 px-3 rounded-3 d-flex align-items-center justify-content-between text-decoration-none transition-fast
-                                   <?= $isActive ? 'bg-primary text-white shadow-sm' : 'text-secondary hover-bg-light' ?>">
-                                    <span class="text-truncate">
-                                        <i class="bi bi-folder2-open me-2 <?= $isActive ? '' : 'opacity-50' ?>"></i> 
-                                        <?= htmlspecialchars($cat['name']) ?>
-                                    </span>
-                                    <?php if($isActive): ?>
-                                        <i class="bi bi-check-lg small"></i>
-                                    <?php endif; ?>
-                                </a>
-                            <?php endforeach; ?>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
-                    
-                    <?php if (!empty($term) || !empty($currentCategory)): ?>
-                        <div class="mt-4 pt-4 border-top">
-                            <a href="/portal/documents/general" class="btn btn-sm btn-outline-danger w-100 border-0 bg-danger-subtle text-danger">
-                                <i class="bi bi-x-circle me-1"></i> Limpar filtros
-                            </a>
-                        </div>
-                    <?php endif; ?>
-                </form>
-            </div>
+                </div>
+                
+                <?php if (!empty($term) || !empty($currentCategory)): ?>
+                    <div class="mt-4 pt-4 border-top border-light-subtle">
+                        <a href="/portal/documents/general" class="btn btn-sm btn-outline-danger w-100 border-0 bg-danger-subtle text-danger rounded-3 py-2">
+                            <i class="bi bi-x-lg me-1"></i> Limpar filtros
+                        </a>
+                    </div>
+                <?php endif; ?>
+            </form>
         </div>
     </div>
 
     <!-- Results -->
     <div class="col-lg-9">
         <?php if (empty($documents)): ?>
-            <div class="nd-card border-0 shadow-sm text-center py-5">
+            <div class="nd-card border-0 shadow-sm text-center py-5 rounded-4">
                 <div class="nd-card-body">
-                    <div class="mb-3">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light" style="width: 80px; height: 80px;">
-                            <i class="bi bi-folder-x text-muted opacity-25 display-6"></i>
+                    <div class="mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light border p-4">
+                            <i class="bi bi-folder-x text-muted opacity-25 display-4"></i>
                         </div>
                     </div>
-                    <h5 class="fw-bold text-dark mb-1">Nenhum documento encontrado</h5>
-                    <p class="text-secondary small mb-0">Não encontramos arquivos com os filtros atuais.</p>
+                    <h5 class="fw-bold text-dark mb-2">Nenhum documento encontrado</h5>
+                    <p class="text-secondary small mb-0 w-75 mx-auto">Não encontramos arquivos com os filtros atuais. Tente buscar por outros termos ou categorias.</p>
                 </div>
             </div>
         <?php else: ?>
-            <div class="row g-3">
+            <div class="row g-4">
                 <?php foreach ($documents as $doc): ?>
                     <div class="col-md-6 col-xl-4">
-                        <div class="nd-card border-0 shadow-sm h-100 position-relative hover-lift transition-fast group-hover">
-                            <div class="nd-card-body p-4 d-flex flex-column h-100">
-                                <div class="d-flex align-items-start justify-content-between mb-3">
-                                    <div class="rounded-3 bg-primary-subtle p-3 text-primary d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift transition-fast position-relative group-hover bg-white overflow-hidden">
+                            <div class="card-body p-4 d-flex flex-column">
+                                <div class="d-flex align-items-start justify-content-between mb-4">
+                                    <div class="rounded-3 bg-primary text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 56px;">
                                         <i class="bi bi-file-earmark-text-fill fs-4"></i>
                                     </div>
                                     <?php if (!empty($doc['category_name'])): ?>
-                                        <span class="badge bg-light text-muted border fw-medium px-2 py-1 rounded-pill">
+                                        <span class="badge bg-light text-secondary border fw-medium px-2 py-1 rounded-pill small">
                                             <?= htmlspecialchars($doc['category_name']) ?>
                                         </span>
                                     <?php endif; ?>
                                 </div>
                                 
-                                <h5 class="card-title h6 text-dark fw-bold mb-2 pe-3">
-                                    <a href="/portal/documents/general/<?= $doc['id'] ?>" class="text-decoration-none text-dark stretched-link">
+                                <h5 class="card-title h6 text-dark fw-bold mb-2">
+                                    <a href="#" onclick="openPreview(<?= $doc['id'] ?>, '<?= htmlspecialchars($doc['title'], ENT_QUOTES) ?>'); return false;" class="text-decoration-none text-dark stretched-link">
                                         <?= htmlspecialchars($doc['title']) ?>
                                     </a>
                                 </h5>
                                 
-                                <p class="card-text x-small text-muted mb-4 text-truncate-2 flex-grow-1" style="line-height: 1.6;">
+                                <p class="card-text x-small text-secondary mb-4 text-truncate-2 flex-grow-1 opacity-75">
                                     <?= htmlspecialchars($doc['description'] ?? 'Sem descrição disponível.') ?>
                                 </p>
                                 
-                                <div class="mt-auto d-flex align-items-center justify-content-between pt-3 border-top border-light-subtle w-100">
-                                    <div class="d-flex align-items-center gap-2 text-secondary x-small">
+                                <div class="mt-auto d-flex align-items-end justify-content-between pt-3 border-top border-light-subtle w-100">
+                                    <div class="d-flex align-items-center gap-2 text-muted x-small fw-medium">
                                         <i class="bi bi-calendar3"></i>
                                         <?= date('d/m/Y', strtotime($doc['created_at'])) ?>
                                     </div>
-                                    <div class="d-flex gap-2">
+                                    
+                                    <div class="d-flex gap-1 position-relative" style="z-index: 2;">
                                         <button type="button" 
-                                                class="btn btn-sm btn-light text-primary hover-primary border rounded-circle d-flex align-items-center justify-content-center" 
-                                                style="width: 32px; height: 32px;"
+                                                class="btn btn-sm btn-light text-primary hover-primary border rounded-circle d-flex align-items-center justify-content-center shadow-sm transition-fast" 
+                                                style="width: 34px; height: 34px;"
                                                 onclick="openPreview(<?= $doc['id'] ?>, '<?= htmlspecialchars($doc['title'], ENT_QUOTES) ?>')"
                                                 title="Visualizar">
                                             <i class="bi bi-eye"></i>
                                         </button>
                                         <a href="/portal/documents/general/<?= $doc['id'] ?>" 
-                                           class="btn btn-sm btn-light text-secondary hover-dark border rounded-circle d-flex align-items-center justify-content-center"
-                                           style="width: 32px; height: 32px;" 
+                                           class="btn btn-sm btn-light text-secondary hover-dark border rounded-circle d-flex align-items-center justify-content-center shadow-sm transition-fast"
+                                           style="width: 34px; height: 34px;" 
                                            title="Baixar">
                                             <i class="bi bi-download"></i>
                                         </a>
@@ -147,8 +146,8 @@
 <!-- Preview Modal -->
 <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" style="height: 90vh;">
-        <div class="modal-content h-100 border-0 shadow-lg">
-            <div class="modal-header border-bottom py-3">
+        <div class="modal-content h-100 border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-bottom py-3 bg-white">
                 <div class="d-flex align-items-center gap-2">
                     <div class="bg-primary-subtle text-primary rounded p-2 d-flex align-items-center justify-content-center">
                         <i class="bi bi-file-earmark-text"></i>
@@ -156,7 +155,7 @@
                     <h5 class="modal-title h6 fw-bold mb-0" id="previewModalLabel">Visualizar Documento</h5>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <a href="#" id="downloadBtn" class="btn btn-sm btn-outline-primary" download>
+                    <a href="#" id="downloadBtn" class="btn btn-sm btn-primary rounded-pill px-3" download>
                         <i class="bi bi-download me-1"></i> Baixar
                     </a>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
