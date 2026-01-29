@@ -80,10 +80,7 @@ class PasswordResetController
             $token = bin2hex(random_bytes(32));
             $expiresAt = new \DateTime('+1 hour');
 
-            // Delete old tokens
-            $this->resetRepo->deleteByUserId((int) $user['id']);
-
-            // Create new token
+            // Create new token (handling revocation internally)
             $this->resetRepo->create((int) $user['id'], $token, $expiresAt);
 
             // Send email

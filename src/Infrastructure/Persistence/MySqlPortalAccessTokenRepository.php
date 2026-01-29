@@ -15,28 +15,41 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
 
     public function create(array $data): int
     {
-        // Garante unicidade lógica: antes de criar um novo token, revoga os válidos anteriores
-        if (isset($data['portal_user_id'])) {
-            $this->revokePreviousValidTokensForUser((int)$data['portal_user_id']);
+        try {
+            $this->pdo->beginTransaction();
+
+            // Garante unicidade lógica: antes de criar um novo token, revoga os válidos anteriores
+            if (isset($data['portal_user_id'])) {
+                $this->revokePreviousValidTokensForUser((int)$data['portal_user_id']);
+            }
+
+            $sql = "INSERT INTO portal_access_tokens
+                    (portal_user_id, code, expires_at, status)
+                    VALUES (:portal_user_id, :code, :expires_at, :status)";
+
+            $stmt = $this->pdo->prepare($sql);
+            // Aceita tanto 'code' (nome da coluna) quanto 'token' (nome antigo na camada de cima)
+            $rawCode = $data['code'] ?? $data['token'] ?? null;
+            $hashedCode = $rawCode ? Encrypter::hash($rawCode) : null;
+
+            $stmt->execute([
+                ':portal_user_id' => $data['portal_user_id'],
+                ':code'           => $hashedCode,
+                ':expires_at'     => $data['expires_at'],
+                ':status'         => 'PENDING',
+            ]);
+
+            $id = (int)$this->pdo->lastInsertId();
+            
+            $this->pdo->commit();
+            
+            return $id;
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
         }
-
-        $sql = "INSERT INTO portal_access_tokens
-                (portal_user_id, code, expires_at, status)
-                VALUES (:portal_user_id, :code, :expires_at, :status)";
-
-        $stmt = $this->pdo->prepare($sql);
-        // Aceita tanto 'code' (nome da coluna) quanto 'token' (nome antigo na camada de cima)
-        $rawCode = $data['code'] ?? $data['token'] ?? null;
-        $hashedCode = $rawCode ? Encrypter::hash($rawCode) : null;
-
-        $stmt->execute([
-            ':portal_user_id' => $data['portal_user_id'],
-            ':code'           => $hashedCode,
-            ':expires_at'     => $data['expires_at'],
-            ':status'         => 'PENDING',
-        ]);
-
-        return (int)$this->pdo->lastInsertId();
     }
 
     public function findValidToken(string $token): ?array

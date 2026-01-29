@@ -19,16 +19,32 @@ class MySqlPasswordResetRepository implements PasswordResetRepository
 
     public function create(int $adminUserId, string $token, \DateTimeInterface $expiresAt): int
     {
-        $sql = "INSERT INTO password_reset_tokens (admin_user_id, token, expires_at) VALUES (:user_id, :token, :expires_at)";
-        
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([
-            'user_id' => $adminUserId,
-            'token' => Encrypter::hash($token),
-            'expires_at' => $expiresAt->format('Y-m-d H:i:s'),
-        ]);
+        try {
+            $this->pdo->beginTransaction();
 
-        return (int) $this->pdo->lastInsertId();
+            // Atomicidade: remove tokens anteriores do usuário antes de criar um novo
+            $this->deleteByUserId($adminUserId);
+
+            $sql = "INSERT INTO password_reset_tokens (admin_user_id, token, expires_at) VALUES (:user_id, :token, :expires_at)";
+            
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                'user_id' => $adminUserId,
+                'token' => Encrypter::hash($token),
+                'expires_at' => $expiresAt->format('Y-m-d H:i:s'),
+            ]);
+
+            $id = (int) $this->pdo->lastInsertId();
+            
+            $this->pdo->commit();
+
+            return $id;
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
     }
 
     public function findValidByToken(string $token): ?array
