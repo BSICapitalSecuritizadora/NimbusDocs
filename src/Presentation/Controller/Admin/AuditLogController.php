@@ -95,4 +95,64 @@ final class AuditLogController
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
     }
+    public function export(array $vars = []): void
+    {
+        $this->requireAdmin();
+        $pdo = $this->config['pdo'];
+
+        // Reusing basic filters from index (simplified for export)
+        $where = [];
+        $params = [];
+
+        if (!empty($_GET['actor_type'])) {
+            $where[] = "actor_type = :actor_type";
+            $params[':actor_type'] = $_GET['actor_type'];
+        }
+        if (!empty($_GET['action'])) {
+            $where[] = "action LIKE :action";
+            $params[':action'] = '%' . $_GET['action'] . '%';
+        }
+        if (!empty($_GET['search'])) {
+            $term = '%' . $_GET['search'] . '%';
+            $where[] = "(details LIKE :search OR ip_address LIKE :search OR actor_id LIKE :search OR target_id LIKE :search)";
+            $params[':search'] = $term;
+        }
+
+        $whereSql = '';
+        if (count($where) > 0) {
+            $whereSql = 'WHERE ' . implode(' AND ', $where);
+        }
+
+        $sql = "SELECT id, occurred_at, actor_type, actor_name, action, ip_address, summary, details 
+                FROM audit_logs $whereSql 
+                ORDER BY occurred_at DESC, id DESC 
+                LIMIT 5000"; // Hard limit for safety
+
+        $stmt = $pdo->prepare($sql);
+        foreach ($params as $key => $val) {
+            $stmt->bindValue($key, $val);
+        }
+        $stmt->execute();
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=audit_export_' . date('Y-m-d_H-i') . '.csv');
+
+        $output = fopen('php://output', 'w');
+        fputcsv($output, ['ID', 'Date', 'Actor Type', 'Actor Name', 'Action', 'IP', 'Summary', 'Details']);
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            fputcsv($output, [
+                $row['id'],
+                $row['occurred_at'],
+                $row['actor_type'],
+                $row['actor_name'],
+                $row['action'],
+                $row['ip_address'],
+                $row['summary'],
+                $row['details']
+            ]);
+        }
+        fclose($output);
+        exit;
+    }
 }

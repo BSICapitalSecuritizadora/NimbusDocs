@@ -77,4 +77,29 @@ final class AuditLogger
         $data['actor_type'] = 'SYSTEM';
         $this->log($data);
     }
+
+    /**
+     * Helper to log changes with diff.
+     */
+    public function diff(string $action, $target, ?string $summary, array $oldData, array $newData): void
+    {
+        $diff = \App\Support\DiffCalculator::compute($oldData, $newData);
+        
+        $data = [
+            'action' => $action,
+            'summary' => $summary,
+            'details' => $diff
+        ];
+
+        // Determine target type/id from object if possible, or pass explicitly
+        if (is_object($target)) {
+            $data['target_type'] = (new \ReflectionClass($target))->getShortName();
+            $data['target_id'] = method_exists($target, 'getId') ? $target->getId() : null;
+        } elseif (is_array($target) && isset($target['type'], $target['id'])) {
+            $data['target_type'] = $target['type'];
+            $data['target_id'] = $target['id'];
+        }
+
+        $this->log($data);
+    }
 }

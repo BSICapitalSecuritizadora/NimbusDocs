@@ -159,6 +159,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET', '/admin/files/{id:\d+}/preview', [FileAdminController::class, 'preview']);
 
     // Auditoria
+    $r->addRoute('GET', '/admin/audit-logs/export', [AuditLogController::class, 'export']);
     $r->addRoute('GET', '/admin/audit-logs', [AuditLogController::class, 'index']);
     // Alias amigável
     $r->addRoute('GET', '/admin/audit', [AuditLogController::class, 'index']);
