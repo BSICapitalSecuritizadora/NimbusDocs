@@ -26,6 +26,8 @@ final class FileUpload
         'application/vnd.ms-excel',
         'image/jpeg',
         'image/png',
+        'text/plain',
+        'text/csv',
     ];
 
     /**
