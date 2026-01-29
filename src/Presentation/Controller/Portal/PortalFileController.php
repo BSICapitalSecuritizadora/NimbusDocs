@@ -29,11 +29,15 @@ final class PortalFileController
             return;
         }
 
-        // Aqui seria ideal validar se a submissão pertence a esse usuário.
-        // Se o seu repo de submissões tiver findByIdForUser, use aqui.
-        // Exemplo (pseudo):
-        // $submission = $this->submissionRepo->findByIdForUser((int)$file['submission_id'], (int)$user['id']);
-        // if (!$submission) { 404 ... }
+        // Validação de Propriedade (Correção IDOR)
+        $submissionRepo = new \App\Infrastructure\Persistence\MySqlPortalSubmissionRepository($this->config['pdo']);
+        $submission = $submissionRepo->findForUser((int)$file['submission_id'], (int)$user['id']);
+
+        if (!$submission) {
+            http_response_code(403);
+            echo 'Acesso negado. Este arquivo não pertence a uma de suas submissões.';
+            return;
+        }
 
         $logger = $this->config['portal_access_logger'] ?? null;
         if ($logger) {
