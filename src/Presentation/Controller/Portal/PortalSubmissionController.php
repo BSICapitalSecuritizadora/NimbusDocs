@@ -339,6 +339,29 @@ final class PortalSubmissionController
                         
                         $storedName   = basename($stored['path']);
                         $checksum     = is_file($stored['path']) ? hash_file('sha256', $stored['path']) : null;
+                        
+                        // --- Virus Scan Step ---
+                        // Instancia o scanner (em produção viria via DI)
+                        // TODO: Mover para DI container
+                        $clamHost = getenv('CLAMAV_HOST');
+                        $scanner = ($clamHost) 
+                            ? new \App\Infrastructure\Security\ClamAvScanner($clamHost, 3310, 30, $this->config['logger'] ?? null)
+                            : new \App\Infrastructure\Security\NullVirusScanner($this->config['logger'] ?? null);
+
+                        if (!$scanner->isClean($stored['path'])) {
+                            // VIROSE DETECTADA! Apaga arquivo e aborta
+                            @unlink($stored['path']);
+                            $virusName = $scanner->getLastVirusName() ?? 'Unknown';
+                            
+                            $this->audit->log('PORTAL_USER', (int)$user['id'], 'VIRUS_DETECTED', 'UPLOAD', 0, [
+                                'file' => $stored['original_name'],
+                                'virus' => $virusName
+                            ]);
+                            
+                            throw new \RuntimeException("Arquivo infectado detectado ($virusName). Upload rejeitado.");
+                        }
+                        // -----------------------
+
                         $relativePath = 'portal_uploads/' . $userId . '/' . $storedName;
 
                         $this->fileRepo->create($submissionId, [

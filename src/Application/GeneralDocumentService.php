@@ -114,6 +114,25 @@ final class GeneralDocumentService
                     'errors' => ['file' => $uploadResult['message']],
                 ];
             }
+            
+            // --- Virus Scan Step ---
+            $clamHost = getenv('CLAMAV_HOST');
+            $scanner = ($clamHost) 
+                ? new \App\Infrastructure\Security\ClamAvScanner($clamHost, 3310, 30)
+                : new \App\Infrastructure\Security\NullVirusScanner();
+
+            if (!$scanner->isClean($uploadResult['path'])) {
+                @unlink($uploadResult['path']);
+                $virusName = $scanner->getLastVirusName() ?? 'Unknown';
+                
+                $this->audit->log('ADMIN', $adminId, 'VIRUS_DETECTED', 'UPLOAD', 0, ['virus' => $virusName]);
+                
+                return [
+                    'success' => false,
+                    'errors' => ['file' => "Arquivo infectado detectado: $virusName"],
+                ];
+            }
+            // -----------------------
 
             // Prepara dados para inserção
             $documentData = [
