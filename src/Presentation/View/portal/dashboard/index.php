@@ -11,25 +11,24 @@
  */
 ?>
 <!-- Header Section with Banner -->
-<div class="nd-dashboard-banner d-block d-md-flex justify-content-between align-items-center mb-5 p-4 rounded-4 shadow-sm bg-white position-relative overflow-hidden">
-    <div class="position-relative z-1">
+<div class="nd-dashboard-banner d-flex justify-content-between align-items-stretch mb-5 rounded-4 shadow-sm bg-white overflow-hidden" style="min-height: 120px;">
+    <!-- Left Content -->
+    <div class="d-flex flex-column justify-content-center p-4 position-relative z-1">
         <h1 class="h3 fw-bold text-dark mb-1">
-            Olá, <span style="color: var(--nd-primary);"><?= htmlspecialchars(explode(' ', $user['full_name'] ?? $user['email'])[0], ENT_QUOTES, 'UTF-8') ?></span>!
+            Olá, <span style="color: var(--nd-navy-900);"><?= htmlspecialchars(explode(' ', $user['full_name'] ?? $user['email'])[0], ENT_QUOTES, 'UTF-8') ?></span>!
         </h1>
         <p class="text-secondary mb-0">
             Bem-vindo ao seu painel exclusivo de solicitações.
         </p>
     </div>
     
-    <div class="position-relative z-1 mt-3 mt-md-0">
-        <a href="/portal/submissions/new" class="nd-btn nd-btn-gold shadow-sm d-inline-flex align-items-center gap-2 px-4 py-3 rounded-pill hover-scale">
+    <!-- Right Curve Section -->
+    <div class="d-flex align-items-center justify-content-center pe-4 ps-5 position-relative" style="background-color: var(--nd-navy-900); border-top-left-radius: 80px; border-bottom-left-radius: 80px; min-width: 300px;">
+        <a href="/portal/submissions/new" class="nd-btn nd-btn-gold shadow-sm d-inline-flex align-items-center gap-2 px-4 py-3 rounded-pill hover-scale border border-white border-opacity-10">
             <i class="bi bi-plus-lg fs-6"></i>
             <span class="fw-bold text-uppercase ls-1 fs-7">Nova Solicitação</span>
         </a>
     </div>
-
-    <!-- Decorative overlapping circle -->
-    <div class="position-absolute end-0 top-0 h-100 w-25 bg-primary opacity-10 rounded-start-pill d-none d-lg-block" style="transform: skewX(-20deg) translateX(50px);"></div>
 </div>
 
 <!-- Announcements -->
