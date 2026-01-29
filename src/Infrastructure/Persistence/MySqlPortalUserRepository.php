@@ -6,6 +6,8 @@ namespace App\Infrastructure\Persistence;
 
 use PDO;
 
+use App\Support\Encrypter; // Import
+
 final class MySqlPortalUserRepository
 {
     public function __construct(private PDO $pdo) {}
@@ -25,6 +27,11 @@ final class MySqlPortalUserRepository
         $stmt = $this->pdo->prepare("SELECT * FROM portal_users WHERE id = :id LIMIT 1");
         $stmt->execute([':id' => $id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($row) {
+            $row = $this->decryptRow($row);
+        }
+        
         return $row ?: null;
     }
 
@@ -74,11 +81,21 @@ final class MySqlPortalUserRepository
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        
+        foreach ($rows as &$r) {
+            $r = $this->decryptRow($r);
+        }
+        
+        return $rows;
     }
 
     public function create(array $data): int
     {
+        // Criptografa antes de salvar
+        $doc = !empty($data['document_number']) ? Encrypter::encrypt($data['document_number']) : null;
+        $phone = !empty($data['phone_number']) ? Encrypter::encrypt($data['phone_number']) : null;
+
         $sql = "INSERT INTO portal_users
                 (full_name, email, document_number, phone_number, external_id, notes, status)
                 VALUES
@@ -88,8 +105,8 @@ final class MySqlPortalUserRepository
         $stmt->execute([
             ':full_name'       => $data['full_name'],
             ':email'           => $data['email'] ?? null,
-            ':document_number' => $data['document_number'] ?? null,
-            ':phone_number'    => $data['phone_number'] ?? null,
+            ':document_number' => $doc,
+            ':phone_number'    => $phone,
             ':external_id'     => $data['external_id'] ?? null,
             ':notes'           => $data['notes'] ?? null,
             ':status'          => $data['status'] ?? 'INVITED',
@@ -103,7 +120,29 @@ final class MySqlPortalUserRepository
         $fields = [];
         $params = [':id' => $id];
 
-        foreach (['full_name', 'email', 'document_number', 'phone_number', 'external_id', 'notes', 'status'] as $col) {
+        // Se vier document_number, criptografa
+        if (array_key_exists('document_number', $data)) {
+            $val = $data['document_number'];
+            if (!empty($val)) {
+                $val = Encrypter::encrypt($val);
+            }
+            $fields[] = "document_number = :document_number";
+            $params[':document_number'] = $val;
+            unset($data['document_number']); // remove para não reprocessar no loop abaixo
+        }
+
+        // Se vier phone_number, criptografa
+        if (array_key_exists('phone_number', $data)) {
+             $val = $data['phone_number'];
+             if (!empty($val)) {
+                 $val = Encrypter::encrypt($val);
+             }
+             $fields[] = "phone_number = :phone_number";
+             $params[':phone_number'] = $val;
+             unset($data['phone_number']);
+        }
+
+        foreach (['full_name', 'email', 'external_id', 'notes', 'status'] as $col) {
             if (array_key_exists($col, $data)) {
                 $fields[]          = "{$col} = :{$col}";
                 $params[":{$col}"] = $data[$col];
@@ -157,5 +196,16 @@ final class MySqlPortalUserRepository
         
         $stmt = $this->pdo->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    private function decryptRow(array $row): array
+    {
+        if (!empty($row['document_number'])) {
+            $row['document_number'] = Encrypter::decrypt($row['document_number']);
+        }
+        if (!empty($row['phone_number'])) {
+            $row['phone_number'] = Encrypter::decrypt($row['phone_number']);
+        }
+        return $row;
     }
 }
