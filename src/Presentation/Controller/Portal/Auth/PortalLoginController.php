@@ -10,18 +10,21 @@ use App\Support\AuditLogger;
 use App\Support\Csrf;
 use App\Support\Session;
 use Respect\Validation\Validator as v;
+use App\Infrastructure\Security\DbRateLimiter; // Import
 
 final class PortalLoginController
 {
     private MySqlPortalAccessTokenRepository $tokenRepo;
     private MySqlPortalUserRepository $userRepo;
     private AuditLogger $audit;
+    private DbRateLimiter $limiter; // New Property
 
     public function __construct(private array $config)
     {
         $this->tokenRepo = new MySqlPortalAccessTokenRepository($config['pdo']);
         $this->userRepo  = new MySqlPortalUserRepository($config['pdo']);
         $this->audit     = new AuditLogger($config['pdo']);
+        $this->limiter   = new DbRateLimiter($config['pdo']); // Initialize
     }
 
     public function showLoginForm(array $vars = []): void
@@ -51,8 +54,6 @@ final class PortalLoginController
             $this->redirect('/portal/login');
         }
 
-        $identifier = trim($post['identifier'] ?? '');
-        $password   = (string)($post['password'] ?? '');
         $code       = strtoupper(trim($post['access_code'] ?? ''));
         // Sanitize code (remove hyphens from mask)
         $code = str_replace('-', '', $code);
@@ -62,7 +63,22 @@ final class PortalLoginController
             $this->redirect('/portal/login');
         }
 
-        $this->loginWithCode($code);
+        // --- Rate Limiting Check (IP based) ---
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        $scope = 'portal_login';
+        
+        // Verifica se IP está bloqueado (independente do código)
+        // 10 tentativas totais por IP (evita spray attacks)
+        if ($this->limiter->check($scope, $ip, 'ip_global', 10, 15)) {
+            Session::flash('error', 'Muitas tentativas de login. Aguarde 15 minutos.');
+            $this->redirect('/portal/login');
+        }
+
+        // Verifica se Código específico está sob ataque (opcional, mas bom pra evitar brute force num código X)
+        // Mas como código é segredo, melhor focar no IP. 
+        // Vamos manter o bloqueio principal por IP para simplicidade e eficácia inicial.
+
+        $this->loginWithCode($code, $ip);
     }
 
     public function logout(array $vars = []): void
@@ -81,17 +97,23 @@ final class PortalLoginController
         exit;
     }
 
-    private function loginWithCode(string $code): void
+    private function loginWithCode(string $code, string $ip): void
     {
+        $scope = 'portal_login';
+
         if (!v::stringType()->length(4, 64)->validate($code)) {
+            $this->limiter->increment($scope, $ip, 'ip_global', 10, 15); // Incrementa falha
             Session::flash('error', 'Informe um código de acesso válido.');
             $this->redirect('/portal/login');
         }
         // Tenta um token válido
         $row = $this->tokenRepo->findValidWithUserByCode($code);
 
-        // Se não válido, tenta buscar token pela string para ver se está expirado e notificar
+        // Se não válido
         if (!$row) {
+            $this->limiter->increment($scope, $ip, 'ip_global', 10, 15); // Incrementa falha
+
+            // Lógica de notificação de expirado (mantida)
             $tokenOnly = $this->tokenRepo->findByCode($code);
             if ($tokenOnly && strtotime($tokenOnly['expires_at']) < time()) {
                 $portalUser = $this->userRepo->findById((int)$tokenOnly['portal_user_id']);
@@ -108,6 +130,9 @@ final class PortalLoginController
             $this->redirect('/portal/login');
         }
 
+        // --- Sucesso: Limpa Rate Limit ---
+        $this->limiter->reset($scope, $ip, 'ip_global');
+
         $portalUser = [
             'id'              => (int)$row['user_id'],
             'full_name'       => $row['user_full_name'],
@@ -116,7 +141,6 @@ final class PortalLoginController
             'phone_number'    => $row['user_phone_number'],
         ];
 
-        $ip  = $_SERVER['REMOTE_ADDR'] ?? '';
         $ua  = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
         $this->tokenRepo->markAsUsed((int)$row['token_id'], $ip, $ua);
