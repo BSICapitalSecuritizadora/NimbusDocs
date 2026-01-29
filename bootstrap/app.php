@@ -79,6 +79,23 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     }
 }
 
+// -------------------------------------------------------------------------
+// Security Headers
+// -------------------------------------------------------------------------
+if (!headers_sent()) {
+    header("X-Frame-Options: SAMEORIGIN");
+    header("X-Content-Type-Options: nosniff");
+    header("Referrer-Policy: strict-origin-when-cross-origin");
+    header("Permissions-Policy: geolocation=(), camera=(), microphone=()");
+    
+    // CSP: Allow 'self', data: images, and unsafe-inline for styles/scripts (compatibility)
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self';");
+
+    if ($isHttps) {
+        header("Strict-Transport-Security: max-age=31536000; includeSubDomains");
+    }
+}
+
 // Debug / erros
 $appDebug = filter_var($_ENV['APP_DEBUG'] ?? false, FILTER_VALIDATE_BOOL);
 
