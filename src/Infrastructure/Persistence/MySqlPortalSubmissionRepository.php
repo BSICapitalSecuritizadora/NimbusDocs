@@ -448,4 +448,27 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
     }
+
+    /**
+     * Busca Rascunhos (PENDING) abandonados há mais de X dias para limpeza.
+     */
+    public function findAbandonedDrafts(int $days): array
+    {
+        $sql = "SELECT id, portal_user_id, reference_code, submitted_at 
+                FROM portal_submissions 
+                WHERE status = 'PENDING' 
+                  AND submitted_at < DATE_SUB(NOW(), INTERVAL :days DAY)";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':days', $days, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function delete(int $id): bool
+    {
+        $stmt = $this->pdo->prepare("DELETE FROM portal_submissions WHERE id = :id");
+        return $stmt->execute([':id' => $id]);
+    }
 }

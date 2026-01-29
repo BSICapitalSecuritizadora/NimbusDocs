@@ -15,7 +15,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$config = require __DIR__ . '/../config/config.php';
+$config = require __DIR__ . '/../bootstrap/app.php';
 $pdo = $config['pdo'];
 
 // Importa dependências

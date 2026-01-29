@@ -81,4 +81,9 @@ final class MySqlPortalSubmissionFileRepository implements PortalSubmissionFileR
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
+    public function deleteBySubmissionId(int $submissionId): void
+    {
+        $stmt = $this->pdo->prepare("DELETE FROM portal_submission_files WHERE submission_id = :sid");
+        $stmt->execute([':sid' => $submissionId]);
+    }
 }

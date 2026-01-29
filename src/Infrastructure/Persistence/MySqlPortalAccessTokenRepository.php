@@ -256,4 +256,20 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $id]);
     }
+
+    /**
+     * Remove tokens expirados ou revogados há mais de X dias para limpeza (LGPD).
+     */
+    public function deleteExpired(int $days): int
+    {
+        $sql = "DELETE FROM portal_access_tokens 
+                WHERE (status = 'REVOKED' OR expires_at < NOW())
+                  AND created_at < DATE_SUB(NOW(), INTERVAL :days DAY)";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':days', $days, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->rowCount();
+    }
 }
