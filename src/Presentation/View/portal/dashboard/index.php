@@ -1,238 +1,412 @@
 <?php
 /**
- * Portal Dashboard
+ * Portal Dashboard v2.0 - Premium Client Experience
  * 
  * @var array $user
- * @var int $total
- * @var int $pendentes
- * @var int $concluidas
  * @var array $submissions
+ * @var array $stats
  * @var array $announcements
  */
+$announcements = $announcements ?? [];
+$firstName = explode(' ', $user['full_name'] ?? $user['email'])[0];
 ?>
-<!-- Header Section with Banner -->
-<div class="nd-dashboard-banner d-flex justify-content-between align-items-stretch mb-5 rounded-4 shadow-sm bg-white overflow-hidden" style="min-height: 120px;">
-    <!-- Left Content -->
-    <div class="d-flex flex-column justify-content-center p-4 position-relative z-1">
-        <h1 class="h3 fw-bold text-dark mb-1">
-            Olá, <span style="color: var(--nd-navy-900);"><?= htmlspecialchars(explode(' ', $user['full_name'] ?? $user['email'])[0], ENT_QUOTES, 'UTF-8') ?></span>!
-        </h1>
-        <p class="text-secondary mb-0">
-            Bem-vindo ao seu painel exclusivo de solicitações.
-        </p>
-    </div>
-    
-    <!-- Right Curve Section -->
-    <div class="d-flex align-items-center justify-content-center pe-4 ps-5 position-relative" style="background-color: var(--nd-navy-900); border-top-left-radius: 80px; border-bottom-left-radius: 80px; min-width: 300px;">
-        <a href="/portal/submissions/new" class="nd-btn nd-btn-gold shadow-sm d-inline-flex align-items-center gap-2 px-4 py-3 rounded-pill hover-scale border border-white border-opacity-10">
-            <i class="bi bi-plus-lg fs-6"></i>
-            <span class="fw-bold text-uppercase ls-1 fs-7">Nova Solicitação</span>
-        </a>
-    </div>
-</div>
 
-<!-- Announcements -->
-<?php if (!empty($announcements)): ?>
-    <div class="mb-5 fade-in-up">
-        <?php foreach ($announcements as $a): ?>
-            <?php
-            $level = $a['level'] ?? 'info';
-            $class = 'bg-info-subtle text-info-emphasis border-info-subtle';
-            $icon  = 'bi-info-circle-fill';
-            
-            if ($level === 'success') { $class = 'bg-success-subtle text-success-emphasis border-success-subtle'; $icon = 'bi-check-circle-fill'; }
-            if ($level === 'warning') { $class = 'bg-warning-subtle text-warning-emphasis border-warning-subtle'; $icon = 'bi-exclamation-triangle-fill'; }
-            if ($level === 'danger')  { $class = 'bg-danger-subtle text-danger-emphasis border-danger-subtle';  $icon = 'bi-x-circle-fill'; }
-            ?>
-            <div class="alert <?= $class ?> d-flex align-items-center shadow-sm border mb-3 rounded-3" role="alert">
-                <i class="bi <?= $icon ?> fs-4 me-3"></i>
-                <div>
-                    <h6 class="alert-heading fw-bold mb-1">
-                        <?= htmlspecialchars($a['title'], ENT_QUOTES, 'UTF-8') ?>
-                    </h6>
-                    <div class="small">
-                        <?= nl2br(htmlspecialchars($a['body'], ENT_QUOTES, 'UTF-8')) ?>
+<div class="container-xxl">
+    <!-- Welcome Banner -->
+    <div class="nd-welcome-banner">
+        <div class="nd-welcome-content">
+            <div class="nd-welcome-greeting">
+                <span class="nd-welcome-wave">👋</span>
+                <span>Olá, <strong><?= htmlspecialchars($firstName) ?></strong>!</span>
+            </div>
+            <p class="nd-welcome-message">Bem-vindo ao seu portal exclusivo de solicitações e documentos.</p>
+        </div>
+        <div class="nd-welcome-cta">
+            <a href="/portal/submissions/new" class="nd-btn nd-btn-gold shadow-lg">
+                <i class="bi bi-plus-lg"></i>
+                <span>Nova Solicitação</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Announcements (if any) -->
+    <?php if (!empty($announcements)): ?>
+        <div class="nd-announcements mb-4">
+            <?php foreach (array_slice($announcements, 0, 2) as $ann): ?>
+                <div class="nd-announcement-card">
+                    <div class="nd-announcement-icon">
+                        <i class="bi bi-megaphone-fill"></i>
                     </div>
+                    <div class="nd-announcement-content">
+                        <h6 class="nd-announcement-title"><?= htmlspecialchars($ann['title'] ?? 'Aviso', ENT_QUOTES) ?></h6>
+                        <p class="nd-announcement-text"><?= htmlspecialchars($ann['content'] ?? '', ENT_QUOTES) ?></p>
+                    </div>
+                    <small class="nd-announcement-date">
+                        <?= date('d/m/Y', strtotime($ann['created_at'] ?? 'now')) ?>
+                    </small>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="nd-stat-card nd-stat-card-primary">
+                <div class="nd-stat-icon">
+                    <i class="bi bi-inbox-fill"></i>
+                </div>
+                <div class="nd-stat-info">
+                    <div class="nd-stat-value"><?= number_format($stats['total'] ?? 0) ?></div>
+                    <div class="nd-stat-label">Envios Realizados</div>
                 </div>
             </div>
-        <?php endforeach; ?>
-    </div>
-<?php endif; ?>
-
-<!-- Stats Cards -->
-<div class="row g-4 mb-5">
-    <!-- Total -->
-    <div class="col-12 col-md-4">
-        <div class="nd-card h-100 border-0 shadow-sm hover-lift transition-fast position-relative overflow-hidden">
-            <div class="nd-card-body p-4 position-relative z-1">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div>
-                        <div class="small text-muted text-uppercase fw-bold ls-1 mb-2">Total de Envios</div>
-                        <div class="display-5 fw-bold text-dark"><?= $total ?></div>
-                    </div>
-                    <div class="rounded-4 bg-primary bg-opacity-10 p-3 d-flex align-items-center justify-content-center text-primary" style="width: 56px; height: 56px;">
-                        <i class="bi bi-stack fs-3"></i>
-                    </div>
+        </div>
+        <div class="col-md-4">
+            <div class="nd-stat-card nd-stat-card-gold">
+                <div class="nd-stat-icon">
+                    <i class="bi bi-clock-fill"></i>
                 </div>
-                <div class="mt-3 pt-3 border-top border-light-subtle">
-                     <span class="text-muted x-small">Histórico completo</span>
+                <div class="nd-stat-info">
+                    <div class="nd-stat-value"><?= number_format($stats['pending'] ?? 0) ?></div>
+                    <div class="nd-stat-label">Aguardando Análise</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="nd-stat-card nd-stat-card-success">
+                <div class="nd-stat-icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="nd-stat-info">
+                    <div class="nd-stat-value"><?= number_format($stats['approved'] ?? 0) ?></div>
+                    <div class="nd-stat-label">Solicitações Aprovadas</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Em Análise -->
-    <div class="col-12 col-md-4">
-        <div class="nd-card h-100 border-0 shadow-sm hover-lift transition-fast position-relative overflow-hidden">
-            <div class="nd-card-body p-4 position-relative z-1">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div>
-                        <div class="small text-muted text-uppercase fw-bold ls-1 mb-2">Em Análise</div>
-                        <div class="display-5 fw-bold text-dark"><?= $pendentes ?></div>
-                    </div>
-                    <div class="rounded-4 bg-warning bg-opacity-10 p-3 d-flex align-items-center justify-content-center text-warning" style="width: 56px; height: 56px;">
-                        <i class="bi bi-hourglass-split fs-3"></i>
-                    </div>
-                </div>
-                 <div class="mt-3 pt-3 border-top border-light-subtle">
-                     <span class="text-warning x-small fw-medium"><i class="bi bi-clock me-1"></i>Aguardando retorno</span>
-                </div>
-            </div>
+    <!-- Recent Submissions -->
+    <div class="nd-card">
+        <div class="nd-card-header d-flex align-items-center justify-content-between">
+            <h5 class="nd-card-title mb-0">
+                <i class="bi bi-clock-history me-2"></i>
+                Suas Solicitações Recentes
+            </h5>
+            <a href="/portal/submissions" class="nd-btn nd-btn-outline nd-btn-sm">
+                Ver Todas
+                <i class="bi bi-chevron-right"></i>
+            </a>
         </div>
-    </div>
-
-    <!-- Concluídos -->
-    <div class="col-12 col-md-4">
-        <div class="nd-card h-100 border-0 shadow-sm hover-lift transition-fast position-relative overflow-hidden">
-            <div class="nd-card-body p-4 position-relative z-1">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div>
-                        <div class="small text-muted text-uppercase fw-bold ls-1 mb-2">Concluídos</div>
-                        <div class="display-5 fw-bold text-dark"><?= $concluidas ?></div>
+        <div class="nd-card-body p-0">
+            <?php if (empty($submissions)): ?>
+                <div class="nd-empty-state">
+                    <div class="nd-empty-icon">
+                        <i class="bi bi-inbox"></i>
                     </div>
-                    <div class="rounded-4 bg-success bg-opacity-10 p-3 d-flex align-items-center justify-content-center text-success" style="width: 56px; height: 56px;">
-                        <i class="bi bi-check-circle-fill fs-3"></i>
-                    </div>
+                    <h6>Nenhuma solicitação encontrada</h6>
+                    <p>Você ainda não realizou nenhum envio. Clique no botão acima para criar sua primeira solicitação.</p>
+                    <a href="/portal/submissions/new" class="nd-btn nd-btn-primary">
+                        <i class="bi bi-plus-lg"></i>
+                        Criar Primeira Solicitação
+                    </a>
                 </div>
-                 <div class="mt-3 pt-3 border-top border-light-subtle">
-                     <span class="text-success x-small fw-medium"><i class="bi bi-check-all me-1"></i>Processados com sucesso</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Recent Submissions -->
-<div class="nd-card border-0 shadow-sm mb-4">
-    <div class="nd-card-header bg-white border-bottom py-4 px-4 d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-3">
-            <div class="bg-primary bg-opacity-10 p-2 rounded-3 text-primary">
-                <i class="bi bi-clock-history fs-5"></i>
-            </div>
-            <div>
-                <h5 class="nd-card-title fw-bold text-dark mb-0">Envios Recentes</h5>
-                <small class="text-muted">Acompanhe suas últimas solicitações</small>
-            </div>
-        </div>
-        <?php if ($submissions): ?>
-        <a href="/portal/submissions" class="btn btn-light btn-sm fw-bold text-primary hover-primary border rounded-pill px-3">
-            Ver todos <i class="bi bi-arrow-right ms-1"></i>
-        </a>
-        <?php endif; ?>
-    </div>
-    
-    <div class="nd-card-body p-0">
-        <?php if (!$submissions): ?>
-            <div class="text-center py-5 px-4">
-                <div class="mb-4">
-                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light-subtle border border-light shadow-sm position-relative" style="width: 100px; height: 100px;">
-                        <i class="bi bi-inbox text-secondary opacity-25" style="font-size: 3rem;"></i>
-                        <span class="position-absolute top-0 end-0 p-2 bg-warning border border-light rounded-circle"></span>
-                    </div>
-                </div>
-                <h6 class="text-dark fw-bold mb-2 fs-5">Nenhum envio recente</h6>
-                <p class="text-muted mb-4 mx-auto" style="max-width: 400px;">
-                    Você ainda não realizou nenhum envio de documentação. Clique no botão abaixo para iniciar uma nova solicitação.
-                </p>
-                <a href="/portal/submissions/new" class="nd-btn nd-btn-gold shadow px-4 py-2 rounded-3">
-                    <i class="bi bi-plus-lg me-2"></i> Começar Agora
-                </a>
-            </div>
-        <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="ps-4 py-3 text-uppercase text-muted x-small fw-bold ls-1 border-bottom-0">Documento</th>
-                            <th class="py-3 text-uppercase text-muted x-small fw-bold ls-1 border-bottom-0">Enviado em</th>
-                            <th class="py-3 text-uppercase text-muted x-small fw-bold ls-1 border-bottom-0">Situação</th>
-                            <th class="pe-4 py-3 text-end text-uppercase text-muted x-small fw-bold ls-1 border-bottom-0">Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($submissions as $s): ?>
+            <?php else: ?>
+                <div class="nd-table-wrapper" style="border: none; border-radius: 0;">
+                    <table class="nd-table">
+                        <thead>
                             <tr>
-                                <td class="ps-4">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-3 bg-white border shadow-sm p-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
-                                            <i class="bi bi-file-earmark-text text-primary fs-5"></i>
-                                        </div>
-                                        <div class="d-flex flex-column">
-                                            <span class="fw-bold text-dark text-truncate" style="max-width: 250px;">
-                                                <?= htmlspecialchars($s['title'] ?? 'Sem título', ENT_QUOTES, 'UTF-8') ?>
-                                            </span>
-                                            <span class="x-small text-muted font-monospace">Protocolo: <?= $s['reference_code'] ?? $s['id'] ?></span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2 text-secondary small fw-medium">
-                                        <i class="bi bi-calendar3 text-muted"></i>
-                                        <?= date('d/m/Y', strtotime($s['submitted_at'] ?? 'now')) ?>
-                                    </div>
-                                </td>
-                                <td>
-                                    <?php
-                                    $statusRaw = strtoupper($s['status'] ?? '');
-                                    $label = $statusRaw;
-                                    $badge = 'bg-secondary-subtle text-secondary-emphasis';
-                                    $iconVal = 'bi-circle';
-                                    
-                                    if (in_array($statusRaw, ['PENDING', 'PENDENTE'])) {
-                                        $label = 'Pendente';
-                                        $badge = 'bg-warning-subtle text-warning-emphasis border-warning-subtle';
-                                        $iconVal = 'bi-hourglass-split';
-                                    } elseif (in_array($statusRaw, ['IN_REVIEW', 'UNDER_REVIEW', 'ANALISE'])) {
-                                        $label = 'Em Análise';
-                                        $badge = 'bg-info-subtle text-info-emphasis border-info-subtle';
-                                        $iconVal = 'bi-search';
-                                    } elseif (in_array($statusRaw, ['APPROVED', 'COMPLETED', 'CONCLUIDO', 'FINALIZADA'])) {
-                                        $label = 'Concluído';
-                                        $badge = 'bg-success-subtle text-success-emphasis border-success-subtle';
-                                        $iconVal = 'bi-check-circle-fill';
-                                    } elseif (in_array($statusRaw, ['REJECTED', 'REJEITADA'])) {
-                                        $label = 'Rejeitado';
-                                        $badge = 'bg-danger-subtle text-danger-emphasis border-danger-subtle';
-                                        $iconVal = 'bi-x-circle-fill';
-                                    }
-                                    ?>
-                                    <span class="badge rounded-pill border <?= $badge ?> px-3 py-2 d-inline-flex align-items-center gap-2 fw-semibold">
-                                        <i class="bi <?= $iconVal ?>"></i> <?= $label ?>
-                                    </span>
-                                </td>
-                                <td class="text-end pe-4">
-                                    <a href="/portal/submissions/<?= (int)$s['id'] ?>"
-                                        class="btn btn-sm btn-light border text-muted hover-primary transition-fast shadow-sm rounded-pill px-3" 
-                                        title="Ver detalhes">
-                                        Detalhes <i class="bi bi-chevron-right ms-1"></i>
-                                    </a>
-                                </td>
+                                <th>Referência</th>
+                                <th>Data de Envio</th>
+                                <th>Situação</th>
+                                <th></th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php endif; ?>
+                        </thead>
+                        <tbody>
+                            <?php foreach (array_slice($submissions, 0, 5) as $s): ?>
+                                <?php
+                                $statusConfig = match($s['status'] ?? '') {
+                                    'PENDING'       => ['label' => 'Pendente', 'class' => 'warning', 'icon' => 'bi-clock'],
+                                    'UNDER_REVIEW'  => ['label' => 'Em Análise', 'class' => 'info', 'icon' => 'bi-search'],
+                                    'APPROVED'      => ['label' => 'Aprovada', 'class' => 'success', 'icon' => 'bi-check-circle'],
+                                    'COMPLETED'     => ['label' => 'Concluída', 'class' => 'success', 'icon' => 'bi-check-all'],
+                                    'REJECTED'      => ['label' => 'Rejeitada', 'class' => 'danger', 'icon' => 'bi-x-circle'],
+                                    default         => ['label' => $s['status'] ?? '-', 'class' => 'neutral', 'icon' => 'bi-dash']
+                                };
+                                ?>
+                                <tr>
+                                    <td>
+                                        <span class="fw-semibold text-dark">#<?= htmlspecialchars($s['id'] ?? 'N/A') ?></span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center text-muted small">
+                                            <i class="bi bi-calendar3 me-1"></i>
+                                            <?= date('d/m/Y H:i', strtotime($s['submitted_at'] ?? 'now')) ?>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="nd-badge nd-badge-<?= $statusConfig['class'] ?>">
+                                            <i class="bi <?= $statusConfig['icon'] ?>"></i>
+                                            <?= $statusConfig['label'] ?>
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="/portal/submissions/<?= $s['id'] ?>" class="nd-btn nd-btn-ghost nd-btn-sm" title="Ver detalhes">
+                                            Detalhes
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 
+<!-- Portal Dashboard Styles -->
+<style>
+    /* Welcome Banner */
+    .nd-welcome-banner {
+        background: linear-gradient(135deg, var(--nd-navy-800) 0%, var(--nd-navy-900) 100%);
+        border-radius: var(--nd-radius-2xl);
+        padding: 2rem 2.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+        box-shadow: var(--nd-shadow-lg);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .nd-welcome-banner::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(212, 168, 75, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    
+    .nd-welcome-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .nd-welcome-greeting {
+        font-family: var(--nd-font-heading);
+        font-size: 1.5rem;
+        color: #ffffff;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .nd-welcome-wave {
+        font-size: 1.75rem;
+        animation: wave 2s ease-in-out infinite;
+    }
+    
+    @keyframes wave {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(15deg); }
+        75% { transform: rotate(-10deg); }
+    }
+    
+    .nd-welcome-message {
+        color: rgba(255, 255, 255, 0.7);
+        margin: 0;
+        font-size: 0.9375rem;
+    }
+    
+    .nd-welcome-cta {
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .nd-welcome-cta .nd-btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.9375rem;
+    }
+    
+    /* Announcements */
+    .nd-announcement-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        background: var(--nd-white);
+        border: 1px solid var(--nd-surface-200);
+        border-radius: var(--nd-radius-lg);
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.75rem;
+        transition: var(--nd-transition);
+    }
+    
+    .nd-announcement-card:hover {
+        box-shadow: var(--nd-shadow-sm);
+        border-color: var(--nd-gold-300);
+    }
+    
+    .nd-announcement-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--nd-gold-100);
+        color: var(--nd-gold-700);
+        border-radius: var(--nd-radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .nd-announcement-content {
+        flex: 1;
+    }
+    
+    .nd-announcement-title {
+        font-weight: 600;
+        color: var(--nd-navy-800);
+        margin: 0 0 0.25rem;
+        font-size: 0.9375rem;
+    }
+    
+    .nd-announcement-text {
+        color: var(--nd-gray-600);
+        font-size: 0.8125rem;
+        margin: 0;
+        line-height: 1.5;
+    }
+    
+    .nd-announcement-date {
+        color: var(--nd-gray-400);
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+    
+    /* Stat Cards */
+    .nd-stat-card {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        background: var(--nd-white);
+        border: 1px solid var(--nd-surface-200);
+        border-radius: var(--nd-radius-xl);
+        padding: 1.5rem;
+        transition: var(--nd-transition);
+    }
+    
+    .nd-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--nd-shadow-md);
+    }
+    
+    .nd-stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: var(--nd-radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+    
+    .nd-stat-card-primary .nd-stat-icon {
+        background: var(--nd-navy-100);
+        color: var(--nd-navy-700);
+    }
+    
+    .nd-stat-card-gold .nd-stat-icon {
+        background: var(--nd-gold-100);
+        color: var(--nd-gold-700);
+    }
+    
+    .nd-stat-card-success .nd-stat-icon {
+        background: var(--nd-success-light);
+        color: var(--nd-success-dark);
+    }
+    
+    .nd-stat-value {
+        font-family: var(--nd-font-heading);
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--nd-navy-800);
+        line-height: 1.1;
+    }
+    
+    .nd-stat-label {
+        color: var(--nd-gray-500);
+        font-size: 0.8125rem;
+        margin-top: 0.125rem;
+    }
+    
+    /* Empty State */
+    .nd-empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+    }
+    
+    .nd-empty-state .nd-empty-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        background: var(--nd-surface-100);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .nd-empty-state .nd-empty-icon i {
+        font-size: 2rem;
+        color: var(--nd-gray-400);
+    }
+    
+    .nd-empty-state h6 {
+        color: var(--nd-navy-800);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .nd-empty-state p {
+        color: var(--nd-gray-500);
+        font-size: 0.875rem;
+        max-width: 360px;
+        margin: 0 auto 1.5rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 767.98px) {
+        .nd-welcome-banner {
+            flex-direction: column;
+            text-align: center;
+            padding: 2rem 1.5rem;
+        }
+        
+        .nd-welcome-cta .nd-btn {
+            width: 100%;
+        }
+        
+        .nd-stat-card {
+            padding: 1.25rem;
+        }
+        
+        .nd-stat-icon {
+            width: 48px;
+            height: 48px;
+            font-size: 1.25rem;
+        }
+        
+        .nd-stat-value {
+            font-size: 1.5rem;
+        }
+    }
+</style>

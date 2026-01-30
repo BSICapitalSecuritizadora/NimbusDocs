@@ -46,8 +46,8 @@ if (class_exists(\App\Support\ColorUtils::class)) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     
-    <!-- NimbusDocs Theme -->
-    <link href="<?= ($config['base_url'] ?? '') ?>/css/nimbusdocs-theme.css" rel="stylesheet">
+    <!-- NimbusDocs Theme (load after Bootstrap to override properly) -->
+    <link href="<?= ($config['base_url'] ?? '') ?>/css/nimbusdocs-theme.css?v=<?= time() ?>" rel="stylesheet">
     
     <!-- Custom Branding Injection -->
     <style>
