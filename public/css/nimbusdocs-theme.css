@@ -14,10 +14,10 @@
 ============================================ */
 :root {
   /* Primary Colors - Navy (Professionalism, Trust) */
-  --nd-navy-950: #020408;
-  --nd-navy-900: #050a12;
-  --nd-navy-800: #0a1628; /* Brand Primary */
-  --nd-navy-700: #15233b;
+  --nd-navy-950: #0a192f; /* Deep Navy */
+  --nd-navy-900: #112240; /* Rich Navy */
+  --nd-navy-800: #1d3557; /* Light Navy */
+  --nd-navy-700: #334e68;
   --nd-navy-600: #243452;
   --nd-navy-500: #3d5a80;
   
@@ -36,6 +36,7 @@
   --nd-surface-100: #f1f5f9;
   --nd-surface-200: #e2e8f0;
   --nd-surface-300: #cbd5e1;
+  --nd-gray-300: #e2e8f0; /* Added missing variable */
   --nd-gray-400: #94a3b8;
   --nd-gray-500: #64748b;
   --nd-gray-600: #475569;
@@ -56,10 +57,10 @@
   --nd-warning-bg: #fef3c7;
   --nd-warning-text: #92400e;
   
+  
   --nd-info: #3b82f6;
   --nd-info-bg: #dbeafe;
   --nd-info-text: #1e40af;
-  
   /* Effects */
   --nd-shadow-sm: 0 1px 2px 0 rgba(10, 22, 40, 0.05);
   --nd-shadow: 0 4px 6px -1px rgba(10, 22, 40, 0.1), 0 2px 4px -1px rgba(10, 22, 40, 0.06);
@@ -77,18 +78,31 @@
   --nd-sidebar-width: 280px;
   
   /* Typography */
-  --nd-font-body: 'Inter', sans-serif;
-  --nd-font-heading: 'Outfit', sans-serif;
+  --nd-font-sans: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+  --nd-font-heading: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
   
+  --nd-text-xs: 0.75rem;
   /* Transitions */
   --nd-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ============================================
-   Reset & Base
+   Global Resets
 ============================================ */
 body {
-  font-family: var(--nd-font-body);
+  margin: 0;
+  padding: 0;
+  font-family: var(--nd-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   Layout & Base Styles
+============================================ */
+.nd-admin-layout {
+  display: flex;
+  min-height: 100vh;
   background-color: var(--nd-surface-50);
   color: var(--nd-gray-800);
   line-height: 1.6;
@@ -419,9 +433,10 @@ a:hover {
    Component: Forms
 ============================================ */
 .nd-input {
+  /* Base Input Style */
   display: block;
   width: 100%;
-  padding: 0.625rem 0.875rem;
+  padding: 0.625rem 1rem; /* Default padding */
   font-size: 0.9375rem;
   font-weight: 400;
   line-height: 1.5;
@@ -538,7 +553,7 @@ a:hover {
 }
 
 .nd-login-card {
-  width: 100%;
+  width: calc(100% - 2rem); /* Mobile spacing */
   max-width: 440px;
   background: var(--nd-white);
   border-radius: var(--nd-radius-xl);
@@ -546,7 +561,7 @@ a:hover {
   box-shadow: var(--nd-shadow-xl);
   position: relative;
   z-index: 10;
-  border: 1px solid var(--nd-surface-200);
+  border: none;
 }
 
 .nd-login-title {
@@ -585,3 +600,190 @@ a:hover {
     padding: 0 1rem;
   }
 }
+
+/* ============================================
+   Missing Utilities & Animations
+============================================ */
+.nd-btn-gold {
+  background: linear-gradient(135deg, var(--nd-gold-500) 0%, var(--nd-gold-600) 100%);
+  color: var(--nd-navy-900);
+  font-weight: 600;
+  transition: var(--nd-transition);
+  border: none;
+}
+
+.nd-btn-gold:hover {
+  background: linear-gradient(135deg, var(--nd-gold-400) 0%, var(--nd-gold-500) 100%);
+  color: var(--nd-navy-900);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212, 168, 75, 0.4);
+}
+
+.text-gold-300 { color: var(--nd-gold-300) !important; }
+.text-navy { color: var(--nd-navy-900) !important; }
+.bg-gradient-gold { background: linear-gradient(135deg, var(--nd-gold-400) 0%, var(--nd-gold-600) 100%); }
+
+.hover-scale { transition: transform 0.2s ease; }
+.hover-scale:hover { transform: scale(1.02); }
+
+.hover-bg-light-10:hover { background-color: rgba(255, 255, 255, 0.1) !important; }
+
+/* Animation Keyframes */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   Restored Login & Input Styles
+============================================ */
+.nd-login-logo {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--nd-navy-700) 0%, var(--nd-navy-800) 100%);
+  border-radius: var(--nd-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 8px 24px rgba(10, 22, 40, 0.3);
+  font-size: 1.75rem;
+  color: var(--nd-gold-500);
+}
+
+.nd-login-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  color: var(--nd-gray-400);
+  font-size: 0.8125rem;
+}
+
+.nd-login-divider::before,
+.nd-login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--nd-surface-200);
+}
+
+/* ============================================
+   Refined Input & Button Styles
+============================================ */
+.nd-input-group {
+  position: relative;
+  width: 100%;
+}
+
+.nd-input {
+  box-sizing: border-box !important; /* CRITICAL: Prevent overflow */
+  width: 100%;
+  height: 48px;
+  padding-left: 2.75rem !important;
+  background-color: var(--nd-surface-50);
+  border: 1px solid var(--nd-gray-300);
+  margin-top: 0;
+}
+
+/* Ensure label pushes content down */
+.nd-label {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  display: block;
+}
+
+.nd-input:focus {
+  background-color: var(--nd-white);
+  border-color: var(--nd-gold-500);
+  box-shadow: 0 4px 12px rgba(212, 168, 75, 0.15);
+}
+
+.nd-input-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 48px; /* Match input height explicitly */
+  width: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nd-gray-400);
+  pointer-events: none;
+  transition: var(--nd-transition);
+  z-index: 5;
+}
+
+.nd-input:focus ~ .nd-input-icon {
+  color: var(--nd-gold-500);
+}
+
+
+.nd-btn {
+  box-sizing: border-box !important; /* Prevent overflow with borders */
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  text-decoration: none !important;
+  border-radius: var(--nd-radius);
+  transition: var(--nd-transition);
+  cursor: pointer;
+}
+
+.nd-btn-ghost {
+  background: transparent;
+  color: var(--nd-navy-900);
+  border: 1px solid var(--nd-gray-300);
+}
+
+.nd-btn-ghost:hover {
+  background: var(--nd-surface-50);
+  border-color: var(--nd-navy-500);
+  color: var(--nd-navy-700);
+}
+
+.nd-btn i, .nd-btn svg {
+  font-size: 1.125rem;
+}
+
+.nd-btn-primary {
+  background: linear-gradient(180deg, var(--nd-navy-700) 0%, var(--nd-navy-800) 100%);
+  color: var(--nd-white);
+  box-shadow: 0 4px 6px rgba(10, 22, 40, 0.2);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================
+   Offline Mode Utilities (Bootstrap Polyfills)
+============================================ */
+.w-100 { width: 100% !important; }
+.text-center { text-align: center !important; }
+.text-end { text-align: right !important; }
+.d-flex { display: flex !important; }
+.align-items-center { align-items: center !important; }
+.justify-content-center { justify-content: center !important; }
+.flex-grow-1 { flex-grow: 1 !important; }
+.mb-1 { margin-bottom: 0.25rem !important; }
+.mb-2 { margin-bottom: 0.5rem !important; }
+.mb-3 { margin-bottom: 1rem !important; }
+.mb-4 { margin-bottom: 1.5rem !important; }
+.mt-3 { margin-top: 1rem !important; }
+.mt-4 { margin-top: 1.5rem !important; }
+.py-3 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+.gap-2 { gap: 0.5rem !important; }
+.fw-bold { font-weight: 700 !important; }
+.text-muted { color: var(--nd-gray-500) !important; }
+.small { font-size: 0.875rem !important; }
+.text-decoration-none { text-decoration: none !important; }
