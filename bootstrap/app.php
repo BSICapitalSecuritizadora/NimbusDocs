@@ -116,6 +116,21 @@ $errorHandler = new ErrorHandler(
 // 1) Carrega config principal (AGORA criamos $config)
 $config = require __DIR__ . '/../config/config.php';
 
+// Detect Base URL for Assets
+$scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+$basePath   = dirname($scriptName);
+// If running from root, basePath is / or \. If not, it's /subdir.
+// We want to remove the script filename (admin.php) from the path if meaningful.
+// But wait, dirname of /sub/public/admin.php is /sub/public.
+// If we want the root of "public", that's it.
+$baseUrl = ($basePath === '/' || $basePath === '\\') ? '' : $basePath;
+$baseUrl = str_replace('\\', '/', $baseUrl);
+// Ensure no trailing slash
+$baseUrl = rtrim($baseUrl, '/');
+
+$config['base_url'] = $baseUrl;
+
+
 // 2) Cria conexão PDO usando os dados de $config['db']
 $pdo = Connection::make($config['db']);
 

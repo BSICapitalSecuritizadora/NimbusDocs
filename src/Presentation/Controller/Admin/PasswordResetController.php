@@ -31,10 +31,14 @@ class PasswordResetController
      */
     public function showForgotForm(): void
     {
-        $csrfToken = Csrf::token();
-        $error = Session::getFlash('error');
-        $success = Session::getFlash('success');
-        $branding = $this->config['branding'] ?? [];
+        $viewData = [
+            'branding'  => $this->config['branding'] ?? [],
+            'config'    => $this->config,
+            'csrfToken' => Csrf::token(),
+            'error'     => Session::getFlash('error'),
+            'success'   => Session::getFlash('success'),
+        ];
+        extract($viewData);
 
         require __DIR__ . '/../../View/admin/auth/forgot_password.php';
     }
@@ -120,9 +124,14 @@ class PasswordResetController
             exit;
         }
 
-        $csrfToken = Csrf::token();
-        $error = Session::getFlash('error');
-        $branding = $this->config['branding'] ?? [];
+        $viewData = [
+            'branding'  => $this->config['branding'] ?? [],
+            'config'    => $this->config,
+            'csrfToken' => Csrf::token(),
+            'error'     => Session::getFlash('error'),
+            'token'     => $token,
+        ];
+        extract($viewData);
 
         require __DIR__ . '/../../View/admin/auth/reset_password.php';
     }

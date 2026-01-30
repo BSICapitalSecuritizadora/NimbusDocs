@@ -190,9 +190,13 @@ class TwoFactorController
             exit;
         }
 
-        $csrfToken = Csrf::token();
-        $error = Session::getFlash('error');
-        $branding = $this->config['branding'] ?? [];
+        $viewData = [
+            'branding'  => $this->config['branding'] ?? [],
+            'config'    => $this->config,
+            'csrfToken' => Csrf::token(),
+            'error'     => Session::getFlash('error'),
+        ];
+        extract($viewData);
 
         require __DIR__ . '/../../View/admin/auth/two_factor_verify.php';
     }

@@ -12,17 +12,42 @@ $appName  = $branding['app_name'] ?? 'NimbusDocs';
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Styles -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="/css/nimbusdocs-theme.css" rel="stylesheet">
+    <link href="<?= ($config['base_url'] ?? '') ?>/css/nimbusdocs-theme.css" rel="stylesheet">
     
+    <!-- Custom Branding -->
+    <?php
+    $primary = $branding['primary_color'] ?? '#0a1628';
+    $accent  = $branding['accent_color']  ?? '#d4a84b';
+    
+    if (class_exists(\App\Support\ColorUtils::class)) {
+        $p900 = \App\Support\ColorUtils::adjustBrightness($primary, -20);
+        $p800 = $primary;
+        $p700 = \App\Support\ColorUtils::adjustBrightness($primary, 20);
+        $g500 = $accent;
+        $g600 = \App\Support\ColorUtils::adjustBrightness($accent, -20);
+    } else {
+        $p900 = $primary; $p800 = $primary; $p700 = $primary;
+        $g500 = $accent; $g600 = $accent;
+    }
+    ?>
     <style>
-        /* Layout */
+        :root {
+            /* Branding Injection */
+            --nd-navy-900: <?= $p900 ?>;
+            --nd-navy-800: <?= $p800 ?>;
+            --nd-navy-700: <?= $p700 ?>;
+            
+            --nd-gold-500: <?= $g500 ?>;
+            --nd-gold-600: <?= $g600 ?>;
+        }
+
         body {
-            background-color: var(--nd-gray-100);
+            background-color: var(--nd-surface-50);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -30,87 +55,7 @@ $appName  = $branding['app_name'] ?? 'NimbusDocs';
 
         .portal-main {
             flex: 1;
-            padding: 2.5rem 0;
-        }
-
-        /* Navbar Premium */
-        .portal-navbar {
-            background: linear-gradient(90deg, #0f172a 0%, #1e293b 100%);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            /* Backdrop filter se o browser suportar */
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        .portal-navbar .navbar-brand {
-            color: var(--nd-white) !important;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            font-size: 1.25rem;
-        }
-
-        .brand-icon {
-            width: 36px;
-            height: 36px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--nd-gold-400);
-            font-size: 1.2rem;
-        }
-
-        .portal-navbar .nav-link {
-            color: rgba(255, 255, 255, 0.7) !important;
-            font-weight: 500;
-            font-size: 0.9rem;
-            padding: 0.5rem 1rem !important;
-            border-radius: 50rem;
-            transition: all 0.2s ease;
-        }
-
-        .portal-navbar .nav-link:hover {
-            color: var(--nd-white) !important;
-            background: rgba(255,255,255,0.05);
-        }
-
-        .portal-navbar .nav-link.active {
-            color: var(--nd-white) !important;
-            background: rgba(255,255,255,0.15);
-            font-weight: 600;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
-        }
-
-        /* User Menu */
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            background: var(--nd-gold-500) !important;
-            color: var(--nd-navy-900);
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-        
-        .user-menu-toggle {
-            padding: 0.25rem;
-            border-radius: 50rem;
-            transition: background 0.2s;
-        }
-        
-        .user-menu-toggle:hover,
-        .user-menu-toggle.show {
-            background: rgba(255,255,255,0.1);
-        }
-
-        .dropdown-menu {
-            animation: fadeIn 0.2s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            padding: 3rem 0; /* More spacing for portal */
         }
     </style>
 </head>
@@ -119,7 +64,7 @@ $appName  = $branding['app_name'] ?? 'NimbusDocs';
     <?php require __DIR__ . '/partials/header.php'; ?>
 
     <main class="portal-main">
-        <div class="container">
+        <div class="container-xxl"> <!-- Use XXL container for wider layout -->
             <?php
             if (isset($contentView)) {
                 extract($viewData ?? []);
@@ -132,6 +77,7 @@ $appName  = $branding['app_name'] ?? 'NimbusDocs';
     <?php require __DIR__ . '/partials/footer.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/nimbusdocs-utils.js"></script>
 
 </body>
 </html>

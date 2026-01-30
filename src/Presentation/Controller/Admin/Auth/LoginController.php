@@ -22,12 +22,17 @@ final class LoginController
 
     public function showLoginForm(array $vars = []): void
     {
-        // Get branding from config
-        $branding = $this->config['branding'] ?? [];
-        
-        $errorMessage = Session::getFlash('error');
-        $oldEmail = Session::getFlash('old_email');
-        $csrfToken = Csrf::token();
+        // Prepare view data with branding and config
+        $viewData = [
+            'branding'     => $this->config['branding'] ?? [],
+            'config'       => $this->config,
+            'errorMessage' => Session::getFlash('error'),
+            'oldEmail'     => Session::getFlash('old_email'),
+            'csrfToken'    => Csrf::token(),
+        ];
+
+        // Extract variables for the view
+        extract($viewData);
 
         // Render standalone login view (no base layout with sidebar)
         require __DIR__ . '/../../../View/admin/auth/login.php';

@@ -11,6 +11,23 @@ $accent   = $branding['accent_color']   ?? '#d4a84b';
 $admin = $_SESSION['admin'] ?? [];
 $adminName = $admin['name'] ?? 'Admin';
 $adminInitials = strtoupper(substr($adminName, 0, 2));
+
+// Check if we need simple brightness adjustments
+// If App\Support\ColorUtils doesn't exist, we use the raw color.
+if (class_exists(\App\Support\ColorUtils::class)) {
+    // Generate palette based on primary
+    $p900 = \App\Support\ColorUtils::adjustBrightness($primary, -20);
+    $p800 = $primary;
+    $p700 = \App\Support\ColorUtils::adjustBrightness($primary, 10);
+    $p500 = \App\Support\ColorUtils::adjustBrightness($primary, 40);
+    
+    // Generate accent palette
+    $g500 = $accent;
+    $g400 = \App\Support\ColorUtils::adjustBrightness($accent, 10);
+} else {
+    $p900 = $primary; $p800 = $primary; $p700 = $primary; $p500 = $primary;
+    $g500 = $accent; $g400 = $accent;
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -23,14 +40,28 @@ $adminInitials = strtoupper(substr($adminName, 0, 2));
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Bootstrap + Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     
     <!-- NimbusDocs Theme -->
-    <link href="/css/nimbusdocs-theme.css" rel="stylesheet">
+    <link href="<?= ($config['base_url'] ?? '') ?>/css/nimbusdocs-theme.css" rel="stylesheet">
+    
+    <!-- Custom Branding Injection -->
+    <style>
+        :root {
+            /* Overlay Brand Colors if customized */
+            --nd-navy-900: <?= $p900 ?>;
+            --nd-navy-800: <?= $p800 ?>;
+            --nd-navy-700: <?= $p700 ?>;
+            --nd-navy-500: <?= $p500 ?>;
+            
+            --nd-gold-500: <?= $g500 ?>;
+            --nd-gold-400: <?= $g400 ?>;
+        }
+    </style>
 </head>
 
 <body>
@@ -43,58 +74,65 @@ $adminInitials = strtoupper(substr($adminName, 0, 2));
                 <?= htmlspecialchars($pageTitle ?? 'Dashboard', ENT_QUOTES, 'UTF-8') ?>
             </div>
             
-            <div class="nd-header-actions">
+            <div class="d-flex align-items-center gap-3">
                 <!-- Search -->
                 <form action="/admin/search" method="GET" class="d-none d-md-block">
                     <div class="position-relative">
                         <input type="text" 
                                name="q" 
                                class="nd-input" 
-                               placeholder="Pesquisar no sistema..." 
-                               style="width: 240px; padding-left: 2.5rem; padding-right: 1rem; height: 38px;">
+                               placeholder="Pesquisar..." 
+                               style="width: 240px; padding-left: 2.25rem; height: 38px; font-size: 0.875rem;">
                         <i class="bi bi-search position-absolute" 
                            style="left: 0.875rem; top: 50%; transform: translateY(-50%); color: var(--nd-gray-400);"></i>
                     </div>
                 </form>
                 
-                <!-- Notifications Dropdown -->
+                <!-- Notifications -->
                 <div class="dropdown">
-                    <button class="nd-btn nd-btn-outline nd-btn-sm position-relative" 
+                    <button class="nd-btn nd-btn-ghost p-2 position-relative rounded-circle" 
                             type="button" 
-                            data-bs-toggle="dropdown">
-                        <i class="bi bi-bell"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                              style="font-size: 0.65rem;" 
+                            data-bs-toggle="dropdown"
+                            style="width: 38px; height: 38px;">
+                        <i class="bi bi-bell" style="font-size: 1.1rem;"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white" 
+                              style="font-size: 0.6rem; padding: 0.25em 0.4em;" 
                               id="notificationBadge">0</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 300px;">
-                        <li><h6 class="dropdown-header">Notificações</h6></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><span class="dropdown-item-text text-muted small">Nenhuma notificação recente</span></li>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" style="min-width: 300px;">
+                        <li><h6 class="dropdown-header text-uppercase small fw-bold">Notificações</h6></li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li><span class="dropdown-item-text text-muted small py-3 text-center d-block">Nenhuma notificação recente</span></li>
                     </ul>
                 </div>
                 
+                <!-- Divider -->
+                <div class="vr h-50 mx-1 bg-secondary opacity-25"></div>
+
                 <!-- User Dropdown -->
                 <div class="dropdown">
-                    <button class="nd-btn nd-btn-outline nd-btn-sm d-flex align-items-center gap-2" 
+                    <button class="d-flex align-items-center gap-2 border-0 bg-transparent p-0" 
                             type="button" 
                             data-bs-toggle="dropdown">
-                        <div class="nd-avatar" style="width: 32px; height: 32px; font-size: 0.75rem;">
+                        <div class="nd-avatar" style="width: 38px; height: 38px;">
                             <?= htmlspecialchars($adminInitials) ?>
                         </div>
-                        <span class="d-none d-md-inline"><?= htmlspecialchars($adminName) ?></span>
-                        <i class="bi bi-chevron-down" style="font-size: 0.75rem;"></i>
+                        <div class="d-none d-md-block text-start">
+                            <div class="fw-bold text-dark" style="font-size: 0.85rem; line-height: 1.2;"><?= htmlspecialchars($adminName) ?></div>
+                            <div class="text-muted" style="font-size: 0.7rem;">Administrador</div>
+                        </div>
+                        <i class="bi bi-chevron-down text-muted ms-1" style="font-size: 0.75rem;"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2">
                         <li>
-                            <a class="dropdown-item" href="/admin/2fa/setup">
-                                <i class="bi bi-shield-lock me-2"></i>Segurança da Conta (2FA)
+                            <a class="dropdown-item py-2" href="/admin/2fa/setup">
+                                <i class="bi bi-shield-lock me-2 text-primary"></i>Segurança 2FA
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                            <a class="dropdown-item text-danger" href="/admin/logout">
-                                <i class="bi bi-box-arrow-left me-2"></i>Encerrar Sessão
+                            <a class="dropdown-item py-2 text-danger" href="/admin/logout">
+                                <i class="bi bi-box-arrow-left me-2"></i>Sair
                             </a>
                         </li>
                     </ul>
@@ -113,23 +151,25 @@ $adminInitials = strtoupper(substr($adminName, 0, 2));
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/nimbusdocs-utils.js"></script>
     
-    <!-- Notification Badge Update -->
     <script>
     (function() {
+        // Simple badge updater
         async function updateNotificationBadge() {
             try {
                 const response = await fetch('/admin/api/notifications');
+                if (!response.ok) return;
                 const data = await response.json();
                 const badge = document.getElementById('notificationBadge');
                 if (badge && data.count !== undefined) {
                     badge.textContent = data.count > 9 ? '9+' : data.count;
-                    badge.style.display = data.count > 0 ? 'inline' : 'none';
+                    badge.style.display = data.count > 0 ? 'inline-block' : 'none';
                 }
             } catch (e) {
-                console.error('Error fetching notifications:', e);
+                // Silent fail
             }
         }
         updateNotificationBadge();
@@ -137,5 +177,4 @@ $adminInitials = strtoupper(substr($adminName, 0, 2));
     })();
     </script>
 </body>
-
 </html>

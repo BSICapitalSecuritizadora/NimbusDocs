@@ -32,6 +32,8 @@ final class PortalLoginController
         $pageTitle   = 'Acesso ao Portal';
         $contentView = __DIR__ . '/../../../View/portal/login.php';
         $viewData    = [
+            'branding'  => $this->config['branding'] ?? [],
+            'config'    => $this->config,
             'csrfToken' => Csrf::token(),
             'flash'     => [
                 'error' => Session::getFlash('error'),
