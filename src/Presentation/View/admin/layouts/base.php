@@ -37,17 +37,16 @@ if (class_exists(\App\Support\ColorUtils::class)) {
     <title><?= htmlspecialchars($appName . ' — ' . ($pageTitle ?? 'Admin'), ENT_QUOTES, 'UTF-8') ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Local Fonts (System Font Stack) -->
+    <link href="<?= ($config['base_url'] ?? '') ?>/assets/fonts/fonts.css" rel="stylesheet">
     
-    <!-- Bootstrap + Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Bootstrap + Icons (Local) -->
+    <link href="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
     
     <!-- NimbusDocs Theme (load after Bootstrap to override properly) -->
     <link href="<?= ($config['base_url'] ?? '') ?>/css/nimbusdocs-theme.css?v=<?= time() ?>" rel="stylesheet">
+
     
     <!-- Custom Branding Injection -->
     <style>
@@ -151,8 +150,8 @@ if (class_exists(\App\Support\ColorUtils::class)) {
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Scripts (Local) -->
+    <script src="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
     <script src="/js/nimbusdocs-utils.js"></script>
     
     <script>

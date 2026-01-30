@@ -1,0 +1,70 @@
+/*
+ * Local Fonts CSS for NimbusDocs
+ * Uses high-quality system native fonts for best performance and CSP compliance
+ * 
+ * Benefits of system fonts:
+ * - Zero network requests
+ * - Instant rendering (no FOIT/FOUT)
+ * - Full CSP compliance
+ * - Excellent typography on all platforms
+ */
+
+:root {
+  /* 
+   * Modern System Font Stack
+   * Provides premium typography across all platforms without external dependencies
+   */
+  
+  /* Primary UI Font - matches platform conventions */
+  --nd-font-sans: 
+    'Segoe UI',           /* Windows 10/11 */
+    'SF Pro Display',      /* macOS/iOS */
+    -apple-system,         /* macOS/iOS fallback */
+    BlinkMacSystemFont,    /* macOS Chrome */
+    'Roboto',              /* Android/Chrome OS */
+    'Noto Sans',           /* Linux */
+    'Helvetica Neue',      /* Legacy macOS */
+    Arial, 
+    sans-serif;
+  
+  /* Heading Font - same as sans for consistency */
+  --nd-font-heading: 
+    'Segoe UI Semibold',   /* Windows (if available) */
+    'SF Pro Display',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto Medium',
+    'Noto Sans',
+    sans-serif;
+  
+  /* Monospace - for code and technical content */
+  --nd-font-mono: 
+    'Cascadia Code',       /* Windows Terminal/VS Code */
+    'SF Mono',             /* macOS */
+    'Fira Code',           /* Popular dev font */
+    'JetBrains Mono',      /* JetBrains IDEs */
+    Consolas,              /* Windows legacy */
+    Monaco,                /* macOS legacy */
+    'Liberation Mono',     /* Linux */
+    monospace;
+}
+
+/* Apply base font to body */
+body {
+  font-family: var(--nd-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Apply heading font to headings */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: var(--nd-font-heading);
+}
+
+/* Apply mono font to code elements */
+code, kbd, pre, samp {
+  font-family: var(--nd-font-mono);
+}

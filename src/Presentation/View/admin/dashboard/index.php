@@ -525,8 +525,8 @@
     }
 </style>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<!-- Chart.js (Local) -->
+<script src="<?= ($config['base_url'] ?? '') ?>/assets/vendor/chart.js"></script>
 <script>
 (function(){
     const statusData = <?= json_encode($chartStatusCounts ?? [], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>;

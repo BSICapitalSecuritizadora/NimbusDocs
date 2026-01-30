@@ -33,15 +33,14 @@ if (class_exists(\App\Support\ColorUtils::class)) {
     <meta name="description" content="Portal Administrativo - <?= htmlspecialchars($appName) ?>">
     <title>Login Administrativo - <?= htmlspecialchars($appName) ?></title>
     
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Local Fonts (System Font Stack) -->
+    <link href="<?= ($config['base_url'] ?? '') ?>/assets/fonts/fonts.css" rel="stylesheet">
     
-    <!-- Styles -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Styles (Local) -->
+    <link href="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
     <link href="<?= ($config['base_url'] ?? '') ?>/css/nimbusdocs-theme.css?v=<?= time() ?>" rel="stylesheet">
+
     
     <style>
         :root {
@@ -278,8 +277,8 @@ if (class_exists(\App\Support\ColorUtils::class)) {
         </p>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Scripts (Local) -->
+    <script src="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
     <script>
         // Auto-hide alert after 5 seconds
         const alertEl = document.getElementById('alertError');
