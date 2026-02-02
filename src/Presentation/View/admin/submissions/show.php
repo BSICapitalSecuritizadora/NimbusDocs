@@ -462,7 +462,7 @@ $statusIcon = match($submission['status'] ?? '') {
                     </div>
 
                     <button type="submit" class="nd-btn nd-btn-gold nd-btn-sm">
-                        <i class="bi bi-send me-2"></i>Transmitir Arquivos
+                        <i class="bi bi-send me-2"></i>Enviar Arquivos
                     </button>
                 </form>
             </div>

@@ -523,6 +523,45 @@
     .nd-alert-card-arrow {
         opacity: 0.4;
     }
+
+    /* Mobile Responsive Fix for Metric Cards & Header */
+    @media (max-width: 575.98px) {
+        .nd-metric-card > .d-flex {
+            flex-direction: column;
+            align-items: center !important;
+            text-align: center;
+            gap: 0.5rem;
+        }
+        
+        .nd-metric-icon {
+            margin-bottom: 0.25rem;
+        }
+
+        .nd-metric-card .text-end {
+            text-align: center !important;
+        }
+
+        /* Header Responsive */
+        .nd-page-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 1rem;
+        }
+        
+        .nd-page-header .d-flex {
+            width: 100%;
+        }
+        
+        .nd-page-header .nd-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Hide avatars in tables on mobile to save space */
+        .nd-table .nd-avatar {
+            display: none !important;
+        }
+    }
 </style>
 
 <!-- Chart.js (Local) -->
