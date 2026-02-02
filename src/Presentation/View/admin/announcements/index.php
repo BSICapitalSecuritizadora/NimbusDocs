@@ -14,7 +14,7 @@ if ($search) {
 }
 ?>
 <!-- Page Header -->
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 nd-page-header">
     <div class="d-flex align-items-center gap-3">
         <div class="nd-avatar nd-avatar-lg" style="background: var(--nd-navy-600);">
             <i class="bi bi-megaphone-fill text-white"></i>
@@ -163,14 +163,14 @@ if ($search) {
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-end">
-                                    <div class="btn-group">
+                                    <div class="d-flex gap-2 justify-content-end">
                                         <a href="/admin/announcements/<?= (int)$a['id'] ?>/edit"
                                             class="nd-btn nd-btn-outline nd-btn-sm"
                                             title="Editar Comunicado">
                                             <i class="bi bi-pencil"></i>
                                         </a>
 
-                                        <button type="button" class="nd-btn nd-btn-outline nd-btn-sm text-danger border-start-0" 
+                                        <button type="button" class="nd-btn nd-btn-outline nd-btn-sm text-danger" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#deleteModal"
                                             data-id="<?= (int)$a['id'] ?>"
@@ -236,3 +236,20 @@ deleteModal?.addEventListener('show.bs.modal', function(e) {
   deleteForm.action = `/admin/announcements/${id}/delete`;
 });
 </script>
+
+<style>
+    @media (max-width: 575.98px) {
+        .nd-page-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 1rem;
+        }
+        .nd-page-header > .d-flex {
+            width: 100%;
+        }
+        .nd-page-header .nd-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
