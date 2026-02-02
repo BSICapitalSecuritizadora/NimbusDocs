@@ -41,7 +41,7 @@ $isExpired = !$isUsed && (strtotime($token['expires_at']) < time());
                         <?php $code = (string)($token['code'] ?? ''); ?>
                         <div class="d-flex align-items-center gap-2">
                             <div class="p-3 bg-light rounded border d-flex align-items-center justify-content-between flex-grow-1">
-                                <code class="fs-5 fw-bold text-dark" style="letter-spacing: 2px;"><?= htmlspecialchars($code, ENT_QUOTES, 'UTF-8') ?></code>
+                                <code class="fs-5 fw-bold text-dark text-break" style="letter-spacing: 2px; word-break: break-all;"><?= htmlspecialchars($code, ENT_QUOTES, 'UTF-8') ?></code>
                                 <i class="bi bi-clipboard text-muted" style="cursor: pointer;" title="Copiar"></i>
                             </div>
                         </div>
