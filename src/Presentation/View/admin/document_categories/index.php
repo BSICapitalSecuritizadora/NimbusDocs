@@ -141,7 +141,7 @@ if ($search) {
                                     </div>
                                 </td>
                                 <td class="text-end">
-                                    <div class="btn-group">
+                                    <div class="d-flex gap-2 justify-content-end">
                                         <!-- Edit Action (could be distinct page or same modal, here assuming distinct based on existing code) -->
                                         <a href="/admin/document-categories/<?= (int)$cat['id'] ?>/edit"
                                             class="nd-btn nd-btn-outline nd-btn-sm"
@@ -149,7 +149,7 @@ if ($search) {
                                             <i class="bi bi-pencil"></i>
                                         </a>
 
-                                        <button type="button" class="nd-btn nd-btn-outline nd-btn-sm text-danger border-start-0" 
+                                        <button type="button" class="nd-btn nd-btn-outline nd-btn-sm text-danger" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#deleteModal"
                                             data-cat-id="<?= (int)$cat['id'] ?>"
