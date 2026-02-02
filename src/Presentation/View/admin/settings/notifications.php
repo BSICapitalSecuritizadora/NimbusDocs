@@ -152,7 +152,7 @@ $has = fn(string $key, bool $default = true)
             </div>
             <div class="nd-card-body">
                 <div class="d-flex align-items-start gap-3 mb-3">
-                    <img src="https://img.icons8.com/color/48/microsoft.png" alt="Microsoft" width="32" height="32">
+                    <i class="bi bi-microsoft text-primary" style="font-size: 2rem;"></i>
                     <div>
                         <h6 class="fw-bold mb-1 small text-uppercase text-muted">Provedor de E-mail</h6>
                         <div class="fw-bold text-dark">Microsoft Graph API</div>
