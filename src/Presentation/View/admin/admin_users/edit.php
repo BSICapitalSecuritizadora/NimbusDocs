@@ -50,7 +50,7 @@ $errors = $errors ?? [];
                         <div class="nd-card-body">
                             <div class="row gx-3 gy-2">
                                 <div class="col-md-12 mb-3">
-                                    <label class="nd-label" for="full_name">Nome do Responsável</label>
+                                    <label class="nd-label" for="full_name">Nome do Usuário</label>
                                     <div class="nd-input-group">
                                         <input
                                             type="text"
@@ -71,7 +71,7 @@ $errors = $errors ?? [];
                                 </div>
 
                                 <div class="col-md-12 mb-3">
-                                    <label class="nd-label" for="email">E-mail Corporativo</label>
+                                    <label class="nd-label" for="email">E-mail</label>
                                     <div class="nd-input-group">
                                         <input
                                             type="email"
