@@ -241,5 +241,8 @@
             width: 100%;
             justify-content: center;
         }
+        .nd-table .nd-avatar {
+            display: none !important;
+        }
     }
 </style>
