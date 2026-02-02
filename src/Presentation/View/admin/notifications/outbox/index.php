@@ -9,7 +9,7 @@ use App\Support\Auth;
 ?>
 
 <!-- Page Header -->
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 nd-page-header">
     <div class="d-flex align-items-center gap-3">
         <div class="nd-avatar nd-avatar-lg" style="background: var(--nd-navy-600);">
             <i class="bi bi-envelope-paper-fill text-white"></i>
@@ -270,7 +270,7 @@ use App\Support\Auth;
                                     </div>
                                 </td>
                                 <td class="text-end">
-                                    <div class="btn-group">
+                                    <div class="d-flex gap-2 justify-content-end">
                                         <?php if (($r['status'] ?? '') === 'FAILED'): ?>
                                             <form method="post" action="/admin/notifications/outbox/<?= (int)$r['id'] ?>/reprocess" class="d-inline" onsubmit="return confirm('Reenviar esta mensagem?');">
                                                 <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken) ?>">
@@ -283,13 +283,13 @@ use App\Support\Auth;
                                         <?php if (($r['status'] ?? '') === 'PENDING'): ?>
                                             <form method="post" action="/admin/notifications/outbox/<?= (int)$r['id'] ?>/cancel" class="d-inline" onsubmit="return confirm('Cancelar envio?');">
                                                 <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken) ?>">
-                                                <button class="nd-btn nd-btn-outline nd-btn-sm text-danger border-start-0" title="Cancelar Envio">
+                                                <button class="nd-btn nd-btn-outline nd-btn-sm text-danger" title="Cancelar Envio">
                                                     <i class="bi bi-x-lg"></i>
                                                 </button>
                                             </form>
                                         <?php endif; ?>
                                         
-                                        <a href="/admin/notifications/outbox/<?= (int)$r['id'] ?>" class="nd-btn nd-btn-outline nd-btn-sm border-start-0" title="Ver Detalhes do Log">
+                                        <a href="/admin/notifications/outbox/<?= (int)$r['id'] ?>" class="nd-btn nd-btn-outline nd-btn-sm" title="Ver Detalhes do Log">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                     </div>
@@ -305,3 +305,20 @@ use App\Support\Auth;
         <?php endif; ?>
     </div>
 </div>
+
+<style>
+    @media (max-width: 575.98px) {
+        .nd-page-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 1rem;
+        }
+        .nd-page-header > .d-flex {
+            width: 100%;
+        }
+        .nd-page-header .nd-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
