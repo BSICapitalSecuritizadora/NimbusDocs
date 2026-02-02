@@ -180,9 +180,9 @@
 
         <!-- Danger Zone -->
         <div class="nd-card border-danger">
-            <div class="nd-card-header bg-danger text-white d-flex align-items-center gap-2">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                <h5 class="nd-card-title mb-0 text-white">Zona de Perigo</h5>
+            <div class="nd-card-header bg-danger-subtle d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                <h5 class="nd-card-title mb-0 text-danger">Zona de Perigo</h5>
             </div>
             <div class="nd-card-body">
                 <p class="small text-muted mb-3">
