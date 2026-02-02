@@ -171,5 +171,8 @@ $pages   = $pagination['pages'] ?? 1;
             width: 100%;
             justify-content: center;
         }
+        .nd-table .nd-avatar {
+            display: none !important;
+        }
     }
 </style>
