@@ -197,7 +197,7 @@ if (class_exists(\App\Support\ColorUtils::class)) {
             
             <!-- Email Field -->
             <div class="mb-3">
-                <label for="email" class="nd-label">E-mail Corporativo</label>
+                <label for="email" class="nd-label">E-mail</label>
                 <div class="nd-input-group">
                     <input type="email" 
                            class="nd-input" 
@@ -273,7 +273,7 @@ if (class_exists(\App\Support\ColorUtils::class)) {
         
         <!-- Footer -->
         <p class="text-center mt-4 mb-0 x-small text-muted">
-            &copy; <?= date('Y') ?> <?= htmlspecialchars($appName) ?>. Acesso Restrito.
+            &copy; <?= date('Y') ?> BSI Capital Securitizadora. Acesso Restrito.
         </p>
     </div>
 
