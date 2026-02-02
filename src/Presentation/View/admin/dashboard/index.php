@@ -559,7 +559,7 @@
                         padding: 20,
                         usePointStyle: true,
                         pointStyle: 'circle',
-                        font: { family: 'Inter', size: 12 }
+                        font: { family: "'Segoe UI', 'SF Pro Display', -apple-system, 'Roboto', sans-serif", size: 12 }
                     }
                 }
             }
@@ -600,12 +600,12 @@
                 y: { 
                     beginAtZero: true,
                     grid: { color: 'rgba(0,0,0,0.04)' },
-                    ticks: { font: { family: 'Inter', size: 11 } }
+                    ticks: { font: { family: "'Segoe UI', 'SF Pro Display', -apple-system, 'Roboto', sans-serif", size: 11 } }
                 },
                 x: {
                     grid: { display: false },
                     ticks: { 
-                        font: { family: 'Inter', size: 11 },
+                        font: { family: "'Segoe UI', 'SF Pro Display', -apple-system, 'Roboto', sans-serif", size: 11 },
                         maxRotation: 0
                     }
                 }
