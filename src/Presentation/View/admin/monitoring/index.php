@@ -5,7 +5,7 @@
  */
 ?>
 <!-- Header e Actions -->
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 nd-page-header">
     <div class="d-flex align-items-center gap-3">
         <div class="nd-avatar nd-avatar-lg" style="background: var(--nd-navy-600); color: #fff;">
             <i class="bi bi-speedometer2"></i>
@@ -312,3 +312,21 @@
         location.reload();
     }, 30000);
 </script>
+</script>
+
+<style>
+    @media (max-width: 575.98px) {
+        .nd-page-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 1rem;
+        }
+        .nd-page-header > .d-flex {
+            width: 100%;
+        }
+        .nd-page-header .nd-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
