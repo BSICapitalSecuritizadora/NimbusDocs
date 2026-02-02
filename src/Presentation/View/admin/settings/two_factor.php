@@ -134,11 +134,11 @@
 
                         <!-- Right: Validation -->
                         <div class="col-md-6 bg-white">
-                            <div class="p-4 h-100 d-flex flex-column justify-content-center">
+                            <div class="p-4 h-100 d-flex flex-column justify-content-center align-items-center text-center">
                                  <div class="mb-4">
                                     <div class="badge bg-primary-subtle text-primary mb-2 px-3 py-2 rounded-pill">Passo 2</div>
                                     <h6 class="fw-bold text-dark">Validar Vínculo</h6>
-                                    <p class="small text-muted">Digite o código de 6 dígitos que apareceu no seu celular para confirmar.</p>
+                                    <p class="small text-muted mx-auto" style="max-width: 280px;">Digite o código de 6 dígitos que apareceu no seu celular para confirmar.</p>
                                 </div>
 
                                 <form method="POST" action="/admin/2fa/enable">
