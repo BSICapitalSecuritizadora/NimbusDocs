@@ -89,7 +89,7 @@ if (!headers_sent()) {
     header("Permissions-Policy: geolocation=(), camera=(), microphone=()");
     
     // CSP: Allow 'self', data: images, and unsafe-inline for styles/scripts (compatibility)
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self';");
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self';");
 
     if ($isHttps) {
         header("Strict-Transport-Security: max-age=31536000; includeSubDomains");

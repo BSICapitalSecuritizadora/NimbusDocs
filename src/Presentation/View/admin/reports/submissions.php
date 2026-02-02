@@ -95,9 +95,9 @@ $queryExport = http_build_query([
 <!-- KPIs -->
 <div class="row g-4 mb-4">
     <!-- Total Recebido -->
-    <div class="col-6 col-md-3">
+    <div class="col-12 col-sm-6 col-md-3">
         <div class="nd-card h-100 border-0 shadow-sm hover-shadow transition-fast position-relative overflow-hidden">
-            <div class="nd-card-body p-4">
+            <div class="nd-card-body p-3 p-md-4">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <div>
                         <div class="small text-muted text-uppercase fw-bold ls-1">Total Recebido</div>
@@ -115,9 +115,9 @@ $queryExport = http_build_query([
     </div>
 
     <!-- Pendentes -->
-    <div class="col-6 col-md-3">
+    <div class="col-12 col-sm-6 col-md-3">
         <div class="nd-card h-100 border-0 shadow-sm hover-shadow transition-fast position-relative overflow-hidden">
-           <div class="nd-card-body p-4">
+           <div class="nd-card-body p-3 p-md-4">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <div>
                         <div class="small text-muted text-uppercase fw-bold ls-1">Pendentes</div>
@@ -135,9 +135,9 @@ $queryExport = http_build_query([
     </div>
 
     <!-- Concluídas -->
-    <div class="col-6 col-md-3">
+    <div class="col-12 col-sm-6 col-md-3">
         <div class="nd-card h-100 border-0 shadow-sm hover-shadow transition-fast position-relative overflow-hidden">
-            <div class="nd-card-body p-4">
+            <div class="nd-card-body p-3 p-md-4">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <div>
                         <div class="small text-muted text-uppercase fw-bold ls-1">Concluídas</div>
@@ -155,9 +155,9 @@ $queryExport = http_build_query([
     </div>
 
     <!-- Rejeitadas -->
-    <div class="col-6 col-md-3">
+    <div class="col-12 col-sm-6 col-md-3">
         <div class="nd-card h-100 border-0 shadow-sm hover-shadow transition-fast position-relative overflow-hidden">
-            <div class="nd-card-body p-4">
+            <div class="nd-card-body p-3 p-md-4">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <div>
                         <div class="small text-muted text-uppercase fw-bold ls-1">Rejeitadas</div>
