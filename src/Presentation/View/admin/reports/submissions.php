@@ -209,7 +209,7 @@ $queryExport = http_build_query([
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="fw-bold text-muted small" style="width: 20px;">#<?= $index + 1 ?></div>
-                                        <div class="nd-avatar nd-avatar-sm" style="background-color: var(--nd-gray-100); color: var(--nd-gray-600);">
+                                        <div class="nd-avatar nd-avatar-sm d-none d-sm-flex" style="background-color: var(--nd-gray-100); color: var(--nd-gray-600);">
                                             <?= strtoupper(substr($row['full_name'] ?? 'U', 0, 1)) ?>
                                         </div>
                                         <div>
@@ -270,7 +270,7 @@ $queryExport = http_build_query([
                             <tr>
                                 <td class="ps-4">
                                      <div class="d-flex align-items-center gap-2">
-                                        <div class="nd-avatar nd-avatar-xs rounded-circle bg-light border">
+                                        <div class="nd-avatar nd-avatar-xs rounded-circle bg-light border d-none d-sm-flex">
                                             <i class="bi bi-person text-secondary"></i>
                                         </div>
                                         <div>
