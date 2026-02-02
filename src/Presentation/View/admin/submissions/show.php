@@ -113,6 +113,7 @@ $statusIcon = match($submission['status'] ?? '') {
 
             <hr class="my-4">
 
+            <?php if (!in_array($submission['status'] ?? '', ['COMPLETED', 'APPROVED', 'REJECTED'])): ?>
             <!-- Formulário de Alteração de Status -->
             <div class="p-4 rounded" style="background: linear-gradient(135deg, var(--nd-gray-50) 0%, rgba(212, 168, 75, 0.05) 100%); border: 1px solid var(--nd-gray-200);">
                 <h3 class="h6 fw-semibold mb-3 d-flex align-items-center gap-2">
@@ -158,7 +159,7 @@ $statusIcon = match($submission['status'] ?? '') {
                         
                         <div class="col-12">
                             <div class="d-flex gap-2 flex-wrap">
-                                <button type="submit" class="nd-btn nd-btn-primary" onclick="document.getElementById('status').value='COMPLETED';">
+                                <button type="submit" class="nd-btn nd-btn-primary" onclick="document.getElementById('status').value='COMPLETED'; return confirm('✅ Tem certeza que deseja APROVAR este envio?\n\nEsta ação notificará o solicitante.');">
                                     <i class="bi bi-check-lg me-1"></i> Aprovar
                                 </button>
                                 <button type="submit" class="nd-btn nd-btn-outline" style="border-color: var(--nd-danger); color: var(--nd-danger);" 
@@ -173,6 +174,7 @@ $statusIcon = match($submission['status'] ?? '') {
                     </div>
                 </form>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -271,7 +273,14 @@ $statusIcon = match($submission['status'] ?? '') {
                         </div>
                          <div class="col-md-3">
                             <label class="text-muted small d-block">CPF do Declarante</label>
-                            <span class="fw-medium"><?= htmlspecialchars($submission['registrant_cpf'] ?? '-', ENT_QUOTES, 'UTF-8') ?></span>
+                            <span class="fw-medium">
+                                <?php 
+                                    $cpf = preg_replace('/\D/', '', $submission['registrant_cpf'] ?? '');
+                                    echo mb_strlen($cpf) === 11 
+                                        ? preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $cpf) 
+                                        : htmlspecialchars($submission['registrant_cpf'] ?? '-', ENT_QUOTES, 'UTF-8');
+                                ?>
+                            </span>
                         </div>
                          <div class="col-md-3">
                             <label class="text-muted small d-block">RG do Declarante</label>
