@@ -207,7 +207,7 @@ if ($catFilter) {
                                     </div>
                                 </td>
                                 <td class="text-end">
-                                    <div class="btn-group">
+                                    <div class="d-flex gap-2 justify-content-end">
                                          <button type="button" class="nd-btn nd-btn-outline nd-btn-sm" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#toggleModal"
@@ -223,7 +223,7 @@ if ($catFilter) {
                                             <i class="bi bi-pencil"></i>
                                         </a>
 
-                                        <button type="button" class="nd-btn nd-btn-outline nd-btn-sm text-danger border-start-0" 
+                                        <button type="button" class="nd-btn nd-btn-outline nd-btn-sm text-danger" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#deleteModal"
                                             data-doc-id="<?= (int)$doc['id'] ?>"
