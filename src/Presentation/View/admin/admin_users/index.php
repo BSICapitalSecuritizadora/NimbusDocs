@@ -10,7 +10,7 @@ $pages   = $pagination['pages'] ?? 1;
 ?>
 
 <!-- Page Header -->
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 nd-page-header">
     <div class="d-flex align-items-center gap-3">
         <div class="nd-avatar nd-avatar-lg" style="background: var(--nd-navy-600);">
             <i class="bi bi-shield-lock-fill text-white"></i>
@@ -156,3 +156,20 @@ $pages   = $pagination['pages'] ?? 1;
         <?php endif; ?>
     </div>
 </div>
+
+<style>
+    @media (max-width: 575.98px) {
+        .nd-page-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 1rem;
+        }
+        .nd-page-header > .d-flex {
+            width: 100%;
+        }
+        .nd-page-header .nd-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>

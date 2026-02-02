@@ -204,3 +204,11 @@ $query = http_build_query([
     </div>
     <?php endif; ?>
 </div>
+
+<style>
+    @media (max-width: 575.98px) {
+        .nd-table .nd-avatar {
+            display: none !important;
+        }
+    }
+</style>
