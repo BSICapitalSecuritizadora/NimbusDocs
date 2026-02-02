@@ -254,5 +254,8 @@ deleteModal?.addEventListener('show.bs.modal', function(e) {
             width: 100%;
             justify-content: center;
         }
+        .nd-table .nd-avatar {
+            display: none !important;
+        }
     }
 </style>
