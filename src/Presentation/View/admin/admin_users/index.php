@@ -115,7 +115,7 @@ $pages   = $pagination['pages'] ?? 1;
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-end">
-                                    <div class="btn-group">
+                                    <div class="d-flex gap-2 justify-content-end">
                                         <a href="/admin/users/<?= (int)$user['id'] ?>/edit" class="nd-btn nd-btn-outline nd-btn-sm" title="Editar">
                                             <i class="bi bi-pencil"></i>
                                         </a>
@@ -125,7 +125,7 @@ $pages   = $pagination['pages'] ?? 1;
                                                 class="d-inline"
                                                 onsubmit="return confirm('Deseja desativar este administrador?');">
                                                 <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
-                                                <button type="submit" class="nd-btn nd-btn-outline nd-btn-sm text-danger border-start-0" title="Desativar">
+                                                <button type="submit" class="nd-btn nd-btn-outline nd-btn-sm text-danger" title="Desativar">
                                                     <i class="bi bi-person-x-fill"></i>
                                                 </button>
                                             </form>
