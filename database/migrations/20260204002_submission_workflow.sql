@@ -1,15 +1,30 @@
 -- Migration: Workflow de Aprovação/Reenvio
 -- Adiciona comentários em submissões e status NEEDS_CORRECTION
 
--- Adicionar status NEEDS_CORRECTION ao enum de portal_submissions
--- (Assumindo que já existe uma coluna status com ENUM)
+-- Passo 1: Atualizar ENUM incluindo COMPLETED (para migração segura)
 ALTER TABLE portal_submissions 
 MODIFY COLUMN status ENUM(
     'PENDING', 
     'UNDER_REVIEW', 
-    'NEEDS_CORRECTION',  -- Novo: requer correção do usuário
+    'NEEDS_CORRECTION', 
     'APPROVED', 
-    'REJECTED',
+    'REJECTED', 
+    'CANCELLED', 
+    'COMPLETED'
+) NOT NULL DEFAULT 'PENDING';
+
+-- Passo 2: Conversão de dados (COMPLETED -> APPROVED)
+UPDATE portal_submissions SET status = 'APPROVED' WHERE status = 'COMPLETED';
+
+-- Passo 3: Definir ENUM final e incluir COMPLETED se quiser manter historico ou remover
+-- Optei por remover COMPLETED do ENUM final para forçar uso de APPROVED, já que convertemos os dados acima
+ALTER TABLE portal_submissions 
+MODIFY COLUMN status ENUM(
+    'PENDING', 
+    'UNDER_REVIEW', 
+    'NEEDS_CORRECTION', 
+    'APPROVED', 
+    'REJECTED', 
     'CANCELLED'
 ) NOT NULL DEFAULT 'PENDING';
 
