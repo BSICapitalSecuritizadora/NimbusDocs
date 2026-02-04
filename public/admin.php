@@ -37,6 +37,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('POST', '/admin/login', [LoginController::class, 'handleLogin']);
     $r->addRoute('GET',  '/admin/logout', [LoginController::class, 'logout']);
 
+    // Health Check
+    $r->addRoute('GET', '/admin/health', [\App\Presentation\Controller\HealthController::class, 'check']);
+
     // Password Recovery
     $r->addRoute('GET',  '/admin/forgot-password', [\App\Presentation\Controller\Admin\PasswordResetController::class, 'showForgotForm']);
     $r->addRoute('POST', '/admin/forgot-password', [\App\Presentation\Controller\Admin\PasswordResetController::class, 'sendResetLink']);

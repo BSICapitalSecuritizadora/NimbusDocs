@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Presentation\Controller\Portal\Auth\PortalLoginController;
 use App\Presentation\Controller\Portal\PortalSubmissionController;
+use App\Presentation\Controller\HealthController;
 use App\Presentation\Controller\Portal\PortalFileController;
 use App\Presentation\Controller\Portal\PortalHomeController;
 use App\Presentation\Controller\Portal\PortalDocumentController;
@@ -28,6 +29,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     // Perfil do usuário
     $r->addRoute('GET',  '/portal/profile', [PortalProfileController::class, 'edit']);
     $r->addRoute('POST', '/portal/profile', [PortalProfileController::class, 'update']);
+
+    // Health Check
+    $r->addRoute('GET', '/portal/health', [HealthController::class, 'check']);
 
     // Submissões do usuário final
     $r->addRoute('GET',  '/portal/submissions',                [PortalSubmissionController::class, 'index']);
@@ -77,6 +81,7 @@ $requestLogger = $config['request_logger'] ?? null;
 $publicRoutes = [
     ['GET',  '/portal/login'],
     ['POST', '/portal/login'],
+    ['GET',  '/portal/health'],
 ];
 
 $isPublic = false;
