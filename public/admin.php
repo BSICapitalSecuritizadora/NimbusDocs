@@ -259,7 +259,19 @@ switch ($routeInfo[0]) {
             if (is_array($handler) && isset($handler[0], $handler[1])) {
                 [$class, $method] = $handler;
 
-                $controller = new $class($config);
+                if ($class === SubmissionAdminController::class) {
+                     // Manual DI for new services
+                     $fileService = new \App\Application\Service\FileService(
+                         new \App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository($config['pdo']),
+                         $config
+                     );
+                     $exportService = new \App\Application\Service\ExportService();
+                     
+                     $controller = new $class($config, $fileService, $exportService);
+                } else {
+                     $controller = new $class($config);
+                }
+
                 $response   = $controller->$method($vars);
 
                 if (is_string($response)) {

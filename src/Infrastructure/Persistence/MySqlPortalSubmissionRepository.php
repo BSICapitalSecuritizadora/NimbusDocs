@@ -428,7 +428,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
      * @param array $filters
      * @return array<int,array>
      */
-    public function exportForAdmin(array $filters = []): array
+    public function getExportCursor(array $filters = []): \Generator
     {
         $where = [];
         $params = [];
@@ -452,6 +452,11 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
 
         $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
+        // Uses unbuffered query if possible or just yields row by row (PDO default buffers unless set otherwise)
+        // For true low memory on MySQL, we need MYSQL_ATTR_USE_BUFFERED_QUERY = false, 
+        // but that blocks other queries on same connection.
+        // For now, simpler generator approach is already better than fetchAll().
+        
         $sql = "SELECT
             s.id,
             s.reference_code,
@@ -464,13 +469,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             u.email     AS user_email,
             u.document_number AS user_document_number,
             u.phone_number    AS user_phone_number,
-            s.portal_user_id,
-            (
-                SELECT GROUP_CONCAT(t_inner.name SEPARATOR ', ')
-                FROM submission_tags st_inner
-                JOIN tags t_inner ON t_inner.id = st_inner.tag_id
-                WHERE st_inner.submission_id = s.id
-            ) AS tag_names
+            s.portal_user_id
         FROM portal_submissions s
         JOIN portal_users u ON u.id = s.portal_user_id
         $whereSql
@@ -481,7 +480,23 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             $stmt->bindValue($k, $v);
         }
         $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            yield $row;
+        }
+    }
+
+    /**
+     * Exporta submissões para o admin, já filtradas (sem paginação)
+     * @deprecated Use getExportCursor instead
+     * @param array $filters
+     * @return array<int,array>
+     */
+    public function exportForAdmin(array $filters = []): array
+    {
+        // Simple fetchAll wrapper for backwards compatibility
+        $generator = $this->getExportCursor($filters);
+        return iterator_to_array($generator);
     }
 
     /**
