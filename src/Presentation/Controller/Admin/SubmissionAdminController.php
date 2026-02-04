@@ -82,6 +82,9 @@ final class SubmissionAdminController
         $notes = $this->noteRepo->listAllForSubmission($id);
         $responseFiles = array_filter($files, static fn($f) => $f['origin'] === 'ADMIN');
         $userFiles     = array_filter($files, static fn($f) => $f['origin'] === 'USER');
+        
+        // Busca logs de auditoria desta submissão
+        $auditLogs = $this->audit->getByContext('submission', $id, 15);
 
         $pageTitle   = 'Detalhes da Submissão';
         $contentView = __DIR__ . '/../../View/admin/submissions/show.php';
@@ -91,10 +94,66 @@ final class SubmissionAdminController
             'userFiles'     => $userFiles,
             'responseFiles' => $responseFiles,
             'notes'         => $notes,
+            'auditLogs'     => $auditLogs,
             'csrfToken'     => Csrf::token(),
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
+    }
+
+    /**
+     * Reenvia notificação ao usuário sobre a submissão
+     */
+    public function resendNotification(array $vars = []): void
+    {
+        $this->requireAdmin();
+        $admin = Auth::requireAdmin();
+
+        $id = (int)($vars['id'] ?? 0);
+        $token = $_POST['_token'] ?? '';
+
+        if (!Csrf::validate($token)) {
+            Session::flash('error', 'Sessão expirada. Tente novamente.');
+            $this->redirect('/admin/submissions/' . $id);
+        }
+
+        $submission = $this->repo->findWithUserById($id);
+        if (!$submission) {
+            Session::flash('error', 'Submissão não encontrada.');
+            $this->redirect('/admin/submissions');
+        }
+
+        $portalUser = $this->portalUserRepo->findById((int)$submission['portal_user_id']);
+        if (!$portalUser) {
+            Session::flash('error', 'Usuário do portal não encontrado.');
+            $this->redirect('/admin/submissions/' . $id);
+        }
+
+        // Envia notificação
+        $notification = $this->config['notification'] ?? null;
+        if ($notification) {
+            try {
+                $notification->notifySubmissionReceived($submission, $portalUser);
+                
+                // Log de auditoria
+                $this->audit->log(
+                    'ADMIN',
+                    $admin['id'] ? (int)$admin['id'] : null,
+                    'SUBMISSION_NOTIFICATION_RESENT',
+                    'submission',
+                    $id,
+                    ['recipient_email' => $portalUser['email']]
+                );
+
+                Session::flash('success', 'Notificação reenviada com sucesso para ' . $portalUser['email'] . '.');
+            } catch (\Throwable $e) {
+                Session::flash('error', 'Erro ao reenviar notificação: ' . $e->getMessage());
+            }
+        } else {
+            Session::flash('error', 'Serviço de notificação não configurado.');
+        }
+
+        $this->redirect('/admin/submissions/' . $id);
     }
 
     private function redirect(string $path): void

@@ -64,6 +64,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('POST', '/admin/submissions/{id:\d+}/status', [SubmissionAdminController::class, 'updateStatus']);
     $r->addRoute('POST', '/admin/portal-users/{id:\d+}/access-link', [PortalUserController::class, 'generateAccessCode']);
     $r->addRoute('POST', '/admin/submissions/{id:\d+}/response-files', [SubmissionAdminController::class, 'uploadResponseFiles']);
+    $r->addRoute('POST', '/admin/submissions/{id:\d+}/resend-notification', [SubmissionAdminController::class, 'resendNotification']);
     $r->addRoute('GET',  '/admin/admin-users',             [AdminUserAdminController::class, 'index']);
     $r->addRoute('GET',  '/admin/admin-users/create',      [AdminUserAdminController::class, 'createForm']);
     $r->addRoute('POST', '/admin/admin-users',             [AdminUserAdminController::class, 'store']);

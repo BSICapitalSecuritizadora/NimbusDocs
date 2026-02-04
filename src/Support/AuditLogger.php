@@ -33,4 +33,29 @@ final class AuditLogger
             ':details'     => $context ? json_encode($context, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) : null,
         ]);
     }
+
+    /**
+     * Busca logs de auditoria por contexto (target_type + target_id)
+     * 
+     * @return array Lista de logs ordenados por data decrescente
+     */
+    public function getByContext(string $targetType, int $targetId, int $limit = 20): array
+    {
+        $sql = "SELECT al.*, 
+                       COALESCE(au.name, pu.full_name, 'Sistema') AS actor_name
+                FROM audit_logs al
+                LEFT JOIN admin_users au ON al.actor_type = 'ADMIN' AND al.actor_id = au.id
+                LEFT JOIN portal_users pu ON al.actor_type = 'PORTAL_USER' AND al.actor_id = pu.id
+                WHERE al.target_type = :target_type AND al.target_id = :target_id
+                ORDER BY al.occurred_at DESC
+                LIMIT :limit";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':target_type', $targetType, \PDO::PARAM_STR);
+        $stmt->bindValue(':target_id', $targetId, \PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

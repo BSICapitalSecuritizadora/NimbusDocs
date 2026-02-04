@@ -34,11 +34,23 @@ $statusIcon = match($submission['status'] ?? '') {
 
 <div class="d-flex flex-column gap-4">
 
-    <!-- Header com Botão Voltar -->
+    <!-- Header com Botão Voltar e Ações Rápidas -->
     <div class="d-flex align-items-center justify-content-between">
         <a href="/admin/submissions" class="nd-btn nd-btn-outline nd-btn-sm">
             <i class="bi bi-arrow-left me-1"></i> Voltar para Lista
         </a>
+        <div class="d-flex gap-2">
+            <form method="post" action="/admin/submissions/<?= (int)$submission['id'] ?>/resend-notification" class="d-inline">
+                <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                <button type="submit" class="nd-btn nd-btn-outline nd-btn-sm" 
+                    onclick="return confirm('Reenviar notificação para o usuário?');">
+                    <i class="bi bi-envelope me-1"></i> Reenviar Notificação
+                </button>
+            </form>
+            <a href="/admin/submissions/export/print?id=<?= (int)$submission['id'] ?>" target="_blank" class="nd-btn nd-btn-ghost nd-btn-sm" title="Imprimir">
+                <i class="bi bi-printer"></i>
+            </a>
+        </div>
     </div>
 
     <!-- Informações da Submissão e Alteração de Status -->
@@ -477,4 +489,93 @@ $statusIcon = match($submission['status'] ?? '') {
             </div>
         </div>
     </div>
+
+    <!-- Trilha de Auditoria -->
+    <?php if (!empty($auditLogs)): ?>
+    <div class="nd-card">
+        <div class="nd-card-header d-flex align-items-center gap-2">
+            <i class="bi bi-shield-check" style="color: var(--nd-navy-500);"></i>
+            <h2 class="nd-card-title mb-0">Trilha de Auditoria</h2>
+            <span class="nd-badge nd-badge-secondary ms-2"><?= count($auditLogs) ?></span>
+        </div>
+        <div class="nd-card-body p-0">
+            <div class="nd-table-wrapper" style="border: none; border-radius: 0;">
+                <table class="nd-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 140px;">Data/Hora</th>
+                            <th style="width: 180px;">Ação</th>
+                            <th>Usuário</th>
+                            <th>Detalhes</th>
+                            <th style="width: 120px;">IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($auditLogs as $log): ?>
+                            <?php
+                            $actionLabels = [
+                                'SUBMISSION_CREATED' => ['label' => 'Submissão Criada', 'icon' => 'bi-plus-circle', 'class' => 'success'],
+                                'PORTAL_SUBMISSION_CREATED' => ['label' => 'Enviado pelo Portal', 'icon' => 'bi-cloud-upload', 'class' => 'primary'],
+                                'SUBMISSION_STATUS_CHANGED' => ['label' => 'Status Alterado', 'icon' => 'bi-arrow-repeat', 'class' => 'info'],
+                                'SUBMISSION_NOTIFICATION_RESENT' => ['label' => 'Notificação Reenviada', 'icon' => 'bi-envelope', 'class' => 'warning'],
+                                'SUBMISSION_RESPONSE_FILES_UPLOADED' => ['label' => 'Resposta Enviada', 'icon' => 'bi-file-earmark-check', 'class' => 'gold'],
+                                'VIRUS_DETECTED' => ['label' => 'Vírus Detectado', 'icon' => 'bi-bug', 'class' => 'danger'],
+                            ];
+                            $action = $log['action'] ?? '';
+                            $config = $actionLabels[$action] ?? ['label' => ucwords(str_replace('_', ' ', strtolower($action))), 'icon' => 'bi-circle', 'class' => 'secondary'];
+                            
+                            $details = [];
+                            if (!empty($log['details'])) {
+                                $parsed = json_decode($log['details'], true);
+                                if (is_array($parsed)) {
+                                    foreach ($parsed as $k => $v) {
+                                        if (is_string($v)) {
+                                            $details[] = ucfirst(str_replace('_', ' ', $k)) . ': ' . $v;
+                                        }
+                                    }
+                                }
+                            }
+                            ?>
+                            <tr>
+                                <td class="text-muted small">
+                                    <?php
+                                    $dt = $log['occurred_at'] ?? '';
+                                    if ($dt) {
+                                        try {
+                                            $d = new DateTime($dt);
+                                            echo $d->format('d/m/Y H:i');
+                                        } catch (Exception $e) {
+                                            echo htmlspecialchars($dt, ENT_QUOTES, 'UTF-8');
+                                        }
+                                    }
+                                    ?>
+                                </td>
+                                <td>
+                                    <span class="nd-badge nd-badge-<?= $config['class'] ?>">
+                                        <i class="bi <?= $config['icon'] ?> me-1"></i>
+                                        <?= htmlspecialchars($config['label'], ENT_QUOTES, 'UTF-8') ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="nd-avatar" style="width: 24px; height: 24px; font-size: 0.65rem;">
+                                            <?= strtoupper(substr($log['actor_name'] ?? 'S', 0, 1)) ?>
+                                        </div>
+                                        <span class="small"><?= htmlspecialchars($log['actor_name'] ?? 'Sistema', ENT_QUOTES, 'UTF-8') ?></span>
+                                    </div>
+                                </td>
+                                <td class="text-muted small">
+                                    <?= htmlspecialchars(implode(' | ', $details) ?: '-', ENT_QUOTES, 'UTF-8') ?>
+                                </td>
+                                <td class="text-muted small font-monospace">
+                                    <?= htmlspecialchars($log['ip_address'] ?? '-', ENT_QUOTES, 'UTF-8') ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 </div>
