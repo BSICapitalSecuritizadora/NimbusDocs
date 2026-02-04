@@ -136,20 +136,21 @@ final class MySqlNotificationOutboxRepository
     {
         $sql = "
             INSERT INTO notification_outbox
-            (type, recipient_email, recipient_name, subject, template, payload_json, max_attempts, next_attempt_at)
+            (type, recipient_email, recipient_name, subject, template, payload_json, correlation_id, max_attempts, next_attempt_at)
             VALUES
-            (:type, :email, :name, :subject, :template, :payload, :max_attempts, :next_attempt_at)
+            (:type, :email, :name, :subject, :template, :payload, :correlation_id, :max_attempts, :next_attempt_at)
         ";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':type'           => $row['type'],
-            ':email'          => $row['recipient_email'],
-            ':name'           => $row['recipient_name'] ?? null,
-            ':subject'        => $row['subject'],
-            ':template'       => $row['template'],
-            ':payload'        => $row['payload_json'],
-            ':max_attempts'   => $row['max_attempts'] ?? 5,
+            ':type'            => $row['type'],
+            ':email'           => $row['recipient_email'],
+            ':name'            => $row['recipient_name'] ?? null,
+            ':subject'         => $row['subject'],
+            ':template'        => $row['template'],
+            ':payload'         => $row['payload_json'],
+            ':correlation_id'  => $row['correlation_id'] ?? null,
+            ':max_attempts'    => $row['max_attempts'] ?? 5,
             ':next_attempt_at' => $row['next_attempt_at'] ?? null,
         ]);
 

@@ -172,11 +172,13 @@ do {
             require $templatePath;
             $html = (string)ob_get_clean();
             
-            // Envia email
+            // Envia email com correlation_id para rastreamento
+            $correlationId = $job['correlation_id'] ?? null;
             $mail->sendMail(
                 to: $job['recipient_email'],
                 subject: $job['subject'],
-                htmlBody: $html
+                htmlBody: $html,
+                correlationId: $correlationId
             );
             
             $outbox->markSent($id);

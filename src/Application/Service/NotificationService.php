@@ -110,6 +110,9 @@ final class NotificationService
             return;
         }
 
+        // Gera correlation_id baseado na submissão
+        $correlationId = $this->generateCorrelationId('sub', (int)($submission['id'] ?? 0));
+
         foreach ($admins as $admin) {
             $this->outbox->enqueue([
                 'type'            => 'SUBMISSION_RECEIVED',
@@ -118,9 +121,26 @@ final class NotificationService
                 'subject'         => '[NimbusDocs] Nova submissão recebida',
                 'template'        => 'submission_received',
                 'payload_json'    => json_encode(['submission' => $submission, 'user' => $portalUser, 'admin' => $admin], JSON_UNESCAPED_UNICODE),
+                'correlation_id'  => $correlationId,
                 'max_attempts'    => 5,
             ]);
         }
+    }
+
+    /**
+     * Gera um ID de correlação único para rastreamento.
+     * Formato: {prefix}-{entityId}-{timestamp}-{random}
+     * Ex: sub-123-1707050000-a1b2c3
+     */
+    private function generateCorrelationId(string $prefix, int $entityId): string
+    {
+        return sprintf(
+            '%s-%d-%d-%s',
+            $prefix,
+            $entityId,
+            time(),
+            bin2hex(random_bytes(4))
+        );
     }
 
     // -----------------------------------------------------------------
