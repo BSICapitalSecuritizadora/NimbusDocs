@@ -77,8 +77,50 @@ final class Auth
         if (!$admin) {
             return false;
         }
-        $role = $admin['role'] ?? 'ADMIN';
+        $role = $admin['role'] ?? 'OPERATOR';
         return in_array($role, $roles, true);
+    }
+
+    /**
+     * Retorna o role do admin logado.
+     */
+    public static function getRole(): string
+    {
+        $admin = self::admin();
+        return $admin['role'] ?? 'OPERATOR';
+    }
+
+    /**
+     * Verifica se o admin tem permissão para uma ação em um recurso.
+     *
+     * @param string $resource Ex: 'submissions', 'portal_users'
+     * @param string $action Ex: 'view', 'create', 'edit', 'delete', 'export'
+     */
+    public static function can(string $resource, string $action): bool
+    {
+        $admin = self::admin();
+        if (!$admin) {
+            return false;
+        }
+        
+        $role = $admin['role'] ?? 'OPERATOR';
+        return PermissionService::can($role, $resource, $action);
+    }
+
+    /**
+     * Exige permissão. Se não tiver, retorna 403.
+     */
+    public static function requirePermission(string $resource, string $action): array
+    {
+        $admin = self::requireAdmin();
+        
+        if (!self::can($resource, $action)) {
+            http_response_code(403);
+            echo 'Você não tem permissão para esta ação.';
+            exit;
+        }
+
+        return $admin;
     }
 
     public static function portalUser(): ?array
