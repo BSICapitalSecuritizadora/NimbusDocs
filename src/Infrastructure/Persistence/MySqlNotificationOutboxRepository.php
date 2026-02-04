@@ -349,4 +349,125 @@ final class MySqlNotificationOutboxRepository
         ]);
     }
 
+    /**
+     * Retorna métricas agregadas da fila de notificações.
+     * @return array{backlog:int, sending:int, sent_today:int, failed_today:int, failed_total:int}
+     */
+    public function getMetrics(): array
+    {
+        $sql = "
+            SELECT 
+                SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END) as backlog,
+                SUM(CASE WHEN status = 'SENDING' THEN 1 ELSE 0 END) as sending,
+                SUM(CASE WHEN status = 'SENT' AND DATE(sent_at) = CURDATE() THEN 1 ELSE 0 END) as sent_today,
+                SUM(CASE WHEN status = 'FAILED' AND DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as failed_today,
+                SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed_total
+            FROM notification_outbox
+        ";
+        
+        $row = $this->pdo->query($sql)->fetch(PDO::FETCH_ASSOC);
+        
+        return [
+            'backlog'      => (int)($row['backlog'] ?? 0),
+            'sending'      => (int)($row['sending'] ?? 0),
+            'sent_today'   => (int)($row['sent_today'] ?? 0),
+            'failed_today' => (int)($row['failed_today'] ?? 0),
+            'failed_total' => (int)($row['failed_total'] ?? 0),
+        ];
+    }
+
+    /**
+     * Retorna contagem de falhas agrupadas por tipo.
+     * @return array<string, int>
+     */
+    public function getFailuresByType(): array
+    {
+        $sql = "
+            SELECT type, COUNT(*) as count
+            FROM notification_outbox
+            WHERE status = 'FAILED'
+            GROUP BY type
+            ORDER BY count DESC
+        ";
+        
+        $rows = $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $result = [];
+        
+        foreach ($rows as $row) {
+            $result[$row['type']] = (int)$row['count'];
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Retorna volume de envios por dia (últimos N dias).
+     * @return array<string, array{sent:int, failed:int}>
+     */
+    public function getVolumeByDay(int $days = 7): array
+    {
+        $sql = "
+            SELECT 
+                DATE(COALESCE(sent_at, created_at)) as day,
+                SUM(CASE WHEN status = 'SENT' THEN 1 ELSE 0 END) as sent,
+                SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed
+            FROM notification_outbox
+            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL :days DAY)
+            GROUP BY day
+            ORDER BY day ASC
+        ";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':days', $days, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $result = [];
+        
+        foreach ($rows as $row) {
+            $result[$row['day']] = [
+                'sent'   => (int)$row['sent'],
+                'failed' => (int)$row['failed'],
+            ];
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Retorna tempo médio de processamento (em segundos).
+     */
+    public function getAverageProcessingTime(): ?float
+    {
+        $sql = "
+            SELECT AVG(TIMESTAMPDIFF(SECOND, created_at, sent_at)) as avg_seconds
+            FROM notification_outbox
+            WHERE status = 'SENT' AND sent_at IS NOT NULL
+              AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        ";
+        
+        $row = $this->pdo->query($sql)->fetch(PDO::FETCH_ASSOC);
+        
+        return $row['avg_seconds'] !== null ? (float)$row['avg_seconds'] : null;
+    }
+
+    /**
+     * Retorna jobs que estão em DLQ (FAILED com tentativas esgotadas).
+     */
+    public function getDeadLetterQueue(int $limit = 50): array
+    {
+        $sql = "
+            SELECT *
+            FROM notification_outbox
+            WHERE status = 'FAILED'
+            ORDER BY created_at DESC
+            LIMIT :limit
+        ";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
 }

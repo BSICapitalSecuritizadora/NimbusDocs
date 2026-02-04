@@ -21,6 +21,7 @@ use App\Presentation\Controller\Admin\DocumentCategoryAdminController;
 use App\Presentation\Controller\Admin\GeneralDocumentAdminController;
 use App\Presentation\Controller\Admin\NotificationOutboxAdminController;
 use App\Presentation\Controller\Admin\MonitoringAdminController;
+use App\Presentation\Controller\Admin\NotificationMetricsController;
 use App\Infrastructure\Logging\RequestLogger;
 use App\Support\Session;
 use FastRoute\RouteCollector;
@@ -81,6 +82,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET', '/admin/submissions/export/excel', [SubmissionAdminController::class, 'exportExcel']);
     $r->addRoute('GET', '/admin/submissions/export/print', [SubmissionAdminController::class, 'exportPrint']);
     $r->addRoute('GET', '/admin/access-log/portal', [PortalAccessLogAdminController::class, 'index']);
+    $r->addRoute('GET', '/admin/notifications/metrics', [NotificationMetricsController::class, 'index']);
+    $r->addRoute('GET', '/admin/notifications/metrics/api', [NotificationMetricsController::class, 'apiMetrics']);
     $r->addRoute('GET', '/admin/reports/submissions', [ReportsAdminController::class, 'submissionsReport']);
     $r->addRoute('GET', '/admin/reports/submissions/export', [ReportsAdminController::class, 'submissionsReportExportCsv']);
     // Link manual de conta Microsoft para admin
