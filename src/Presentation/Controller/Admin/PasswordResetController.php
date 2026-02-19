@@ -8,7 +8,7 @@ use App\Infrastructure\Persistence\MySqlPasswordResetRepository;
 use App\Infrastructure\Persistence\MySqlAdminUserRepository;
 use App\Support\Csrf;
 use App\Support\Session;
-use App\Support\RateLimiter;
+use App\Infrastructure\Security\DbRateLimiter;
 
 /**
  * Controller for admin password recovery
@@ -18,12 +18,14 @@ class PasswordResetController
     private array $config;
     private MySqlPasswordResetRepository $resetRepo;
     private MySqlAdminUserRepository $userRepo;
+    private DbRateLimiter $limiter;
 
     public function __construct(array $config)
     {
         $this->config = $config;
         $this->resetRepo = new MySqlPasswordResetRepository($config['pdo']);
         $this->userRepo = new MySqlAdminUserRepository($config['pdo']);
+        $this->limiter = new DbRateLimiter($config['pdo']);
     }
 
     /**
@@ -58,16 +60,16 @@ class PasswordResetController
         $email = trim($_POST['email'] ?? '');
 
         // Rate limiting - 3 attempts per 15 minutes per IP
-        $rateLimiter = new RateLimiter();
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $scope = 'password_reset';
         
-        if (!$rateLimiter->isAllowed("password_reset:{$ip}", 3, 900)) {
+        if ($this->limiter->check($scope, $ip, 'ip_global', 3, 15)) {
             Session::flash('error', 'Muitas tentativas. Aguarde alguns minutos.');
             header('Location: /admin/forgot-password');
             exit;
         }
 
-        $rateLimiter->recordAttempt("password_reset:{$ip}", 900);
+        $this->limiter->increment($scope, $ip, 'ip_global', 3, 15);
 
         // Always show success message (don't reveal if email exists)
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {

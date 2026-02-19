@@ -8,16 +8,18 @@ use App\Infrastructure\Persistence\MySqlAdminUserRepository;
 use App\Support\AuditLogger;
 use App\Support\Csrf;
 use App\Support\Session;
-use App\Support\RateLimiter;
+use App\Infrastructure\Security\DbRateLimiter;
 use Respect\Validation\Validator as v;
 
 final class LoginController
 {
     private AuditLogger $audit;
+    private DbRateLimiter $limiter;
 
     public function __construct(private array $config)
     {
         $this->audit = new AuditLogger($config['pdo']);
+        $this->limiter = new DbRateLimiter($config['pdo']);
     }
 
     public function showLoginForm(array $vars = []): void
@@ -47,9 +49,9 @@ final class LoginController
 
         // Rate limiting
         $clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-        if (!RateLimiter::isAllowed($clientIp, 5, 900)) {
-            $remaining = RateLimiter::getTimeRemaining($clientIp);
-            Session::flash('error', 'Muitas tentativas de login. Tente novamente em ' . ceil($remaining / 60) . ' minutos.');
+        $scope = 'admin_login';
+        if ($this->limiter->check($scope, $clientIp, 'ip_global', 5, 15)) {
+            Session::flash('error', 'Muitas tentativas de login. Aguarde 15 minutos.');
             Session::flash('old_email', $email);
             $this->redirect('/admin/login');
         }
@@ -65,7 +67,7 @@ final class LoginController
         $emailIsValid = v::email()->length(1, 190)->validate($email);
         $passIsValid  = v::stringType()->length(1, null)->validate($password);
         if (!$emailIsValid || !$passIsValid) {
-            RateLimiter::recordAttempt($clientIp, 900);
+            $this->limiter->increment($scope, $clientIp, 'ip_global', 5, 15);
             Session::flash('error', 'Credenciais inválidas.');
             Session::flash('old_email', $email);
             $this->redirect('/admin/login');
@@ -77,7 +79,7 @@ final class LoginController
 
         $user = $repo->findActiveByEmail($email);
         if (!$user) {
-            RateLimiter::recordAttempt($clientIp, 900);
+            $this->limiter->increment($scope, $clientIp, 'ip_global', 5, 15);
             $this->audit->log('ADMIN', null, 'LOGIN_FAILED', 'ADMIN_USER', null);
             Session::flash('error', 'Credenciais inválidas.');
             Session::flash('old_email', $email);
@@ -94,7 +96,7 @@ final class LoginController
 
         // Verifica hash
         if (empty($user['password_hash']) || !password_verify($password, $user['password_hash'])) {
-            RateLimiter::recordAttempt($clientIp, 900);
+            $this->limiter->increment($scope, $clientIp, 'ip_global', 5, 15);
             $this->audit->log('ADMIN', (int)$user['id'], 'LOGIN_FAILED', 'ADMIN_USER', (int)$user['id']);
             Session::flash('error', 'Credenciais inválidas.');
             Session::flash('old_email', $email);
@@ -102,7 +104,7 @@ final class LoginController
         }
 
         // OK: reset rate limiter
-        RateLimiter::reset($clientIp);
+        $this->limiter->reset($scope, $clientIp, 'ip_global');
 
         // Check if 2FA is enabled
         if (!empty($user['two_factor_enabled']) && !empty($user['two_factor_secret'])) {
