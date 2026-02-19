@@ -40,7 +40,7 @@
         "start": "php -S localhost:8000 -t public",
         "test": "phpunit",
         "test:unit": "phpunit tests/Unit --no-coverage",
-        "lint": "find src/ -name '*.php' -exec php -l {} \\;",
+        "lint": "php bin/lint.php",
         "analyse": "phpstan analyse --no-progress",
         "ci": [
             "@lint",
