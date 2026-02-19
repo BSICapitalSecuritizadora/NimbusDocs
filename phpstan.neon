@@ -1,0 +1,19 @@
+parameters:
+    level: 1
+    paths:
+        - src/
+    excludePaths:
+        - src/Presentation/View/
+        - src/Presentation/Email/
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        # Optional library (chillerlan/php-qrcode) — installed separately, not via composer
+        -
+            identifier: class.notFound
+            path: src/Infrastructure/Auth/TwoFactorAuthService.php
+        # Superglobals $_POST, $_GET, $_SESSION always exist
+        -
+            identifier: nullCoalesce.variable
+        # empty() on variables that are always defined
+        -
+            identifier: empty.variable

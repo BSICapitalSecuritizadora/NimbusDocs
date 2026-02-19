@@ -33,3 +33,14 @@ Thumbs.db
 structure.lua
 .htaccess
 certs/
+
+# Build & CI Caches
+.phpunit.cache/
+.phpstan-cache/
+build/
+phpstan-baseline.neon
+
+# Debug & Temp files
+debug_*.php
+*.har
+db_old.sql

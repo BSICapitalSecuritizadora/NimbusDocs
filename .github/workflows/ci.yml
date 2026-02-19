@@ -1,0 +1,72 @@
+name: CI - NimbusDocs
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Lint, Analyse & Test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php-version: ['8.2']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: pdo_mysql, mbstring, openssl, gd, json, curl
+          tools: composer:v2
+          coverage: none
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      # ─── Syntax Check ───────────────────────────────────────
+      - name: PHP Syntax Check
+        run: |
+          echo "🔍 Checking PHP syntax..."
+          error_count=0
+          while IFS= read -r file; do
+            if ! php -l "$file" 2>/dev/null | grep -q "No syntax errors"; then
+              echo "❌ Syntax error in: $file"
+              php -l "$file"
+              error_count=$((error_count + 1))
+            fi
+          done < <(find src/ bootstrap/ public/ bin/ -name "*.php" -type f)
+          
+          if [ $error_count -gt 0 ]; then
+            echo "::error::Found $error_count file(s) with syntax errors"
+            exit 1
+          fi
+          echo "✅ All PHP files have valid syntax"
+
+      # ─── Static Analysis ────────────────────────────────────
+      - name: PHPStan (Level 1)
+        run: vendor/bin/phpstan analyse --no-progress --error-format=github
+
+      # ─── Unit Tests ─────────────────────────────────────────
+      - name: PHPUnit (Unit Tests)
+        run: vendor/bin/phpunit tests/Unit --no-coverage --colors=always
