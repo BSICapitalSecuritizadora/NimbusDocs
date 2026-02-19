@@ -18,10 +18,25 @@ use function FastRoute\simpleDispatcher;
 // Bootstrap the application
 $config = require __DIR__ . '/../bootstrap/app.php';
 
-// CORS headers for API
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-API-Token');
+// CORS — Dynamic Origin Whitelist
+// Configure via .env: CORS_ALLOWED_ORIGINS=https://app.example.com,https://admin.example.com
+// Falls back to APP_URL if not set (safe default).
+$allowedOriginsRaw = $_ENV['CORS_ALLOWED_ORIGINS'] ?? $_ENV['APP_URL'] ?? '';
+$allowedOrigins = array_filter(array_map(
+    fn(string $o) => rtrim(trim($o), '/'),
+    explode(',', $allowedOriginsRaw)
+));
+
+$requestOrigin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+if ($requestOrigin && in_array(rtrim($requestOrigin, '/'), $allowedOrigins, true)) {
+    header('Access-Control-Allow-Origin: ' . $requestOrigin);
+    header('Vary: Origin');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-API-Token');
+    header('Access-Control-Max-Age: 86400');
+}
+
 header('Content-Type: application/json; charset=utf-8');
 
 // Handle preflight requests
