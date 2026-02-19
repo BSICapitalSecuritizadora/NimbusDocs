@@ -122,7 +122,8 @@ final class LoginController
         }
 
         // No 2FA - complete login
-        // Set session data directly
+        session_regenerate_id(true);
+
         $_SESSION['admin'] = [
             'id'    => (int)$user['id'],
             'name'  => $user['name'] ?? $user['full_name'] ?? '',

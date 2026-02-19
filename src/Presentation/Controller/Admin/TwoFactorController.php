@@ -229,6 +229,8 @@ class TwoFactorController
         }
 
         // 2FA verified - complete login
+        session_regenerate_id(true);
+
         Session::forget('2fa_pending_admin');
         Session::put('admin', $pendingAdmin);
 
