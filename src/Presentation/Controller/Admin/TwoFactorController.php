@@ -117,14 +117,14 @@ class TwoFactorController
 
         // Log the action
         if (isset($this->config['audit'])) {
-            $this->config['audit']->log(
-                'ADMIN',
-                (int) $admin['id'],
-                '2FA_ENABLED',
-                'admin_user',
-                (int) $admin['id'],
-                []
-            );
+            $this->config['audit']->log([
+                'actor_type'   => 'ADMIN',
+                'actor_id'     => (int) $admin['id'],
+                'action'       => '2FA_ENABLED',
+                'context_type' => 'admin_user',
+                'context_id'   => (int) $admin['id'],
+                'details'      => [],
+            ]);
         }
 
         Session::flash('success', 'Autenticação em dois fatores ativada com sucesso!');
@@ -164,14 +164,14 @@ class TwoFactorController
 
         // Log the action
         if (isset($this->config['audit'])) {
-            $this->config['audit']->log(
-                'ADMIN',
-                (int) $admin['id'],
-                '2FA_DISABLED',
-                'admin_user',
-                (int) $admin['id'],
-                []
-            );
+            $this->config['audit']->log([
+                'actor_type'   => 'ADMIN',
+                'actor_id'     => (int) $admin['id'],
+                'action'       => '2FA_DISABLED',
+                'context_type' => 'admin_user',
+                'context_id'   => (int) $admin['id'],
+                'details'      => [],
+            ]);
         }
 
         Session::flash('success', 'Autenticação em dois fatores desativada.');
@@ -239,14 +239,14 @@ class TwoFactorController
 
         // Log the action
         if (isset($this->config['audit'])) {
-            $this->config['audit']->log(
-                'ADMIN',
-                (int) $pendingAdmin['id'],
-                '2FA_VERIFIED',
-                'admin_user',
-                (int) $pendingAdmin['id'],
-                []
-            );
+            $this->config['audit']->log([
+                'actor_type'   => 'ADMIN',
+                'actor_id'     => (int) $pendingAdmin['id'],
+                'action'       => '2FA_VERIFIED',
+                'context_type' => 'admin_user',
+                'context_id'   => (int) $pendingAdmin['id'],
+                'details'      => [],
+            ]);
         }
 
         header('Location: /admin/dashboard');
