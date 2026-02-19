@@ -12,11 +12,13 @@ class JwtService
 {
     private string $secret;
     private int $expiresIn;
+    private string $issuer;
 
-    public function __construct(string $secret, int $expiresIn = 3600)
+    public function __construct(string $secret, int $expiresIn = 3600, string $issuer = 'nimbusdocs')
     {
         $this->secret = $secret;
         $this->expiresIn = $expiresIn;
+        $this->issuer = $issuer;
     }
 
     /**
@@ -32,9 +34,13 @@ class JwtService
             'typ' => 'JWT',
         ];
 
+        $now = time();
+
         $payload = array_merge($payload, [
-            'iat' => time(),
-            'exp' => time() + $this->expiresIn,
+            'iss' => $this->issuer,
+            'iat' => $now,
+            'nbf' => $now,
+            'exp' => $now + $this->expiresIn,
         ]);
 
         $headerEncoded = $this->base64UrlEncode(json_encode($header));
@@ -79,6 +85,16 @@ class JwtService
 
         // Check expiration
         if (isset($payload['exp']) && $payload['exp'] < time()) {
+            return null;
+        }
+
+        // Check not-before (with 30s clock skew tolerance)
+        if (isset($payload['nbf']) && $payload['nbf'] > (time() + 30)) {
+            return null;
+        }
+
+        // Check issuer
+        if (isset($payload['iss']) && $payload['iss'] !== $this->issuer) {
             return null;
         }
 
