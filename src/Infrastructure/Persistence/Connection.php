@@ -19,6 +19,8 @@ final class Connection
             $db['charset'] ?? 'utf8mb4'
         );
 
-        return new PDO($dsn, $db['username'], $db['password'], $db['options'] ?? []);
+        return new PDO($dsn, $db['username'], $db['password'], ($db['options'] ?? []) + [
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ]);
     }
 }
