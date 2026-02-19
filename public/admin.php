@@ -310,7 +310,7 @@ switch ($routeInfo[0]) {
             }
             // Passa o erro para a view
             $error = $e->getMessage();
-            if ($_SERVER['APP_ENV'] ?? 'production' !== 'production') {
+            if (($config['app']['debug'] ?? false) || ($_SERVER['APP_ENV'] ?? 'production') !== 'production') {
                  $error .= "\n\n" . $e->getTraceAsString();
             }
             require __DIR__ . '/../src/Presentation/View/errors/500.php';

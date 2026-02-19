@@ -91,8 +91,9 @@ final class MySqlAdminUserRepository implements AdminUserRepository
 
         // Sync name/full_name
         if (array_key_exists('name', $data)) {
-            $parts[] = 'name = :name, full_name = :name';
+            $parts[] = 'name = :name, full_name = :full_name';
             $params[':name'] = $data['name'];
+            $params[':full_name'] = $data['name'];
         }
 
         if (array_key_exists('email', $data)) {
@@ -125,18 +126,21 @@ final class MySqlAdminUserRepository implements AdminUserRepository
 
         // Sync azure_*/ms_* fields
         if (array_key_exists('ms_object_id', $data)) {
-            $parts[] = 'ms_object_id = :ms_object_id, azure_oid = :ms_object_id';
+            $parts[] = 'ms_object_id = :ms_object_id, azure_oid = :azure_oid';
             $params[':ms_object_id'] = $data['ms_object_id'];
+            $params[':azure_oid'] = $data['ms_object_id'];
         }
 
         if (array_key_exists('ms_tenant_id', $data)) {
-            $parts[] = 'ms_tenant_id = :ms_tenant_id, azure_tenant_id = :ms_tenant_id';
+            $parts[] = 'ms_tenant_id = :ms_tenant_id, azure_tenant_id = :azure_tenant_id';
             $params[':ms_tenant_id'] = $data['ms_tenant_id'];
+            $params[':azure_tenant_id'] = $data['ms_tenant_id'];
         }
 
         if (array_key_exists('ms_upn', $data)) {
-            $parts[] = 'ms_upn = :ms_upn, azure_upn = :ms_upn';
+            $parts[] = 'ms_upn = :ms_upn, azure_upn = :azure_upn';
             $params[':ms_upn'] = $data['ms_upn'];
+            $params[':azure_upn'] = $data['ms_upn'];
         }
 
         if (!$parts) {
@@ -191,11 +195,16 @@ final class MySqlAdminUserRepository implements AdminUserRepository
     {
         $sql = "UPDATE admin_users SET two_factor_secret = :secret, two_factor_enabled = :enabled, updated_at = NOW() WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([
-            ':secret' => $secret,
-            ':enabled' => $enabled ? 1 : 0,
-            ':id' => $id
-        ]);
+        
+        if ($secret === null) {
+            $stmt->bindValue(':secret', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':secret', $secret, PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':enabled', $enabled ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        
+        $stmt->execute();
     }
 
     /**
