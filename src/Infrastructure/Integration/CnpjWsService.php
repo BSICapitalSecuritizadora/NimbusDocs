@@ -136,7 +136,7 @@ final class CnpjWsService
         $weights = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
         
         for ($i = 0; $i < 12; $i++) {
-            $sum += $cnpj[$i] * $weights[$i];
+            $sum += (int)$cnpj[$i] * $weights[$i];
         }
         
         $remainder = $sum % 11;
@@ -151,7 +151,7 @@ final class CnpjWsService
         $weights = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
         
         for ($i = 0; $i < 13; $i++) {
-            $sum += $cnpj[$i] * $weights[$i];
+            $sum += (int)$cnpj[$i] * $weights[$i];
         }
         
         $remainder = $sum % 11;

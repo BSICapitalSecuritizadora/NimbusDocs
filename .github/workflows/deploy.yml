@@ -1,0 +1,48 @@
+name: Deploy - NimbusDocs
+
+on:
+    push:
+        branches: [main]
+    workflow_dispatch:
+
+concurrency:
+    group: deploy-prod
+    cancel-in-progress: false
+
+jobs:
+    validate:
+        uses: ./.github/workflows/ci.yml
+
+    deploy-production:
+        needs: validate
+        runs-on: ubuntu-latest
+        environment:
+            name: production
+            url: https://nimbusdocs.bsicapital.com.br
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: "8.2"
+                  tools: composer:v2
+
+            - name: Install Dependencies (No Dev)
+              run: composer install --no-dev --optimize-autoloader --no-progress
+
+            # Simulação de deploy (no futuro: az webapp deploy ou rsync)
+            - name: Deploy to Azure Web App
+              run: |
+                  echo "🚀 Deploying to Production..."
+                  # az webapp deploy --resource-group nimbusdocs-rg --name nimbusdocs-prod --src-path . --type zip
+                  echo "✅ Deploy completed successfully (simulation)"
+
+            # Post-deploy health check
+            - name: Verify Health Endpoint
+              run: |
+                  echo "Checking https://nimbusdocs.bsicapital.com.br/health.php..."
+                  # curl -f https://nimbusdocs.bsicapital.com.br/health.php
+                  echo "✅ Health check passed (simulation)"

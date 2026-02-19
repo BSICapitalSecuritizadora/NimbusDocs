@@ -426,7 +426,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
     /**
      * Exporta submissões para o admin, já filtradas (sem paginação)
      * @param array $filters
-     * @return array<int,array>
+     * @return \Generator
      */
     public function getExportCursor(array $filters = []): \Generator
     {
