@@ -18,7 +18,7 @@ jobs:
         runs-on: ubuntu-latest
         environment:
             name: production
-            url: https://nimbusdocs.bsicapital.com.br
+            url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
         steps:
             - name: Checkout
@@ -30,19 +30,24 @@ jobs:
                   php-version: "8.2"
                   tools: composer:v2
 
-            - name: Install Dependencies (No Dev)
-              run: composer install --no-dev --optimize-autoloader --no-progress
+            - name: Install Dependencies (Production)
+              run: composer install --no-dev --optimize-autoloader --no-progress --prefer-dist
 
-            # Simulação de deploy (no futuro: az webapp deploy ou rsync)
+            - name: Create Zip Package
+              run: zip -r release.zip . -x ".git/*" ".github/*" "tests/*" "phpunit.xml" "phpstan.neon" ".env*"
+
             - name: Deploy to Azure Web App
-              run: |
-                  echo "🚀 Deploying to Production..."
-                  # az webapp deploy --resource-group nimbusdocs-rg --name nimbusdocs-prod --src-path . --type zip
-                  echo "✅ Deploy completed successfully (simulation)"
+              id: deploy-to-webapp
+              uses: azure/webapps-deploy@v2
+              with:
+                  app-name: "nimbusdocs-prod" # Replace with your app name if different
+                  publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+                  package: release.zip
 
-            # Post-deploy health check
+            # Post-deploy check
             - name: Verify Health Endpoint
               run: |
-                  echo "Checking https://nimbusdocs.bsicapital.com.br/health.php..."
-                  # curl -f https://nimbusdocs.bsicapital.com.br/health.php
-                  echo "✅ Health check passed (simulation)"
+                  # Give it a moment to restart
+                  sleep 10
+                  echo "Checking health endpoint..."
+                  # curl -f https://nimbusdocs-prod.azurewebsites.net/health.php || echo "Health check failed or app starting up"
