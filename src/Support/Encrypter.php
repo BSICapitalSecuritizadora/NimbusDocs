@@ -14,10 +14,6 @@ class Encrypter
 
     /**
      * Criptografa um valor.
-     * Retorna string base64: base64(iv . ciphertext . mac) para integridade.
-     * formato simples: base64(json_encode(['iv'=>..., 'value'=>..., 'mac'=>...]))
-     * Ou mais simples: base64(iv) . ':' . base64(ciphertext) (estilo Laravel antigo)
-     * Vamos usar uma abordagem segura com HMAC.
      */
     public static function encrypt(string $value): string
     {
@@ -30,7 +26,6 @@ class Encrypter
             throw new \RuntimeException('Falha ao criptografar dados.');
         }
 
-        // Gera MAC para garantir integridade e evitar padding oracle attacks
         $mac = hash_hmac('sha256', $iv . $encrypted, $key);
 
         $json = json_encode([
@@ -43,37 +38,34 @@ class Encrypter
     }
 
     /**
-     * Descriptografa um valor.
-     * Retorna null se falhar ou se o dados não for válido.
+     * Descriptografa um valor (modo seguro).
+     * Retorna null se o payload for inválido, adulterado ou não for formato criptografado.
      */
     public static function decrypt(?string $payload): ?string
     {
-        if (!$payload) {
+        if (!$payload || !is_string($payload)) {
             return null;
         }
 
         try {
             $json = base64_decode($payload, true);
-            if (!$json) return null; // Não é base64 válido
+            if (!$json) {
+                return null;
+            }
 
             $data = json_decode($json, true);
             
             if (!is_array($data) || !isset($data['iv'], $data['value'], $data['mac'])) {
-                // Tenta fallback para texto plano (caso ainda não esteja migrado ou erro)
-                // Isso é útil durante a migração: se não conseguir decriptar, assume que é dado legado.
-                // MAS CUIDADO: pode confundir lixo com dado real.
-                // Como nossos dados alvo (CPF/Phone) não parecem JSON base64, podemos assumir que se falhar o decode, é plano.
-                return $payload;
+                return null;
             }
 
             $key = self::getKey();
             $iv = base64_decode($data['iv'], true);
             
-            // Valida MAC
+            // Valida MAC (integridade)
             $expectedMac = hash_hmac('sha256', $iv . $data['value'], $key);
             if (!hash_equals($expectedMac, $data['mac'])) {
-                 // MAC inválido (dado adulterado)
-                 return null; 
+                return null;
             }
 
             $decrypted = openssl_decrypt($data['value'], self::CIPHER, $key, 0, $iv);
@@ -81,20 +73,81 @@ class Encrypter
             return $decrypted !== false ? $decrypted : null;
 
         } catch (\Throwable $e) {
-            // Se der erro (ex: json invalido), retorna o o valor original (assumindo legado/plano)
-            // ou loga o erro.
-            return $payload; 
+            return null;
         }
+    }
+
+    /**
+     * Descriptografa com fallback para dados legados (texto plano).
+     * 
+     * Usar APENAS no repositório de dados que possam ter registros antigos
+     * ainda em texto puro. Loga quando o fallback é ativado para que você
+     * saiba exatamente quais registros precisam ser re-criptografados.
+     * 
+     * @param string|null $payload O valor do banco
+     * @param string $context Identificador para o log (ex: "portal_user.document_number:42")
+     */
+    public static function decryptOrFallback(?string $payload, string $context = ''): ?string
+    {
+        if (!$payload || !is_string($payload)) {
+            return null;
+        }
+
+        // Tenta descriptografar normalmente
+        $decrypted = self::decrypt($payload);
+        if ($decrypted !== null) {
+            return $decrypted;
+        }
+
+        // Se falhou, verifica se o valor parece texto legível (dado legado plain text).
+        // Dados corrompidos/binários NÃO são retornados.
+        if (self::looksLikePlainText($payload)) {
+            // Loga para rastreamento — ajuda a identificar dados não migrados
+            $logMsg = sprintf(
+                '[Encrypter] Fallback para texto plano detectado (%s). Valor deve ser re-criptografado.',
+                $context ?: 'contexto desconhecido'
+            );
+            error_log($logMsg);
+
+            return $payload;
+        }
+
+        // Nem criptografado válido, nem texto plano legível → dado corrompido
+        return null;
+    }
+
+    /**
+     * Verifica se uma string parece texto plano legível (CPF, telefone, nome, etc.)
+     * e NÃO lixo binário ou payload corrompido.
+     */
+    private static function looksLikePlainText(string $value): bool
+    {
+        // Texto legível = só caracteres imprimíveis UTF-8 (letras, números, pontuação, espaços)
+        // Rejeita strings com bytes de controle ou sequências binárias
+        if (!mb_check_encoding($value, 'UTF-8')) {
+            return false;
+        }
+
+        // Se contiver caracteres de controle (exceto \n, \r, \t), não é texto plano
+        if (preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', $value)) {
+            return false;
+        }
+
+        // CPFs, telefones e nomes geralmente têm até 100 chars
+        if (strlen($value) > 255) {
+            return false;
+        }
+
+        return true;
     }
 
     private static function getKey(): string
     {
         $secret = $_ENV['APP_SECRET'] ?? '';
         if (strlen($secret) < 32) {
-             // Pad ou hash para garantir 32 bytes (AES-256)
              return hash('sha256', $secret, true);
         }
-        return substr($secret, 0, 32); // Trunca se for maior (ou usa direto se for 32 bytes raw)
+        return substr($secret, 0, 32);
     }
 
     /**
@@ -106,3 +159,4 @@ class Encrypter
         return hash_hmac('sha256', $value, self::getKey());
     }
 }
+

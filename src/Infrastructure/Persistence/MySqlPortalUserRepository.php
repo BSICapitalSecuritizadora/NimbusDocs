@@ -200,11 +200,19 @@ final class MySqlPortalUserRepository
 
     private function decryptRow(array $row): array
     {
+        $id = $row['id'] ?? '?';
+
         if (!empty($row['document_number'])) {
-            $row['document_number'] = Encrypter::decrypt($row['document_number']);
+            $row['document_number'] = Encrypter::decryptOrFallback(
+                $row['document_number'],
+                "portal_user.document_number:{$id}"
+            );
         }
         if (!empty($row['phone_number'])) {
-            $row['phone_number'] = Encrypter::decrypt($row['phone_number']);
+            $row['phone_number'] = Encrypter::decryptOrFallback(
+                $row['phone_number'],
+                "portal_user.phone_number:{$id}"
+            );
         }
         return $row;
     }
