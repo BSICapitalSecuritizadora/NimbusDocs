@@ -1,0 +1,13 @@
+.git
+.github
+.vscode
+vendor
+node_modules
+storage/cache/*
+storage/logs/*
+tests
+phpunit.xml
+phpstan.neon
+docker-compose.yml
+Dockerfile
+README.md

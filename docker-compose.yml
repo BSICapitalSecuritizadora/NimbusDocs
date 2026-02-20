@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # Python App (NimbusDocs)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nimbusdocs-app
+    container_name: nimbusdocs-app
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - nimbus-network
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+  # Database Service
+  db:
+    image: mysql:8.0
+    container_name: nimbusdocs-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-nimbusdocs}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_USER: ${DB_USERNAME:-nimbus}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - nimbus-network
+    ports:
+      - "3306:3306"
+
+  # Database Manager (PhpMyAdmin)
+  pma:
+    image: phpmyadmin/phpmyadmin
+    container_name: nimbusdocs-pma
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - "8081:80"
+    networks:
+      - nimbus-network
+    depends_on:
+      - db
+
+# Networks
+networks:
+  nimbus-network:
+    driver: bridge
+
+# Volumes
+volumes:
+  dbdata:
+    driver: local
