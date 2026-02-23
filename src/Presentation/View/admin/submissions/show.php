@@ -9,6 +9,7 @@
 $statusClass = match($submission['status'] ?? '') {
     'PENDING' => 'warning',
     'UNDER_REVIEW' => 'info',
+    'NEEDS_CORRECTION' => 'gold',
     'COMPLETED', 'APPROVED' => 'success',
     'REJECTED' => 'danger',
     default => 'secondary'
@@ -17,6 +18,7 @@ $statusClass = match($submission['status'] ?? '') {
 $statusLabel = match($submission['status'] ?? '') {
     'PENDING' => 'Pendente',
     'UNDER_REVIEW' => 'Em Análise',
+    'NEEDS_CORRECTION' => 'Precisa de Correção',
     'COMPLETED' => 'Concluído',
     'APPROVED' => 'Aprovado',
     'REJECTED' => 'Rejeitado',
@@ -26,6 +28,7 @@ $statusLabel = match($submission['status'] ?? '') {
 $statusIcon = match($submission['status'] ?? '') {
     'PENDING' => 'bi-hourglass-split',
     'UNDER_REVIEW' => 'bi-search',
+    'NEEDS_CORRECTION' => 'bi-exclamation-triangle-fill',
     'COMPLETED', 'APPROVED' => 'bi-check-circle-fill',
     'REJECTED' => 'bi-x-circle-fill',
     default => 'bi-circle'
@@ -146,7 +149,10 @@ $statusIcon = match($submission['status'] ?? '') {
                                 <option value="UNDER_REVIEW" <?= ($submission['status'] ?? '') === 'UNDER_REVIEW' ? 'selected' : '' ?>>
                                     🔍 Em Análise
                                 </option>
-                                <option value="COMPLETED" <?= in_array($submission['status'] ?? '', ['COMPLETED', 'APPROVED']) ? 'selected' : '' ?>>
+                                <option value="NEEDS_CORRECTION" <?= ($submission['status'] ?? '') === 'NEEDS_CORRECTION' ? 'selected' : '' ?>>
+                                    ⚠️ Aguardando Correção
+                                </option>
+                                <option value="APPROVED" <?= in_array($submission['status'] ?? '', ['COMPLETED', 'APPROVED']) ? 'selected' : '' ?>>
                                     ✅ Aprovado/Concluído
                                 </option>
                                 <option value="REJECTED" <?= ($submission['status'] ?? '') === 'REJECTED' ? 'selected' : '' ?>>
@@ -156,30 +162,33 @@ $statusIcon = match($submission['status'] ?? '') {
                         </div>
                         
                         <div class="col-md-4">
-                            <label class="nd-label" for="visibility">Visibilidade da Nota</label>
+                            <label class="nd-label" for="visibility">Visibilidade da Observação</label>
                             <select class="nd-input" id="visibility" name="visibility">
-                                <option value="USER_VISIBLE">👁️ Visível ao solicitante</option>
-                                <option value="ADMIN_ONLY">🔒 Apenas administradores</option>
+                                <option value="USER_VISIBLE">👁️ Visível ao solicitante no Portal</option>
+                                <option value="ADMIN_ONLY">🔒 Apenas interna administradores</option>
                             </select>
                         </div>
                         
                         <div class="col-12">
-                            <label class="nd-label" for="note">Observação (opcional)</label>
+                            <label class="nd-label" for="note">Observação / Comentário (opcional)</label>
                             <textarea class="nd-input" id="note" name="note" rows="3" 
-                                placeholder="Adicione uma observação sobre esta alteração de status..."></textarea>
+                                placeholder="Adicione um comentário ou detalhe o que precisa ser corrigido pelo usuário..."></textarea>
                         </div>
                         
                         <div class="col-12">
                             <div class="d-flex gap-2 flex-wrap">
-                                <button type="submit" class="nd-btn nd-btn-primary" onclick="document.getElementById('status').value='COMPLETED'; return confirm('✅ Tem certeza que deseja APROVAR este envio?\n\nEsta ação notificará o solicitante.');">
+                                <button type="submit" class="nd-btn nd-btn-primary" onclick="document.getElementById('status').value='APPROVED'; return confirm('✅ Tem certeza que deseja APROVAR este envio?\n\nEsta ação notificará o solicitante.');">
                                     <i class="bi bi-check-lg me-1"></i> Aprovar
                                 </button>
+                                <button type="submit" class="nd-btn nd-btn-outline" style="border-color: var(--nd-gold-600); color: var(--nd-gold-600);" onclick="document.getElementById('status').value='NEEDS_CORRECTION'; if(!document.getElementById('note').value) { alert('Você precisa escrever uma observação detalhando o que deve ser corrigido pelo usuário.'); return false; } return confirm('⚠️ Devolver para Correção?\n\nO solicitante receberá o comentário acima e poderá alterar a submissão.');">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Solicitar Correção
+                                </button>
                                 <button type="submit" class="nd-btn nd-btn-outline" style="border-color: var(--nd-danger); color: var(--nd-danger);" 
-                                    onclick="document.getElementById('status').value='REJECTED'; return confirm('⚠️ Tem certeza que deseja REJEITAR este envio?\n\nEsta ação notificará o solicitante.');">
+                                    onclick="document.getElementById('status').value='REJECTED'; return confirm('⚠️ Tem certeza que deseja REJEITAR este envio?\n\nEsta ação notificará o solicitante e encerrará a submissão.');">
                                     <i class="bi bi-x-lg me-1"></i> Rejeitar
                                 </button>
-                                <button type="submit" class="nd-btn nd-btn-gold">
-                                    <i class="bi bi-save me-1"></i> Salvar Alteração
+                                <button type="submit" class="nd-btn nd-btn-gold ms-auto">
+                                    <i class="bi bi-send me-1"></i> Enviar Comentário Interno
                                 </button>
                             </div>
                         </div>
@@ -303,50 +312,143 @@ $statusIcon = match($submission['status'] ?? '') {
             </div>
         </div>
     </div>
-    <?php if ($notes): ?>
+    <?php 
+    // Mix comments and status history into a single timeline
+    // This allows us to see "Admin changed status" intertwined with "Admin said: Please fix this"
+    $timeline = [];
+    $allNotes = $notes ?? [];
+    $allComments = $comments ?? [];
+    $allHistory = $statusHistory ?? [];
+    
+    // Legacy Notes mapping
+    foreach ($allNotes as $note) {
+        $timeline[] = [
+            'type' => 'note',
+            'created_at' => $note['created_at'],
+            'data' => $note
+        ];
+    }
+    
+    // New Comments mapping
+    foreach ($allComments as $comment) {
+        $timeline[] = [
+            'type' => 'comment',
+            'created_at' => $comment['created_at'],
+            'data' => $comment
+        ];
+    }
+    
+    // Status History mapping
+    foreach ($allHistory as $history) {
+        // Skip initial PENDING as it's just creation noise usually, unless it has a specific reason
+        if (($history['old_status'] ?? '') === '' && $history['new_status'] === 'PENDING') {
+            continue;
+        }
+        $timeline[] = [
+            'type' => 'status',
+            'created_at' => $history['created_at'],
+            'data' => $history
+        ];
+    }
+    
+    // Sort timeline chronologically
+    usort($timeline, function($a, $b) {
+        return strtotime($a['created_at']) <=> strtotime($b['created_at']);
+    });
+    
+    if (!empty($timeline)): 
+    ?>
     <div class="nd-card">
         <div class="nd-card-header d-flex align-items-center gap-2">
             <i class="bi bi-chat-left-text" style="color: var(--nd-info);"></i>
-            <h2 class="nd-card-title mb-0">Histórico de Observações</h2>
-            <span class="nd-badge nd-badge-secondary ms-2"><?= count($notes) ?></span>
+            <h2 class="nd-card-title mb-0">Timeline da Submissão</h2>
+            <span class="nd-badge nd-badge-secondary ms-2"><?= count($timeline) ?> interações</span>
         </div>
-        <div class="nd-card-body">
-            <div class="d-flex flex-column gap-3">
-                <?php foreach ($notes as $note): ?>
-                    <div class="p-3 rounded <?= ($note['visibility'] ?? '') === 'ADMIN_ONLY' ? 'border-start border-3 border-warning' : '' ?>" 
-                         style="background: var(--nd-gray-50); border: 1px solid var(--nd-gray-200);">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="nd-avatar" style="width: 28px; height: 28px; font-size: 0.7rem;">
-                                    <?= strtoupper(substr($note['admin_name'] ?? 'A', 0, 1)) ?>
-                                </div>
-                                <div>
-                                    <span class="fw-medium small"><?= htmlspecialchars($note['admin_name'] ?? 'Administrador', ENT_QUOTES, 'UTF-8') ?></span>
-                                    <?php if (($note['visibility'] ?? '') === 'ADMIN_ONLY'): ?>
-                                        <span class="nd-badge nd-badge-warning ms-2" style="font-size: 0.6rem;">Interno</span>
-                                    <?php endif; ?>
+        <div class="nd-card-body pb-0">
+            <div class="timeline-container position-relative mb-4" style="padding-left: 20px;">
+                <div class="position-absolute h-100" style="left: 6px; top: 10px; width: 2px; background: var(--nd-gray-200);"></div>
+                
+                <div class="d-flex flex-column gap-4">
+                    <?php foreach ($timeline as $item): 
+                        $createdObj = new DateTime($item['created_at']);
+                        $formattedDate = $createdObj->format('d/m/Y H:i');
+                        
+                        if ($item['type'] === 'status') {
+                            $history = $item['data'];
+                            $newStatusLabel = match($history['new_status']) {
+                                'PENDING' => 'Pendente',
+                                'UNDER_REVIEW' => 'Em Análise',
+                                'NEEDS_CORRECTION' => 'Aguardando Correção',
+                                'COMPLETED', 'APPROVED' => 'Aprovado',
+                                'REJECTED' => 'Rejeitado',
+                                default => $history['new_status']
+                            };
+                            $badgeClass = match($history['new_status']) {
+                                'PENDING' => 'warning',
+                                'UNDER_REVIEW' => 'info',
+                                'NEEDS_CORRECTION' => 'gold',
+                                'COMPLETED', 'APPROVED' => 'success',
+                                'REJECTED' => 'danger',
+                                default => 'secondary'
+                            };
+                            $actorName = htmlspecialchars($history['changed_by_name'] ?? 'Sistema', ENT_QUOTES, 'UTF-8');
+                            
+                            echo "<div class='position-relative' style='padding-left: 30px;'>";
+                            echo "<div class='position-absolute rounded-circle border border-white border-2 bg-white' style='left: -20px; top: 0px;'>";
+                            echo "<i class='bi bi-arrow-repeat text-muted' style='font-size: 1.1rem;'></i></div>";
+                            echo "<div class='small text-muted mb-1'>$formattedDate</div>";
+                            echo "<div><strong>{$actorName}</strong> alterou o status para <span class='nd-badge nd-badge-{$badgeClass}'>{$newStatusLabel}</span></div>";
+                            echo "</div>";
+                            
+                        } elseif ($item['type'] === 'note' || $item['type'] === 'comment') {
+                            $isLegacy = ($item['type'] === 'note');
+                            $data = $item['data'];
+                            
+                            $isInternal = $isLegacy ? ($data['visibility'] === 'ADMIN_ONLY') : (bool)$data['is_internal'];
+                            $requiresAction = !$isLegacy && (bool)$data['requires_action'];
+                            
+                            if ($isLegacy) {
+                                $authorName = htmlspecialchars($data['admin_name'] ?? 'Administrador', ENT_QUOTES, 'UTF-8');
+                                $authorInitial = strtoupper(substr($data['admin_name'] ?? 'A', 0, 1));
+                                $avatarClass = 'bg-primary text-white';
+                            } else {
+                                $authorName = htmlspecialchars($data['author_name'] ?? 'Usuário', ENT_QUOTES, 'UTF-8');
+                                $authorInitial = strtoupper(substr($authorName, 0, 1));
+                                $isAdmin = ($data['author_type'] === 'ADMIN');
+                                $avatarClass = $isAdmin ? 'bg-primary text-white' : 'bg-secondary text-white';
+                            }
+                            
+                            $boxClass = $isInternal ? 'border-start border-3 border-warning' : 'border';
+                            $boxBg = $isInternal ? 'style="background: #fffdf5;"' : 'style="background: #fff;"';
+                    ?>
+                        <div class="position-relative" style="padding-left: 30px;">
+                            <div class="position-absolute" style="left: -25px; top: 0px;">
+                                <div class="nd-avatar <?= $avatarClass ?> shadow-sm" style="width: 32px; height: 32px; font-size: 0.9rem;">
+                                    <?= $authorInitial ?>
                                 </div>
                             </div>
-                            <small class="text-muted">
-                                <i class="bi bi-clock me-1"></i>
-                                <?php
-                                $noteDate = $note['created_at'] ?? '';
-                                if ($noteDate) {
-                                    try {
-                                        $d = new DateTime($noteDate);
-                                        echo $d->format('d/m/Y H:i');
-                                    } catch (Exception $e) {
-                                        echo htmlspecialchars($noteDate, ENT_QUOTES, 'UTF-8');
-                                    }
-                                }
-                                ?>
-                            </small>
+                            
+                            <div class="p-3 rounded shadow-sm <?= $boxClass ?>" <?= $boxBg ?>>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="fw-bold"><?= $authorName ?></span>
+                                        <?php if ($isInternal): ?>
+                                            <span class="nd-badge nd-badge-warning" style="font-size: 0.65rem;"><i class="bi bi-lock me-1"></i>Interno</span>
+                                        <?php endif; ?>
+                                        <?php if ($requiresAction): ?>
+                                            <span class="nd-badge nd-badge-danger" style="font-size: 0.65rem;"><i class="bi bi-exclamation-triangle me-1"></i>Ação Necessária</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <small class="text-muted"><i class="bi bi-clock me-1"></i><?= $formattedDate ?></small>
+                                </div>
+                                <div class="text-secondary" style="font-size: 0.95rem; white-space: pre-wrap;"><?= htmlspecialchars($data['comment'] ?? $data['message'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                            </div>
                         </div>
-                        <div class="text-secondary small">
-                            <?= nl2br(htmlspecialchars($note['message'] ?? '', ENT_QUOTES, 'UTF-8')) ?>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
+                    <?php 
+                        }
+                    endforeach; 
+                    ?>
+                </div>
             </div>
         </div>
     </div>

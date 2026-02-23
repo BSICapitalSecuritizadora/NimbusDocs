@@ -135,10 +135,57 @@ $dateFormatted = !empty($submission['submitted_at'])
         <!-- History/Notes Timeline -->
          <div class="nd-card mb-4">
             <div class="nd-card-header">
-                <h2 class="nd-card-title">Histórico de Eventos</h2>
+                <h2 class="nd-card-title">Interações e Histórico</h2>
             </div>
             <div class="nd-card-body">
-                <div class="nd-timeline">
+                <?php if (($submission['status'] ?? '') === 'NEEDS_CORRECTION'): ?>
+                    <div class="alert alert-warning border border-warning-subtle rounded-3 mb-4 p-4 text-dark shadow-sm">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+                            <h5 class="mb-0 fw-bold">Ação Necessária</h5>
+                        </div>
+                        <p class="mb-3">Foram solicitadas correções em sua submissão. Por favor, leia os comentários abaixo, anexe o documento corrigido caso necessário, e envie sua resposta.</p>
+                        
+                        <form action="/portal/submissions/<?= (int)$submission['id'] ?>/reply" method="POST" enctype="multipart/form-data" class="bg-white p-3 rounded border">
+                            <input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                            <div class="mb-3">
+                                <label class="nd-label" for="comment">Resposta / Comentário</label>
+                                <textarea name="comment" id="comment" rows="2" class="nd-input" placeholder="Descreva as correções feitas..."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="nd-label" for="file">Anexar Arquivo Corrigido (Opcional)</label>
+                                <input type="file" name="file" id="file" class="nd-input" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx">
+                            </div>
+                            <button type="submit" class="nd-btn nd-btn-primary">
+                                <i class="bi bi-send me-2"></i> Enviar Correção
+                            </button>
+                        </form>
+                    </div>
+                <?php endif; ?>
+
+                <?php 
+                $timeline = [];
+                $allNotes = $notes ?? [];
+                $allComments = $comments ?? [];
+                $allHistory = $statusHistory ?? [];
+                
+                foreach ($allNotes as $note) {
+                    $timeline[] = ['type' => 'note', 'created_at' => $note['created_at'], 'data' => $note];
+                }
+                foreach ($allComments as $comment) {
+                    $timeline[] = ['type' => 'comment', 'created_at' => $comment['created_at'], 'data' => $comment];
+                }
+                foreach ($allHistory as $history) {
+                    if (($history['old_status'] ?? '') === '' && $history['new_status'] === 'PENDING') continue;
+                    $timeline[] = ['type' => 'status', 'created_at' => $history['created_at'], 'data' => $history];
+                }
+                
+                usort($timeline, function($a, $b) {
+                    return strtotime($a['created_at']) <=> strtotime($b['created_at']);
+                });
+                ?>
+
+                <div class="nd-timeline mt-3">
                     <!-- Submission Event (Start) -->
                     <div class="nd-timeline-item">
                         <div class="nd-timeline-marker user"></div>
@@ -158,32 +205,72 @@ $dateFormatted = !empty($submission['submitted_at'])
                         </div>
                     </div>
 
-                    <!-- Notes Loop -->
-                    <?php if (!empty($notes)): ?>
-                        <?php foreach ($notes as $note): ?>
+                    <!-- Timeline Loop -->
+                    <?php if (!empty($timeline)): ?>
+                        <?php foreach ($timeline as $item): ?>
                             <div class="nd-timeline-item">
-                                <div class="nd-timeline-marker admin"></div>
-                                <div class="nd-timeline-content">
-                                    <div class="nd-timeline-header">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="nd-timeline-author">Equipe de Análise</span>
-                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2" style="font-size: 0.65rem;">ADMIN</span>
+                                <?php
+                                $d = new DateTime($item['created_at']);
+                                $fmtDate = $d->format('d/m/Y H:i');
+                                
+                                if ($item['type'] === 'status') {
+                                    $history = $item['data'];
+                                    $newStatusLabel = match($history['new_status']) {
+                                        'PENDING' => 'Pendente',
+                                        'UNDER_REVIEW' => 'Em Análise',
+                                        'NEEDS_CORRECTION' => 'Aguardando Correção',
+                                        'COMPLETED', 'APPROVED' => 'Aprovado',
+                                        'REJECTED' => 'Rejeitado',
+                                        default => $history['new_status']
+                                    };
+                                    $actorName = htmlspecialchars($history['changed_by_name'] ?? 'Sistema', ENT_QUOTES, 'UTF-8');
+                                    $isAdmin = ($history['changed_by_type'] ?? '') === 'ADMIN';
+                                    $markerClass = $isAdmin ? 'admin' : 'user';
+                                ?>
+                                    <div class="nd-timeline-marker <?= $markerClass ?>"></div>
+                                    <div class="nd-timeline-content py-0 border-0 bg-transparent shadow-none ps-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="nd-timeline-author text-secondary"><?= $actorName ?></span>
+                                            <span class="text-muted small">alterou o status para</span>
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle"><?= $newStatusLabel ?></span>
+                                            <span class="nd-timeline-date ms-auto"><?= $fmtDate ?></span>
                                         </div>
-                                        <span class="nd-timeline-date">
-                                            <?php
-                                            $noteDate = $note['created_at'] ?? '';
-                                            if ($noteDate) {
-                                                try {
-                                                    echo (new DateTime($noteDate))->format('d/m/Y H:i');
-                                                } catch (Exception $e) { echo $noteDate; }
-                                            }
-                                            ?>
-                                        </span>
                                     </div>
-                                    <div class="text-dark small">
-                                        <?= nl2br(htmlspecialchars($note['message'] ?? '', ENT_QUOTES, 'UTF-8')) ?>
+                                <?php
+                                } elseif ($item['type'] === 'note' || $item['type'] === 'comment') {
+                                    $data = $item['data'];
+                                    $isLegacy = ($item['type'] === 'note');
+                                    
+                                    if ($isLegacy) {
+                                        $authorName = htmlspecialchars($data['admin_name'] ?? 'Equipe de Análise', ENT_QUOTES, 'UTF-8');
+                                        $markerClass = 'admin';
+                                        $pillName = 'ADMIN';
+                                    } else {
+                                        $authorName = htmlspecialchars($data['author_name'] ?? 'Usuário', ENT_QUOTES, 'UTF-8');
+                                        $isAdmin = ($data['author_type'] === 'ADMIN');
+                                        $markerClass = $isAdmin ? 'admin' : 'user';
+                                        $pillName = $isAdmin ? 'ADMIN' : 'VOCÊ';
+                                    }
+                                    
+                                    $requiresAction = !$isLegacy && !empty($data['requires_action']);
+                                ?>
+                                    <div class="nd-timeline-marker <?= $markerClass ?>"></div>
+                                    <div class="nd-timeline-content <?= $requiresAction ? 'border-warning border-start border-3' : '' ?>">
+                                        <div class="nd-timeline-header">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="nd-timeline-author"><?= $authorName ?></span>
+                                                <span class="badge <?= $markerClass === 'admin' ? 'bg-primary-subtle text-primary border-primary-subtle' : 'bg-secondary-subtle text-secondary border-secondary-subtle' ?> rounded-pill px-2" style="font-size: 0.65rem; border: 1px solid;"><?= $pillName ?></span>
+                                                <?php if ($requiresAction): ?>
+                                                    <span class="badge bg-danger text-white rounded-pill px-2" style="font-size: 0.65rem;">Ação Necessária</span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <span class="nd-timeline-date"><?= $fmtDate ?></span>
+                                        </div>
+                                        <div class="text-dark small" style="white-space: pre-wrap;"><?= htmlspecialchars($data['comment'] ?? $data['message'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                                     </div>
-                                </div>
+                                <?php
+                                }
+                                ?>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>

@@ -8,6 +8,7 @@ use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionNoteRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionShareholderRepository;
+use App\Infrastructure\Persistence\MySqlSubmissionCommentRepository;
 use App\Infrastructure\Integration\CachedCnpjService;
 use App\Infrastructure\Integration\CnpjWsService;
 use App\Support\Csrf;
@@ -24,6 +25,7 @@ final class PortalSubmissionController
     private MySqlPortalSubmissionFileRepository $fileRepo;
     private MySqlPortalSubmissionNoteRepository $noteRepo;
     private MySqlPortalSubmissionShareholderRepository $shareholderRepo;
+    private MySqlSubmissionCommentRepository $commentRepo;
     private AuditLogger $audit;
     private CachedCnpjService $cnpjService;
 
@@ -33,6 +35,7 @@ final class PortalSubmissionController
         $this->fileRepo        = new MySqlPortalSubmissionFileRepository($config['pdo']);
         $this->noteRepo        = new MySqlPortalSubmissionNoteRepository($config['pdo']);
         $this->shareholderRepo = new MySqlPortalSubmissionShareholderRepository($config['pdo']);
+        $this->commentRepo     = new MySqlSubmissionCommentRepository($config['pdo']);
         $this->audit           = new AuditLogger($config['pdo']);
         
         // Usa o serviço de CNPJ com cache do bootstrap
@@ -477,6 +480,9 @@ final class PortalSubmissionController
         $notes = $this->noteRepo->listVisibleForSubmission($id);
         $shareholders = $this->shareholderRepo->findBySubmission($id);
         $responseFiles = $this->fileRepo->findVisibleToUser($id);
+        
+        $comments = $this->commentRepo->getBySubmission($id, false); // False = User only
+        $statusHistory = $this->commentRepo->getStatusHistory($id);
 
         $pageTitle   = 'Detalhes da submissão';
         $contentView = __DIR__ . '/../../View/portal/submissions/show.php';
@@ -486,9 +492,100 @@ final class PortalSubmissionController
             'responseFiles' => $responseFiles,
             'notes'         => $notes,
             'shareholders'  => $shareholders,
+            'comments'      => $comments,
+            'statusHistory' => $statusHistory,
+            'csrfToken'     => Csrf::token(),
         ];
 
         require __DIR__ . '/../../View/portal/layouts/base.php';
+    }
+
+    public function reply(array $vars = []): void
+    {
+        $user = Auth::requirePortalUser();
+        $userId = (int)$user['id'];
+        $id = (int)($vars['id'] ?? 0);
+        $post = $_POST;
+        $token = $post['_token'] ?? '';
+
+        if (!Csrf::validate($token)) {
+            Session::flash('error', 'Sessão expirada. Tente novamente.');
+            $this->redirect('/portal/submissions/' . $id);
+        }
+
+        $submission = $this->repo->findForUser($id, $userId);
+        if (!$submission || $submission['status'] !== 'NEEDS_CORRECTION') {
+            Session::flash('error', 'Ação não permitida para o status atual.');
+            $this->redirect('/portal/submissions/' . $id);
+        }
+
+        $commentText = trim($post['comment'] ?? '');
+        $hasFile = isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK;
+
+        if ($commentText === '' && !$hasFile) {
+            Session::flash('error', 'É necessário enviar um comentário ou um arquivo de correção.');
+            $this->redirect('/portal/submissions/' . $id);
+        }
+
+        // 1. Save new file if provided
+        if ($hasFile) {
+            try {
+                $storageBase = dirname(__DIR__, 4) . '/storage/portal_uploads/' . $userId . '/';
+                $stored = FileUpload::store($_FILES['file'], $storageBase, [
+                    'max_size_mb' => 30,
+                    'allowed_extensions' => ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png'],
+                ]);
+
+                $storedName = basename($stored['path']);
+                $checksum = is_file($stored['path']) ? hash_file('sha256', $stored['path']) : null;
+                $relativePath = 'portal_uploads/' . $userId . '/' . $storedName;
+
+                $this->fileRepo->create($id, [
+                    'origin'          => 'USER',
+                    'original_name'   => $stored['original_name'],
+                    'stored_name'     => $storedName,
+                    'mime_type'       => $stored['mime_type'],
+                    'size_bytes'      => (int)$stored['size'],
+                    'storage_path'    => $relativePath,
+                    'checksum'        => $checksum,
+                    'visible_to_user' => 1,
+                    'document_type'   => 'CORRECTION_FILE',
+                ]);
+                
+                $this->audit->log('PORTAL_USER', $userId, 'USER_UPLOADED_CORRECTION_FILE', 'PORTAL_SUBMISSION', $id, [
+                    'file' => $stored['original_name']
+                ]);
+            } catch (\Throwable $e) {
+                Session::flash('error', 'Falha ao enviar arquivo: ' . $e->getMessage());
+                $this->redirect('/portal/submissions/' . $id);
+            }
+        }
+
+        // 2. Save comment
+        if ($commentText !== '') {
+            $this->commentRepo->add([
+                'submission_id'   => $id,
+                'author_type'     => 'PORTAL_USER',
+                'author_id'       => $userId,
+                'comment'         => $commentText,
+                'is_internal'     => 0,
+                'requires_action' => 0
+            ]);
+        }
+
+        // 3. Update status back to UNDER_REVIEW
+        $this->commentRepo->updateSubmissionStatus(
+            $id,
+            'UNDER_REVIEW',
+            'PORTAL_USER',
+            $userId,
+            'Usuário enviou correções e retornou para análise.'
+        );
+
+        $this->audit->log('PORTAL_USER', $userId, 'USER_SUBMITTED_CORRECTIONS', 'PORTAL_SUBMISSION', $id);
+
+        Session::flash('success', 'Correções enviadas com sucesso. A submissão retornou para análise.');
+        $this->redirect('/portal/submissions/' . $id);
     }
 
     private function redirect(string $path): void

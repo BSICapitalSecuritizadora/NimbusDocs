@@ -7,6 +7,7 @@ namespace App\Presentation\Controller\Admin;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository;
 use App\Infrastructure\Persistence\MySqlPortalUserRepository;
+use App\Infrastructure\Persistence\MySqlSubmissionCommentRepository;
 use App\Support\Csrf;
 use App\Support\AuditLogger;
 use App\Support\Session;
@@ -21,6 +22,7 @@ final class SubmissionAdminController
     private MySqlPortalSubmissionFileRepository $fileRepo;
     private MySqlPortalSubmissionNoteRepository $noteRepo;
     private MySqlPortalUserRepository $portalUserRepo;
+    private MySqlSubmissionCommentRepository $commentRepo;
     private AuditLogger $audit;
 
     public function __construct(
@@ -32,6 +34,7 @@ final class SubmissionAdminController
         $this->fileRepo       = new MySqlPortalSubmissionFileRepository($config['pdo']);
         $this->noteRepo       = new MySqlPortalSubmissionNoteRepository($config['pdo']);
         $this->portalUserRepo = new MySqlPortalUserRepository($config['pdo']);
+        $this->commentRepo    = new MySqlSubmissionCommentRepository($config['pdo']);
         $this->audit          = new AuditLogger($config['pdo']);
         
         // Fallback instantiation if manual DI fails (backwards compatibility or simple testing)
@@ -94,6 +97,10 @@ final class SubmissionAdminController
         $responseFiles = array_filter($files, static fn($f) => $f['origin'] === 'ADMIN');
         $userFiles     = array_filter($files, static fn($f) => $f['origin'] === 'USER');
         
+        // Busca comentários e histórico de status
+        $comments = $this->commentRepo->getBySubmission($id, true);
+        $statusHistory = $this->commentRepo->getStatusHistory($id);
+        
         // Busca logs de auditoria desta submissão
         $auditLogs = $this->audit->getByContext('submission', $id, 15);
 
@@ -105,6 +112,8 @@ final class SubmissionAdminController
             'userFiles'     => $userFiles,
             'responseFiles' => $responseFiles,
             'notes'         => $notes,
+            'comments'      => $comments,
+            'statusHistory' => $statusHistory,
             'auditLogs'     => $auditLogs,
             'csrfToken'     => Csrf::token(),
         ];
@@ -196,7 +205,12 @@ final class SubmissionAdminController
         $noteText = trim($post['note'] ?? '');
         $visible  = $post['visibility'] ?? 'USER_VISIBLE';
 
-        $allowedStatus = ['PENDING', 'UNDER_REVIEW', 'COMPLETED', 'REJECTED'];
+        // COMPLETED converts to APPROVED for backwards compatibility
+        if ($status === 'COMPLETED') {
+            $status = 'APPROVED';
+        }
+
+        $allowedStatus = ['PENDING', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'NEEDS_CORRECTION'];
         if (!in_array($status, $allowedStatus, true)) {
             Session::flash('error', 'Status inválido.');
             $this->redirect('/admin/submissions/' . $id);
@@ -206,18 +220,30 @@ final class SubmissionAdminController
             $visible = 'USER_VISIBLE';
         }
 
-        // Guarda status anterior
-        $submissionData = $this->repo->findById($id);
-        $oldStatus = $submissionData['status'] ?? null;
-
-        // Atualiza status
         $admin = Auth::requireAdmin();
         $adminId = $admin['id'] ?? null;
 
-        $this->repo->updateStatus($id, $status, $adminId ? (int)$adminId : null);
+        // Atualiza status e registra histórico
+        $this->commentRepo->updateSubmissionStatus(
+            $id,
+            $status,
+            'ADMIN',
+            $adminId ? (int)$adminId : null,
+            $noteText // Usa a nota também como "reason" no histórico
+        );
 
-        // Cria nota (opcional)
+        // Se houver nota, adiciona ao novo sistema de comentários
         if ($noteText !== '') {
+            $this->commentRepo->add([
+                'submission_id'   => $id,
+                'author_type'     => 'ADMIN',
+                'author_id'       => $adminId ? (int)$adminId : null,
+                'comment'         => $noteText,
+                'is_internal'     => $visible === 'ADMIN_ONLY',
+                'requires_action' => $status === 'NEEDS_CORRECTION'
+            ]);
+            
+            // Mantém compatibilidade legada com a tabela notes antiga
             $this->noteRepo->create([
                 'submission_id' => $id,
                 'admin_user_id' => $adminId ? (int)$adminId : null,
@@ -226,24 +252,19 @@ final class SubmissionAdminController
             ]);
         }
 
-        // Busca submissão atualizada
         $updatedSubmission = $this->repo->findById($id);
-
-        // Busca usuário do portal para notificação
         $portalUser = $this->portalUserRepo->findById((int)$updatedSubmission['portal_user_id']);
 
-        // Envia notificação se status mudou
         $notifications = $this->config['notifications_service'] ?? null;
-        if ($notifications && $portalUser && $oldStatus !== $updatedSubmission['status']) {
+        if ($notifications && $portalUser && ($submission['status'] ?? null) !== $status) {
             $notifications->portalSubmissionStatusChanged(
                 $portalUser,
                 $updatedSubmission,
-                (string)$oldStatus,
-                (string)$updatedSubmission['status']
+                (string)($submission['status'] ?? ''),
+                $status
             );
         }
 
-        // Log de auditoria
         $this->audit->log(
             'ADMIN',
             $adminId ? (int)$adminId : null,
@@ -251,7 +272,7 @@ final class SubmissionAdminController
             'submission',
             $id,
             [
-                'old_status' => $oldStatus,
+                'old_status' => $submission['status'] ?? null,
                 'new_status' => $status,
                 'note'       => $noteText,
             ]

@@ -39,6 +39,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET',  '/portal/submissions/new',            [PortalSubmissionController::class, 'showCreateForm']);
     $r->addRoute('POST', '/portal/submissions',                [PortalSubmissionController::class, 'store']);
     $r->addRoute('GET',  '/portal/submissions/{id:\d+}',       [PortalSubmissionController::class, 'show']);
+    $r->addRoute('POST', '/portal/submissions/{id:\d+}/reply', [PortalSubmissionController::class, 'reply']);
     $r->addRoute('POST', '/portal/api/cnpj',                   [PortalSubmissionController::class, 'getCnpjData']);
 
     // Documentos do usuário final
