@@ -7,6 +7,7 @@ namespace App\Presentation\Controller\Admin;
 use App\Infrastructure\Persistence\MySqlAdminUserRepository;
 use App\Support\Session;
 use App\Support\Csrf;
+use App\Support\PasswordValidator;
 use Respect\Validation\Validator as v;
 
 final class AdminUserAdminController
@@ -226,10 +227,11 @@ final class AdminUserAdminController
         }
 
         if ($password !== '') {
-            if ($password !== $passwordConfirm) {
+            $pwdErrors = PasswordValidator::validate($password);
+            if (!empty($pwdErrors)) {
+                $errors['password'] = implode(' ', $pwdErrors);
+            } elseif ($password !== $passwordConfirm) {
                 $errors['password'] = 'As senhas não coincidem.';
-            } elseif (!v::stringType()->length(8, null)->validate($password)) {
-                $errors['password'] = 'Senha deve ter pelo menos 8 caracteres.';
             }
         }
 
@@ -239,7 +241,8 @@ final class AdminUserAdminController
         }
 
         if ($password !== '') {
-            $data['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+            $this->repo->updatePassword($id, $hash);
         }
 
         $this->repo->update($id, $data);
