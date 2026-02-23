@@ -1,0 +1,28 @@
+# Configure o Dependabot para trabalhar de forma segura sem quebrar a aplicação.
+# Documentação completa: https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  # 1. Ecossistema PHP (Composer)
+  - package-ecosystem: "composer"
+    # Diretório onde fica o composer.json
+    directory: "/"
+    # Verifica vulnerabilidades 1x por semana
+    schedule:
+      interval: "weekly"
+    # Limita o número de PRs abertos simultaneamente para não faturar a caixa de entrada
+    open-pull-requests-limit: 5
+    # Permite apenas correções de segurança (Security Updates) e atualizações que NÃO quebram o código (Patch/Minor)
+    versioning-strategy: "lockfile-only"
+    # Não cria PRs com mudanças na própria configuração
+    rebase-strategy: "disabled"
+
+  # 2. Ecossistema Docker
+  - package-ecosystem: "docker"
+    # Diretório onde fica o Dockerfile
+    directory: "/"
+    # Verifica imagens de contêineres mensalmente (são menos voláteis)
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 2
+    versioning-strategy: "lockfile-only"
