@@ -13,6 +13,8 @@ services:
     environment:
       SERVICE_NAME: app
       SERVICE_TAGS: dev
+      DB_HOST: db
+      DB_PASSWORD: root
     working_dir: /var/www/html
     volumes:
       - ./:/var/www/html
@@ -30,18 +32,17 @@ services:
     container_name: nimbusdocs-db
     restart: always
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE:-nimbusdocs}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-root}
-      MYSQL_USER: ${DB_USERNAME:-nimbus}
+      MYSQL_DATABASE: nimbusdocs
+      MYSQL_ROOT_PASSWORD: root
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
     volumes:
       - dbdata:/var/lib/mysql
+      - ./db.sql:/docker-entrypoint-initdb.d/db.sql
     networks:
       - nimbus-network
     ports:
-      - "3306:3306"
+      - "33060:3306"
 
   # Database Manager (PhpMyAdmin)
   pma:
