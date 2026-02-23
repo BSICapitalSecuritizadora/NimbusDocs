@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Dotenv\Dotenv;
 use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
+use Monolog\Handler\RotatingFileHandler;
 use App\Infrastructure\Persistence\Connection;
 use App\Infrastructure\Notification\GraphMailService;
 use App\Application\Service\NotificationService;
@@ -154,7 +154,7 @@ if (!is_dir($logDir)) {
 
 $logger = new Logger('nimbusdocs');
 $logger->pushHandler(
-    new StreamHandler($logDir . '/app.log', Logger::DEBUG)
+    new RotatingFileHandler($logDir . '/app.log', 14, Logger::DEBUG)
 );
 
 // Adiciona logger ao config
@@ -254,7 +254,7 @@ $graphMailConfig = [
 ];
 
 $mailLogger = new Logger('mail');
-$mailLogger->pushHandler(new StreamHandler(__DIR__ . '/../storage/logs/mail.log', Logger::DEBUG));
+$mailLogger->pushHandler(new RotatingFileHandler(__DIR__ . '/../storage/logs/mail.log', 14, Logger::DEBUG));
 $graphMailService = new GraphMailService($graphMailConfig, $mailLogger);
 // Outbox repository para fila de notificações
 $outboxRepo = new MySqlNotificationOutboxRepository($pdo, $logger);
