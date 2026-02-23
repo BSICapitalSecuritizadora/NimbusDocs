@@ -96,7 +96,7 @@ class TwoFactorAuthService
         // Use the chillerlan/php-qrcode library if available (composer)
         if (class_exists(\chillerlan\QRCode\QRCode::class)) {
             $options = new \chillerlan\QRCode\QROptions([
-                'outputType' => \chillerlan\QRCode\Common\QROutputInterface::CUSTOM,
+                'outputType' => \chillerlan\QRCode\Output\QROutputInterface::CUSTOM,
                 'eccLevel'   => \chillerlan\QRCode\Common\EccLevel::H,
             ]);
             $qr = new \chillerlan\QRCode\QRCode($options);
