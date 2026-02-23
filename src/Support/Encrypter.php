@@ -38,8 +38,26 @@ class Encrypter
     }
 
     /**
+     * Tenta descriptografar usando uma chave específica
+     */
+    private static function attemptDecrypt(array $data, string $key): ?string
+    {
+        $iv = base64_decode($data['iv'], true);
+        
+        // Valida MAC (integridade) com a chave testada
+        $expectedMac = hash_hmac('sha256', $iv . $data['value'], $key);
+        if (!hash_equals($expectedMac, $data['mac'])) {
+            return null; // Chave errada ou dado adulterado
+        }
+
+        $decrypted = openssl_decrypt($data['value'], self::CIPHER, $key, 0, $iv);
+
+        return $decrypted !== false ? $decrypted : null;
+    }
+
+    /**
      * Descriptografa um valor (modo seguro).
-     * Retorna null se o payload for inválido, adulterado ou não for formato criptografado.
+     * Suporta Fallback Loop: tenta a chave atual e, se falhar, tenta chaves antigas.
      */
     public static function decrypt(?string $payload): ?string
     {
@@ -59,18 +77,34 @@ class Encrypter
                 return null;
             }
 
-            $key = self::getKey();
-            $iv = base64_decode($data['iv'], true);
+            // 1. Tenta a chave principal (APP_SECRET)
+            $primaryKey = self::getNormalizedKey($_ENV['APP_SECRET'] ?? '');
             
-            // Valida MAC (integridade)
-            $expectedMac = hash_hmac('sha256', $iv . $data['value'], $key);
-            if (!hash_equals($expectedMac, $data['mac'])) {
-                return null;
+            $decrypted = self::attemptDecrypt($data, $primaryKey);
+            if ($decrypted !== null) {
+                return $decrypted;
             }
 
-            $decrypted = openssl_decrypt($data['value'], self::CIPHER, $key, 0, $iv);
+            // 2. Se falhou, tenta chaves antigas (APP_PREVIOUS_SECRETS)
+            // Útil para "Secret Rotation" sem downtime
+            $previousSecretsRaw = $_ENV['APP_PREVIOUS_SECRETS'] ?? '';
+            if (!empty($previousSecretsRaw)) {
+                $previousSecrets = explode(',', $previousSecretsRaw);
+                foreach ($previousSecrets as $secretRaw) {
+                    $secretRaw = trim($secretRaw);
+                    if (empty($secretRaw)) continue;
 
-            return $decrypted !== false ? $decrypted : null;
+                    $fallbackKey = self::getNormalizedKey($secretRaw);
+                    $decrypted = self::attemptDecrypt($data, $fallbackKey);
+                    
+                    if ($decrypted !== null) {
+                        return $decrypted;
+                    }
+                }
+            }
+
+            // Falhou em todas as tentativas
+            return null;
 
         } catch (\Throwable $e) {
             return null;
@@ -141,13 +175,17 @@ class Encrypter
         return true;
     }
 
-    private static function getKey(): string
+    private static function getNormalizedKey(string $secret): string
     {
-        $secret = $_ENV['APP_SECRET'] ?? '';
         if (strlen($secret) < 32) {
              return hash('sha256', $secret, true);
         }
         return substr($secret, 0, 32);
+    }
+
+    private static function getKey(): string
+    {
+        return self::getNormalizedKey($_ENV['APP_SECRET'] ?? '');
     }
 
     /**
