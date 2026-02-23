@@ -50,7 +50,8 @@ RUN chown -R www-data:www-data /var/www/html
 COPY . /var/www/html
 
 # Set directory permissions for storage
-RUN chown -R www-data:www-data /var/www/html/storage \
+RUN mkdir -p /var/www/html/storage/logs /var/www/html/storage/cache /var/www/html/storage/portal_uploads /var/www/html/storage/backups \
+    && chown -R www-data:www-data /var/www/html/storage \
     && chmod -R 775 /var/www/html/storage
 
 # We don't expose 80 explicitly, base image does. but good for docs.

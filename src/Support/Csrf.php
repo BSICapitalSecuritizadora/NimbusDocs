@@ -52,6 +52,27 @@ final class Csrf
     }
 
     /**
+     * Valida o token mas NÃO o rotaciona. Ideal para chamadas AJAX intermediárias 
+     * onde o usuário ainda vai submeter o formulário principal depois.
+     */
+    public static function validateWithoutRotation(?string $token): bool
+    {
+        if (!is_string($token) || $token === '') {
+            return false;
+        }
+
+        if (self::matchesCurrent($token)) {
+            return true;
+        }
+
+        if (self::matchesPrevious($token)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Força regeneração do token (útil após login, por exemplo).
      */
     public static function regenerate(): void
