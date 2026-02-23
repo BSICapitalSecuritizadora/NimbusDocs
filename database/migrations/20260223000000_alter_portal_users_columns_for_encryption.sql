@@ -1,0 +1,2 @@
+ALTER TABLE portal_users MODIFY document_number VARCHAR(255) DEFAULT NULL;
+ALTER TABLE portal_users MODIFY phone_number VARCHAR(255) DEFAULT NULL;
