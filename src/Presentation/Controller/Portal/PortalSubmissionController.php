@@ -251,6 +251,9 @@ final class PortalSubmissionController
         }
 
         if ($errors) {
+            if (!isset($errors['general'])) {
+                $errors['general'] = 'Por favor, verifique os dados informados nos passos anteriores. Atenção: você precisará anexar os documentos novamente.';
+            }
             Session::flash('errors', $errors);
             Session::flash('old', $data);
             Session::flash('old_shareholders', $shareholders ?? []);

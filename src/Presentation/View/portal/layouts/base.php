@@ -65,6 +65,20 @@ $appName  = $branding['app_name'] ?? 'NimbusDocs';
     <main class="portal-main">
         <div class="container-xxl"> <!-- Use XXL container for wider layout -->
             <?php
+            $flashSuccess = \App\Support\Session::getFlash('success');
+            $flashError   = \App\Support\Session::getFlash('error');
+            $flashWarning = \App\Support\Session::getFlash('warning');
+            
+            if ($flashSuccess) {
+                echo '<div class="alert alert-success shadow-sm rounded-4 border-0 mb-4"><i class="bi bi-check-circle-fill me-2"></i>' . htmlspecialchars($flashSuccess, ENT_QUOTES, 'UTF-8') . '</div>';
+            }
+            if ($flashError) {
+                echo '<div class="alert alert-danger shadow-sm rounded-4 border-0 mb-4"><i class="bi bi-x-circle-fill me-2"></i>' . htmlspecialchars($flashError, ENT_QUOTES, 'UTF-8') . '</div>';
+            }
+            if ($flashWarning) {
+                echo '<div class="alert alert-warning shadow-sm rounded-4 border-0 mb-4"><i class="bi bi-exclamation-triangle-fill me-2"></i>' . htmlspecialchars($flashWarning, ENT_QUOTES, 'UTF-8') . '</div>';
+            }
+
             if (isset($contentView)) {
                 extract($viewData ?? []);
                 require $contentView;

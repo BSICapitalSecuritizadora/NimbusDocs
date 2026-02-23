@@ -33,8 +33,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # Customize PHP settings (upload size, memory limit)
-RUN echo "upload_max_filesize = 64M" > /usr/local/etc/php/conf.d/uploads.ini \
-    && echo "post_max_size = 64M" >> /usr/local/etc/php/conf.d/uploads.ini \
+RUN echo "upload_max_filesize = 200M" > /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "post_max_size = 200M" >> /usr/local/etc/php/conf.d/uploads.ini \
     && echo "memory_limit = 256M" >> /usr/local/etc/php/conf.d/memory.ini
 
 # Add User for non-root execution (optional, but good practice)
