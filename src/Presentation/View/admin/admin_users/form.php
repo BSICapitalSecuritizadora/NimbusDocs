@@ -156,6 +156,9 @@ $action = $isEdit
                                         <?= htmlspecialchars($errors['password'], ENT_QUOTES, 'UTF-8') ?>
                                     </div>
                                 <?php endif; ?>
+                                <div class="form-text" style="font-size: 0.75rem; color: var(--nd-gray-500); margin-top: 0.5rem;">
+                                    Mín. 8 caracteres, 1 letra maiúscula, 1 minúscula, 1 número e 1 símbolo.
+                                </div>
                             </div>
 
                             <div class="col-md-6">

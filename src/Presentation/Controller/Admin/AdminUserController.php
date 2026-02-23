@@ -9,6 +9,7 @@ use App\Support\AuditLogger;
 use App\Support\Csrf;
 use App\Support\Session;
 use App\Support\Auth;
+use App\Support\PasswordValidator;
 use Respect\Validation\Validator as v;
 
 final class AdminUserController
@@ -238,17 +239,14 @@ final class AdminUserController
         }
 
         // Regras de senha
-        if ($isCreate) {
-            if (!v::stringType()->length(6, null)->validate($data['password'])) {
-                $errors['password'] = 'Senha deve ter pelo menos 6 caracteres.';
+        $checkPassword = $isCreate || !empty($data['password']);
+
+        if ($checkPassword) {
+            $pwdErrors = PasswordValidator::validate($data['password']);
+            if (!empty($pwdErrors)) {
+                $errors['password'] = implode(' ', $pwdErrors);
             } elseif ($data['password'] !== $data['password_confirmation']) {
-                $errors['password_confirmation'] = 'Confirmação de senha não confere.';
-            }
-        } elseif (!empty($data['password'])) {
-            if (!v::stringType()->length(6, null)->validate($data['password'])) {
-                $errors['password'] = 'Senha deve ter pelo menos 6 caracteres.';
-            } elseif ($data['password'] !== $data['password_confirmation']) {
-                $errors['password_confirmation'] = 'Confirmação de senha não confere.';
+                $errors['password_confirmation'] = 'A confirmação de senha não confere.';
             }
         }
 

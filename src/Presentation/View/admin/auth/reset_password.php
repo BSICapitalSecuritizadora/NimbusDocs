@@ -140,6 +140,7 @@ $primaryColor = $branding['primary_color'] ?? '#00205b';
                     <li id="req-upper">Caractere maiúsculo</li>
                     <li id="req-lower">Caractere minúsculo</li>
                     <li id="req-number">Pelo menos um número</li>
+                    <li id="req-special">Símbolo especial (!@#$...)</li>
                 </ul>
             </div>
 
@@ -186,6 +187,7 @@ $primaryColor = $branding['primary_color'] ?? '#00205b';
         const reqUpper = document.getElementById('req-upper');
         const reqLower = document.getElementById('req-lower');
         const reqNumber = document.getElementById('req-number');
+        const reqSpecial = document.getElementById('req-special');
         const passwordMatch = document.getElementById('password-match');
 
         password.addEventListener('input', validatePassword);
@@ -198,6 +200,7 @@ $primaryColor = $branding['primary_color'] ?? '#00205b';
             reqUpper.classList.toggle('valid', /[A-Z]/.test(val));
             reqLower.classList.toggle('valid', /[a-z]/.test(val));
             reqNumber.classList.toggle('valid', /[0-9]/.test(val));
+            reqSpecial.classList.toggle('valid', /[\W_]/.test(val));
             
             checkMatch();
         }

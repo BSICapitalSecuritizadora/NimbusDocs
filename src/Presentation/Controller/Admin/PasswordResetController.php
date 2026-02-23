@@ -8,6 +8,7 @@ use App\Infrastructure\Persistence\MySqlPasswordResetRepository;
 use App\Infrastructure\Persistence\MySqlAdminUserRepository;
 use App\Support\Csrf;
 use App\Support\Session;
+use App\Support\PasswordValidator;
 use App\Infrastructure\Security\DbRateLimiter;
 
 /**
@@ -177,8 +178,9 @@ class PasswordResetController
         }
 
         // Password strength validation
-        if (!preg_match('/[A-Z]/', $password) || !preg_match('/[a-z]/', $password) || !preg_match('/[0-9]/', $password)) {
-            Session::flash('error', 'A senha deve conter letras maiúsculas, minúsculas e números.');
+        $passwordErrors = PasswordValidator::validate($password);
+        if (!empty($passwordErrors)) {
+            Session::flash('error', implode(' ', $passwordErrors));
             header("Location: /admin/reset-password/{$token}");
             exit;
         }
