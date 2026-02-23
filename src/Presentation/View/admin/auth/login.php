@@ -34,12 +34,14 @@ if (class_exists(\App\Support\ColorUtils::class)) {
     <title>Login Administrativo - <?= htmlspecialchars($appName) ?></title>
     
     <!-- Local Fonts (System Font Stack) -->
-    <link href="<?= ($config['base_url'] ?? '') ?>/assets/fonts/fonts.css" rel="stylesheet">
+    <link href="<?= ($config['asset_url'] ?? $config['base_url'] ?? '') ?>/assets/fonts/fonts.css" rel="stylesheet">
     
-    <!-- Styles (Local) -->
-    <link href="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
-    <link href="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="<?= ($config['base_url'] ?? '') ?>/css/nimbusdocs-theme.css?v=<?= time() ?>" rel="stylesheet">
+    <!-- Bootstrap + Icons (Local) -->
+    <link href="<?= ($config['asset_url'] ?? $config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="<?= ($config['asset_url'] ?? $config['base_url'] ?? '') ?>/assets/vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
+    
+    <!-- NimbusDocs Theme -->
+    <link href="<?= ($config['asset_url'] ?? $config['base_url'] ?? '') ?>/css/nimbusdocs-theme.css?v=<?= time() ?>" rel="stylesheet">
 
     
     <style>
@@ -278,7 +280,7 @@ if (class_exists(\App\Support\ColorUtils::class)) {
     </div>
 
     <!-- Scripts (Local) -->
-    <script src="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="<?= ($config['asset_url'] ?? $config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
     <script>
         // Auto-hide alert after 5 seconds
         const alertEl = document.getElementById('alertError');

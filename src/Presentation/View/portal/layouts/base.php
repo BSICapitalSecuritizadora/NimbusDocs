@@ -10,12 +10,12 @@ $appName  = $branding['app_name'] ?? 'NimbusDocs';
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <!-- Local Fonts (System Font Stack) -->
-    <link href="<?= ($config['base_url'] ?? '') ?>/assets/fonts/fonts.css" rel="stylesheet">
+    <link href="<?= ($config['asset_url'] ?? '') ?>/assets/fonts/fonts.css" rel="stylesheet">
     
     <!-- Styles (Local) -->
-    <link href="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
-    <link href="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="<?= ($config['base_url'] ?? '') ?>/css/nimbusdocs-theme.css" rel="stylesheet">
+    <link href="<?= ($config['asset_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="<?= ($config['asset_url'] ?? '') ?>/assets/vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="<?= ($config['asset_url'] ?? '') ?>/css/nimbusdocs-theme.css" rel="stylesheet">
 
     
     <!-- Custom Branding -->
@@ -75,8 +75,8 @@ $appName  = $branding['app_name'] ?? 'NimbusDocs';
 
     <?php require __DIR__ . '/partials/footer.php'; ?>
 
-    <script src="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
-    <script src="/js/nimbusdocs-utils.js"></script>
+    <script src="<?= ($config['asset_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="<?= ($config['asset_url'] ?? '') ?>/js/nimbusdocs-utils.js"></script>
 
 </body>
 </html>

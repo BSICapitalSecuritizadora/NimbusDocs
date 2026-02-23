@@ -130,6 +130,8 @@ $baseUrl = rtrim($baseUrl, '/');
 
 $config['base_url'] = $baseUrl;
 
+// Configura URL de Assets (CDN). Se não houver, cai para o base_url local
+$config['asset_url'] = !empty($_ENV['ASSET_URL']) ? rtrim($_ENV['ASSET_URL'], '/') : $baseUrl;
 
 // 2) Cria conexão PDO usando os dados de $config['db']
 $pdo = Connection::make($config['db']);

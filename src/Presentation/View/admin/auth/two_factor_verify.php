@@ -35,12 +35,12 @@ if (class_exists(\App\Support\ColorUtils::class)) {
     <title>Verificação 2FA - <?= htmlspecialchars($appName) ?></title>
     
     <!-- Local Fonts (System Font Stack) -->
-    <link href="<?= ($config['base_url'] ?? '') ?>/assets/fonts/fonts.css" rel="stylesheet">
+    <link href="<?= ($config['asset_url'] ?? $config['base_url'] ?? '') ?>/assets/fonts/fonts.css" rel="stylesheet">
     
     <!-- Styles (Local) -->
-    <link href="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
-    <link href="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="<?= ($config['base_url'] ?? '') ?>/css/nimbusdocs-theme.css?v=<?= time() ?>" rel="stylesheet">
+    <link href="<?= ($config['asset_url'] ?? $config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="<?= ($config['asset_url'] ?? $config['base_url'] ?? '') ?>/assets/vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="<?= ($config['asset_url'] ?? $config['base_url'] ?? '') ?>/css/nimbusdocs-theme.css?v=<?= time() ?>" rel="stylesheet">
 
     <style>
         :root {
@@ -292,7 +292,7 @@ if (class_exists(\App\Support\ColorUtils::class)) {
     </div>
 
     <!-- Scripts (Local) -->
-    <script src="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="<?= ($config['asset_url'] ?? $config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
     <script>
         const codeInput = document.getElementById('code');
         const submitBtn = document.getElementById('submitBtn');

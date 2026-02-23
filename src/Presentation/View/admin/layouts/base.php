@@ -37,15 +37,15 @@ if (class_exists(\App\Support\ColorUtils::class)) {
     <title><?= htmlspecialchars($appName . ' — ' . ($pageTitle ?? 'Admin'), ENT_QUOTES, 'UTF-8') ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Local Fonts (System Font Stack) -->
-    <link href="<?= ($config['base_url'] ?? '') ?>/assets/fonts/fonts.css" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="<?= ($config['asset_url'] ?? '') ?>/assets/fonts/fonts.css" rel="stylesheet">
     
-    <!-- Bootstrap + Icons (Local) -->
-    <link href="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
-    <link href="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Vendor CSS -->
+    <link href="<?= ($config['asset_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="<?= ($config['asset_url'] ?? '') ?>/assets/vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
     
-    <!-- NimbusDocs Theme (load after Bootstrap to override properly) -->
-    <link href="<?= ($config['base_url'] ?? '') ?>/css/nimbusdocs-theme.css?v=<?= time() ?>" rel="stylesheet">
+    <!-- Theme CSS -->
+    <link href="<?= ($config['asset_url'] ?? '') ?>/css/nimbusdocs-theme.css?v=<?= time() ?>" rel="stylesheet">
 
     
     <!-- Custom Branding Injection -->
@@ -151,8 +151,8 @@ if (class_exists(\App\Support\ColorUtils::class)) {
     </div>
 
     <!-- Scripts (Local) -->
-    <script src="<?= ($config['base_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
-    <script src="/js/nimbusdocs-utils.js"></script>
+    <script src="<?= ($config['asset_url'] ?? '') ?>/assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="<?= ($config['asset_url'] ?? '') ?>/js/nimbusdocs-utils.js"></script>
     
     <script>
     (function() {
