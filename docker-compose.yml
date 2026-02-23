@@ -60,6 +60,26 @@ services:
     depends_on:
       - db
 
+  # Automated Database Backup
+  db-backup:
+    image: fradelg/mysql-cron-backup
+    container_name: nimbusdocs-db-backup
+    restart: always
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=root
+      - MYSQL_PASS=root
+      - MYSQL_DB=nimbusdocs
+      - MAX_BACKUPS=7
+      - INIT_BACKUP=1 # Perform an initial backup on startup
+      - CRON_TIME=0 3 * * *
+    volumes:
+      - ./storage/backups:/backup
+    networks:
+      - nimbus-network
+    depends_on:
+      - db
+
 # Networks
 networks:
   nimbus-network:
