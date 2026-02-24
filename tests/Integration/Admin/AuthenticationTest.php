@@ -29,7 +29,7 @@ class AuthenticationTest extends TestCase
 
     public function testIsAdminWithSession(): void
     {
-        Session::set('admin_user', [
+        Session::set('admin', [
             'id' => 1,
             'email' => 'admin@test.com',
             'name' => 'Test Admin',
@@ -46,7 +46,7 @@ class AuthenticationTest extends TestCase
             'name' => 'Test Admin',
         ];
         
-        Session::set('admin_user', $adminData);
+        Session::set('admin', $adminData);
         
         $admin = Auth::getAdmin();
         
@@ -77,7 +77,7 @@ class AuthenticationTest extends TestCase
 
     public function testAdminLogout(): void
     {
-        Session::set('admin_user', [
+        Session::set('admin', [
             'id' => 1,
             'email' => 'admin@test.com',
         ]);
