@@ -398,8 +398,17 @@ final class PortalSubmissionController
 
             // Auditoria de Sucesso
             $this->audit->log('PORTAL_USER', (int)$user['id'], 'SUBMISSION_CREATED', 'PORTAL_SUBMISSION', $submissionId, [
-                'reference_code' => $refCode,
+                'reference' => $refCode
             ]);
+
+            // Disparar Notificação In-App para os Administradores
+            $notificationRepo = new \App\Infrastructure\Persistence\MySqlAdminNotificationRepository($this->config['pdo']);
+            $notificationRepo->createForAllAdmins(
+                'NEW_SUBMISSION',
+                'Nova Solicitação Recebida',
+                "O cliente {$data['company_name']} enviou uma nova documentação ({$refCode}).",
+                "/admin/submissions/show?id={$submissionId}"
+            );
 
             // Auditoria de Negócio
             $this->config['audit']->portalUserAction([
