@@ -36,7 +36,16 @@ This project fully supports Docker for a consistent development environment.
 | Run Migrations | `docker-compose exec app php bin/migrate.php` |
 | Run Tests | `docker-compose exec app composer test:unit` |
 
-## Troubleshooting
+## Scheduled Reports (Cron)
 
--   **Port Conflicts**: If port 8080 or 3306 is in use, edit `docker-compose.yml` to change the mapping (e.g., `"8888:80"`).
--   **Database Connection**: Ensure `.env` has `DB_HOST=db`. XAMPP uses `localhost`, but Docker uses the service name `db`.
+To enable the automatic generation and dispatch of Scheduled Reports (relatórios agendados), you must configure a cron job on your host server. This cron job will execute the internal Worker script inside the Docker container.
+
+1. Open your host's crontab:
+   ```bash
+   crontab -e
+   ```
+2. Add the following line to run the scheduler every hour (adjust `cd` path to where your `docker-compose.yml` is located):
+   ```bash
+   0 * * * * cd /path/to/NimbusDocs && docker-compose exec -T app php bin/run_scheduled_reports.php >> storage/logs/cron.log 2>&1
+   ```
+   *Note: Using `-T` disables pseudo-TTY allocation, which is required when running from cron.*

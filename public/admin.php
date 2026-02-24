@@ -89,6 +89,12 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET', '/admin/notifications/metrics/api', [NotificationMetricsController::class, 'apiMetrics']);
     $r->addRoute('GET', '/admin/reports/submissions', [ReportsAdminController::class, 'submissionsReport']);
     $r->addRoute('GET', '/admin/reports/submissions/export', [ReportsAdminController::class, 'submissionsReportExportCsv']);
+
+    // Relatórios Agendados
+    $r->addRoute('GET',  '/admin/reports/schedules', [\App\Presentation\Controller\Admin\ReportScheduleAdminController::class, 'index']);
+    $r->addRoute('POST', '/admin/reports/schedules', [\App\Presentation\Controller\Admin\ReportScheduleAdminController::class, 'store']);
+    $r->addRoute('POST', '/admin/reports/schedules/{id:\d+}/toggle', [\App\Presentation\Controller\Admin\ReportScheduleAdminController::class, 'toggleActive']);
+    $r->addRoute('POST', '/admin/reports/schedules/{id:\d+}/delete', [\App\Presentation\Controller\Admin\ReportScheduleAdminController::class, 'delete']);
     // Link manual de conta Microsoft para admin
     $r->addRoute('GET',  '/admin/ms-link', [\App\Presentation\Controller\Admin\AdminMicrosoftLinkController::class, 'showForm']);
     $r->addRoute('POST', '/admin/ms-link', [\App\Presentation\Controller\Admin\AdminMicrosoftLinkController::class, 'store']);

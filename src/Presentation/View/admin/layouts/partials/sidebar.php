@@ -118,9 +118,14 @@ $appInitials = strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $appName), 0, 2
             <span>Saúde do Sistema</span>
         </a>
         
-        <a href="/admin/reports/submissions" class="nd-nav-item <?= isActive('/admin/reports', $currentUri) ? 'active' : '' ?>">
+        <a href="/admin/reports/submissions" class="nd-nav-item <?= isActive('/admin/reports/submissions', $currentUri) ? 'active' : '' ?>">
             <i class="bi bi-graph-up-arrow nd-nav-icon"></i>
             <span>Relatórios</span>
+        </a>
+
+        <a href="/admin/reports/schedules" class="nd-nav-item <?= isActive('/admin/reports/schedules', $currentUri) ? 'active' : '' ?>">
+            <i class="bi bi-calendar2-check-fill nd-nav-icon"></i>
+            <span>Relatórios Agendados</span>
         </a>
         
         <!-- Conta -->
