@@ -16,6 +16,9 @@
 /storage/uploads/
 /public/uploads/
 
+# Backups
+/storage/backups/
+
 # Arquivos temporários
 *.log
 *.tmp
