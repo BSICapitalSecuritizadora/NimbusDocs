@@ -54,6 +54,7 @@ final class PortalLoginController
         if (!Csrf::validate($token)) {
             Session::flash('error', 'Sessão expirada. Tente novamente.');
             $this->redirect('/portal/login');
+            return;
         }
 
         $code       = strtoupper(trim($post['access_code'] ?? ''));
@@ -63,6 +64,7 @@ final class PortalLoginController
         if ($code === '') {
             Session::flash('error', 'Informe um código de acesso válido.');
             $this->redirect('/portal/login');
+            return;
         }
 
         // --- Rate Limiting Check (IP based) ---
@@ -74,6 +76,7 @@ final class PortalLoginController
         if ($this->limiter->check($scope, $ip, 'ip_global', 10, 15)) {
             Session::flash('error', 'Muitas tentativas de login. Aguarde 15 minutos.');
             $this->redirect('/portal/login');
+            return;
         }
 
         // Verifica se Código específico está sob ataque (opcional, mas bom pra evitar brute force num código X)
@@ -90,13 +93,16 @@ final class PortalLoginController
 
         Session::flash('success', 'Você saiu do portal.');
         $this->redirect('/portal/login');
+        return;
     }
 
     private function redirect(string $path): void
     {
         session_write_close();
         header('Location: ' . $path);
-        exit;
+        if (!defined('PHPUNIT_RUNNING')) {
+            exit;
+        }
     }
 
     private function loginWithCode(string $code, string $ip): void
@@ -107,6 +113,7 @@ final class PortalLoginController
             $this->limiter->increment($scope, $ip, 'ip_global', 10, 15); // Incrementa falha
             Session::flash('error', 'Informe um código de acesso válido.');
             $this->redirect('/portal/login');
+            return;
         }
         // Tenta um token válido
         $row = $this->tokenRepo->findValidWithUserByCode($code);
@@ -130,6 +137,7 @@ final class PortalLoginController
             $this->audit->log('PORTAL_USER', null, 'PORTAL_LOGIN_CODE_FAILED', 'PORTAL_ACCESS_TOKEN', null, ['code' => $code]);
             Session::flash('error', 'Código inválido ou expirado.');
             $this->redirect('/portal/login');
+            return;
         }
 
         // --- Sucesso: Limpa Rate Limit ---
@@ -162,5 +170,6 @@ final class PortalLoginController
 
         Session::flash('success', 'Login efetuado com sucesso.');
         $this->redirect('/portal');
+        return;
     }
 }

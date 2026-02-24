@@ -51,26 +51,32 @@ final class LoginController
         $clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $scope = 'admin_login';
         if ($this->limiter->check($scope, $clientIp, 'ip_global', 5, 15)) {
+
             Session::flash('error', 'Muitas tentativas de login. Aguarde 15 minutos.');
             Session::flash('old_email', $email);
             $this->redirect('/admin/login');
+            return;
         }
 
         // CSRF
         if (!Csrf::validate($token)) {
+
             Session::flash('error', 'Sessão expirada. Tente novamente.');
             Session::flash('old_email', $email);
             $this->redirect('/admin/login');
+            return;
         }
 
         // Validação básica
         $emailIsValid = v::email()->length(1, 190)->validate($email);
         $passIsValid  = v::stringType()->length(1, null)->validate($password);
         if (!$emailIsValid || !$passIsValid) {
+
             $this->limiter->increment($scope, $clientIp, 'ip_global', 5, 15);
             Session::flash('error', 'Credenciais inválidas.');
             Session::flash('old_email', $email);
             $this->redirect('/admin/login');
+            return;
         }
 
         // Repositório
@@ -79,28 +85,34 @@ final class LoginController
 
         $user = $repo->findActiveByEmail($email);
         if (!$user) {
+
             $this->limiter->increment($scope, $clientIp, 'ip_global', 5, 15);
             $this->audit->log('ADMIN', null, 'LOGIN_FAILED', 'ADMIN_USER', null);
             Session::flash('error', 'Credenciais inválidas.');
             Session::flash('old_email', $email);
             $this->redirect('/admin/login');
+            return;
         }
 
         // Checa se modo local permite senha
         if (!in_array($user['auth_mode'], ['LOCAL_ONLY', 'LOCAL_AND_MS'], true)) {
+
             $this->audit->log('ADMIN', (int)$user['id'], 'LOGIN_FAILED_AUTH_MODE', 'ADMIN_USER', (int)$user['id']);
             Session::flash('error', 'Esse usuário só pode entrar com Microsoft.');
             Session::flash('old_email', $email);
             $this->redirect('/admin/login');
+            return;
         }
 
         // Verifica hash
         if (empty($user['password_hash']) || !password_verify($password, $user['password_hash'])) {
+
             $this->limiter->increment($scope, $clientIp, 'ip_global', 5, 15);
             $this->audit->log('ADMIN', (int)$user['id'], 'LOGIN_FAILED', 'ADMIN_USER', (int)$user['id']);
             Session::flash('error', 'Credenciais inválidas.');
             Session::flash('old_email', $email);
             $this->redirect('/admin/login');
+            return;
         }
 
         // OK: reset rate limiter
@@ -119,6 +131,7 @@ final class LoginController
             
             $this->audit->log('ADMIN', (int)$user['id'], 'LOGIN_2FA_REQUIRED', 'ADMIN_USER', (int)$user['id']);
             $this->redirect('/admin/2fa/verify');
+            return;
         }
 
         // No 2FA - complete login
@@ -138,14 +151,18 @@ final class LoginController
         session_write_close();
 
         // Redireciona para dashboard
-        header('Location: /admin');
-        exit;
+
+        $this->redirect('/admin');
+        return;
     }
 
     private function redirect(string $path): void
     {
+        session_write_close();
         header('Location: ' . $path);
-        exit;
+        if (!defined('PHPUNIT_RUNNING')) {
+            exit;
+        }
     }
 
     public function logout(array $vars = []): void
