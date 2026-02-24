@@ -29,10 +29,10 @@ class AuthApiController
     /**
      * Login and get JWT token
      */
-    public function login(array $params): array
+    public function login(?array $payload = null): array
     {
-        // Get JSON payload
-        $input = json_decode(file_get_contents('php://input'), true) ?? [];
+        // Use injected payload (for tests) or read JSON payload from request
+        $input = $payload ?? json_decode(file_get_contents('php://input'), true) ?? [];
         
         $email = trim($input['email'] ?? '');
         $password = $input['password'] ?? '';
@@ -102,7 +102,7 @@ class AuthApiController
     /**
      * Create a long-lived API token
      */
-    public function createToken(array $params): array
+    public function createToken(?array $payload = null): array
     {
         $user = $this->authenticateRequest();
         
@@ -111,7 +111,7 @@ class AuthApiController
             return ['error' => 'Unauthorized', 'message' => 'Invalid or expired token.'];
         }
 
-        $input = json_decode(file_get_contents('php://input'), true) ?? [];
+        $input = $payload ?? json_decode(file_get_contents('php://input'), true) ?? [];
         $name = trim($input['name'] ?? 'API Token');
 
         // Generate token
@@ -140,7 +140,7 @@ class AuthApiController
     /**
      * Revoke an API token
      */
-    public function revokeToken(array $params): array
+    public function revokeToken(?array $payload = null): array
     {
         $user = $this->authenticateRequest();
         
@@ -149,7 +149,7 @@ class AuthApiController
             return ['error' => 'Unauthorized', 'message' => 'Invalid or expired token.'];
         }
 
-        $input = json_decode(file_get_contents('php://input'), true) ?? [];
+        $input = $payload ?? json_decode(file_get_contents('php://input'), true) ?? [];
         $tokenId = (int) ($input['token_id'] ?? 0);
 
         if ($tokenId <= 0) {

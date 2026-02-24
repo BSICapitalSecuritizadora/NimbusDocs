@@ -106,7 +106,7 @@ class SubmissionsApiController
     /**
      * Update submission status
      */
-    public function updateStatus(array $params): array
+    public function updateStatus(?array $payload = null): array
     {
         $user = $this->authenticateRequest();
         
@@ -115,11 +115,11 @@ class SubmissionsApiController
             return ['error' => 'Unauthorized', 'message' => 'Invalid or expired token.'];
         }
 
-        $id = (int) ($params['id'] ?? 0);
-        $input = json_decode(file_get_contents('php://input'), true) ?? [];
+        $id = (int) ($payload['id'] ?? $_GET['id'] ?? 0); // Check payload or get
+        $input = $payload ?? json_decode(file_get_contents('php://input'), true) ?? [];
         $status = strtoupper(trim($input['status'] ?? ''));
 
-        $validStatuses = ['PENDING', 'UNDER_REVIEW', 'COMPLETED', 'REJECTED'];
+        $validStatuses = ['PENDING', 'UNDER_REVIEW', 'APPROVED', 'NEEDS_CORRECTION', 'COMPLETED', 'REJECTED', 'CANCELLED'];
         
         if (!in_array($status, $validStatuses)) {
             http_response_code(400);
@@ -151,7 +151,7 @@ class SubmissionsApiController
     /**
      * Create a new submission (for integrations)
      */
-    public function create(array $params): array
+    public function create(?array $payload = null): array
     {
         $user = $this->authenticateRequest();
         
@@ -160,15 +160,12 @@ class SubmissionsApiController
             return ['error' => 'Unauthorized', 'message' => 'Invalid or expired token.'];
         }
 
-        $input = json_decode(file_get_contents('php://input'), true) ?? [];
+        $input = $payload ?? json_decode(file_get_contents('php://input'), true) ?? [];
 
         // Validate required fields
-        $required = ['portal_user_id', 'title'];
-        foreach ($required as $field) {
-            if (empty($input[$field])) {
-                http_response_code(400);
-                return ['error' => 'Bad Request', 'message' => "Field '{$field}' is required."];
-            }
+        if (empty($input['portal_user_id']) || empty($input['title'])) {
+            http_response_code(400);
+            return ['error' => 'Bad Request', 'message' => "Fields 'portal_user_id' and 'title' are required."];
         }
 
         // Generate reference code

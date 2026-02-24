@@ -84,7 +84,7 @@ class UsersApiController
     /**
      * Create a new portal user
      */
-    public function create(array $params): array
+    public function create(?array $payload = null): array
     {
         $user = $this->authenticateRequest();
         
@@ -93,7 +93,7 @@ class UsersApiController
             return ['error' => 'Unauthorized', 'message' => 'Invalid or expired token.'];
         }
 
-        $input = json_decode(file_get_contents('php://input'), true) ?? [];
+        $input = $payload ?? json_decode(file_get_contents('php://input'), true) ?? [];
 
         // Validate required fields
         if (empty($input['full_name'])) {
@@ -127,7 +127,7 @@ class UsersApiController
     /**
      * Update a portal user
      */
-    public function update(array $params): array
+    public function update(?array $payload = null): array
     {
         $user = $this->authenticateRequest();
         
@@ -136,8 +136,8 @@ class UsersApiController
             return ['error' => 'Unauthorized', 'message' => 'Invalid or expired token.'];
         }
 
-        $id = (int) ($params['id'] ?? 0);
-        $input = json_decode(file_get_contents('php://input'), true) ?? [];
+        $id = (int) ($payload['id'] ?? $_GET['id'] ?? 0);
+        $input = $payload ?? json_decode(file_get_contents('php://input'), true) ?? [];
 
         $portalUser = $this->userRepo->findById($id);
         
