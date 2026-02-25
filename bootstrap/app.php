@@ -134,6 +134,17 @@ $config['base_url'] = $baseUrl;
 $config['asset_url'] = !empty($_ENV['ASSET_URL']) ? rtrim($_ENV['ASSET_URL'], '/') : $baseUrl;
 
 // 2) Cria conexão PDO usando os dados de $config['db']
+
+// --- INICIO INTERCEPTADOR DE TESTE E2E SEGURA ---
+$e2eFlagPath = __DIR__ . '/../storage/e2e_db_override.flag';
+if (file_exists($e2eFlagPath)) {
+    $overrideDb = trim(file_get_contents($e2eFlagPath));
+    if ($overrideDb === 'nimbusdocs_test') {
+        $config['db']['database'] = $overrideDb;
+    }
+}
+// --- FIM INTERCEPTADOR ---
+
 $pdo = Connection::make($config['db']);
 
 // 3) Injeta PDO dentro do array de config para uso pelos controllers

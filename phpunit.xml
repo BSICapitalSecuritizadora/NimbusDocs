@@ -41,5 +41,23 @@
         <env name="DB_DATABASE" value="nimbusdocs_test"/>
         <env name="DB_USERNAME" value="root"/>
         <env name="DB_PASSWORD" value=""/>
+        <env name="CACHE_DRIVER" value="array"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="MAIL_MAILER" value="array"/>
+        
+        <env name="APP_URL" value="http://localhost:8888"/>
+        
+        <!-- Symfony Panther Configuration for E2E Tests -->
+        <env name="PANTHER_APP_ENV" value="testing"/>
+        <!-- Start built-in PHP server pointing to our public dir -->
+        <env name="PANTHER_WEB_SERVER_DIR" value="./public"/>
+        <!-- Custom router for built in PHP server -->
+        <env name="PANTHER_WEB_SERVER_ROUTER" value="./public/router.php"/>
+        <!-- Explicit driver for Windows compat -->
+        <env name="PANTHER_CHROME_DRIVER_BINARY" value="drivers/chromedriver.exe"/>
+        <!-- Avoid port collisons -->
+        <env name="PANTHER_WEB_SERVER_PORT" value="8888"/>
+        <!-- Do not use headless if you want to see the browser opening (useful for debugging, false by default usually headless) -->
+        <env name="PANTHER_NO_HEADLESS" value="1"/>
     </php>
 </phpunit>
