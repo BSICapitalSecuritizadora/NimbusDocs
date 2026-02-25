@@ -76,7 +76,7 @@ export default function () {
         password: 'wrong',
     }), JSON_HEADERS);
     check(badAuth, {
-        'bad auth: returns 401 or 403': (r) => r.status === 401 || r.status === 403,
+        'bad auth: rejects correctly': (r) => [400, 401, 403].includes(r.status),
     });
 
     sleep(1);

@@ -21,7 +21,7 @@ class GlobalSearchService
      * 
      * @param string $query Search query
      * @param int $limit Maximum results per category
-     * @return array<string, array> Grouped search results
+     * @return array{submissions: array, users: array, documents: array, total: int}
      */
     public function search(string $query, int $limit = 10): array
     {

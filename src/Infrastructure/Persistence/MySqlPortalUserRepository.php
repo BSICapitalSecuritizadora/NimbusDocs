@@ -54,7 +54,7 @@ final class MySqlPortalUserRepository
     }
 
     /**
-     * @return array<int,array>
+     * @return array{items: array, page: int, perPage: int, total: int, pages: int}
      */
     public function paginate(int $page, int $perPage, ?string $search = null): array
     {
@@ -67,6 +67,16 @@ final class MySqlPortalUserRepository
             $params[':s'] = '%' . $search . '%';
         }
 
+        // Count total
+        $countSql = "SELECT COUNT(*) FROM portal_users {$where}";
+        $countStmt = $this->pdo->prepare($countSql);
+        foreach ($params as $k => $v) {
+            $countStmt->bindValue($k, $v);
+        }
+        $countStmt->execute();
+        $total = (int) $countStmt->fetchColumn();
+
+        // Fetch page
         $sql = "SELECT *
                 FROM portal_users
                 {$where}
@@ -87,7 +97,13 @@ final class MySqlPortalUserRepository
             $r = $this->decryptRow($r);
         }
         
-        return $rows;
+        return [
+            'items'   => $rows,
+            'page'    => $page,
+            'perPage' => $perPage,
+            'total'   => $total,
+            'pages'   => (int) ceil($total / max(1, $perPage)),
+        ];
     }
 
     public function create(array $data): int
