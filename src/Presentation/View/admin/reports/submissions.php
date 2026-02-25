@@ -293,31 +293,10 @@ $queryExport = http_build_query([
                                 </td>
                                 <td>
                                     <?php
-                                    $st = strtoupper($s['status'] ?? '');
-                                    $badge = 'nd-badge-secondary';
-                                    $label = $st ?: 'Desconhecido';
-                                    $icon = 'bi-question-circle';
-                                    
-                                    if ($st === 'PENDING') {
-                                        $badge = 'nd-badge-warning';
-                                        $label = 'Pendente';
-                                        $icon = 'bi-hourglass-split';
-                                    } elseif ($st === 'COMPLETED' || $st === 'FINALIZADA') { // Suporte a legado se houver
-                                        $badge = 'nd-badge-success';
-                                        $label = 'Concluída';
-                                        $icon = 'bi-check-all';
-                                    } elseif ($st === 'REJECTED') {
-                                        $badge = 'nd-badge-danger';
-                                        $label = 'Rejeitada';
-                                        $icon = 'bi-x-circle';
-                                    } elseif ($st === 'UNDER_REVIEW') {
-                                        $badge = 'nd-badge-info';
-                                        $label = 'Em Análise';
-                                        $icon = 'bi-search';
-                                    }
+                                    $statusInfo = \App\Support\StatusHelper::translate($s['status'] ?? '');
                                     ?>
-                                    <span class="nd-badge <?= $badge ?>">
-                                        <i class="bi <?= $icon ?> me-1"></i> <?= htmlspecialchars($label) ?>
+                                    <span class="nd-badge <?= $statusInfo['badge'] ?>">
+                                        <i class="bi <?= $statusInfo['icon'] ?> me-1"></i> <?= htmlspecialchars($statusInfo['label']) ?>
                                     </span>
                                 </td>
                                 <td>
