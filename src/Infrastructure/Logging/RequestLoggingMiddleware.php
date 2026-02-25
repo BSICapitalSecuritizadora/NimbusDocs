@@ -5,15 +5,15 @@ declare(strict_types=1);
 /**
  * Middleware de Request Logging
  * Integra-se no public/admin.php e public/portal.php para logar todas as requisições
- * 
+ *
  * Use assim no final do dispatch:
- * 
+ *
  * // Log requisição bem-sucedida
  * $requestLogger->logSuccess($statusCode);
- * 
+ *
  * // Log erro
  * $requestLogger->logError($error, $statusCode, $exception);
- * 
+ *
  * // Log acesso negado
  * $requestLogger->logUnauthorized($statusCode, $reason);
  */

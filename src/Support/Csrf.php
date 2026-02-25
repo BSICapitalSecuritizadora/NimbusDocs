@@ -21,12 +21,13 @@ final class Csrf
         if (empty($_SESSION[self::KEY]) || !is_string($_SESSION[self::KEY])) {
             self::regenerate();
         }
+
         return (string) $_SESSION[self::KEY];
     }
 
     /**
      * Valida o token e rotaciona automaticamente após uso bem-sucedido.
-     * 
+     *
      * Aceita o token atual OU o token anterior (dentro da janela de graça),
      * garantindo que múltiplas abas ou submissões quase simultâneas não quebrem.
      */
@@ -39,6 +40,7 @@ final class Csrf
         // 1. Tenta validar contra o token ATUAL
         if (self::matchesCurrent($token)) {
             self::rotate();
+
             return true;
         }
 
@@ -52,7 +54,7 @@ final class Csrf
     }
 
     /**
-     * Valida o token mas NÃO o rotaciona. Ideal para chamadas AJAX intermediárias 
+     * Valida o token mas NÃO o rotaciona. Ideal para chamadas AJAX intermediárias
      * onde o usuário ainda vai submeter o formulário principal depois.
      */
     public static function validateWithoutRotation(?string $token): bool
@@ -101,7 +103,7 @@ final class Csrf
         }
 
         $stored = (string) $_SESSION[self::KEY];
-        $ts = (int)($_SESSION[self::TS_KEY] ?? 0);
+        $ts = (int) ($_SESSION[self::TS_KEY] ?? 0);
 
         return hash_equals($stored, (string) $token)
             && (time() - $ts) <= self::TTL;
@@ -114,11 +116,10 @@ final class Csrf
         }
 
         $stored = (string) $_SESSION[self::PREV_KEY];
-        $ts = (int)($_SESSION[self::PREV_TS_KEY] ?? 0);
+        $ts = (int) ($_SESSION[self::PREV_TS_KEY] ?? 0);
 
         // O token anterior só vale dentro da janela de graça (60s)
         return hash_equals($stored, (string) $token)
             && (time() - $ts) <= self::GRACE_TTL;
     }
 }
-

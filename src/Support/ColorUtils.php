@@ -14,7 +14,7 @@ class ColorUtils
     {
         // Remove #
         $hex = ltrim($hex, '#');
-        
+
         // Expand short form (e.g. "036")
         if (strlen($hex) === 3) {
             $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];

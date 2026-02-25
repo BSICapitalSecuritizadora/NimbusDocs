@@ -27,10 +27,10 @@ class RateLimiter
     public function tooManyAttempts(string $key, int $maxAttempts, int $decaySeconds = 60): bool
     {
         $cacheKey = 'rate_limit:' . $key;
-        
+
         // Verifica valor atual sem incrementar
-        $current = (int)$this->cache->get($cacheKey, 0);
-        
+        $current = (int) $this->cache->get($cacheKey, 0);
+
         if ($current >= $maxAttempts) {
             return true;
         }
@@ -48,7 +48,7 @@ class RateLimiter
      */
     public function availableIn(string $key): int
     {
-        // Como o FileCache não tem método ttl(), retornamos um valor padrão ou 
+        // Como o FileCache não tem método ttl(), retornamos um valor padrão ou
         // precisaríamos implementar ttl() no FileCache. Para MVP, retornamos 60s.
         return 60;
     }

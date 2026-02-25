@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 class JwtServiceTest extends TestCase
 {
     private JwtService $jwt;
+
     private string $secret = 'test-secret-key-for-ci-pipeline-12345';
 
     protected function setUp(): void
@@ -69,7 +70,7 @@ class JwtServiceTest extends TestCase
     public function testVerifyRejectsTamperedToken(): void
     {
         $token = $this->jwt->generate(['sub' => 1, 'role' => 'USER']);
-        
+
         // Adultera o payload (troca role para ADMIN)
         $parts = explode('.', $token);
         $payload = json_decode(base64_decode($parts[1]), true);

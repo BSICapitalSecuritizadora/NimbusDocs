@@ -13,11 +13,12 @@ class FileService
     public function __construct(
         private PortalSubmissionFileRepository $fileRepo,
         private array $config // Injecting config for upload paths and constraints
-    ) {}
+    ) {
+    }
 
     /**
      * Process multiple file uploads for a submission from Admin context
-     * 
+     *
      * @param int $submissionId
      * @param array $filesArray $_FILES['key']
      * @param int|null $adminUserId
@@ -29,9 +30,9 @@ class FileService
             throw new RuntimeException('Nenhum arquivo enviado.');
         }
 
-        $maxSize = (int)($this->config['upload']['max_filesize_bytes'] ?? 104857600);
-        $uploadDir = rtrim((string)($this->config['upload']['storage_path'] ?? ''), '/');
-        
+        $maxSize = (int) ($this->config['upload']['max_filesize_bytes'] ?? 104857600);
+        $uploadDir = rtrim((string) ($this->config['upload']['storage_path'] ?? ''), '/');
+
         if ($uploadDir === '') {
             // Fallback safe path relative to project root if config is missing
             $uploadDir = dirname(__DIR__, 3) . '/storage/uploads';
@@ -59,7 +60,7 @@ class FileService
                 continue;
             }
 
-            $size = (int)$filesArray['size'][$i];
+            $size = (int) $filesArray['size'][$i];
             if ($size <= 0 || $size > $maxSize) {
                 $errors[] = "Arquivo {$filesArray['name'][$i]} excede o tamanho permitido.";
                 continue;
@@ -75,33 +76,33 @@ class FileService
 
             try {
                 $tempFile = [
-                    'name'     => $originalName,
-                    'type'     => $filesArray['type'][$i] ?? 'application/octet-stream',
+                    'name' => $originalName,
+                    'type' => $filesArray['type'][$i] ?? 'application/octet-stream',
                     'tmp_name' => $tmpName,
-                    'error'    => $error,
-                    'size'     => $size,
+                    'error' => $error,
+                    'size' => $size,
                 ];
-                
+
                 // Uses Support\FileUpload for secure storage (random name, extension check)
                 $stored = FileUpload::store($tempFile, $baseDir);
-                
+
                 $storedName = basename($stored['path']);
                 // Save relative path for database
-                $relative   = str_replace($uploadDir . '/', '', $stored['path']);
-                $checksum   = hash_file('sha256', $stored['path']);
+                $relative = str_replace($uploadDir . '/', '', $stored['path']);
+                $checksum = hash_file('sha256', $stored['path']);
 
                 $this->fileRepo->create($submissionId, [
-                    'origin'          => 'ADMIN',
-                    'original_name'   => $stored['original_name'],
-                    'stored_name'     => $storedName,
-                    'mime_type'       => $stored['mime_type'],
-                    'size_bytes'      => $stored['size'],
-                    'storage_path'    => $relative,
-                    'checksum'        => $checksum,
+                    'origin' => 'ADMIN',
+                    'original_name' => $stored['original_name'],
+                    'stored_name' => $storedName,
+                    'mime_type' => $stored['mime_type'],
+                    'size_bytes' => $stored['size'],
+                    'storage_path' => $relative,
+                    'checksum' => $checksum,
                     'visible_to_user' => 1, // Admin uploads are visible to user by default
-                    'uploaded_by'     => $adminUserId // Optional, depending on schema support
+                    'uploaded_by' => $adminUserId, // Optional, depending on schema support
                 ]);
-                
+
                 $uploaded++;
             } catch (\Throwable $e) {
                 $errors[] = "{$originalName}: " . $e->getMessage();
@@ -110,7 +111,7 @@ class FileService
 
         return [
             'uploaded' => $uploaded,
-            'errors'   => $errors
+            'errors' => $errors,
         ];
     }
 }

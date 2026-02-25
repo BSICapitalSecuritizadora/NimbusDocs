@@ -1,13 +1,14 @@
 #!/usr/bin/env php
 <?php
+
 /**
  * Generic Queue Worker
- * 
+ *
  * Processes jobs from the `jobs` table.
- * 
+ *
  * Usage:
  *   php bin/queue-worker.php [options]
- * 
+ *
  * Options:
  *   --queue=name   Specify queue name (default: default)
  *   --once         Process one job and exit
@@ -18,8 +19,8 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use App\Infrastructure\Queue\DatabaseQueue;
 use App\Application\Queue\JobInterface;
+use App\Infrastructure\Queue\DatabaseQueue;
 use Psr\Log\LoggerInterface;
 
 // Bootstrap
@@ -35,7 +36,7 @@ $queueDriver = new DatabaseQueue($pdo);
 // Parse Args
 $args = getopt('', ['queue::', 'once', 'help']);
 $queueName = $args['queue'] ?? 'default';
-$runOnce   = isset($args['once']);
+$runOnce = isset($args['once']);
 
 if (isset($args['help'])) {
     echo "Usage: php bin/queue-worker.php [--queue=default] [--once]\n";
@@ -70,12 +71,12 @@ while ($running) {
             continue;
         }
 
-        $jobId = (int)$jobRow['id'];
+        $jobId = (int) $jobRow['id'];
         $payload = json_decode($jobRow['payload'], true, 512, JSON_THROW_ON_ERROR);
         $jobClass = $payload['job'];
         $jobData = $payload['data'] ?? [];
 
-        echo "[queue-worker] Processing Job #{$jobId} [" . $jobClass . "]... ";
+        echo "[queue-worker] Processing Job #{$jobId} [" . $jobClass . ']... ';
 
         // Instantiate and Run
         if (!class_exists($jobClass)) {
@@ -94,31 +95,33 @@ while ($running) {
         echo "DONE\n";
 
     } catch (\Throwable $e) {
-        echo "FAILED: " . $e->getMessage() . "\n";
-        
+        echo 'FAILED: ' . $e->getMessage() . "\n";
+
         if (isset($jobRow)) {
-            $attempts = (int)$jobRow['attempts'];
-            $max = (int)$jobRow['max_attempts'];
-            
+            $attempts = (int) $jobRow['attempts'];
+            $max = (int) $jobRow['max_attempts'];
+
             if ($attempts >= $max) {
-                 // Fail permanently (maybe log to failed_jobs here in future)
-                 echo "[queue-worker] Job #{$jobRow['id']} failed permanently after {$max} attempts.\n";
-                 // For now, we delete it or we could leave it. 
-                 // Let's release it with a very long available_at to "bury" it? 
-                 // Or better yet, delete it to stop loop, and log error clearly.
-                 if ($logger) {
-                     $logger->error("Job failed permanently", ['id' => $jobRow['id'], 'error' => $e->getMessage()]);
-                 }
-                 // Delete to clean up
-                 $queueDriver->delete((int)$jobRow['id']);
+                // Fail permanently (maybe log to failed_jobs here in future)
+                echo "[queue-worker] Job #{$jobRow['id']} failed permanently after {$max} attempts.\n";
+                // For now, we delete it or we could leave it.
+                // Let's release it with a very long available_at to "bury" it?
+                // Or better yet, delete it to stop loop, and log error clearly.
+                if ($logger) {
+                    $logger->error('Job failed permanently', ['id' => $jobRow['id'], 'error' => $e->getMessage()]);
+                }
+                // Delete to clean up
+                $queueDriver->delete((int) $jobRow['id']);
             } else {
                 // Release with backoff
                 $backoff = 10 * $attempts; // 10s, 20s, 30s
-                $queueDriver->release((int)$jobRow['id'], $backoff);
+                $queueDriver->release((int) $jobRow['id'], $backoff);
                 echo "[queue-worker] Released Job #{$jobRow['id']} for retry in {$backoff}s\n";
             }
         }
     }
 
-    if ($runOnce) break;
+    if ($runOnce) {
+        break;
+    }
 }

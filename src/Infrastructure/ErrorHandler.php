@@ -11,17 +11,18 @@ namespace App\Infrastructure;
 final class ErrorHandler
 {
     private string $errorViewsPath;
+
     private bool $debug;
-    
+
     public function __construct(string $errorViewsPath, bool $debug = false)
     {
         $this->errorViewsPath = $errorViewsPath;
         $this->debug = $debug;
-        
+
         set_error_handler([$this, 'handleError']);
         set_exception_handler([$this, 'handleException']);
     }
-    
+
     /**
      * Handler para erros PHP
      */
@@ -31,17 +32,17 @@ final class ErrorHandler
         if (!$this->debug && in_array($errno, [E_NOTICE, E_DEPRECATED, E_USER_NOTICE])) {
             return false;
         }
-        
+
         $this->logError($errno, $errstr, $errfile, $errline);
-        
+
         // Se for erro fatal, mostra página de erro
         if (in_array($errno, [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
             $this->show500($errstr);
         }
-        
+
         return true;
     }
-    
+
     /**
      * Handler para exceções
      */
@@ -54,17 +55,17 @@ final class ErrorHandler
             $e->getLine(),
             $e->getTraceAsString()
         );
-        
+
         $this->show500($e->getMessage() . ' (em ' . basename($e->getFile()) . ':' . $e->getLine() . ')');
     }
-    
+
     /**
      * Mostra página de erro 500
      */
     private function show500(string $error = null): void
     {
         http_response_code(500);
-        
+
         // Inclui view de erro
         $errorViewFile = $this->errorViewsPath . '/500.php';
         if (file_exists($errorViewFile)) {
@@ -86,10 +87,10 @@ final class ErrorHandler
             }
             echo '</div>';
         }
-        
+
         exit;
     }
-    
+
     /**
      * Log do erro
      */
@@ -97,11 +98,11 @@ final class ErrorHandler
     {
         $logFile = dirname($this->errorViewsPath, 4) . '/storage/logs/errors.log';
         $logDir = dirname($logFile);
-        
+
         if (!is_dir($logDir)) {
             mkdir($logDir, 0775, true);
         }
-        
+
         $message = sprintf(
             "[%s] %s: %s in %s:%d\n",
             date('Y-m-d H:i:s'),
@@ -110,16 +111,16 @@ final class ErrorHandler
             $errfile,
             $errline
         );
-        
+
         if ($trace) {
             $message .= "Trace:\n" . $trace . "\n";
         }
-        
+
         $message .= str_repeat('=', 80) . "\n";
-        
+
         error_log($message, 3, $logFile);
     }
-    
+
     /**
      * Nome legível do erro
      */
@@ -141,7 +142,7 @@ final class ErrorHandler
             E_DEPRECATED => 'Deprecated',
             E_USER_DEPRECATED => 'User Deprecated',
         ];
-        
+
         return $errorNames[$errno] ?? 'Unknown Error';
     }
 }

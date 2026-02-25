@@ -6,8 +6,8 @@ namespace App\Presentation\Controller\Admin;
 
 use App\Infrastructure\Persistence\MySqlPortalAnnouncementRepository;
 use App\Support\Auth;
-use App\Support\Session;
 use App\Support\Csrf;
+use App\Support\Session;
 
 final class AnnouncementAdminController
 {
@@ -24,15 +24,15 @@ final class AnnouncementAdminController
 
         $announcements = $this->repo->listAll();
 
-        $pageTitle   = 'Comunicados do Portal';
+        $pageTitle = 'Comunicados do Portal';
         $contentView = __DIR__ . '/../../View/admin/announcements/index.php';
 
         $viewData = [
-            'admin'         => $admin,
+            'admin' => $admin,
             'announcements' => $announcements,
-            'csrfToken'     => Csrf::token(),
-            'success'       => Session::getFlash('success'),
-            'error'         => Session::getFlash('error'),
+            'csrfToken' => Csrf::token(),
+            'success' => Session::getFlash('success'),
+            'error' => Session::getFlash('error'),
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -42,19 +42,19 @@ final class AnnouncementAdminController
     {
         $admin = Auth::requireRole('ADMIN', 'SUPER_ADMIN');
 
-        $pageTitle   = 'Novo comunicado';
+        $pageTitle = 'Novo comunicado';
         $contentView = __DIR__ . '/../../View/admin/announcements/form.php';
 
         $viewData = [
-            'admin'     => $admin,
+            'admin' => $admin,
             'csrfToken' => Csrf::token(),
-            'mode'      => 'create',
-            'data'      => [
-                'title'     => '',
-                'body'      => '',
-                'level'     => 'info',
+            'mode' => 'create',
+            'data' => [
+                'title' => '',
+                'body' => '',
+                'level' => 'info',
                 'starts_at' => '',
-                'ends_at'   => '',
+                'ends_at' => '',
                 'is_active' => 1,
             ],
         ];
@@ -65,7 +65,7 @@ final class AnnouncementAdminController
     public function editForm(array $vars): void
     {
         $admin = Auth::requireRole('ADMIN', 'SUPER_ADMIN');
-        $id    = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
 
         $announcement = $this->repo->find($id);
         if (!$announcement) {
@@ -74,14 +74,14 @@ final class AnnouncementAdminController
             exit;
         }
 
-        $pageTitle   = 'Editar comunicado';
+        $pageTitle = 'Editar comunicado';
         $contentView = __DIR__ . '/../../View/admin/announcements/form.php';
 
         $viewData = [
-            'admin'     => $admin,
+            'admin' => $admin,
             'csrfToken' => Csrf::token(),
-            'mode'      => 'edit',
-            'data'      => $announcement,
+            'mode' => 'edit',
+            'data' => $announcement,
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -97,16 +97,16 @@ final class AnnouncementAdminController
             exit;
         }
 
-        $title   = trim($_POST['title'] ?? '');
-        $body    = trim($_POST['body'] ?? '');
-        $level   = $_POST['level'] ?? 'info';
-        $active  = isset($_POST['is_active']) ? 1 : 0;
+        $title = trim($_POST['title'] ?? '');
+        $body = trim($_POST['body'] ?? '');
+        $level = $_POST['level'] ?? 'info';
+        $active = isset($_POST['is_active']) ? 1 : 0;
 
-        $starts  = trim($_POST['starts_at'] ?? '');
-        $ends    = trim($_POST['ends_at'] ?? '');
+        $starts = trim($_POST['starts_at'] ?? '');
+        $ends = trim($_POST['ends_at'] ?? '');
 
         $startsAt = $starts !== '' ? $starts . ' 00:00:00' : null;
-        $endsAt   = $ends   !== '' ? $ends   . ' 23:59:59' : null;
+        $endsAt = $ends !== '' ? $ends . ' 23:59:59' : null;
 
         if ($title === '' || $body === '') {
             Session::flash('error', 'Título e mensagem são obrigatórios.');
@@ -115,12 +115,12 @@ final class AnnouncementAdminController
         }
 
         $announcementId = $this->repo->create([
-            'title'            => $title,
-            'body'             => $body,
-            'level'            => $level,
-            'starts_at'        => $startsAt,
-            'ends_at'          => $endsAt,
-            'is_active'        => $active,
+            'title' => $title,
+            'body' => $body,
+            'level' => $level,
+            'starts_at' => $startsAt,
+            'ends_at' => $endsAt,
+            'is_active' => $active,
             'created_by_admin' => $admin['id'],
         ]);
 
@@ -143,7 +143,7 @@ final class AnnouncementAdminController
     public function update(array $vars): void
     {
         $admin = Auth::requireRole('ADMIN', 'SUPER_ADMIN');
-        $id    = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
 
         if (!Csrf::validate($_POST['_token'] ?? '')) {
             Session::flash('error', 'Sessão expirada.');
@@ -158,16 +158,16 @@ final class AnnouncementAdminController
             exit;
         }
 
-        $title   = trim($_POST['title'] ?? '');
-        $body    = trim($_POST['body'] ?? '');
-        $level   = $_POST['level'] ?? 'info';
-        $active  = isset($_POST['is_active']) ? 1 : 0;
+        $title = trim($_POST['title'] ?? '');
+        $body = trim($_POST['body'] ?? '');
+        $level = $_POST['level'] ?? 'info';
+        $active = isset($_POST['is_active']) ? 1 : 0;
 
-        $starts  = trim($_POST['starts_at'] ?? '');
-        $ends    = trim($_POST['ends_at'] ?? '');
+        $starts = trim($_POST['starts_at'] ?? '');
+        $ends = trim($_POST['ends_at'] ?? '');
 
         $startsAt = $starts !== '' ? $starts . ' 00:00:00' : null;
-        $endsAt   = $ends   !== '' ? $ends   . ' 23:59:59' : null;
+        $endsAt = $ends !== '' ? $ends . ' 23:59:59' : null;
 
         if ($title === '' || $body === '') {
             Session::flash('error', 'Título e mensagem são obrigatórios.');
@@ -176,11 +176,11 @@ final class AnnouncementAdminController
         }
 
         $this->repo->update($id, [
-            'title'     => $title,
-            'body'      => $body,
-            'level'     => $level,
+            'title' => $title,
+            'body' => $body,
+            'level' => $level,
             'starts_at' => $startsAt,
-            'ends_at'   => $endsAt,
+            'ends_at' => $endsAt,
             'is_active' => $active,
         ]);
 
@@ -192,7 +192,7 @@ final class AnnouncementAdminController
     public function delete(array $vars): void
     {
         $admin = Auth::requireRole('SUPER_ADMIN'); // só super admin apaga
-        $id    = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
 
         if (!Csrf::validate($_POST['_token'] ?? '')) {
             Session::flash('error', 'Sessão expirada.');

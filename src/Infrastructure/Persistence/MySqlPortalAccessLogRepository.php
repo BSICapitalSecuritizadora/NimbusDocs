@@ -8,7 +8,9 @@ use PDO;
 
 final class MySqlPortalAccessLogRepository
 {
-    public function __construct(private PDO $pdo) {}
+    public function __construct(private PDO $pdo)
+    {
+    }
 
     /**
      * @param array<string,mixed> $filters
@@ -16,12 +18,12 @@ final class MySqlPortalAccessLogRepository
      */
     public function search(array $filters = []): array
     {
-        $where  = [];
+        $where = [];
         $params = [];
 
         if (!empty($filters['user_id'])) {
             $where[] = 'l.portal_user_id = :uid';
-            $params[':uid'] = (int)$filters['user_id'];
+            $params[':uid'] = (int) $filters['user_id'];
         }
 
         if (!empty($filters['email'])) {

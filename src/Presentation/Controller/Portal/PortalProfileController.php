@@ -21,7 +21,7 @@ final class PortalProfileController
     public function edit(): void
     {
         $userSession = Auth::requirePortalUser();
-        $user = $this->userRepo->findById((int)$userSession['id']);
+        $user = $this->userRepo->findById((int) $userSession['id']);
 
         if (!$user) {
             Session::flash('error', 'Usuário não encontrado.');
@@ -29,16 +29,16 @@ final class PortalProfileController
             exit;
         }
 
-        $pageTitle   = 'Meu Perfil';
+        $pageTitle = 'Meu Perfil';
         $contentView = __DIR__ . '/../../View/portal/profile.php';
-        
+
         $viewData = [
-            'user'      => $user,
+            'user' => $user,
             'csrfToken' => Csrf::token(),
-            'flash'     => [
+            'flash' => [
                 'success' => Session::getFlash('success'),
-                'error'   => Session::getFlash('error'),
-            ]
+                'error' => Session::getFlash('error'),
+            ],
         ];
 
         require __DIR__ . '/../../View/portal/layouts/base.php';
@@ -47,7 +47,7 @@ final class PortalProfileController
     public function update(): void
     {
         $userSession = Auth::requirePortalUser();
-        $id = (int)$userSession['id'];
+        $id = (int) $userSession['id'];
 
         if (!Csrf::validate($_POST['_token'] ?? '')) {
             Session::flash('error', 'Token de segurança inválido.');
@@ -56,8 +56,8 @@ final class PortalProfileController
         }
 
         $fullName = trim($_POST['full_name'] ?? '');
-        $phone    = trim($_POST['phone_number'] ?? '');
-        
+        $phone = trim($_POST['phone_number'] ?? '');
+
         // Basic validation
         if (strlen($fullName) < 3) {
             Session::flash('error', 'O nome deve ter pelo menos 3 caracteres.');
@@ -67,7 +67,7 @@ final class PortalProfileController
 
         // Update DB
         $this->userRepo->update($id, [
-            'full_name'    => $fullName,
+            'full_name' => $fullName,
             'phone_number' => $phone,
         ]);
 
@@ -75,11 +75,11 @@ final class PortalProfileController
         $updatedUser = $this->userRepo->findById($id);
         if ($updatedUser) {
             Session::put('portal_user', [
-                'id'              => (int)$updatedUser['id'],
-                'full_name'       => $updatedUser['full_name'],
-                'email'           => $updatedUser['email'],
+                'id' => (int) $updatedUser['id'],
+                'full_name' => $updatedUser['full_name'],
+                'email' => $updatedUser['email'],
                 'document_number' => $updatedUser['document_number'],
-                'phone_number'    => $updatedUser['phone_number'],
+                'phone_number' => $updatedUser['phone_number'],
             ]);
         }
 

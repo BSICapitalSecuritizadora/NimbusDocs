@@ -41,7 +41,7 @@ class ExportService
 
     /**
      * Stream data as an HTML table (Pseudo-Excel).
-     * 
+     *
      * @param iterable $dataGenerator
      * @param array $columns Field mapping (key => label/config)
      * @param string $title Report Title
@@ -66,11 +66,11 @@ class ExportService
               </style>';
         echo '</head><body>';
         echo '<table border="1">';
-        
+
         // Title Row
         $colCount = count($columns);
-        echo "<tr><td colspan=\"{$colCount}\" class=\"header-brand\">" . htmlspecialchars($title) . "</td></tr>";
-        
+        echo "<tr><td colspan=\"{$colCount}\" class=\"header-brand\">" . htmlspecialchars($title) . '</td></tr>';
+
         // Header Row
         echo '<tr>';
         foreach ($columns as $colConfig) {
@@ -84,19 +84,21 @@ class ExportService
             echo '<tr>';
             foreach ($columns as $key => $colConfig) {
                 $value = $row[$key] ?? '';
-                $style = is_array($colConfig) && isset($colConfig['style']) ? ' style="'.$colConfig['style'].'"' : '';
-                
+                $style = is_array($colConfig) && isset($colConfig['style']) ? ' style="' . $colConfig['style'] . '"' : '';
+
                 // Format if needed
                 if (is_array($colConfig) && isset($colConfig['formatter']) && is_callable($colConfig['formatter'])) {
                     $value = $colConfig['formatter']($value, $row);
                 }
 
-                echo "<td class=\"td-style\"{$style}>" . htmlspecialchars((string)$value) . "</td>";
+                echo "<td class=\"td-style\"{$style}>" . htmlspecialchars((string) $value) . '</td>';
             }
             echo '</tr>';
-            
+
             // Flush periodically to keep memory low
-            if (ob_get_level() > 0) ob_flush();
+            if (ob_get_level() > 0) {
+                ob_flush();
+            }
             flush();
         }
 

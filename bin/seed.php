@@ -5,7 +5,7 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 $config = require __DIR__ . '/../bootstrap/app.php';
-$pdo    = $config['pdo'];
+$pdo = $config['pdo'];
 
 $adminEmail = $_ENV['SEED_ADMIN_EMAIL'] ?? 'admin@example.com';
 $adminPassword = $_ENV['SEED_ADMIN_PASSWORD'] ?? 'Admin@123';
@@ -39,10 +39,10 @@ if ($portalId === false) {
             ':n' => 'Cliente Demo',
             ':e' => $portalEmail,
         ]);
-    $portalId = (int)$pdo->lastInsertId();
+    $portalId = (int) $pdo->lastInsertId();
     echo "Usuário final seed criado com email {$portalEmail}\n";
 } else {
-    $portalId = (int)$portalId;
+    $portalId = (int) $portalId;
     echo "Usuário final já existe ({$portalEmail})\n";
 }
 
@@ -51,8 +51,7 @@ $code = \App\Support\RandomToken::shortCode(12);
 $pdo->prepare('INSERT INTO portal_access_tokens (portal_user_id, code, status, expires_at) VALUES (:uid,:c,"PENDING", DATE_ADD(NOW(), INTERVAL 1 DAY))')
     ->execute([
         ':uid' => $portalId,
-        ':c'   => $code,
+        ':c' => $code,
     ]);
 
 echo "Código de acesso inicial para {$portalEmail}: {$code} (validade 24h)\n";
-

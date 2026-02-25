@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Support;
 
-use PHPUnit\Framework\TestCase;
 use App\Support\Csrf;
+use PHPUnit\Framework\TestCase;
 
 class CsrfTest extends TestCase
 {
@@ -24,7 +24,7 @@ class CsrfTest extends TestCase
     public function testTokenGeneration(): void
     {
         $token = Csrf::token();
-        
+
         $this->assertNotEmpty($token);
         $this->assertEquals(64, strlen($token));
         $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $token);
@@ -35,21 +35,21 @@ class CsrfTest extends TestCase
     {
         $token1 = Csrf::token();
         $token2 = Csrf::token();
-        
+
         $this->assertEquals($token1, $token2);
     }
 
     public function testValidTokenValidation(): void
     {
         $token = Csrf::token();
-        
+
         $this->assertTrue(Csrf::validate($token));
     }
 
     public function testInvalidTokenValidation(): void
     {
         Csrf::token();
-        
+
         $this->assertFalse(Csrf::validate('invalid_token'));
         $this->assertFalse(Csrf::validate(''));
         $this->assertFalse(Csrf::validate(null));
@@ -67,7 +67,7 @@ class CsrfTest extends TestCase
         $_SESSION['_csrf_token'] = null;
         $_SESSION['_csrf_token_ts'] = null;
         $token2 = Csrf::token();
-        
+
         $this->assertNotEquals($token1, $token2);
         $this->assertFalse(Csrf::validate($token1));
     }
@@ -89,10 +89,10 @@ class CsrfTest extends TestCase
     public function testTokenRotatesAfterValidation(): void
     {
         $token1 = Csrf::token();
-        
+
         // Primeira validação: sucede e rotaciona
         $this->assertTrue(Csrf::validate($token1));
-        
+
         // O token atual mudou
         $token2 = Csrf::token();
         $this->assertNotEquals($token1, $token2);
@@ -105,10 +105,10 @@ class CsrfTest extends TestCase
     public function testPreviousTokenValidInGraceWindow(): void
     {
         $token1 = Csrf::token();
-        
+
         // Valida e rotaciona
         $this->assertTrue(Csrf::validate($token1));
-        
+
         // token1 agora é o "anterior" — ainda aceito na janela de graça
         $this->assertTrue(Csrf::validate($token1));
     }
@@ -119,13 +119,13 @@ class CsrfTest extends TestCase
     public function testPreviousTokenRejectedAfterGrace(): void
     {
         $token1 = Csrf::token();
-        
+
         // Valida e rotaciona
         $this->assertTrue(Csrf::validate($token1));
-        
+
         // Simula que a janela de graça expirou (61s atrás)
         $_SESSION['_csrf_token_prev_ts'] = time() - 61;
-        
+
         // Token anterior agora é rejeitado
         $this->assertFalse(Csrf::validate($token1));
     }
@@ -134,7 +134,7 @@ class CsrfTest extends TestCase
     {
         $token = Csrf::token();
         $upperToken = strtoupper($token);
-        
+
         if ($token !== $upperToken) {
             $this->assertFalse(Csrf::validate($upperToken));
         }
@@ -149,4 +149,3 @@ class CsrfTest extends TestCase
         $this->assertNotEquals($token1, $token2);
     }
 }
-

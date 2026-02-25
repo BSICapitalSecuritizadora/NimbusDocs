@@ -9,12 +9,14 @@ use Psr\Log\LoggerInterface;
 
 final class MySqlNotificationOutboxRepository
 {
-    public function __construct(private PDO $pdo, private ?LoggerInterface $logger = null) {}
+    public function __construct(private PDO $pdo, private ?LoggerInterface $logger = null)
+    {
+    }
 
     /** @return array<int,array<string,mixed>> */
     public function search(array $filters = [], int $limit = 200): array
     {
-        $where  = [];
+        $where = [];
         $params = [];
 
         if (!empty($filters['status'])) {
@@ -61,33 +63,36 @@ final class MySqlNotificationOutboxRepository
     /** @return array<int,string> */
     public function distinctTypes(): array
     {
-        $stmt = $this->pdo->query("
+        $stmt = $this->pdo->query('
             SELECT DISTINCT type
             FROM notification_outbox
             ORDER BY type ASC
-        ");
+        ');
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        return array_values(array_map(fn($r) => (string)$r['type'], $rows));
+
+        return array_values(array_map(fn ($r) => (string) $r['type'], $rows));
     }
 
     /** @return array<int,string> */
     public function distinctStatuses(): array
     {
         // enums conhecidos, mas melhor ler do banco:
-        $stmt = $this->pdo->query("
+        $stmt = $this->pdo->query('
             SELECT DISTINCT status
             FROM notification_outbox
             ORDER BY status ASC
-        ");
+        ');
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        return array_values(array_map(fn($r) => (string)$r['status'], $rows));
+
+        return array_values(array_map(fn ($r) => (string) $r['status'], $rows));
     }
 
     public function find(int $id): ?array
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM notification_outbox WHERE id = :id LIMIT 1");
+        $stmt = $this->pdo->prepare('SELECT * FROM notification_outbox WHERE id = :id LIMIT 1');
         $stmt->execute([':id' => $id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $row ?: null;
     }
 
@@ -100,6 +105,7 @@ final class MySqlNotificationOutboxRepository
             WHERE id = :id AND status IN ('PENDING')
         ");
         $stmt->execute([':id' => $id]);
+
         return $stmt->rowCount() > 0;
     }
 
@@ -114,6 +120,7 @@ final class MySqlNotificationOutboxRepository
             WHERE id = :id AND status IN ('FAILED')
         ");
         $stmt->execute([':id' => $id]);
+
         return $stmt->rowCount() > 0;
     }
 
@@ -129,32 +136,33 @@ final class MySqlNotificationOutboxRepository
             WHERE id = :id AND status IN ('FAILED','CANCELLED')
         ");
         $stmt->execute([':id' => $id]);
+
         return $stmt->rowCount() > 0;
     }
 
     public function enqueue(array $row): int
     {
-        $sql = "
+        $sql = '
             INSERT INTO notification_outbox
             (type, recipient_email, recipient_name, subject, template, payload_json, correlation_id, max_attempts, next_attempt_at)
             VALUES
             (:type, :email, :name, :subject, :template, :payload, :correlation_id, :max_attempts, :next_attempt_at)
-        ";
+        ';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':type'            => $row['type'],
-            ':email'           => $row['recipient_email'],
-            ':name'            => $row['recipient_name'] ?? null,
-            ':subject'         => $row['subject'],
-            ':template'        => $row['template'],
-            ':payload'         => $row['payload_json'],
-            ':correlation_id'  => $row['correlation_id'] ?? null,
-            ':max_attempts'    => $row['max_attempts'] ?? 5,
+            ':type' => $row['type'],
+            ':email' => $row['recipient_email'],
+            ':name' => $row['recipient_name'] ?? null,
+            ':subject' => $row['subject'],
+            ':template' => $row['template'],
+            ':payload' => $row['payload_json'],
+            ':correlation_id' => $row['correlation_id'] ?? null,
+            ':max_attempts' => $row['max_attempts'] ?? 5,
             ':next_attempt_at' => $row['next_attempt_at'] ?? null,
         ]);
 
-        return (int)$this->pdo->lastInsertId();
+        return (int) $this->pdo->lastInsertId();
     }
 
     /**
@@ -168,12 +176,12 @@ final class MySqlNotificationOutboxRepository
     {
         $params = [
             ':email' => $recipientEmail,
-            ':tokenId' => (string)$tokenId,
+            ':tokenId' => (string) $tokenId,
         ];
 
         $timeCondition = '';
         if ($windowHours !== null && $windowHours > 0) {
-            $timeCondition = " AND created_at > DATE_SUB(NOW(), INTERVAL :windowHours HOUR)";
+            $timeCondition = ' AND created_at > DATE_SUB(NOW(), INTERVAL :windowHours HOUR)';
             $params[':windowHours'] = $windowHours;
         }
 
@@ -187,7 +195,8 @@ final class MySqlNotificationOutboxRepository
                 LIMIT 1";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
-        return (bool)$stmt->fetchColumn();
+
+        return (bool) $stmt->fetchColumn();
     }
 
     /**
@@ -246,9 +255,9 @@ final class MySqlNotificationOutboxRepository
         // Pode ser ajustado via OUTBOX_RESCUE_MINUTES ou NOTIFICATION_WORKER_RESCUE_MINUTES
         $minutes = 30;
         if (isset($_ENV['OUTBOX_RESCUE_MINUTES'])) {
-            $minutes = (int)$_ENV['OUTBOX_RESCUE_MINUTES'];
+            $minutes = (int) $_ENV['OUTBOX_RESCUE_MINUTES'];
         } elseif (isset($_ENV['NOTIFICATION_WORKER_RESCUE_MINUTES'])) {
-            $minutes = (int)$_ENV['NOTIFICATION_WORKER_RESCUE_MINUTES'];
+            $minutes = (int) $_ENV['NOTIFICATION_WORKER_RESCUE_MINUTES'];
         }
         if ($minutes < 1) {
             $minutes = 30;
@@ -299,8 +308,8 @@ final class MySqlNotificationOutboxRepository
         }
 
         // Marca como SENDING (trava simples)
-        $ids = array_map(fn($r) => (int)$r['id'], $rows);
-        $in  = implode(',', $ids);
+        $ids = array_map(fn ($r) => (int) $r['id'], $rows);
+        $in = implode(',', $ids);
 
         $this->pdo->exec("
             UPDATE notification_outbox
@@ -330,22 +339,22 @@ final class MySqlNotificationOutboxRepository
 
     public function markFailed(int $id, string $error, int $attempts, ?string $nextAttemptAt): void
     {
-        $stmt = $this->pdo->prepare("
+        $stmt = $this->pdo->prepare('
             UPDATE notification_outbox
             SET status = :status,
                 attempts = :attempts,
                 last_error = :error,
                 next_attempt_at = :next_attempt_at
             WHERE id = :id
-        ");
+        ');
 
         $status = ($attempts >= 5) ? 'FAILED' : 'PENDING';
 
         $stmt->execute([
-            ':id'              => $id,
-            ':status'          => $status,
-            ':attempts'        => $attempts,
-            ':error'           => $error,
+            ':id' => $id,
+            ':status' => $status,
+            ':attempts' => $attempts,
+            ':error' => $error,
             ':next_attempt_at' => $nextAttemptAt,
         ]);
     }
@@ -365,15 +374,15 @@ final class MySqlNotificationOutboxRepository
                 SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed_total
             FROM notification_outbox
         ";
-        
+
         $row = $this->pdo->query($sql)->fetch(PDO::FETCH_ASSOC);
-        
+
         return [
-            'backlog'      => (int)($row['backlog'] ?? 0),
-            'sending'      => (int)($row['sending'] ?? 0),
-            'sent_today'   => (int)($row['sent_today'] ?? 0),
-            'failed_today' => (int)($row['failed_today'] ?? 0),
-            'failed_total' => (int)($row['failed_total'] ?? 0),
+            'backlog' => (int) ($row['backlog'] ?? 0),
+            'sending' => (int) ($row['sending'] ?? 0),
+            'sent_today' => (int) ($row['sent_today'] ?? 0),
+            'failed_today' => (int) ($row['failed_today'] ?? 0),
+            'failed_total' => (int) ($row['failed_total'] ?? 0),
         ];
     }
 
@@ -390,14 +399,14 @@ final class MySqlNotificationOutboxRepository
             GROUP BY type
             ORDER BY count DESC
         ";
-        
+
         $rows = $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC) ?: [];
         $result = [];
-        
+
         foreach ($rows as $row) {
-            $result[$row['type']] = (int)$row['count'];
+            $result[$row['type']] = (int) $row['count'];
         }
-        
+
         return $result;
     }
 
@@ -417,21 +426,21 @@ final class MySqlNotificationOutboxRepository
             GROUP BY day
             ORDER BY day ASC
         ";
-        
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':days', $days, PDO::PARAM_INT);
         $stmt->execute();
-        
+
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
         $result = [];
-        
+
         foreach ($rows as $row) {
             $result[$row['day']] = [
-                'sent'   => (int)$row['sent'],
-                'failed' => (int)$row['failed'],
+                'sent' => (int) $row['sent'],
+                'failed' => (int) $row['failed'],
             ];
         }
-        
+
         return $result;
     }
 
@@ -446,10 +455,10 @@ final class MySqlNotificationOutboxRepository
             WHERE status = 'SENT' AND sent_at IS NOT NULL
               AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
         ";
-        
+
         $row = $this->pdo->query($sql)->fetch(PDO::FETCH_ASSOC);
-        
-        return $row['avg_seconds'] !== null ? (float)$row['avg_seconds'] : null;
+
+        return $row['avg_seconds'] !== null ? (float) $row['avg_seconds'] : null;
     }
 
     /**
@@ -464,11 +473,11 @@ final class MySqlNotificationOutboxRepository
             ORDER BY created_at DESC
             LIMIT :limit
         ";
-        
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
-        
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 }

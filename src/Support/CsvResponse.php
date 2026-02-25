@@ -15,6 +15,7 @@ final class CsvResponse
         $filename = preg_replace('/\.csv$/i', '', $filename);
         self::send($filename, $fields, $data);
     }
+
     /**
      * @param string   $filename  Nome do arquivo (sem .csv)
      * @param string[] $headers   Cabeçalhos das colunas

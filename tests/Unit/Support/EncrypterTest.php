@@ -27,7 +27,7 @@ class EncrypterTest extends TestCase
         $original = 'sensitive data 123';
         $encrypted = Encrypter::encrypt($original);
         $decrypted = Encrypter::decrypt($encrypted);
-        
+
         $this->assertEquals($original, $decrypted);
     }
 
@@ -42,13 +42,13 @@ class EncrypterTest extends TestCase
     {
         $encrypted = Encrypter::encrypt('foo');
         $decoded = json_decode(base64_decode($encrypted), true);
-        
+
         // Tamper with the encrypted data
         $decoded['value'] = base64_encode('tampered');
-        
+
         // Re-encode
         $tampered = base64_encode(json_encode($decoded));
-        
+
         // Should fail MAC check
         $this->assertNull(Encrypter::decrypt($tampered));
     }
@@ -57,7 +57,7 @@ class EncrypterTest extends TestCase
     {
         $original = 'secret';
         $encrypted = Encrypter::encrypt($original);
-        
+
         $this->assertEquals($original, Encrypter::decryptOrFallback($encrypted));
     }
 
@@ -65,7 +65,7 @@ class EncrypterTest extends TestCase
     {
         // Legacy plain text value
         $legacy = '12345678900';
-        
+
         // Should return as-is (and log error, but we can't easily assert error_log here without deeper mocking)
         $this->assertEquals($legacy, Encrypter::decryptOrFallback($legacy));
     }
@@ -74,7 +74,7 @@ class EncrypterTest extends TestCase
     {
         // Binary garbage that is neither valid encrypted JSON nor readable text
         $garbage = "\x00\x01\x02\xFF";
-        
+
         $this->assertNull(Encrypter::decryptOrFallback($garbage));
     }
 
@@ -83,7 +83,7 @@ class EncrypterTest extends TestCase
         $val1 = Encrypter::hash('test');
         $val2 = Encrypter::hash('test');
         $val3 = Encrypter::hash('other');
-        
+
         $this->assertEquals($val1, $val2);
         $this->assertNotEquals($val1, $val3);
     }

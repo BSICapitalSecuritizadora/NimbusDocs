@@ -90,7 +90,7 @@ class TwoFactorAuthServiceTest extends TestCase
     public function testVerifyAcceptsValidCode(): void
     {
         $secret = $this->service->generateSecret();
-        
+
         // Gera TOTP válido para o momento atual
         $code = $this->generateTOTP($secret);
 
@@ -115,7 +115,9 @@ class TwoFactorAuthServiceTest extends TestCase
 
         for ($i = 0; $i < strlen($secret); $i++) {
             $val = strpos($base32Chars, strtoupper($secret[$i]));
-            if ($val === false) continue;
+            if ($val === false) {
+                continue;
+            }
 
             $buffer = ($buffer << 5) | $val;
             $bitsLeft += 5;

@@ -24,31 +24,31 @@ final class NotificationOutboxAdminController
         Auth::requireRole('ADMIN', 'SUPER_ADMIN');
 
         $defaultFrom = (new \DateTimeImmutable('-30 days'))->format('Y-m-d');
-        $defaultTo   = (new \DateTimeImmutable('today'))->format('Y-m-d');
+        $defaultTo = (new \DateTimeImmutable('today'))->format('Y-m-d');
 
         $filters = [
-            'status'    => $_GET['status']    ?? '',
-            'type'      => $_GET['type']      ?? '',
-            'email'     => $_GET['email']     ?? '',
+            'status' => $_GET['status'] ?? '',
+            'type' => $_GET['type'] ?? '',
+            'email' => $_GET['email'] ?? '',
             'from_date' => $_GET['from_date'] ?? $defaultFrom,
-            'to_date'   => $_GET['to_date']   ?? $defaultTo,
+            'to_date' => $_GET['to_date'] ?? $defaultTo,
         ];
 
-        $rows     = $this->outbox->search($filters, 200);
-        $types    = $this->outbox->distinctTypes();
+        $rows = $this->outbox->search($filters, 200);
+        $types = $this->outbox->distinctTypes();
         $statuses = $this->outbox->distinctStatuses();
 
-        $pageTitle   = 'Fila de notificações (Outbox)';
+        $pageTitle = 'Fila de notificações (Outbox)';
         $contentView = __DIR__ . '/../../View/admin/notifications/outbox/index.php';
 
         $viewData = [
-            'filters'  => $filters,
-            'rows'     => $rows,
-            'types'    => $types,
+            'filters' => $filters,
+            'rows' => $rows,
+            'types' => $types,
             'statuses' => $statuses,
             'csrfToken' => Csrf::token(),
-            'success'  => Session::getFlash('success'),
-            'error'    => Session::getFlash('error'),
+            'success' => Session::getFlash('success'),
+            'error' => Session::getFlash('error'),
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -58,7 +58,7 @@ final class NotificationOutboxAdminController
     {
         Auth::requireRole('ADMIN', 'SUPER_ADMIN');
 
-        $id  = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
         $row = $this->outbox->find($id);
 
         if (!$row) {
@@ -68,18 +68,19 @@ final class NotificationOutboxAdminController
         }
 
         $payload = null;
+
         try {
-            $payload = json_decode((string)$row['payload_json'], true, 512, JSON_THROW_ON_ERROR);
+            $payload = json_decode((string) $row['payload_json'], true, 512, JSON_THROW_ON_ERROR);
         } catch (\Throwable $e) {
             $payload = ['_error' => 'Payload inválido: ' . $e->getMessage()];
         }
 
-        $pageTitle   = 'Detalhes da notificação';
+        $pageTitle = 'Detalhes da notificação';
         $contentView = __DIR__ . '/../../View/admin/notifications/outbox/show.php';
 
         $viewData = [
-            'row'      => $row,
-            'payload'  => $payload,
+            'row' => $row,
+            'payload' => $payload,
             'csrfToken' => Csrf::token(),
         ];
 
@@ -96,7 +97,7 @@ final class NotificationOutboxAdminController
             exit;
         }
 
-        $id = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
 
         if ($this->outbox->cancel($id)) {
             Session::flash('success', 'Notificação cancelada (PENDING → CANCELLED).');
@@ -118,7 +119,7 @@ final class NotificationOutboxAdminController
             exit;
         }
 
-        $id = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
 
         if ($this->outbox->reprocess($id)) {
             Session::flash('success', 'Notificação marcada para reprocessamento (FAILED → PENDING).');
@@ -140,7 +141,7 @@ final class NotificationOutboxAdminController
             exit;
         }
 
-        $id = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
 
         if ($this->outbox->resetAttemptsAndReprocess($id)) {
             Session::flash('success', 'Notificação resetada e reprocessada (attempts=0, status=PENDING).');

@@ -18,6 +18,7 @@ abstract class AbstractAdminController
             header('Location: /admin/login');
             exit;
         }
+
         return $admin;
     }
 

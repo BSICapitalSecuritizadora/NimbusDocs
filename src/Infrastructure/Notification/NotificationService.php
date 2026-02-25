@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Notification;
 
-use App\Infrastructure\Notification\GraphMailService;
 use App\Support\Url;
 
 final class NotificationService
@@ -12,7 +11,8 @@ final class NotificationService
     public function __construct(
         private GraphMailService $mailer,
         private array $notificationsConfig
-    ) {}
+    ) {
+    }
 
     /**
      * Nova submissão criada pelo usuário no portal
@@ -30,10 +30,10 @@ final class NotificationService
         }
 
         $subject = 'Confirmação de envio — NimbusDocs';
-        $submissionId = (int)$submission['id'];
+        $submissionId = (int) $submission['id'];
 
-        $portalUrl   = Url::portal("/submissions/{$submissionId}");
-        $userName    = $portalUser['full_name'] ?? $portalUser['email'];
+        $portalUrl = Url::portal("/submissions/{$submissionId}");
+        $userName = $portalUser['full_name'] ?? $portalUser['email'];
 
         $title = $submission['title'] ?? 'Envio de informações';
 
@@ -56,13 +56,13 @@ HTML;
         $this->mailer->sendMail($toEmail, $userName, $subject, $html);
 
         $this->notificationsConfig['audit']->systemAction([
-            'action'       => 'PORTAL_NOTIFICATION_SENT',
-            'summary'      => 'E-mail de notificação enviado ao usuário do portal.',
+            'action' => 'PORTAL_NOTIFICATION_SENT',
+            'summary' => 'E-mail de notificação enviado ao usuário do portal.',
             'context_type' => 'submission',
-            'context_id'   => $submissionId,
-            'details'      => [
+            'context_id' => $submissionId,
+            'details' => [
                 'type' => 'new_submission',
-                'to'   => $portalUser['email'],
+                'to' => $portalUser['email'],
             ],
         ]);
     }
@@ -87,9 +87,9 @@ HTML;
         }
 
         $subject = 'Atualização de status — NimbusDocs';
-        $submissionId = (int)$submission['id'];
-        $portalUrl    = Url::portal("/submissions/{$submissionId}");
-        $userName     = $portalUser['full_name'] ?? $portalUser['email'];
+        $submissionId = (int) $submission['id'];
+        $portalUrl = Url::portal("/submissions/{$submissionId}");
+        $userName = $portalUser['full_name'] ?? $portalUser['email'];
 
         $title = $submission['title'] ?? 'Envio de informações';
 
@@ -114,13 +114,13 @@ HTML;
         $this->mailer->sendMail($toEmail, $userName, $subject, $html);
 
         $this->notificationsConfig['audit']->systemAction([
-            'action'       => 'PORTAL_NOTIFICATION_SENT',
-            'summary'      => 'E-mail de notificação enviado ao usuário do portal.',
+            'action' => 'PORTAL_NOTIFICATION_SENT',
+            'summary' => 'E-mail de notificação enviado ao usuário do portal.',
             'context_type' => 'submission',
-            'context_id'   => $submissionId,
-            'details'      => [
-                'type'       => 'status_change',
-                'to'         => $portalUser['email'],
+            'context_id' => $submissionId,
+            'details' => [
+                'type' => 'status_change',
+                'to' => $portalUser['email'],
                 'old_status' => $oldStatus,
                 'new_status' => $newStatus,
             ],
@@ -144,11 +144,11 @@ HTML;
             return;
         }
 
-        $subject      = 'Novos documentos disponíveis — NimbusDocs';
-        $submissionId = (int)$submission['id'];
-        $portalUrl    = Url::portal("/submissions/{$submissionId}");
-        $userName     = $portalUser['full_name'] ?? $portalUser['email'];
-        $title        = $submission['title'] ?? 'Envio de informações';
+        $subject = 'Novos documentos disponíveis — NimbusDocs';
+        $submissionId = (int) $submission['id'];
+        $portalUrl = Url::portal("/submissions/{$submissionId}");
+        $userName = $portalUser['full_name'] ?? $portalUser['email'];
+        $title = $submission['title'] ?? 'Envio de informações';
 
         $html = <<<HTML
 <p>Olá, {$this->e($userName)}.</p>
@@ -169,13 +169,13 @@ HTML;
         $this->mailer->sendMail($toEmail, $userName, $subject, $html);
 
         $this->notificationsConfig['audit']->systemAction([
-            'action'       => 'PORTAL_NOTIFICATION_SENT',
-            'summary'      => 'E-mail de notificação enviado ao usuário do portal.',
+            'action' => 'PORTAL_NOTIFICATION_SENT',
+            'summary' => 'E-mail de notificação enviado ao usuário do portal.',
             'context_type' => 'submission',
-            'context_id'   => $submissionId,
-            'details'      => [
+            'context_id' => $submissionId,
+            'details' => [
                 'type' => 'response_uploaded',
-                'to'   => $portalUser['email'],
+                'to' => $portalUser['email'],
             ],
         ]);
     }

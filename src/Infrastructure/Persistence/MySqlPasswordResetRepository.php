@@ -15,7 +15,8 @@ class MySqlPasswordResetRepository implements PasswordResetRepository
 {
     public function __construct(
         private PDO $pdo
-    ) {}
+    ) {
+    }
 
     public function create(int $adminUserId, string $token, \DateTimeInterface $expiresAt): int
     {
@@ -25,8 +26,8 @@ class MySqlPasswordResetRepository implements PasswordResetRepository
             // Atomicidade: remove tokens anteriores do usuário antes de criar um novo
             $this->deleteByUserId($adminUserId);
 
-            $sql = "INSERT INTO password_reset_tokens (admin_user_id, token, expires_at) VALUES (:user_id, :token, :expires_at)";
-            
+            $sql = 'INSERT INTO password_reset_tokens (admin_user_id, token, expires_at) VALUES (:user_id, :token, :expires_at)';
+
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([
                 'user_id' => $adminUserId,
@@ -35,7 +36,7 @@ class MySqlPasswordResetRepository implements PasswordResetRepository
             ]);
 
             $id = (int) $this->pdo->lastInsertId();
-            
+
             $this->pdo->commit();
 
             return $id;
@@ -43,13 +44,14 @@ class MySqlPasswordResetRepository implements PasswordResetRepository
             if ($this->pdo->inTransaction()) {
                 $this->pdo->rollBack();
             }
+
             throw $e;
         }
     }
 
     public function findValidByToken(string $token): ?array
     {
-        $sql = "
+        $sql = '
             SELECT prt.*, au.email, au.name
             FROM password_reset_tokens prt
             JOIN admin_users au ON au.id = prt.admin_user_id
@@ -57,19 +59,20 @@ class MySqlPasswordResetRepository implements PasswordResetRepository
               AND prt.expires_at > NOW()
               AND prt.used_at IS NULL
             LIMIT 1
-        ";
+        ';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['token' => Encrypter::hash($token)]);
 
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $result ?: null;
     }
 
     public function markAsUsed(string $token): bool
     {
-        $sql = "UPDATE password_reset_tokens SET used_at = NOW() WHERE token = :token";
-        
+        $sql = 'UPDATE password_reset_tokens SET used_at = NOW() WHERE token = :token';
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['token' => Encrypter::hash($token)]);
 
@@ -78,8 +81,8 @@ class MySqlPasswordResetRepository implements PasswordResetRepository
 
     public function deleteByUserId(int $adminUserId): int
     {
-        $sql = "DELETE FROM password_reset_tokens WHERE admin_user_id = :user_id";
-        
+        $sql = 'DELETE FROM password_reset_tokens WHERE admin_user_id = :user_id';
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['user_id' => $adminUserId]);
 
@@ -88,8 +91,8 @@ class MySqlPasswordResetRepository implements PasswordResetRepository
 
     public function deleteExpired(): int
     {
-        $sql = "DELETE FROM password_reset_tokens WHERE expires_at < NOW()";
-        
+        $sql = 'DELETE FROM password_reset_tokens WHERE expires_at < NOW()';
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute();
 

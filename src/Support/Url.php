@@ -15,6 +15,7 @@ final class Url
     {
         $base = self::base() . '/portal';
         $path = '/' . ltrim($path, '/');
+
         return $base . $path;
     }
 
@@ -22,6 +23,7 @@ final class Url
     {
         $base = self::base() . '/admin';
         $path = '/' . ltrim($path, '/');
+
         return $base . $path;
     }
 }

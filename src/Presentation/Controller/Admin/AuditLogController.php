@@ -10,7 +10,9 @@ use PDO;
 
 final class AuditLogController
 {
-    public function __construct(private array $config) {}
+    public function __construct(private array $config)
+    {
+    }
 
     private function requireAdmin(): array
     {
@@ -29,7 +31,7 @@ final class AuditLogController
         $this->requireAdmin();
 
         $pdo = $this->config['pdo'];
-        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
         $perPage = 20;
         $offset = max(0, ($page - 1) * $perPage);
 
@@ -38,19 +40,19 @@ final class AuditLogController
         $params = [];
 
         if (!empty($_GET['actor_type'])) {
-            $where[] = "actor_type = :actor_type";
+            $where[] = 'actor_type = :actor_type';
             $params[':actor_type'] = $_GET['actor_type'];
         }
 
         if (!empty($_GET['action'])) {
-            $where[] = "action LIKE :action";
+            $where[] = 'action LIKE :action';
             $params[':action'] = '%' . $_GET['action'] . '%';
         }
 
         if (!empty($_GET['search'])) {
             $term = '%' . $_GET['search'] . '%';
             // Search in details JSON, actor_id, or IP
-            $where[] = "(details LIKE :search OR ip_address LIKE :search OR actor_id LIKE :search OR target_id LIKE :search)";
+            $where[] = '(details LIKE :search OR ip_address LIKE :search OR actor_id LIKE :search OR target_id LIKE :search)';
             $params[':search'] = $term;
         }
 
@@ -65,19 +67,19 @@ final class AuditLogController
             $stmtCount->bindValue($key, $val);
         }
         $stmtCount->execute();
-        $total = (int)$stmtCount->fetchColumn();
+        $total = (int) $stmtCount->fetchColumn();
 
         // Fetch Items
         $sql = "SELECT * FROM audit_logs $whereSql ORDER BY id DESC LIMIT :limit OFFSET :offset";
         $stmt = $pdo->prepare($sql);
-        
+
         foreach ($params as $key => $val) {
             $stmt->bindValue($key, $val);
         }
         $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
-        
+
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
         $pageTitle = 'Auditoria do Sistema';
@@ -88,13 +90,14 @@ final class AuditLogController
                 'total' => $total,
                 'page' => $page,
                 'perPage' => $perPage,
-                'pages' => max(1, (int)ceil($total / $perPage)),
+                'pages' => max(1, (int) ceil($total / $perPage)),
             ],
             'csrfToken' => Csrf::token(),
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
     }
+
     public function export(array $vars = []): void
     {
         $this->requireAdmin();
@@ -105,16 +108,16 @@ final class AuditLogController
         $params = [];
 
         if (!empty($_GET['actor_type'])) {
-            $where[] = "actor_type = :actor_type";
+            $where[] = 'actor_type = :actor_type';
             $params[':actor_type'] = $_GET['actor_type'];
         }
         if (!empty($_GET['action'])) {
-            $where[] = "action LIKE :action";
+            $where[] = 'action LIKE :action';
             $params[':action'] = '%' . $_GET['action'] . '%';
         }
         if (!empty($_GET['search'])) {
             $term = '%' . $_GET['search'] . '%';
-            $where[] = "(details LIKE :search OR ip_address LIKE :search OR actor_id LIKE :search OR target_id LIKE :search)";
+            $where[] = '(details LIKE :search OR ip_address LIKE :search OR actor_id LIKE :search OR target_id LIKE :search)';
             $params[':search'] = $term;
         }
 
@@ -149,7 +152,7 @@ final class AuditLogController
                 $row['action'],
                 $row['ip_address'],
                 $row['summary'],
-                $row['details']
+                $row['details'],
             ]);
         }
         fclose($output);

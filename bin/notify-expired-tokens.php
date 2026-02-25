@@ -5,10 +5,10 @@ declare(strict_types=1);
 /**
  * Script para notificar usuários sobre tokens expirados.
  * Executar via cron ou agendador de tarefas:
- * 
+ *
  * Linux/Mac:
  *   0 9 * * * /usr/bin/php /path/to/NimbusDocs/bin/notify-expired-tokens.php
- * 
+ *
  * Windows (Agendador de Tarefas):
  *   C:\xampp\php\php.exe C:\xampp\htdocs\NimbusDocs\bin\notify-expired-tokens.php
  */
@@ -21,10 +21,9 @@ $pdo = $config['pdo'];
 // Importa dependências
 use App\Infrastructure\Persistence\MySqlPortalAccessTokenRepository;
 use App\Infrastructure\Persistence\MySqlPortalUserRepository;
-use App\Aplication\Service\NotificationService;
 
 try {
-    echo "[" . date('Y-m-d H:i:s') . "] Iniciando notificação de tokens expirados...\n";
+    echo '[' . date('Y-m-d H:i:s') . "] Iniciando notificação de tokens expirados...\n";
 
     // Instancia repositórios
     $tokenRepo = new MySqlPortalAccessTokenRepository($pdo);
@@ -44,10 +43,10 @@ try {
     $stmt->execute();
     $expiredTokens = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-    echo "Encontrados " . count($expiredTokens) . " tokens expirados nas últimas 24 horas.\n";
+    echo 'Encontrados ' . count($expiredTokens) . " tokens expirados nas últimas 24 horas.\n";
 
     if (empty($expiredTokens)) {
-        echo "[" . date('Y-m-d H:i:s') . "] Nenhum token expirado para notificar.\n";
+        echo '[' . date('Y-m-d H:i:s') . "] Nenhum token expirado para notificar.\n";
         exit(0);
     }
 
@@ -64,16 +63,16 @@ try {
     foreach ($expiredTokens as $tokenRecord) {
         try {
             $portalUser = [
-                'id'        => (int)$tokenRecord['portal_user_id'],
+                'id' => (int) $tokenRecord['portal_user_id'],
                 'full_name' => $tokenRecord['full_name'],
-                'email'     => $tokenRecord['email'],
+                'email' => $tokenRecord['email'],
             ];
 
             $token = [
-                'id'         => (int)$tokenRecord['id'],
-                'code'       => $tokenRecord['code'],
+                'id' => (int) $tokenRecord['id'],
+                'code' => $tokenRecord['code'],
                 'expires_at' => $tokenRecord['expires_at'],
-                'portal_user_id' => (int)$tokenRecord['portal_user_id'],
+                'portal_user_id' => (int) $tokenRecord['portal_user_id'],
             ];
 
             // Envia notificação
@@ -88,7 +87,7 @@ try {
                     null, // sem actor específico (job automático)
                     'token.expired.notification.sent',
                     'portal_access_token',
-                    (int)$tokenRecord['id'],
+                    (int) $tokenRecord['id'],
                     ['user_email' => $portalUser['email']]
                 );
             }
@@ -101,12 +100,12 @@ try {
     echo "\n[" . date('Y-m-d H:i:s') . "] Conclusão:\n";
     echo "  - Notificados com sucesso: $notified\n";
     echo "  - Falhas: $failed\n";
-    echo "  - Total processado: " . count($expiredTokens) . "\n";
+    echo '  - Total processado: ' . count($expiredTokens) . "\n";
 
     exit($failed > 0 ? 1 : 0);
 
 } catch (\Throwable $e) {
-    echo "[ERRO CRÍTICO] " . $e->getMessage() . "\n";
+    echo '[ERRO CRÍTICO] ' . $e->getMessage() . "\n";
     echo $e->getTraceAsString() . "\n";
     exit(2);
 }

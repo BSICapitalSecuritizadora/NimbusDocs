@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Infrastructure\Security;
 
-use PHPUnit\Framework\TestCase;
 use App\Infrastructure\Security\RateLimiter;
 use App\Support\FileCache;
+use PHPUnit\Framework\TestCase;
 
 class RateLimiterTest extends TestCase
 {
     private string $cacheDir;
+
     private FileCache $cache;
+
     private RateLimiter $limiter;
 
     protected function setUp(): void
@@ -22,7 +24,7 @@ class RateLimiterTest extends TestCase
         if (!is_dir($this->cacheDir)) {
             mkdir($this->cacheDir);
         }
-        
+
         $this->cache = new FileCache($this->cacheDir);
         $this->limiter = new RateLimiter($this->cache);
     }
@@ -35,9 +37,12 @@ class RateLimiterTest extends TestCase
         parent::tearDown();
     }
 
-    private function removeDirectory($dir) {
-        if (!is_dir($dir)) return;
-        $files = array_diff(scandir($dir), array('.','..'));
+    private function removeDirectory($dir)
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+        $files = array_diff(scandir($dir), ['.', '..']);
         foreach ($files as $file) {
             (is_dir("$dir/$file")) ? $this->removeDirectory("$dir/$file") : unlink("$dir/$file");
         }
@@ -52,7 +57,7 @@ class RateLimiterTest extends TestCase
         // Executa 5 vezes, deve permitir todas (retornar false para tooManyAttempts)
         for ($i = 0; $i < 5; $i++) {
             $this->assertFalse(
-                $this->limiter->tooManyAttempts($key, $limit), 
+                $this->limiter->tooManyAttempts($key, $limit),
                 "Attempt $i should be allowed"
             );
         }
@@ -70,15 +75,15 @@ class RateLimiterTest extends TestCase
 
         // A próxima (4ª) deve ser bloqueada
         $this->assertTrue(
-            $this->limiter->tooManyAttempts($key, $limit), 
-            "Should be blocked after exceeding limit"
+            $this->limiter->tooManyAttempts($key, $limit),
+            'Should be blocked after exceeding limit'
         );
     }
 
     public function test_counters_are_isolated_by_key(): void
     {
         $limit = 2;
-        
+
         // Bloqueia user A
         $this->limiter->tooManyAttempts('user_A', $limit);
         $this->limiter->tooManyAttempts('user_A', $limit);

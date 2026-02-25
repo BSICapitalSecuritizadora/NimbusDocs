@@ -22,7 +22,7 @@ final class RandomToken
 
         // opcional: agrupar em blocos de 4
         return strtoupper(implode('', array_chunk($chars, 4, true)
-            ? array_map(fn($chunk) => implode('', $chunk), array_chunk($chars, 4))
+            ? array_map(fn ($chunk) => implode('', $chunk), array_chunk($chars, 4))
             : $chars));
     }
 }

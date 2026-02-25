@@ -9,40 +9,42 @@ use PDO;
 
 final class MySqlPortalSubmissionFileRepository implements PortalSubmissionFileRepository
 {
-    public function __construct(private PDO $pdo) {}
+    public function __construct(private PDO $pdo)
+    {
+    }
 
     public function create(int $submissionId, array $data): int
     {
-        $sql = "INSERT INTO portal_submission_files
+        $sql = 'INSERT INTO portal_submission_files
             (submission_id, origin, original_name, stored_name,
              mime_type, size_bytes, storage_path, checksum, visible_to_user, document_type)
             VALUES
             (:submission_id, :origin, :original_name, :stored_name,
-             :mime_type, :size_bytes, :storage_path, :checksum, :visible_to_user, :document_type)";
+             :mime_type, :size_bytes, :storage_path, :checksum, :visible_to_user, :document_type)';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':submission_id'   => $submissionId,
-            ':origin'          => $data['origin'] ?? 'USER',
-            ':original_name'   => $data['original_name'],
-            ':stored_name'     => $data['stored_name'],
-            ':mime_type'       => $data['mime_type'],
-            ':size_bytes'      => $data['size_bytes'],
-            ':storage_path'    => $data['storage_path'],
-            ':checksum'        => $data['checksum'] ?? null,
-            ':visible_to_user' => isset($data['visible_to_user']) ? (int)$data['visible_to_user'] : 0,
-            ':document_type'   => $data['document_type'] ?? 'OTHER',
+            ':submission_id' => $submissionId,
+            ':origin' => $data['origin'] ?? 'USER',
+            ':original_name' => $data['original_name'],
+            ':stored_name' => $data['stored_name'],
+            ':mime_type' => $data['mime_type'],
+            ':size_bytes' => $data['size_bytes'],
+            ':storage_path' => $data['storage_path'],
+            ':checksum' => $data['checksum'] ?? null,
+            ':visible_to_user' => isset($data['visible_to_user']) ? (int) $data['visible_to_user'] : 0,
+            ':document_type' => $data['document_type'] ?? 'OTHER',
         ]);
 
-        return (int)$this->pdo->lastInsertId();
+        return (int) $this->pdo->lastInsertId();
     }
 
     public function findBySubmission(int $submissionId): array
     {
-        $sql = "SELECT *
+        $sql = 'SELECT *
                 FROM portal_submission_files
                 WHERE submission_id = :sid
-                ORDER BY uploaded_at ASC";
+                ORDER BY uploaded_at ASC';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':sid' => $submissionId]);
@@ -52,15 +54,16 @@ final class MySqlPortalSubmissionFileRepository implements PortalSubmissionFileR
 
     public function findById(int $id): ?array
     {
-        $sql = "SELECT *
+        $sql = 'SELECT *
                 FROM portal_submission_files
                 WHERE id = :id
-                LIMIT 1";
+                LIMIT 1';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $id]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $row ?: null;
     }
 
@@ -81,9 +84,10 @@ final class MySqlPortalSubmissionFileRepository implements PortalSubmissionFileR
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
+
     public function deleteBySubmissionId(int $submissionId): void
     {
-        $stmt = $this->pdo->prepare("DELETE FROM portal_submission_files WHERE submission_id = :sid");
+        $stmt = $this->pdo->prepare('DELETE FROM portal_submission_files WHERE submission_id = :sid');
         $stmt->execute([':sid' => $submissionId]);
     }
 }

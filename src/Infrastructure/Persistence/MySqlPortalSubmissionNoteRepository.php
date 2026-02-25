@@ -9,23 +9,25 @@ use PDO;
 
 final class MySqlPortalSubmissionNoteRepository implements PortalSubmissionNoteRepository
 {
-    public function __construct(private PDO $pdo) {}
+    public function __construct(private PDO $pdo)
+    {
+    }
 
     public function create(array $data): int
     {
-        $sql = "INSERT INTO portal_submission_notes
+        $sql = 'INSERT INTO portal_submission_notes
                 (submission_id, admin_user_id, visibility, message)
-                VALUES (:submission_id, :admin_user_id, :visibility, :message)";
+                VALUES (:submission_id, :admin_user_id, :visibility, :message)';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
             ':submission_id' => $data['submission_id'],
             ':admin_user_id' => $data['admin_user_id'] ?? null,
-            ':visibility'    => $data['visibility'],
-            ':message'       => $data['message'],
+            ':visibility' => $data['visibility'],
+            ':message' => $data['message'],
         ]);
 
-        return (int)$this->pdo->lastInsertId();
+        return (int) $this->pdo->lastInsertId();
     }
 
     public function listVisibleForSubmission(int $submissionId): array
@@ -44,11 +46,11 @@ final class MySqlPortalSubmissionNoteRepository implements PortalSubmissionNoteR
 
     public function listAllForSubmission(int $submissionId): array
     {
-        $sql = "SELECT n.*, a.name AS admin_name
+        $sql = 'SELECT n.*, a.name AS admin_name
                 FROM portal_submission_notes n
                 LEFT JOIN admin_users a ON a.id = n.admin_user_id
                 WHERE n.submission_id = :sid
-                ORDER BY n.created_at DESC";
+                ORDER BY n.created_at DESC';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':sid' => $submissionId]);

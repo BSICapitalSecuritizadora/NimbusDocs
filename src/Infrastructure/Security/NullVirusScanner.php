@@ -9,7 +9,9 @@ use Psr\Log\LoggerInterface;
 
 final class NullVirusScanner implements VirusScannerInterface
 {
-    public function __construct(private ?LoggerInterface $logger = null) {}
+    public function __construct(private ?LoggerInterface $logger = null)
+    {
+    }
 
     public function isClean(string $filePath): bool
     {
@@ -17,6 +19,7 @@ final class NullVirusScanner implements VirusScannerInterface
         if ($this->logger) {
             $this->logger->info("[NullVirusScanner] Skipping virus scan for: $filePath");
         }
+
         return true;
     }
 

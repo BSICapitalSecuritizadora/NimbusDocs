@@ -4,24 +4,29 @@ declare(strict_types=1);
 
 namespace App\Application;
 
-use App\Infrastructure\Persistence\MySqlGeneralDocumentRepository;
-use App\Infrastructure\Persistence\MySqlDocumentCategoryRepository;
-use App\Infrastructure\Persistence\MySqlPortalUserRepository;
-use App\Infrastructure\Persistence\MySqlSettingsRepository;
-use App\Infrastructure\Persistence\MySqlAdminUserRepository;
 use App\Application\Service\NotificationService;
 use App\Infrastructure\Notification\GraphMailService;
-use App\Support\FileUpload;
+use App\Infrastructure\Persistence\MySqlAdminUserRepository;
+use App\Infrastructure\Persistence\MySqlDocumentCategoryRepository;
+use App\Infrastructure\Persistence\MySqlGeneralDocumentRepository;
+use App\Infrastructure\Persistence\MySqlPortalUserRepository;
+use App\Infrastructure\Persistence\MySqlSettingsRepository;
 use App\Support\AuditLogger;
+use App\Support\FileUpload;
 use Respect\Validation\Validator as v;
 
 final class GeneralDocumentService
 {
     private MySqlGeneralDocumentRepository $documentRepo;
+
     private MySqlDocumentCategoryRepository $categoryRepo;
+
     private MySqlPortalUserRepository $userRepo;
+
     private NotificationService $notificationService;
+
     private AuditLogger $audit;
+
     private FileUpload $fileUpload;
 
     public function __construct(
@@ -30,26 +35,26 @@ final class GeneralDocumentService
     ) {
         $this->documentRepo = new MySqlGeneralDocumentRepository($config['pdo']);
         $this->categoryRepo = new MySqlDocumentCategoryRepository($config['pdo']);
-        $this->userRepo     = new MySqlPortalUserRepository($config['pdo']);
-        $this->audit        = new AuditLogger($config['pdo']);
-        $this->fileUpload   = new FileUpload();
-        
+        $this->userRepo = new MySqlPortalUserRepository($config['pdo']);
+        $this->audit = new AuditLogger($config['pdo']);
+        $this->fileUpload = new FileUpload();
+
         // Permite injeção ou cria nova instância
         if ($notificationService === null) {
             $graphMailConfig = [
-                'GRAPH_TENANT_ID'      => $config['graph_tenant_id'] ?? '',
-                'GRAPH_CLIENT_ID'      => $config['graph_client_id'] ?? '',
-                'GRAPH_CLIENT_SECRET'  => $config['graph_client_secret'] ?? '',
-                'MAIL_FROM'            => $config['graph_sender_email'] ?? '',
-                'MAIL_FROM_NAME'       => 'NimbusDocs'
+                'GRAPH_TENANT_ID' => $config['graph_tenant_id'] ?? '',
+                'GRAPH_CLIENT_ID' => $config['graph_client_id'] ?? '',
+                'GRAPH_CLIENT_SECRET' => $config['graph_client_secret'] ?? '',
+                'MAIL_FROM' => $config['graph_sender_email'] ?? '',
+                'MAIL_FROM_NAME' => 'NimbusDocs',
             ];
-            
+
             $logger = $config['logger'] ?? new \Monolog\Logger('app');
             $graphMailService = new GraphMailService($graphMailConfig, $logger);
             $settingsRepo = new MySqlSettingsRepository($config['pdo']);
             $adminUserRepo = new MySqlAdminUserRepository($config['pdo']);
             $portalUserRepo = new MySqlPortalUserRepository($config['pdo']);
-            $outboxRepo    = new \App\Infrastructure\Persistence\MySqlNotificationOutboxRepository($config['pdo']);
+            $outboxRepo = new \App\Infrastructure\Persistence\MySqlNotificationOutboxRepository($config['pdo']);
             $this->notificationService = new NotificationService($graphMailService, $settingsRepo, $adminUserRepo, $portalUserRepo, $outboxRepo);
         } else {
             $this->notificationService = $notificationService;
@@ -70,7 +75,7 @@ final class GeneralDocumentService
         }
 
         // Valida se categoria existe
-        if (!$this->categoryRepo->find((int)$data['category_id'])) {
+        if (!$this->categoryRepo->find((int) $data['category_id'])) {
             return [
                 'success' => false,
                 'errors' => ['category_id' => 'Categoria não encontrada.'],
@@ -104,7 +109,7 @@ final class GeneralDocumentService
                         'image/png',
                         'text/plain',
                         'text/csv',
-                    ]
+                    ],
                 ]
             );
 
@@ -114,19 +119,19 @@ final class GeneralDocumentService
                     'errors' => ['file' => $uploadResult['message']],
                 ];
             }
-            
+
             // --- Virus Scan Step ---
             $clamHost = getenv('CLAMAV_HOST');
-            $scanner = ($clamHost) 
+            $scanner = ($clamHost)
                 ? new \App\Infrastructure\Security\ClamAvScanner($clamHost, 3310, 30)
                 : new \App\Infrastructure\Security\NullVirusScanner();
 
             if (!$scanner->isClean($uploadResult['path'])) {
                 @unlink($uploadResult['path']);
                 $virusName = $scanner->getLastVirusName() ?? 'Unknown';
-                
+
                 $this->audit->log('ADMIN', $adminId, 'VIRUS_DETECTED', 'UPLOAD', 0, ['virus' => $virusName]);
-                
+
                 return [
                     'success' => false,
                     'errors' => ['file' => "Arquivo infectado detectado: $virusName"],
@@ -136,16 +141,16 @@ final class GeneralDocumentService
 
             // Prepara dados para inserção
             $documentData = [
-                'category_id'        => (int)$data['category_id'],
-                'title'              => trim($data['title']),
-                'description'        => trim($data['description'] ?? ''),
-                'file_path'          => $uploadResult['path'],
-                'file_mime'          => $uploadResult['mime_type'],
-                'file_size'          => $uploadResult['size'],
+                'category_id' => (int) $data['category_id'],
+                'title' => trim($data['title']),
+                'description' => trim($data['description'] ?? ''),
+                'file_path' => $uploadResult['path'],
+                'file_mime' => $uploadResult['mime_type'],
+                'file_size' => $uploadResult['size'],
                 'file_original_name' => $uploadResult['original_name'],
-                'is_active'          => (int)($data['is_active'] ?? 1),
-                'published_at'       => $data['published_at'] ?? null,
-                'created_by_admin'   => $adminId,
+                'is_active' => (int) ($data['is_active'] ?? 1),
+                'published_at' => $data['published_at'] ?? null,
+                'created_by_admin' => $adminId,
             ];
 
             $documentId = $this->documentRepo->create($documentData);
@@ -158,24 +163,24 @@ final class GeneralDocumentService
                 'GENERAL_DOCUMENT',
                 $documentId,
                 context: [
-                    'title'       => $documentData['title'],
+                    'title' => $documentData['title'],
                     'category_id' => $documentData['category_id'],
                 ]
             );
 
             // Notifica usuários ativos do portal (se habilitado)
             $notificationsEnabled = ($this->config['settings']['notifications.general_documents.enabled'] ?? '1') === '1';
-            
+
             if ($notificationsEnabled) {
                 try {
                     $portalUsers = $this->userRepo->getActiveUsers();
-                    $category = $this->categoryRepo->find((int)$data['category_id']);
-                    
+                    $category = $this->categoryRepo->find((int) $data['category_id']);
+
                     $docWithCategory = array_merge(
                         $this->documentRepo->find($documentId) ?? [],
                         ['category_name' => $category['name'] ?? 'Sem categoria']
                     );
-                    
+
                     $this->notificationService->notifyNewGeneralDocument($docWithCategory);
                 } catch (\Exception $e) {
                     // Falha na notificação não deve impedir criação do documento
@@ -215,7 +220,7 @@ final class GeneralDocumentService
         if (empty($data['title'])) {
             $errors['title'] = 'Título é obrigatório.';
         }
-        if (!empty($data['category_id']) && !$this->categoryRepo->find((int)$data['category_id'])) {
+        if (!empty($data['category_id']) && !$this->categoryRepo->find((int) $data['category_id'])) {
             $errors['category_id'] = 'Categoria não encontrada.';
         }
 
@@ -225,10 +230,10 @@ final class GeneralDocumentService
 
         // Prepara dados
         $updateData = [
-            'category_id' => (int)($data['category_id'] ?? $document['category_id']),
-            'title'       => trim($data['title']),
+            'category_id' => (int) ($data['category_id'] ?? $document['category_id']),
+            'title' => trim($data['title']),
             'description' => trim($data['description'] ?? ''),
-            'is_active'   => (int)($data['is_active'] ?? $document['is_active']),
+            'is_active' => (int) ($data['is_active'] ?? $document['is_active']),
         ];
 
         $this->documentRepo->update($documentId, $updateData);
@@ -241,8 +246,8 @@ final class GeneralDocumentService
             'GENERAL_DOCUMENT',
             $documentId,
             context: [
-                'title'       => $updateData['title'],
-                'is_active'   => $updateData['is_active'],
+                'title' => $updateData['title'],
+                'is_active' => $updateData['is_active'],
             ]
         );
 
@@ -414,6 +419,7 @@ final class GeneralDocumentService
     private function isValidDate(string $date): bool
     {
         $timestamp = strtotime($date);
+
         return $timestamp !== false;
     }
 }

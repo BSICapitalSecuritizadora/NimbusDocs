@@ -4,25 +4,28 @@ declare(strict_types=1);
 
 namespace App\Presentation\Controller\Admin;
 
-use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository;
+use App\Infrastructure\Persistence\MySqlPortalSubmissionNoteRepository;
+use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
 use App\Infrastructure\Persistence\MySqlPortalUserRepository;
 use App\Infrastructure\Persistence\MySqlSubmissionCommentRepository;
-use App\Support\Csrf;
 use App\Support\AuditLogger;
-use App\Support\Session;
 use App\Support\Auth;
-use App\Support\FileUpload;
-use App\Infrastructure\Persistence\MySqlPortalSubmissionNoteRepository;
-use Respect\Validation\Validator as v;
+use App\Support\Csrf;
+use App\Support\Session;
 
 final class SubmissionAdminController
 {
     private MySqlPortalSubmissionRepository $repo;
+
     private MySqlPortalSubmissionFileRepository $fileRepo;
+
     private MySqlPortalSubmissionNoteRepository $noteRepo;
+
     private MySqlPortalUserRepository $portalUserRepo;
+
     private MySqlSubmissionCommentRepository $commentRepo;
+
     private AuditLogger $audit;
 
     public function __construct(
@@ -30,19 +33,19 @@ final class SubmissionAdminController
         private ?\App\Application\Service\FileService $fileService = null,
         private ?\App\Application\Service\ExportService $exportService = null
     ) {
-        $this->repo           = new MySqlPortalSubmissionRepository($config['pdo']);
-        $this->fileRepo       = new MySqlPortalSubmissionFileRepository($config['pdo']);
-        $this->noteRepo       = new MySqlPortalSubmissionNoteRepository($config['pdo']);
+        $this->repo = new MySqlPortalSubmissionRepository($config['pdo']);
+        $this->fileRepo = new MySqlPortalSubmissionFileRepository($config['pdo']);
+        $this->noteRepo = new MySqlPortalSubmissionNoteRepository($config['pdo']);
         $this->portalUserRepo = new MySqlPortalUserRepository($config['pdo']);
-        $this->commentRepo    = new MySqlSubmissionCommentRepository($config['pdo']);
-        $this->audit          = new AuditLogger($config['pdo']);
-        
+        $this->commentRepo = new MySqlSubmissionCommentRepository($config['pdo']);
+        $this->audit = new AuditLogger($config['pdo']);
+
         // Fallback instantiation if manual DI fails (backwards compatibility or simple testing)
         if (!$this->fileService) {
-             $this->fileService = new \App\Application\Service\FileService($this->fileRepo, $config);
+            $this->fileService = new \App\Application\Service\FileService($this->fileRepo, $config);
         }
         if (!$this->exportService) {
-             $this->exportService = new \App\Application\Service\ExportService();
+            $this->exportService = new \App\Application\Service\ExportService();
         }
     }
 
@@ -55,25 +58,25 @@ final class SubmissionAdminController
     {
         $this->requireAdmin();
 
-        $page    = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
         $perPage = 15;
 
         $filters = [
-            'status'    => $_GET['status']    ?? null,
+            'status' => $_GET['status'] ?? null,
             'user_name' => $_GET['user_name'] ?? null,
         ];
 
         $pagination = $this->repo->paginateAll($filters, $page, $perPage);
 
-        $pageTitle   = 'Envios';
+        $pageTitle = 'Envios';
         $contentView = __DIR__ . '/../../View/admin/submissions/index.php';
-        $viewData    = [
+        $viewData = [
             'pagination' => $pagination,
-            'filters'    => $filters,
-            'csrfToken'  => Csrf::token(),
-            'flash'      => [
+            'filters' => $filters,
+            'csrfToken' => Csrf::token(),
+            'flash' => [
                 'success' => Session::getFlash('success'),
-                'error'   => Session::getFlash('error'),
+                'error' => Session::getFlash('error'),
             ],
         ];
 
@@ -84,7 +87,7 @@ final class SubmissionAdminController
     {
         $this->requireAdmin();
 
-        $id         = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
         $submission = $this->repo->findWithUserById($id);
 
         if (!$submission) {
@@ -94,28 +97,28 @@ final class SubmissionAdminController
 
         $files = $this->fileRepo->findBySubmission($id);
         $notes = $this->noteRepo->listAllForSubmission($id);
-        $responseFiles = array_filter($files, static fn($f) => $f['origin'] === 'ADMIN');
-        $userFiles     = array_filter($files, static fn($f) => $f['origin'] === 'USER');
-        
+        $responseFiles = array_filter($files, static fn ($f) => $f['origin'] === 'ADMIN');
+        $userFiles = array_filter($files, static fn ($f) => $f['origin'] === 'USER');
+
         // Busca comentários e histórico de status
         $comments = $this->commentRepo->getBySubmission($id, true);
         $statusHistory = $this->commentRepo->getStatusHistory($id);
-        
+
         // Busca logs de auditoria desta submissão
         $auditLogs = $this->audit->getByContext('submission', $id, 15);
 
-        $pageTitle   = 'Detalhes da Submissão';
+        $pageTitle = 'Detalhes da Submissão';
         $contentView = __DIR__ . '/../../View/admin/submissions/show.php';
         $viewData = [
-            'submission'    => $submission,
-            'files'         => $files,
-            'userFiles'     => $userFiles,
+            'submission' => $submission,
+            'files' => $files,
+            'userFiles' => $userFiles,
             'responseFiles' => $responseFiles,
-            'notes'         => $notes,
-            'comments'      => $comments,
+            'notes' => $notes,
+            'comments' => $comments,
             'statusHistory' => $statusHistory,
-            'auditLogs'     => $auditLogs,
-            'csrfToken'     => Csrf::token(),
+            'auditLogs' => $auditLogs,
+            'csrfToken' => Csrf::token(),
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -129,7 +132,7 @@ final class SubmissionAdminController
         $this->requireAdmin();
         $admin = Auth::requireAdmin();
 
-        $id = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
         $token = $_POST['_token'] ?? '';
 
         if (!Csrf::validate($token)) {
@@ -143,7 +146,7 @@ final class SubmissionAdminController
             $this->redirect('/admin/submissions');
         }
 
-        $portalUser = $this->portalUserRepo->findById((int)$submission['portal_user_id']);
+        $portalUser = $this->portalUserRepo->findById((int) $submission['portal_user_id']);
         if (!$portalUser) {
             Session::flash('error', 'Usuário do portal não encontrado.');
             $this->redirect('/admin/submissions/' . $id);
@@ -154,11 +157,11 @@ final class SubmissionAdminController
         if ($notification) {
             try {
                 $notification->notifySubmissionReceived($submission, $portalUser);
-                
+
                 // Log de auditoria
                 $this->audit->log(
                     'ADMIN',
-                    $admin['id'] ? (int)$admin['id'] : null,
+                    $admin['id'] ? (int) $admin['id'] : null,
                     'SUBMISSION_NOTIFICATION_RESENT',
                     'submission',
                     $id,
@@ -186,9 +189,9 @@ final class SubmissionAdminController
     {
         $this->requireAdmin();
 
-        $id     = (int)($vars['id'] ?? 0);
-        $post   = $_POST;
-        $token  = $post['_token'] ?? '';
+        $id = (int) ($vars['id'] ?? 0);
+        $post = $_POST;
+        $token = $post['_token'] ?? '';
 
         $submission = $this->repo->findWithUserById($id);
         if (!$submission) {
@@ -201,9 +204,9 @@ final class SubmissionAdminController
             $this->redirect('/admin/submissions/' . $id);
         }
 
-        $status   = $post['status'] ?? '';
+        $status = $post['status'] ?? '';
         $noteText = trim($post['note'] ?? '');
-        $visible  = $post['visibility'] ?? 'USER_VISIBLE';
+        $visible = $post['visibility'] ?? 'USER_VISIBLE';
 
         // COMPLETED converts to APPROVED for backwards compatibility
         if ($status === 'COMPLETED') {
@@ -228,53 +231,53 @@ final class SubmissionAdminController
             $id,
             $status,
             'ADMIN',
-            $adminId ? (int)$adminId : null,
+            $adminId ? (int) $adminId : null,
             $noteText // Usa a nota também como "reason" no histórico
         );
 
         // Se houver nota, adiciona ao novo sistema de comentários
         if ($noteText !== '') {
             $this->commentRepo->add([
-                'submission_id'   => $id,
-                'author_type'     => 'ADMIN',
-                'author_id'       => $adminId ? (int)$adminId : null,
-                'comment'         => $noteText,
-                'is_internal'     => $visible === 'ADMIN_ONLY',
-                'requires_action' => $status === 'NEEDS_CORRECTION'
+                'submission_id' => $id,
+                'author_type' => 'ADMIN',
+                'author_id' => $adminId ? (int) $adminId : null,
+                'comment' => $noteText,
+                'is_internal' => $visible === 'ADMIN_ONLY',
+                'requires_action' => $status === 'NEEDS_CORRECTION',
             ]);
-            
+
             // Mantém compatibilidade legada com a tabela notes antiga
             $this->noteRepo->create([
                 'submission_id' => $id,
-                'admin_user_id' => $adminId ? (int)$adminId : null,
-                'visibility'    => $visible,
-                'message'       => $noteText,
+                'admin_user_id' => $adminId ? (int) $adminId : null,
+                'visibility' => $visible,
+                'message' => $noteText,
             ]);
         }
 
         $updatedSubmission = $this->repo->findById($id);
-        $portalUser = $this->portalUserRepo->findById((int)$updatedSubmission['portal_user_id']);
+        $portalUser = $this->portalUserRepo->findById((int) $updatedSubmission['portal_user_id']);
 
         $notifications = $this->config['notifications_service'] ?? null;
         if ($notifications && $portalUser && ($submission['status'] ?? null) !== $status) {
             $notifications->portalSubmissionStatusChanged(
                 $portalUser,
                 $updatedSubmission,
-                (string)($submission['status'] ?? ''),
+                (string) ($submission['status'] ?? ''),
                 $status
             );
         }
 
         $this->audit->log(
             'ADMIN',
-            $adminId ? (int)$adminId : null,
+            $adminId ? (int) $adminId : null,
             'SUBMISSION_STATUS_CHANGED',
             'submission',
             $id,
             [
                 'old_status' => $submission['status'] ?? null,
                 'new_status' => $status,
-                'note'       => $noteText,
+                'note' => $noteText,
             ]
         );
 
@@ -287,8 +290,8 @@ final class SubmissionAdminController
         $this->requireAdmin();
         $admin = Auth::requireAdmin();
 
-        $id    = (int)($vars['id'] ?? 0);
-        $post  = $_POST;
+        $id = (int) ($vars['id'] ?? 0);
+        $post = $_POST;
         $token = $post['_token'] ?? '';
 
         if (!Csrf::validate($token)) {
@@ -301,7 +304,7 @@ final class SubmissionAdminController
             $result = $this->fileService->processAdminResponseUploads(
                 $id,
                 $_FILES['response_files'] ?? [],
-                (int)$admin['id']
+                (int) $admin['id']
             );
 
             if (!empty($result['errors'])) {
@@ -311,28 +314,28 @@ final class SubmissionAdminController
             }
 
             if ($result['uploaded'] > 0) {
-                 $this->config['audit']->adminAction([
-                    'actor_id'    => $admin['id'] ?? null,
-                    'actor_name'  => $admin['name'] ?? null,
-                    'action'      => 'SUBMISSION_RESPONSE_FILES_UPLOADED',
-                    'summary'     => 'Arquivos de resposta enviados ao usuário.',
-                    'context_type' => 'submission',
-                    'context_id'  => $id,
-                    'details'     => [
-                        'files_count' => $result['uploaded'],
-                    ],
+                $this->config['audit']->adminAction([
+                   'actor_id' => $admin['id'] ?? null,
+                   'actor_name' => $admin['name'] ?? null,
+                   'action' => 'SUBMISSION_RESPONSE_FILES_UPLOADED',
+                   'summary' => 'Arquivos de resposta enviados ao usuário.',
+                   'context_type' => 'submission',
+                   'context_id' => $id,
+                   'details' => [
+                       'files_count' => $result['uploaded'],
+                   ],
                 ]);
 
                 // Notification Logic
                 $submission = $this->repo->findById($id);
-                $portalUser = $this->portalUserRepo->findById((int)$submission['portal_user_id']);
+                $portalUser = $this->portalUserRepo->findById((int) $submission['portal_user_id']);
                 $notifications = $this->config['notifications_service'] ?? null;
                 if ($notifications && $portalUser) {
                     $notifications->portalSubmissionResponseUploaded($portalUser, $submission);
                 }
 
                 Session::flash('success', $result['uploaded'] . ' arquivo(s) enviado(s) com sucesso.');
-            } else if (empty($result['errors'])) {
+            } elseif (empty($result['errors'])) {
                 Session::flash('error', 'Nenhum arquivo válido enviado.');
             }
 
@@ -348,10 +351,10 @@ final class SubmissionAdminController
         $this->requireAdmin();
 
         $filters = [
-            'status'    => $_GET['status']    ?? null,
+            'status' => $_GET['status'] ?? null,
             'user_name' => $_GET['user_name'] ?? null,
             'from_date' => $_GET['from_date'] ?? null,
-            'to_date'   => $_GET['to_date']   ?? null,
+            'to_date' => $_GET['to_date'] ?? null,
         ];
 
         // Generator yielding arrays
@@ -373,7 +376,7 @@ final class SubmissionAdminController
         ];
 
         // Wrap cursor to format rows for CSV
-        $formattedCursor = (function() use ($cursor) {
+        $formattedCursor = (function () use ($cursor) {
             foreach ($cursor as $row) {
                 yield [
                     $row['id'],
@@ -387,7 +390,7 @@ final class SubmissionAdminController
                     $row['user_email'],
                     $row['user_document_number'],
                     $row['user_phone_number'],
-                    $row['portal_user_id']
+                    $row['portal_user_id'],
                 ];
             }
         })();
@@ -400,10 +403,10 @@ final class SubmissionAdminController
         $this->requireAdmin();
 
         $filters = [
-            'status'    => $_GET['status']    ?? null,
+            'status' => $_GET['status'] ?? null,
             'user_name' => $_GET['user_name'] ?? null,
             'from_date' => $_GET['from_date'] ?? null,
-            'to_date'   => $_GET['to_date']   ?? null,
+            'to_date' => $_GET['to_date'] ?? null,
         ];
 
         $cursor = $this->repo->getExportCursor($filters);
@@ -412,16 +415,16 @@ final class SubmissionAdminController
             'reference_code' => 'Código',
             'status' => [
                 'label' => 'Situação',
-                'formatter' => function($val) {
+                'formatter' => function ($val) {
                     return match($val) {
-                         'PENDING' => 'Pendente',
-                         'UNDER_REVIEW' => 'Em Análise',
-                         'COMPLETED' => 'Concluído',
-                         'APPROVED' => 'Aprovado',
-                         'REJECTED' => 'Rejeitado',
-                         default => $val
+                        'PENDING' => 'Pendente',
+                        'UNDER_REVIEW' => 'Em Análise',
+                        'COMPLETED' => 'Concluído',
+                        'APPROVED' => 'Aprovado',
+                        'REJECTED' => 'Rejeitado',
+                        default => $val
                     };
-                }
+                },
             ],
             'title' => 'Assunto',
             'submitted_at' => 'Data Envio',
@@ -429,8 +432,8 @@ final class SubmissionAdminController
             'user_email' => 'Email',
             'user_document_number' => [
                 'label' => 'Documento (CPF/CNPJ)',
-                'style' => 'mso-number-format:\@;' // Force text format
-            ]
+                'style' => 'mso-number-format:\@;', // Force text format
+            ],
         ];
 
         $filename = 'relatorio_submissoes_' . date('Ymd_Hi') . '.xls';
@@ -442,7 +445,7 @@ final class SubmissionAdminController
         $this->requireAdmin();
 
         $filters = [
-            'status'    => $_GET['status']    ?? null,
+            'status' => $_GET['status'] ?? null,
             'user_name' => $_GET['user_name'] ?? null,
         ];
 
@@ -450,7 +453,7 @@ final class SubmissionAdminController
         $submissions = $this->repo->paginateAll($filters, 1, 500)['items'];
 
         $pageTitle = 'Relatório de Submissões';
-        
+
         // Render special print layout
         require __DIR__ . '/../../View/admin/submissions/print.php';
         exit;

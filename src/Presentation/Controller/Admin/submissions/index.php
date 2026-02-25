@@ -6,10 +6,10 @@
 /** @var array $flash */
 
 $items = $pagination['items'] ?? [];
-$page  = $pagination['page'] ?? 1;
+$page = $pagination['page'] ?? 1;
 $pages = $pagination['pages'] ?? 1;
 $success = $flash['success'] ?? null;
-$error   = $flash['error']   ?? null;
+$error = $flash['error'] ?? null;
 
 $statusFilter = $filters['status'] ?? '';
 ?>
@@ -34,10 +34,10 @@ $statusFilter = $filters['status'] ?? '';
         <label class="form-label" for="status">Status</label>
         <select class="form-select" id="status" name="status">
             <option value="">Todos</option>
-            <option value="PENDING" <?= $statusFilter === 'PENDING'        ? 'selected' : '' ?>>Pendente</option>
-            <option value="UNDER_REVIEW" <?= $statusFilter === 'UNDER_REVIEW'   ? 'selected' : '' ?>>Em análise</option>
-            <option value="COMPLETED" <?= $statusFilter === 'COMPLETED'      ? 'selected' : '' ?>>Concluído</option>
-            <option value="REJECTED" <?= $statusFilter === 'REJECTED'       ? 'selected' : '' ?>>Rejeitado</option>
+            <option value="PENDING" <?= $statusFilter === 'PENDING' ? 'selected' : '' ?>>Pendente</option>
+            <option value="UNDER_REVIEW" <?= $statusFilter === 'UNDER_REVIEW' ? 'selected' : '' ?>>Em análise</option>
+            <option value="COMPLETED" <?= $statusFilter === 'COMPLETED' ? 'selected' : '' ?>>Concluído</option>
+            <option value="REJECTED" <?= $statusFilter === 'REJECTED' ? 'selected' : '' ?>>Rejeitado</option>
         </select>
     </div>
     <div class="col-md-3 align-self-end">
@@ -80,7 +80,7 @@ $statusFilter = $filters['status'] ?? '';
                                 <td><?= htmlspecialchars($s['status'], ENT_QUOTES, 'UTF-8') ?></td>
                                 <td><?= htmlspecialchars($s['submitted_at'], ENT_QUOTES, 'UTF-8') ?></td>
                                 <td class="text-end">
-                                    <a href="/admin/submissions/<?= (int)$s['id'] ?>" class="btn btn-sm btn-outline-secondary">
+                                    <a href="/admin/submissions/<?= (int) $s['id'] ?>" class="btn btn-sm btn-outline-secondary">
                                         Ver
                                     </a>
                                 </td>

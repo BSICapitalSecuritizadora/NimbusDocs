@@ -13,7 +13,7 @@ class AuthApiTest extends ApiTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->controller = new AuthApiController($this->getApiConfig());
 
         // Setup a test user
@@ -24,7 +24,7 @@ class AuthApiTest extends ApiTestCase
     {
         $payload = [
             'email' => 'api@test.com',
-            'password' => 'Pass123!'
+            'password' => 'Pass123!',
         ];
 
         $response = $this->controller->login($payload);
@@ -32,10 +32,10 @@ class AuthApiTest extends ApiTestCase
         $this->assertIsArray($response);
         $this->assertArrayHasKey('success', $response);
         $this->assertTrue($response['success']);
-        
+
         $this->assertArrayHasKey('token', $response);
         $this->assertNotEmpty($response['token']);
-        
+
         $this->assertArrayHasKey('user', $response);
         $this->assertEquals('api@test.com', $response['user']['email']);
     }
@@ -44,7 +44,7 @@ class AuthApiTest extends ApiTestCase
     {
         $payload = [
             'email' => 'api@test.com',
-            'password' => 'WrongPass!'
+            'password' => 'WrongPass!',
         ];
 
         $response = $this->controller->login($payload);
@@ -68,7 +68,7 @@ class AuthApiTest extends ApiTestCase
     public function testCreateTokenRequiresAuthentication(): void
     {
         $response = $this->controller->createToken(['name' => 'My API Key']);
-        
+
         $this->assertIsArray($response);
         $this->assertArrayHasKey('error', $response);
         $this->assertEquals('Unauthorized', $response['error']);
@@ -77,9 +77,9 @@ class AuthApiTest extends ApiTestCase
     public function testCreateTokenWithAuthentication(): void
     {
         $this->authenticateAs(999, 'api@test.com');
-        
+
         $response = $this->controller->createToken(['name' => 'My API Key']);
-        
+
         $this->assertIsArray($response);
         $this->assertArrayHasKey('success', $response);
         $this->assertTrue($response['success']);

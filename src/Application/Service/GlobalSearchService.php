@@ -14,11 +14,12 @@ class GlobalSearchService
 {
     public function __construct(
         private PDO $pdo
-    ) {}
+    ) {
+    }
 
     /**
      * Perform a global search across multiple entities
-     * 
+     *
      * @param string $query Search query
      * @param int $limit Maximum results per category
      * @return array{submissions: array, users: array, documents: array, total: int}
@@ -26,7 +27,7 @@ class GlobalSearchService
     public function search(string $query, int $limit = 10): array
     {
         $query = trim($query);
-        
+
         if (strlen($query) < 2) {
             return [
                 'submissions' => [],
@@ -44,8 +45,8 @@ class GlobalSearchService
             'documents' => $this->searchDocuments($searchTerm, $limit),
         ];
 
-        $results['total'] = count($results['submissions']) 
-            + count($results['users']) 
+        $results['total'] = count($results['submissions'])
+            + count($results['users'])
             + count($results['documents']);
 
         return $results;
@@ -160,7 +161,7 @@ class GlobalSearchService
     public function quickSearch(string $query, int $limit = 5): array
     {
         $query = trim($query);
-        
+
         if (strlen($query) < 2) {
             return [];
         }

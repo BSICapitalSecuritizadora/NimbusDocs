@@ -19,9 +19,9 @@ class Encrypter
     {
         $key = self::getKey();
         $iv = random_bytes(openssl_cipher_iv_length(self::CIPHER));
-        
+
         $encrypted = openssl_encrypt($value, self::CIPHER, $key, 0, $iv);
-        
+
         if ($encrypted === false) {
             throw new \RuntimeException('Falha ao criptografar dados.');
         }
@@ -29,9 +29,9 @@ class Encrypter
         $mac = hash_hmac('sha256', $iv . $encrypted, $key);
 
         $json = json_encode([
-            'iv'      => base64_encode($iv),
-            'value'   => $encrypted,
-            'mac'     => $mac
+            'iv' => base64_encode($iv),
+            'value' => $encrypted,
+            'mac' => $mac,
         ], JSON_THROW_ON_ERROR);
 
         return base64_encode($json);
@@ -43,7 +43,7 @@ class Encrypter
     private static function attemptDecrypt(array $data, string $key): ?string
     {
         $iv = base64_decode($data['iv'], true);
-        
+
         // Valida MAC (integridade) com a chave testada
         $expectedMac = hash_hmac('sha256', $iv . $data['value'], $key);
         if (!hash_equals($expectedMac, $data['mac'])) {
@@ -72,14 +72,14 @@ class Encrypter
             }
 
             $data = json_decode($json, true);
-            
+
             if (!is_array($data) || !isset($data['iv'], $data['value'], $data['mac'])) {
                 return null;
             }
 
             // 1. Tenta a chave principal (APP_SECRET)
             $primaryKey = self::getNormalizedKey($_ENV['APP_SECRET'] ?? '');
-            
+
             $decrypted = self::attemptDecrypt($data, $primaryKey);
             if ($decrypted !== null) {
                 return $decrypted;
@@ -92,11 +92,13 @@ class Encrypter
                 $previousSecrets = explode(',', $previousSecretsRaw);
                 foreach ($previousSecrets as $secretRaw) {
                     $secretRaw = trim($secretRaw);
-                    if (empty($secretRaw)) continue;
+                    if (empty($secretRaw)) {
+                        continue;
+                    }
 
                     $fallbackKey = self::getNormalizedKey($secretRaw);
                     $decrypted = self::attemptDecrypt($data, $fallbackKey);
-                    
+
                     if ($decrypted !== null) {
                         return $decrypted;
                     }
@@ -113,11 +115,11 @@ class Encrypter
 
     /**
      * Descriptografa com fallback para dados legados (texto plano).
-     * 
+     *
      * Usar APENAS no repositório de dados que possam ter registros antigos
      * ainda em texto puro. Loga quando o fallback é ativado para que você
      * saiba exatamente quais registros precisam ser re-criptografados.
-     * 
+     *
      * @param string|null $payload O valor do banco
      * @param string $context Identificador para o log (ex: "portal_user.document_number:42")
      */
@@ -178,8 +180,9 @@ class Encrypter
     private static function getNormalizedKey(string $secret): string
     {
         if (strlen($secret) < 32) {
-             return hash('sha256', $secret, true);
+            return hash('sha256', $secret, true);
         }
+
         return substr($secret, 0, 32);
     }
 
@@ -197,4 +200,3 @@ class Encrypter
         return hash_hmac('sha256', $value, self::getKey());
     }
 }
-

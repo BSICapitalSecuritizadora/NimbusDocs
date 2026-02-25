@@ -11,12 +11,13 @@ use App\Support\Session;
 final class AdminAuthController
 {
     private MySqlAdminUserRepository $adminRepo;
+
     private AzureAdminAuthClient $azureClient;
 
     public function __construct(private array $config)
     {
         $pdo = $config['pdo'];
-        $this->adminRepo   = new MySqlAdminUserRepository($pdo);
+        $this->adminRepo = new MySqlAdminUserRepository($pdo);
         /** @var AzureAdminAuthClient $client */
         $client = $config['azure_admin_auth'];
         $this->azureClient = $client;
@@ -54,8 +55,8 @@ final class AdminAuthController
     {
         $provider = $this->azureClient->getProvider();
 
-        $state      = (string)($_GET['state'] ?? '');
-        $savedState = (string)Session::get('azure_oauth2_state');
+        $state = (string) ($_GET['state'] ?? '');
+        $savedState = (string) Session::get('azure_oauth2_state');
 
         if (!$state || !$savedState || !hash_equals($savedState, $state)) {
             Session::flash('error', 'Falha na validação do login com a Microsoft (state inválido).');
@@ -91,7 +92,7 @@ final class AdminAuthController
 
             // Extrai dados com múltiplos fallbacks
             $mail = $graphUser['mail'] ?? null;
-            $upn  = $graphUser['userPrincipalName'] ?? ($graphUser['preferred_username'] ?? null);
+            $upn = $graphUser['userPrincipalName'] ?? ($graphUser['preferred_username'] ?? null);
             if (!$mail && isset($graphUser['otherMails']) && is_array($graphUser['otherMails']) && count($graphUser['otherMails']) > 0) {
                 $mail = $graphUser['otherMails'][0];
             }
@@ -108,7 +109,7 @@ final class AdminAuthController
             $allowedDomain = $this->azureClient->getAllowedDomain();
             if ($allowedDomain) {
                 $domain = substr(strrchr($email, '@') ?: '', 1);
-                if (strcasecmp($domain, (string)$allowedDomain) !== 0) {
+                if (strcasecmp($domain, (string) $allowedDomain) !== 0) {
                     Session::flash('error', 'Seu e-mail não pertence ao domínio autorizado.');
                     header('Location: /admin/login');
                     exit;
@@ -121,7 +122,7 @@ final class AdminAuthController
             if ($azureOid) {
                 // tenta localizar por ms_object_id/azure_oid via SQL direto
                 $pdo = $this->config['pdo'];
-                $stmt = $pdo->prepare("SELECT * FROM admin_users WHERE ms_object_id = :oid OR azure_oid = :oid LIMIT 1");
+                $stmt = $pdo->prepare('SELECT * FROM admin_users WHERE ms_object_id = :oid OR azure_oid = :oid LIMIT 1');
                 $stmt->execute([':oid' => $azureOid]);
                 $adminUser = $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
             }
@@ -140,7 +141,7 @@ final class AdminAuthController
             if ($adminUser && $azureOid) {
                 $pdo = $this->config['pdo'];
                 $upd = $pdo->prepare(
-                    "UPDATE admin_users SET 
+                    'UPDATE admin_users SET 
                         ms_object_id = COALESCE(ms_object_id, :oid),
                         azure_oid    = COALESCE(azure_oid, :oid),
                         ms_tenant_id = COALESCE(ms_tenant_id, :tenant),
@@ -148,27 +149,27 @@ final class AdminAuthController
                         ms_upn       = COALESCE(ms_upn, :upn),
                         azure_upn    = COALESCE(azure_upn, :upn),
                         updated_at   = NOW()
-                     WHERE id = :id"
+                     WHERE id = :id'
                 );
                 $upd->execute([
-                    ':oid'    => $azureOid,
+                    ':oid' => $azureOid,
                     ':tenant' => $azureTenant,
-                    ':upn'    => $email,
-                    ':id'     => (int)$adminUser['id'],
+                    ':upn' => $email,
+                    ':id' => (int) $adminUser['id'],
                 ]);
             }
 
             // Tudo ok: inicia sessão
             session_regenerate_id(true);
             Session::put('admin', [
-                'id'        => (int)$adminUser['id'],
-                'email'     => $adminUser['email'],
-                'name'      => $adminUser['full_name'] ?? $adminUser['name'] ?? ($name ?? $adminUser['email']),
-                'role'      => $adminUser['role'] ?? 'ADMIN',
+                'id' => (int) $adminUser['id'],
+                'email' => $adminUser['email'],
+                'name' => $adminUser['full_name'] ?? $adminUser['name'] ?? ($name ?? $adminUser['email']),
+                'role' => $adminUser['role'] ?? 'ADMIN',
                 'is_active' => $adminUser['is_active'] ?? 1,
-                'oauth'     => [
+                'oauth' => [
                     'provider' => 'azure',
-                    'upn'      => $upn,
+                    'upn' => $upn,
                 ],
             ]);
 

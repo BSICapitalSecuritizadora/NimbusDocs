@@ -94,7 +94,7 @@
                 <div class="card-body">
                     <h2 class="h6 mb-3">Atualizar status</h2>
 
-                    <form method="post" action="/admin/submissions/<?= (int)$submission['id'] ?>/status">
+                    <form method="post" action="/admin/submissions/<?= (int) $submission['id'] ?>/status">
                         <input type="hidden" name="_token"
                             value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
@@ -103,14 +103,14 @@
                             <select class="form-select" id="status" name="status" required>
                                 <?php
                                 $currentStatus = $submission['status'];
-                                $options = [
-                                    'PENDING'      => 'Pendente',
-                                    'UNDER_REVIEW' => 'Em análise',
-                                    'COMPLETED'    => 'Concluído',
-                                    'REJECTED'     => 'Rejeitado',
-                                ];
-                                foreach ($options as $value => $label):
-                                ?>
+$options = [
+    'PENDING' => 'Pendente',
+    'UNDER_REVIEW' => 'Em análise',
+    'COMPLETED' => 'Concluído',
+    'REJECTED' => 'Rejeitado',
+];
+foreach ($options as $value => $label):
+    ?>
                                     <option value="<?= $value ?>" <?= $currentStatus === $value ? 'selected' : '' ?>>
                                         <?= $label ?>
                                     </option>

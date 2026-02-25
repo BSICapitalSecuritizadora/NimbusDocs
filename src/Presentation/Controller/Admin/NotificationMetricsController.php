@@ -26,20 +26,20 @@ final class NotificationMetricsController
     {
         Auth::requireAdmin();
 
-        $metrics          = $this->outbox->getMetrics();
-        $failuresByType   = $this->outbox->getFailuresByType();
-        $volumeByDay      = $this->outbox->getVolumeByDay(7);
+        $metrics = $this->outbox->getMetrics();
+        $failuresByType = $this->outbox->getFailuresByType();
+        $volumeByDay = $this->outbox->getVolumeByDay(7);
         $avgProcessingTime = $this->outbox->getAverageProcessingTime();
-        $deadLetterQueue  = $this->outbox->getDeadLetterQueue(20);
+        $deadLetterQueue = $this->outbox->getDeadLetterQueue(20);
 
-        $pageTitle   = 'Métricas de Notificações';
+        $pageTitle = 'Métricas de Notificações';
         $contentView = __DIR__ . '/../../View/admin/notifications/metrics.php';
         $viewData = [
-            'metrics'           => $metrics,
-            'failuresByType'    => $failuresByType,
-            'volumeByDay'       => $volumeByDay,
+            'metrics' => $metrics,
+            'failuresByType' => $failuresByType,
+            'volumeByDay' => $volumeByDay,
             'avgProcessingTime' => $avgProcessingTime,
-            'deadLetterQueue'   => $deadLetterQueue,
+            'deadLetterQueue' => $deadLetterQueue,
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -52,20 +52,20 @@ final class NotificationMetricsController
     {
         Auth::requireAdmin();
 
-        $metrics           = $this->outbox->getMetrics();
+        $metrics = $this->outbox->getMetrics();
         $avgProcessingTime = $this->outbox->getAverageProcessingTime();
 
         header('Content-Type: application/json');
         echo json_encode([
             'success' => true,
-            'data'    => [
-                'backlog'            => $metrics['backlog'],
-                'sending'            => $metrics['sending'],
-                'sent_today'         => $metrics['sent_today'],
-                'failed_today'       => $metrics['failed_today'],
-                'failed_total'       => $metrics['failed_total'],
+            'data' => [
+                'backlog' => $metrics['backlog'],
+                'sending' => $metrics['sending'],
+                'sent_today' => $metrics['sent_today'],
+                'failed_today' => $metrics['failed_today'],
+                'failed_total' => $metrics['failed_total'],
                 'avg_processing_sec' => $avgProcessingTime,
-                'timestamp'          => date('Y-m-d H:i:s'),
+                'timestamp' => date('Y-m-d H:i:s'),
             ],
         ], JSON_THROW_ON_ERROR);
         exit;

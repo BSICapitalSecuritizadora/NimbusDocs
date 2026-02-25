@@ -22,7 +22,9 @@ final class DownloadConcurrencyGuard
     private const DEFAULT_SLOT_TTL = 600;
 
     private FileCache $cache;
+
     private int $maxConcurrent;
+
     private int $slotTtl;
 
     /**
@@ -43,14 +45,14 @@ final class DownloadConcurrencyGuard
 
     /**
      * Tenta adquirir um slot de download para o identificador.
-     * 
+     *
      * @param string $identifier Identificador único (IP, user ID, etc)
      * @return bool True se conseguiu adquirir slot, False se limite atingido
      */
     public function acquire(string $identifier): bool
     {
         $key = $this->getCacheKey($identifier);
-        $current = (int)$this->cache->get($key, 0);
+        $current = (int) $this->cache->get($key, 0);
 
         if ($current >= $this->maxConcurrent) {
             return false; // Limite atingido
@@ -58,19 +60,19 @@ final class DownloadConcurrencyGuard
 
         // Incrementa contador
         $this->cache->increment($key, 1, $this->slotTtl);
-        
+
         return true;
     }
 
     /**
      * Libera um slot de download do identificador.
-     * 
+     *
      * @param string $identifier Identificador único
      */
     public function release(string $identifier): void
     {
         $key = $this->getCacheKey($identifier);
-        $current = (int)$this->cache->get($key, 0);
+        $current = (int) $this->cache->get($key, 0);
 
         if ($current <= 1) {
             // Se for 1 ou menos, remove a chave
@@ -83,19 +85,20 @@ final class DownloadConcurrencyGuard
 
     /**
      * Retorna o número atual de downloads ativos para o identificador.
-     * 
+     *
      * @param string $identifier Identificador único
      * @return int Número de downloads ativos
      */
     public function getActiveCount(string $identifier): int
     {
         $key = $this->getCacheKey($identifier);
-        return (int)$this->cache->get($key, 0);
+
+        return (int) $this->cache->get($key, 0);
     }
 
     /**
      * Verifica se o identificador pode iniciar um novo download.
-     * 
+     *
      * @param string $identifier Identificador único
      * @return bool True se pode iniciar download
      */

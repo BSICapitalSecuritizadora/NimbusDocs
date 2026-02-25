@@ -4,29 +4,34 @@ declare(strict_types=1);
 
 namespace App\Presentation\Controller\Portal;
 
+use App\Infrastructure\Logging\PortalAccessLogger;
 use App\Infrastructure\Persistence\MySqlDocumentCategoryRepository;
 use App\Infrastructure\Persistence\MySqlGeneralDocumentRepository;
-use App\Infrastructure\Logging\PortalAccessLogger;
 use App\Support\Auth;
-use App\Support\StreamingFileDownloader;
 use App\Support\DownloadConcurrencyGuard;
 use App\Support\FileMetadataCache;
+use App\Support\StreamingFileDownloader;
 
 final class PortalGeneralDocumentsController
 {
     private MySqlDocumentCategoryRepository $categories;
+
     private MySqlGeneralDocumentRepository $docs;
+
     private ?PortalAccessLogger $logger;
+
     private StreamingFileDownloader $downloader;
+
     private DownloadConcurrencyGuard $concurrencyGuard;
+
     private FileMetadataCache $metadataCache;
 
     public function __construct(private array $config)
     {
         $pdo = $config['pdo'];
         $this->categories = new MySqlDocumentCategoryRepository($pdo);
-        $this->docs       = new MySqlGeneralDocumentRepository($pdo);
-        $this->logger     = $config['portal_access_logger'] ?? null;
+        $this->docs = new MySqlGeneralDocumentRepository($pdo);
+        $this->logger = $config['portal_access_logger'] ?? null;
         $this->downloader = new StreamingFileDownloader();
         $this->concurrencyGuard = new DownloadConcurrencyGuard();
         $this->metadataCache = new FileMetadataCache();
@@ -36,21 +41,21 @@ final class PortalGeneralDocumentsController
     {
         $user = Auth::requirePortalUser();
 
-        $categoryId = isset($_GET['category_id']) ? (int)$_GET['category_id'] : null;
-        $term       = trim($_GET['q'] ?? '');
+        $categoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
+        $term = trim($_GET['q'] ?? '');
 
         $categories = $this->categories->all();
-        $documents  = $this->docs->listForPortal($categoryId, $term);
+        $documents = $this->docs->listForPortal($categoryId, $term);
 
-        $pageTitle   = 'Documentos gerais';
+        $pageTitle = 'Documentos gerais';
         $contentView = __DIR__ . '/../../View/portal/general_documents/index.php';
 
         $viewData = [
-            'user'       => $user,
+            'user' => $user,
             'categories' => $categories,
-            'documents'  => $documents,
+            'documents' => $documents,
             'currentCategory' => $categoryId,
-            'term'       => $term,
+            'term' => $term,
         ];
 
         require __DIR__ . '/../../View/portal/layouts/base.php';
@@ -58,16 +63,17 @@ final class PortalGeneralDocumentsController
 
     public function download(array $vars): void
     {
-        $user   = Auth::requirePortalUser();
-        $userId = (int)$user['id'];
+        $user = Auth::requirePortalUser();
+        $userId = (int) $user['id'];
         $clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 
-        $id = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
 
         // Controle de concorrência
         if (!$this->concurrencyGuard->acquire($clientIp)) {
             http_response_code(429);
             echo 'Limite de downloads simultâneos atingido. Aguarde um download terminar.';
+
             return;
         }
 
@@ -76,12 +82,13 @@ final class PortalGeneralDocumentsController
             $doc = $this->metadataCache->remember(
                 'general_document',
                 $id,
-                fn() => $this->docs->find($id)
+                fn () => $this->docs->find($id)
             );
 
-            if (!$doc || (int)$doc['is_active'] !== 1) {
+            if (!$doc || (int) $doc['is_active'] !== 1) {
                 http_response_code(404);
                 echo 'Documento não encontrado.';
+
                 return;
             }
 
@@ -93,6 +100,7 @@ final class PortalGeneralDocumentsController
             if (!is_file($doc['file_path'])) {
                 http_response_code(404);
                 echo 'Arquivo não encontrado no servidor.';
+
                 return;
             }
 
@@ -106,14 +114,14 @@ final class PortalGeneralDocumentsController
                 if ($ext === 'pdf') {
                     $mime = 'application/pdf';
                 } elseif (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-                     // Ensure images have correct mime type for preview
-                     $mime = match ($ext) {
-                         'jpg', 'jpeg' => 'image/jpeg',
-                         'png' => 'image/png',
-                         'gif' => 'image/gif',
-                         'webp' => 'image/webp',
-                         default => $mime
-                     };
+                    // Ensure images have correct mime type for preview
+                    $mime = match ($ext) {
+                        'jpg', 'jpeg' => 'image/jpeg',
+                        'png' => 'image/png',
+                        'gif' => 'image/gif',
+                        'webp' => 'image/webp',
+                        default => $mime
+                    };
                 }
             }
 
@@ -123,7 +131,7 @@ final class PortalGeneralDocumentsController
                 $mime,
                 $doc['file_original_name'],
                 $disposition,
-                (int)$doc['file_size']
+                (int) $doc['file_size']
             );
 
             if (!$success) {

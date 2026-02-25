@@ -16,9 +16,9 @@ abstract class TestCase extends BaseTestCase
         if (!defined('PHPUNIT_RUNNING')) {
             define('PHPUNIT_RUNNING', true);
         }
-        
+
         parent::setUp();
-        
+
         $this->setUpDatabase();
         $this->cleanDatabase();
     }
@@ -27,23 +27,25 @@ abstract class TestCase extends BaseTestCase
     {
         $this->cleanDatabase();
         $this->pdo = null;
-        
+
         parent::tearDown();
     }
 
     private function cleanDatabase(): void
     {
-        if (!$this->pdo) return;
-        
+        if (!$this->pdo) {
+            return;
+        }
+
         $this->pdo->exec('SET FOREIGN_KEY_CHECKS=0;');
-        
-        $tables = $this->pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+
+        $tables = $this->pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
         foreach ($tables as $table) {
             if ($table !== 'migrations') {
                 $this->pdo->exec("TRUNCATE TABLE `{$table}`");
             }
         }
-        
+
         $this->pdo->exec('SET FOREIGN_KEY_CHECKS=1;');
     }
 
@@ -59,7 +61,7 @@ abstract class TestCase extends BaseTestCase
         $pdoInit = new PDO("mysql:host={$host};port={$port};charset=utf8mb4", $user, $pass, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         ]);
-        
+
         $pdoInit->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
         $pdoInit = null;
 

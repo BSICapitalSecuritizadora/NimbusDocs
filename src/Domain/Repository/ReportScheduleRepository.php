@@ -21,7 +21,7 @@ interface ReportScheduleRepository
     public function create(array $data): int;
 
     public function update(int $id, array $data): void;
-    
+
     public function updateRunTimes(int $id, string $lastRunAt, string $nextRunAt): void;
 
     public function toggleActive(int $id, bool $isActive): void;

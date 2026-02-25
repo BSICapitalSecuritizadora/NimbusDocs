@@ -16,6 +16,7 @@ final class FileMetadataCache
     private const DEFAULT_TTL = 3600;
 
     private FileCache $cache;
+
     private int $ttl;
 
     /**
@@ -33,7 +34,7 @@ final class FileMetadataCache
 
     /**
      * Obtém metadata do cache.
-     * 
+     *
      * @param string $type Tipo do arquivo (e.g., 'submission_file', 'general_document')
      * @param int $id ID do arquivo
      * @return array|null Metadata ou null se não encontrado/expirado
@@ -42,13 +43,13 @@ final class FileMetadataCache
     {
         $key = $this->getCacheKey($type, $id);
         $data = $this->cache->get($key);
-        
+
         return is_array($data) ? $data : null;
     }
 
     /**
      * Armazena metadata no cache.
-     * 
+     *
      * @param string $type Tipo do arquivo
      * @param int $id ID do arquivo
      * @param array $metadata Metadata do arquivo
@@ -63,7 +64,7 @@ final class FileMetadataCache
     /**
      * Obtém ou define metadata usando callback.
      * Se não estiver em cache, executa o callback e armazena o resultado.
-     * 
+     *
      * @param string $type Tipo do arquivo
      * @param int $id ID do arquivo
      * @param callable $callback Função que retorna metadata (executada se cache miss)
@@ -73,7 +74,7 @@ final class FileMetadataCache
     public function remember(string $type, int $id, callable $callback, ?int $ttl = null): ?array
     {
         $cached = $this->get($type, $id);
-        
+
         if ($cached !== null) {
             return $cached;
         }
@@ -89,7 +90,7 @@ final class FileMetadataCache
 
     /**
      * Invalida o cache de um arquivo específico.
-     * 
+     *
      * @param string $type Tipo do arquivo
      * @param int $id ID do arquivo
      */

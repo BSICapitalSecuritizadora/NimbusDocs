@@ -15,8 +15,11 @@ use RuntimeException;
 final class ClamAvScanner implements VirusScannerInterface
 {
     private string $host;
+
     private int $port;
+
     private int $timeout;
+
     private ?string $lastVirus = null;
 
     public function __construct(
@@ -48,6 +51,7 @@ final class ClamAvScanner implements VirusScannerInterface
             if ($this->logger) {
                 $this->logger->warning("[ClamAvScanner] Connection failed to {$this->host}:{$this->port}. Error: $errorMessage");
             }
+
             return true; // Fail-open (permite upload se AV estiver fora)
         }
 
@@ -94,6 +98,7 @@ final class ClamAvScanner implements VirusScannerInterface
             // Formato "stream: VirusName FOUND"
             $virusPart = trim($parts[1] ?? 'Unknown');
             $this->lastVirus = preg_replace('/ FOUND$/', '', $virusPart);
+
             return false;
         }
 
@@ -101,7 +106,8 @@ final class ClamAvScanner implements VirusScannerInterface
         if ($this->logger) {
             $this->logger->error("[ClamAvScanner] Unexpected response: $response");
         }
-        return true; 
+
+        return true;
     }
 
     public function getLastVirusName(): ?string

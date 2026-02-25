@@ -14,7 +14,7 @@ final class Connection
             '%s:host=%s;port=%d;dbname=%s;charset=%s',
             $db['driver'],
             $db['host'],
-            (int)$db['port'],
+            (int) $db['port'],
             $db['database'],
             $db['charset'] ?? 'utf8mb4'
         );

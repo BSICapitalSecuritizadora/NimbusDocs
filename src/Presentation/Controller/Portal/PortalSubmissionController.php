@@ -4,42 +4,47 @@ declare(strict_types=1);
 
 namespace App\Presentation\Controller\Portal;
 
-use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
-use App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository;
-use App\Infrastructure\Persistence\MySqlPortalSubmissionNoteRepository;
-use App\Infrastructure\Persistence\MySqlPortalSubmissionShareholderRepository;
-use App\Infrastructure\Persistence\MySqlSubmissionCommentRepository;
 use App\Infrastructure\Integration\CachedCnpjService;
 use App\Infrastructure\Integration\CnpjWsService;
-use App\Support\Csrf;
+use App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository;
+use App\Infrastructure\Persistence\MySqlPortalSubmissionNoteRepository;
+use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
+use App\Infrastructure\Persistence\MySqlPortalSubmissionShareholderRepository;
+use App\Infrastructure\Persistence\MySqlSubmissionCommentRepository;
 use App\Support\AuditLogger;
-use App\Support\Session;
-use App\Support\RandomToken;
 use App\Support\Auth;
+use App\Support\Csrf;
 use App\Support\FileUpload;
-use Respect\Validation\Validator as v;
+use App\Support\RandomToken;
+use App\Support\Session;
 
 final class PortalSubmissionController
 {
     private MySqlPortalSubmissionRepository $repo;
+
     private MySqlPortalSubmissionFileRepository $fileRepo;
+
     private MySqlPortalSubmissionNoteRepository $noteRepo;
+
     private MySqlPortalSubmissionShareholderRepository $shareholderRepo;
+
     private MySqlSubmissionCommentRepository $commentRepo;
+
     private AuditLogger $audit;
+
     private CachedCnpjService $cnpjService;
 
     public function __construct(private array $config)
     {
-        $this->repo            = new MySqlPortalSubmissionRepository($config['pdo']);
-        $this->fileRepo        = new MySqlPortalSubmissionFileRepository($config['pdo']);
-        $this->noteRepo        = new MySqlPortalSubmissionNoteRepository($config['pdo']);
+        $this->repo = new MySqlPortalSubmissionRepository($config['pdo']);
+        $this->fileRepo = new MySqlPortalSubmissionFileRepository($config['pdo']);
+        $this->noteRepo = new MySqlPortalSubmissionNoteRepository($config['pdo']);
         $this->shareholderRepo = new MySqlPortalSubmissionShareholderRepository($config['pdo']);
-        $this->commentRepo     = new MySqlSubmissionCommentRepository($config['pdo']);
-        $this->audit           = new AuditLogger($config['pdo']);
-        
+        $this->commentRepo = new MySqlSubmissionCommentRepository($config['pdo']);
+        $this->audit = new AuditLogger($config['pdo']);
+
         // Usa o serviço de CNPJ com cache do bootstrap
-        $this->cnpjService     = $config['cnpj_service'] ?? new CachedCnpjService(
+        $this->cnpjService = $config['cnpj_service'] ?? new CachedCnpjService(
             new CnpjWsService($config['logger']),
             $config['cache'],
             $config['logger']
@@ -54,52 +59,53 @@ final class PortalSubmissionController
             header('Content-Type: application/json');
             http_response_code(403);
             echo json_encode(['error' => 'Token CSRF inválido']);
+
             return;
         }
-        
+
         header('Content-Type: application/json');
-        
+
         $cnpj = $_POST['cnpj'] ?? '';
         $cnpj = preg_replace('/\D/', '', $cnpj);
-        
+
         if (!CnpjWsService::isValidCnpj($cnpj)) {
             echo json_encode(['error' => 'CNPJ inválido']);
+
             return;
         }
-        
+
         $data = $this->cnpjService->getCompanyData($cnpj);
-        
+
         if (!$data) {
             echo json_encode(['error' => 'Não foi possível buscar os dados do CNPJ']);
+
             return;
         }
-        
+
         echo json_encode([
             'success' => true,
             'data' => $data,
         ]);
     }
 
-    
-
     public function index(array $vars = []): void
     {
         $user = Auth::requirePortalUser();
 
-        $page    = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
         $perPage = 10;
-        $search  = $_GET['q'] ?? null;
-        $status  = $_GET['status'] ?? null;
+        $search = $_GET['q'] ?? null;
+        $status = $_GET['status'] ?? null;
 
-        $pagination = $this->repo->paginateByUser((int)$user['id'], $page, $perPage, $search, $status);
+        $pagination = $this->repo->paginateByUser((int) $user['id'], $page, $perPage, $search, $status);
 
-        $pageTitle   = 'Minhas submissões';
+        $pageTitle = 'Minhas submissões';
         $contentView = __DIR__ . '/../../View/portal/submissions/index.php';
-        $viewData    = [
+        $viewData = [
             'pagination' => $pagination,
-            'flash'      => [
+            'flash' => [
                 'success' => Session::getFlash('success'),
-                'error'   => Session::getFlash('error'),
+                'error' => Session::getFlash('error'),
             ],
         ];
 
@@ -110,12 +116,12 @@ final class PortalSubmissionController
     {
         Auth::requirePortalUser();
 
-        $pageTitle   = 'Nova submissão';
+        $pageTitle = 'Nova submissão';
         $contentView = __DIR__ . '/../../View/portal/submissions/create.php';
-        $viewData    = [
+        $viewData = [
             'csrfToken' => Csrf::token(),
-            'errors'    => Session::getFlash('errors') ?? [],
-            'old'       => Session::getFlash('old') ?? [],
+            'errors' => Session::getFlash('errors') ?? [],
+            'old' => Session::getFlash('old') ?? [],
         ];
 
         require __DIR__ . '/../../View/portal/layouts/base.php';
@@ -123,8 +129,8 @@ final class PortalSubmissionController
 
     public function store(array $vars = []): void
     {
-        $user  = Auth::requirePortalUser();
-        $post  = $_POST;
+        $user = Auth::requirePortalUser();
+        $post = $_POST;
         $token = $post['_token'] ?? '';
 
         if (!Csrf::validate($token)) {
@@ -134,23 +140,23 @@ final class PortalSubmissionController
 
         // Coleta todos os dados do formulário
         $data = [
-            'title'                => trim($post['title'] ?? 'Cadastro de Cliente'),
-            'message'              => trim($post['message'] ?? ''),
-            'responsible_name'     => trim($post['responsible_name'] ?? ''),
-            'company_cnpj'         => preg_replace('/\D/', '', $post['company_cnpj'] ?? ''),
-            'company_name'         => trim($post['company_name'] ?? ''),
-            'main_activity'        => trim($post['main_activity'] ?? ''),
-            'phone'                => trim($post['phone'] ?? ''),
-            'website'              => trim($post['website'] ?? ''),
-            'net_worth'            => $this->parseMoney($post['net_worth'] ?? ''),
-            'annual_revenue'       => $this->parseMoney($post['annual_revenue'] ?? ''),
-            'is_us_person'         => isset($post['is_us_person']) ? 1 : 0,
-            'is_pep'               => isset($post['is_pep']) ? 1 : 0,
-            'is_none_compliant'    => isset($post['is_none_compliant']) ? 1 : 0,
-            'registrant_name'      => trim($post['registrant_name'] ?? ''),
-            'registrant_position'  => trim($post['registrant_position'] ?? ''),
-            'registrant_rg'        => trim($post['registrant_rg'] ?? ''),
-            'registrant_cpf'       => preg_replace('/\D/', '', $post['registrant_cpf'] ?? ''),
+            'title' => trim($post['title'] ?? 'Cadastro de Cliente'),
+            'message' => trim($post['message'] ?? ''),
+            'responsible_name' => trim($post['responsible_name'] ?? ''),
+            'company_cnpj' => preg_replace('/\D/', '', $post['company_cnpj'] ?? ''),
+            'company_name' => trim($post['company_name'] ?? ''),
+            'main_activity' => trim($post['main_activity'] ?? ''),
+            'phone' => trim($post['phone'] ?? ''),
+            'website' => trim($post['website'] ?? ''),
+            'net_worth' => $this->parseMoney($post['net_worth'] ?? ''),
+            'annual_revenue' => $this->parseMoney($post['annual_revenue'] ?? ''),
+            'is_us_person' => isset($post['is_us_person']) ? 1 : 0,
+            'is_pep' => isset($post['is_pep']) ? 1 : 0,
+            'is_none_compliant' => isset($post['is_none_compliant']) ? 1 : 0,
+            'registrant_name' => trim($post['registrant_name'] ?? ''),
+            'registrant_position' => trim($post['registrant_position'] ?? ''),
+            'registrant_rg' => trim($post['registrant_rg'] ?? ''),
+            'registrant_cpf' => preg_replace('/\D/', '', $post['registrant_cpf'] ?? ''),
         ];
 
         // Validações
@@ -161,7 +167,7 @@ final class PortalSubmissionController
         // CRÍTICO: Esta validação é obrigatória por razões regulatórias
         // =========================================================================
         $hasComplianceDeclaration = $data['is_us_person'] || $data['is_pep'] || $data['is_none_compliant'];
-        
+
         if (!$hasComplianceDeclaration) {
             $errors['compliance'] = 'É obrigatório informar se você é US Person, PEP ou se não se enquadra nessas categorias.';
         }
@@ -202,13 +208,13 @@ final class PortalSubmissionController
 
         // Valida composição societária
         $shareholders = json_decode($post['shareholders'] ?? '[]', true);
-        
+
         if (empty($shareholders) || !is_array($shareholders)) {
             $errors['shareholders'] = 'É necessário informar pelo menos um sócio.';
         } else {
             $totalPercentage = 0;
             foreach ($shareholders as $idx => $shareholder) {
-                $percentage = (float)($shareholder['percentage'] ?? 0);
+                $percentage = (float) ($shareholder['percentage'] ?? 0);
                 $totalPercentage += $percentage;
 
                 if (empty($shareholder['name'])) {
@@ -271,56 +277,56 @@ final class PortalSubmissionController
                 substr(RandomToken::shortCode(8), 0, 8)
             );
 
-            $ip = $_SERVER['REMOTE_ADDR']      ?? '';
-            $ua = $_SERVER['HTTP_USER_AGENT']  ?? '';
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+            $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
-            $submissionId = $this->repo->createForUser((int)$user['id'], [
-                'reference_code'      => $refCode,
-                'title'               => $data['title'],
-                'message'             => $data['message'],
-                'status'              => 'PENDING',
-                'created_ip'          => $ip,
-                'created_user_agent'  => $ua,
-                'responsible_name'    => $data['responsible_name'],
-                'company_cnpj'        => $data['company_cnpj'],
-                'company_name'        => $data['company_name'],
-                'main_activity'       => $data['main_activity'],
-                'phone'               => $data['phone'],
-                'website'             => $data['website'],
-                'net_worth'           => $data['net_worth'],
-                'annual_revenue'      => $data['annual_revenue'],
-                'is_us_person'        => $data['is_us_person'],
-                'is_pep'              => $data['is_pep'],
-                'is_none_compliant'   => $data['is_none_compliant'],
-                'registrant_name'     => $data['registrant_name'],
+            $submissionId = $this->repo->createForUser((int) $user['id'], [
+                'reference_code' => $refCode,
+                'title' => $data['title'],
+                'message' => $data['message'],
+                'status' => 'PENDING',
+                'created_ip' => $ip,
+                'created_user_agent' => $ua,
+                'responsible_name' => $data['responsible_name'],
+                'company_cnpj' => $data['company_cnpj'],
+                'company_name' => $data['company_name'],
+                'main_activity' => $data['main_activity'],
+                'phone' => $data['phone'],
+                'website' => $data['website'],
+                'net_worth' => $data['net_worth'],
+                'annual_revenue' => $data['annual_revenue'],
+                'is_us_person' => $data['is_us_person'],
+                'is_pep' => $data['is_pep'],
+                'is_none_compliant' => $data['is_none_compliant'],
+                'registrant_name' => $data['registrant_name'],
                 'registrant_position' => $data['registrant_position'],
-                'registrant_rg'       => $data['registrant_rg'],
-                'registrant_cpf'      => $data['registrant_cpf'],
+                'registrant_rg' => $data['registrant_rg'],
+                'registrant_cpf' => $data['registrant_cpf'],
             ]);
 
             // Salva composição societária
             foreach ($shareholders as $shareholder) {
                 $this->shareholderRepo->create($submissionId, [
-                    'name'          => $shareholder['name'],
-                    'document_rg'   => $shareholder['rg'] ?? null,
+                    'name' => $shareholder['name'],
+                    'document_rg' => $shareholder['rg'] ?? null,
                     'document_cnpj' => preg_replace('/\D/', '', $shareholder['cnpj'] ?? ''),
-                    'percentage'    => (float)$shareholder['percentage'],
+                    'percentage' => (float) $shareholder['percentage'],
                 ]);
             }
 
             // Salva arquivos obrigatórios com tipo específico
-            $userId = (int)$user['id'];
+            $userId = (int) $user['id'];
             $storageBase = dirname(__DIR__, 4) . '/storage/portal_uploads/' . $userId . '/';
 
             $fileTypeMap = [
-                'ultimo_balanco'            => 'BALANCE_SHEET',
-                'dre'                       => 'DRE',
-                'politicas'                 => 'POLICIES',
-                'cartao_cnpj'               => 'CNPJ_CARD',
-                'procuracao'                => 'POWER_OF_ATTORNEY',
-                'ata'                       => 'MINUTES',
-                'contrato_social'           => 'ARTICLES_OF_INCORPORATION',
-                'estatuto'                  => 'BYLAWS',
+                'ultimo_balanco' => 'BALANCE_SHEET',
+                'dre' => 'DRE',
+                'politicas' => 'POLICIES',
+                'cartao_cnpj' => 'CNPJ_CARD',
+                'procuracao' => 'POWER_OF_ATTORNEY',
+                'ata' => 'MINUTES',
+                'contrato_social' => 'ARTICLES_OF_INCORPORATION',
+                'estatuto' => 'BYLAWS',
             ];
 
             $uploadWarnings = [];
@@ -340,17 +346,17 @@ final class PortalSubmissionController
                                 'image/png',
                                 'text/plain',
                                 'text/csv',
-                            ]
+                            ],
                         ]);
-                        
-                        $storedName   = basename($stored['path']);
-                        $checksum     = is_file($stored['path']) ? hash_file('sha256', $stored['path']) : null;
-                        
+
+                        $storedName = basename($stored['path']);
+                        $checksum = is_file($stored['path']) ? hash_file('sha256', $stored['path']) : null;
+
                         // --- Virus Scan Step ---
                         // Instancia o scanner (em produção viria via DI)
                         // TODO: Mover para DI container
                         $clamHost = getenv('CLAMAV_HOST');
-                        $scanner = ($clamHost) 
+                        $scanner = ($clamHost)
                             ? new \App\Infrastructure\Security\ClamAvScanner($clamHost, 3310, 30, $this->config['logger'] ?? null)
                             : new \App\Infrastructure\Security\NullVirusScanner($this->config['logger'] ?? null);
 
@@ -358,12 +364,12 @@ final class PortalSubmissionController
                             // VIROSE DETECTADA! Apaga arquivo e aborta
                             @unlink($stored['path']);
                             $virusName = $scanner->getLastVirusName() ?? 'Unknown';
-                            
-                            $this->audit->log('PORTAL_USER', (int)$user['id'], 'VIRUS_DETECTED', 'UPLOAD', 0, [
+
+                            $this->audit->log('PORTAL_USER', (int) $user['id'], 'VIRUS_DETECTED', 'UPLOAD', 0, [
                                 'file' => $stored['original_name'],
-                                'virus' => $virusName
+                                'virus' => $virusName,
                             ]);
-                            
+
                             throw new \RuntimeException("Arquivo infectado detectado ($virusName). Upload rejeitado.");
                         }
                         // -----------------------
@@ -371,34 +377,34 @@ final class PortalSubmissionController
                         $relativePath = 'portal_uploads/' . $userId . '/' . $storedName;
 
                         $this->fileRepo->create($submissionId, [
-                            'origin'          => 'USER',
-                            'original_name'   => $stored['original_name'],
-                            'stored_name'     => $storedName,
-                            'mime_type'       => $stored['mime_type'],
-                            'size_bytes'      => (int)$stored['size'],
-                            'storage_path'    => $relativePath,
-                            'checksum'        => $checksum,
+                            'origin' => 'USER',
+                            'original_name' => $stored['original_name'],
+                            'stored_name' => $storedName,
+                            'mime_type' => $stored['mime_type'],
+                            'size_bytes' => (int) $stored['size'],
+                            'storage_path' => $relativePath,
+                            'checksum' => $checksum,
                             'visible_to_user' => 0,
-                            'document_type'   => $docType,
+                            'document_type' => $docType,
                         ]);
                     } catch (\Throwable $e) {
-                         // Loga falha de upload específico, mas não aborta tudo se não for crítico
-                         // Porém, como são documentos obrigatórios, idealmente deveríamos avisar
+                        // Loga falha de upload específico, mas não aborta tudo se não for crítico
+                        // Porém, como são documentos obrigatórios, idealmente deveríamos avisar
                         $uploadWarnings[] = "Falha ao processar arquivo para $field: " . $e->getMessage();
-                        
+
                         // Auditoria técnica
-                        $this->audit->log('PORTAL_USER', (int)$user['id'], 'USER_FILE_UPLOAD_FAILED', 'PORTAL_SUBMISSION', $submissionId, [
+                        $this->audit->log('PORTAL_USER', (int) $user['id'], 'USER_FILE_UPLOAD_FAILED', 'PORTAL_SUBMISSION', $submissionId, [
                             'error' => $e->getMessage(),
-                            'file'  => $_FILES[$field]['name'] ?? null,
-                            'type'  => $docType,
+                            'file' => $_FILES[$field]['name'] ?? null,
+                            'type' => $docType,
                         ]);
                     }
                 }
             }
 
             // Auditoria de Sucesso
-            $this->audit->log('PORTAL_USER', (int)$user['id'], 'SUBMISSION_CREATED', 'PORTAL_SUBMISSION', $submissionId, [
-                'reference' => $refCode
+            $this->audit->log('PORTAL_USER', (int) $user['id'], 'SUBMISSION_CREATED', 'PORTAL_SUBMISSION', $submissionId, [
+                'reference' => $refCode,
             ]);
 
             // Disparar Notificação In-App para os Administradores
@@ -412,23 +418,23 @@ final class PortalSubmissionController
 
             // Auditoria de Negócio
             $this->config['audit']->portalUserAction([
-                'actor_id'     => (int)$user['id'],
-                'actor_name'   => $user['full_name'] ?? $user['name'] ?? $user['email'],
-                'action'       => 'PORTAL_SUBMISSION_CREATED',
-                'summary'      => 'Nova submissão de cadastro criada.',
+                'actor_id' => (int) $user['id'],
+                'actor_name' => $user['full_name'] ?? $user['name'] ?? $user['email'],
+                'action' => 'PORTAL_SUBMISSION_CREATED',
+                'summary' => 'Nova submissão de cadastro criada.',
                 'context_type' => 'submission',
-                'context_id'   => $submissionId,
-                'details'      => [
+                'context_id' => $submissionId,
+                'details' => [
                     'company_name' => $data['company_name'],
-                    'cnpj'         => CnpjWsService::formatCnpj($data['company_cnpj']),
+                    'cnpj' => CnpjWsService::formatCnpj($data['company_cnpj']),
                 ],
             ]);
 
             // Notificações
             try {
                 $submission = $this->repo->findById($submissionId);
-                $portalUser = $this->config['portal_user_repo']->findById((int)$user['id']);
-                
+                $portalUser = $this->config['portal_user_repo']->findById((int) $user['id']);
+
                 if ($submission && $portalUser && $this->config['notification']) {
                     $this->config['notification']->notifySubmissionReceived($submission, $portalUser);
                 }
@@ -443,7 +449,7 @@ final class PortalSubmissionController
             } else {
                 Session::flash('success', 'Cadastro enviado com sucesso.');
             }
-            
+
             $this->redirect('/portal/submissions/' . $submissionId);
 
         } catch (\Throwable $e) {
@@ -452,7 +458,7 @@ final class PortalSubmissionController
 
             // Log detalhado do erro
             error_log(sprintf(
-                "[PortalSubmissionController::store] Erro crítico ao salvar submissão. UserID: %d. Error: %s. Trace: %s",
+                '[PortalSubmissionController::store] Erro crítico ao salvar submissão. UserID: %d. Error: %s. Trace: %s',
                 $user['id'],
                 $e->getMessage(),
                 $e->getTraceAsString()
@@ -460,11 +466,11 @@ final class PortalSubmissionController
 
             // Feedback ao usuário
             Session::flash('error', 'Ocorreu um erro interno ao processar seu cadastro. Sua solicitação não pôde ser completada. Por favor, tente novamente ou contate o suporte.');
-            
+
             // Preserva dados preenchidos
             Session::flash('old', $data);
             Session::flash('old_shareholders', $shareholders ?? []);
-            
+
             $this->redirect('/portal/submissions/create');
         }
 
@@ -473,8 +479,8 @@ final class PortalSubmissionController
     public function show(array $vars = []): void
     {
         $user = Auth::requirePortalUser();
-        $userId = (int)$user['id'];
-        $id = (int)($vars['id'] ?? 0);
+        $userId = (int) $user['id'];
+        $id = (int) ($vars['id'] ?? 0);
 
         $submission = $this->repo->findForUser($id, $userId);
         if (!$submission) {
@@ -485,28 +491,28 @@ final class PortalSubmissionController
         // Log de acesso
         $logger = $this->config['portal_access_logger'] ?? null;
         if ($logger) {
-            $logger->log((int)$userId, 'VIEW_SUBMISSION', 'submission', $id);
+            $logger->log((int) $userId, 'VIEW_SUBMISSION', 'submission', $id);
         }
 
         $files = $this->fileRepo->findBySubmission($id);
         $notes = $this->noteRepo->listVisibleForSubmission($id);
         $shareholders = $this->shareholderRepo->findBySubmission($id);
         $responseFiles = $this->fileRepo->findVisibleToUser($id);
-        
+
         $comments = $this->commentRepo->getBySubmission($id, false); // False = User only
         $statusHistory = $this->commentRepo->getStatusHistory($id);
 
-        $pageTitle   = 'Detalhes da submissão';
+        $pageTitle = 'Detalhes da submissão';
         $contentView = __DIR__ . '/../../View/portal/submissions/show.php';
         $viewData = [
-            'submission'    => $submission,
-            'files'         => $files,
+            'submission' => $submission,
+            'files' => $files,
             'responseFiles' => $responseFiles,
-            'notes'         => $notes,
-            'shareholders'  => $shareholders,
-            'comments'      => $comments,
+            'notes' => $notes,
+            'shareholders' => $shareholders,
+            'comments' => $comments,
             'statusHistory' => $statusHistory,
-            'csrfToken'     => Csrf::token(),
+            'csrfToken' => Csrf::token(),
         ];
 
         require __DIR__ . '/../../View/portal/layouts/base.php';
@@ -515,8 +521,8 @@ final class PortalSubmissionController
     public function reply(array $vars = []): void
     {
         $user = Auth::requirePortalUser();
-        $userId = (int)$user['id'];
-        $id = (int)($vars['id'] ?? 0);
+        $userId = (int) $user['id'];
+        $id = (int) ($vars['id'] ?? 0);
         $post = $_POST;
         $token = $post['_token'] ?? '';
 
@@ -553,19 +559,19 @@ final class PortalSubmissionController
                 $relativePath = 'portal_uploads/' . $userId . '/' . $storedName;
 
                 $this->fileRepo->create($id, [
-                    'origin'          => 'USER',
-                    'original_name'   => $stored['original_name'],
-                    'stored_name'     => $storedName,
-                    'mime_type'       => $stored['mime_type'],
-                    'size_bytes'      => (int)$stored['size'],
-                    'storage_path'    => $relativePath,
-                    'checksum'        => $checksum,
+                    'origin' => 'USER',
+                    'original_name' => $stored['original_name'],
+                    'stored_name' => $storedName,
+                    'mime_type' => $stored['mime_type'],
+                    'size_bytes' => (int) $stored['size'],
+                    'storage_path' => $relativePath,
+                    'checksum' => $checksum,
                     'visible_to_user' => 1,
-                    'document_type'   => 'CORRECTION_FILE',
+                    'document_type' => 'CORRECTION_FILE',
                 ]);
-                
+
                 $this->audit->log('PORTAL_USER', $userId, 'USER_UPLOADED_CORRECTION_FILE', 'PORTAL_SUBMISSION', $id, [
-                    'file' => $stored['original_name']
+                    'file' => $stored['original_name'],
                 ]);
             } catch (\Throwable $e) {
                 Session::flash('error', 'Falha ao enviar arquivo: ' . $e->getMessage());
@@ -576,12 +582,12 @@ final class PortalSubmissionController
         // 2. Save comment
         if ($commentText !== '') {
             $this->commentRepo->add([
-                'submission_id'   => $id,
-                'author_type'     => 'PORTAL_USER',
-                'author_id'       => $userId,
-                'comment'         => $commentText,
-                'is_internal'     => 0,
-                'requires_action' => 0
+                'submission_id' => $id,
+                'author_type' => 'PORTAL_USER',
+                'author_id' => $userId,
+                'comment' => $commentText,
+                'is_internal' => 0,
+                'requires_action' => 0,
             ]);
         }
 
@@ -617,10 +623,10 @@ final class PortalSubmissionController
 
         // Remove tudo exceto números, vírgula e ponto
         $value = preg_replace('/[^\d,.]/', '', $value);
-        
+
         // Substitui vírgula por ponto
         $value = str_replace(',', '.', $value);
-        
+
         // Remove pontos extras (mantém apenas o último como decimal)
         $parts = explode('.', $value);
         if (count($parts) > 2) {
@@ -628,7 +634,7 @@ final class PortalSubmissionController
             $value = implode('', $parts) . '.' . $decimal;
         }
 
-        return (float)$value;
+        return (float) $value;
     }
 
     /**
@@ -645,7 +651,7 @@ final class PortalSubmissionController
         for ($t = 9; $t < 11; $t++) {
             $d = 0;
             for ($c = 0; $c < $t; $c++) {
-                $d += (int)$cpf[$c] * (($t + 1) - $c);
+                $d += (int) $cpf[$c] * (($t + 1) - $c);
             }
             $d = ((10 * $d) % 11) % 10;
             if ($cpf[$c] != $d) {
@@ -663,6 +669,7 @@ final class PortalSubmissionController
     private function isValidPhone(string $phone): bool
     {
         $phone = preg_replace('/\D/', '', $phone);
+
         // Verifica se tem 10 ou 11 dígitos (DDD + número)
         return strlen($phone) >= 10 && strlen($phone) <= 11;
     }

@@ -14,11 +14,11 @@ abstract class ApiTestCase extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Ensure standard testing environment for API
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
         $_SERVER['HTTP_USER_AGENT'] = 'PHPUnit API Test';
-        
+
         $this->jwt = new JwtService($_ENV['APP_SECRET'] ?? 'default-secret', 86400);
     }
 
@@ -39,9 +39,9 @@ abstract class ApiTestCase extends TestCase
             'name' => 'API User',
             'role' => $role,
         ]);
-        
+
         $_SERVER['HTTP_AUTHORIZATION'] = "Bearer {$token}";
-        
+
         return $token;
     }
 

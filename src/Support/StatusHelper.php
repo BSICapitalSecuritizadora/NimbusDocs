@@ -22,27 +22,27 @@ class StatusHelper
             'PENDING' => [
                 'label' => 'Pendente',
                 'badge' => 'nd-badge-warning',
-                'icon'  => 'bi-hourglass',
+                'icon' => 'bi-hourglass',
             ],
             'IN_REVIEW', 'UNDER_REVIEW' => [
                 'label' => 'Em Análise',
                 'badge' => 'nd-badge-info',
-                'icon'  => 'bi-search',
+                'icon' => 'bi-search',
             ],
             'APPROVED', 'COMPLETED', 'FINALIZADA' => [
                 'label' => 'Concluído',
                 'badge' => 'nd-badge-success',
-                'icon'  => 'bi-check2-circle',
+                'icon' => 'bi-check2-circle',
             ],
             'REJECTED', 'REJEITADA' => [
                 'label' => 'Rejeitado',
                 'badge' => 'nd-badge-danger',
-                'icon'  => 'bi-x-circle',
+                'icon' => 'bi-x-circle',
             ],
             default => [
                 'label' => $status,
                 'badge' => 'nd-badge-secondary',
-                'icon'  => 'bi-circle',
+                'icon' => 'bi-circle',
             ],
         };
     }

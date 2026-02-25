@@ -30,26 +30,26 @@ final class AuditLogAdminController
     {
         $this->requireAdmin();
 
-        $page    = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
         $perPage = 50;
 
         $filters = [
-            'actor_type'   => $_GET['actor_type']   ?? null,
-            'action'       => $_GET['action']       ?? null,
+            'actor_type' => $_GET['actor_type'] ?? null,
+            'action' => $_GET['action'] ?? null,
             'context_type' => $_GET['context_type'] ?? null,
-            'search'       => $_GET['search']       ?? null,
+            'search' => $_GET['search'] ?? null,
         ];
 
         $result = $this->repo->paginate($page, $perPage, $filters);
 
-        $pageTitle   = 'Auditoria do sistema';
+        $pageTitle = 'Auditoria do sistema';
         $contentView = __DIR__ . '/../../View/admin/audit/index.php';
-        $viewData    = [
-            'logs'      => $result['items'],
-            'total'     => $result['total'],
-            'page'      => $page,
-            'perPage'   => $perPage,
-            'filters'   => $filters,
+        $viewData = [
+            'logs' => $result['items'],
+            'total' => $result['total'],
+            'page' => $page,
+            'perPage' => $perPage,
+            'filters' => $filters,
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';

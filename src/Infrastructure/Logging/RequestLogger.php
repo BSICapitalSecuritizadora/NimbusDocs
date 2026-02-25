@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Logging;
 
-use Psr\Log\LoggerInterface;
 use App\Support\Session;
+use Psr\Log\LoggerInterface;
 
 /**
  * Logger avançado para requisições HTTP
@@ -14,12 +14,19 @@ use App\Support\Session;
 final class RequestLogger
 {
     private LoggerInterface $logger;
+
     private float $startTime;
+
     private string $requestId;
+
     private string $clientIp;
+
     private string $method;
+
     private string $uri;
+
     private ?string $user;
+
     private array $context;
 
     public function __construct(LoggerInterface $logger)
@@ -84,9 +91,9 @@ final class RequestLogger
 
         // Warning se for lento (>2s)
         if ($duration > 2000) {
-            $this->logger->warning("Requisição lenta detectada", $context);
+            $this->logger->warning('Requisição lenta detectada', $context);
         } else {
-            $this->logger->info("Requisição bem-sucedida", $context);
+            $this->logger->info('Requisição bem-sucedida', $context);
         }
 
         // Salva em arquivo de requisições
@@ -124,7 +131,7 @@ final class RequestLogger
         // Adiciona context customizado
         $context = array_merge($context, $this->context);
 
-        $this->logger->error("Erro em requisição", $context);
+        $this->logger->error('Erro em requisição', $context);
         $this->saveToRequestLog($context, 'error');
     }
 
@@ -147,7 +154,7 @@ final class RequestLogger
             'user' => $this->user,
         ];
 
-        $this->logger->warning("Acesso negado", $context);
+        $this->logger->warning('Acesso negado', $context);
         $this->saveToRequestLog($context, 'unauthorized');
     }
 
@@ -196,9 +203,9 @@ final class RequestLogger
     private function redactContext(array $context): array
     {
         $sensitiveKeys = [
-            'password', 'password_confirmation', 'senha', 
+            'password', 'password_confirmation', 'senha',
             'secret', 'token', 'access_code', 'code', 'auth_token',
-            'cpf', 'rg', 'credit_card', 'card_number', 'cvv'
+            'cpf', 'rg', 'credit_card', 'card_number', 'cvv',
         ];
 
         foreach ($context as $key => $value) {

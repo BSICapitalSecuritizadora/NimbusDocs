@@ -50,4 +50,3 @@ foreach ($files as $file) {
 }
 
 echo "Migrations concluídas.\n";
-

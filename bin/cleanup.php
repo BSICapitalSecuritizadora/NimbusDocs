@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Script de Limpeza de Dados e Arquivos (Política de Retenção / LGPD).
- * 
+ *
  * Executar via Cron:
  * 0 3 * * 0 /usr/bin/php /path/to/NimbusDocs/bin/cleanup.php
  * (Rodar semanalmente, ex: Domingo às 03:00)
@@ -16,10 +16,10 @@ $config = require __DIR__ . '/../bootstrap/app.php';
 $pdo = $config['pdo'];
 
 use App\Infrastructure\Persistence\MySqlPortalAccessTokenRepository;
-use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
 use App\Infrastructure\Persistence\MySqlPortalSubmissionFileRepository;
+use App\Infrastructure\Persistence\MySqlPortalSubmissionRepository;
 
-echo "[" . date('Y-m-d H:i:s') . "] --- INICIANDO LIMPEZA DE DADOS (LGPD) ---\n";
+echo '[' . date('Y-m-d H:i:s') . "] --- INICIANDO LIMPEZA DE DADOS (LGPD) ---\n";
 
 try {
     // -------------------------------------------------------------------------
@@ -27,7 +27,7 @@ try {
     // -------------------------------------------------------------------------
     $tokenRepo = new MySqlPortalAccessTokenRepository($pdo);
     $daysToken = 30; // 30 dias de retenção após expiração
-    
+
     echo "1. Limpando tokens expirados/revogados há mais de {$daysToken} dias...\n";
     $deletedTokens = $tokenRepo->deleteExpired($daysToken);
     echo "   -> {$deletedTokens} tokens removidos.\n";
@@ -41,7 +41,7 @@ try {
 
     echo "2. Buscando rascunhos (PENDING) abandonados há mais de {$daysDraft} dias...\n";
     $abandoned = $submissionRepo->findAbandonedDrafts($daysDraft);
-    echo "   -> " . count($abandoned) . " rascunhos encontrados.\n";
+    echo '   -> ' . count($abandoned) . " rascunhos encontrados.\n";
 
     $deletedSubmissions = 0;
     $deletedFiles = 0;
@@ -50,17 +50,17 @@ try {
     $baseDir = dirname(__DIR__) . '/storage/'; // Ajuste conforme seu config de storage
 
     foreach ($abandoned as $sub) {
-        $subId = (int)$sub['id'];
+        $subId = (int) $sub['id'];
         $ref = $sub['reference_code'];
 
         // a) Buscar arquivos para remover fisicamente
         $files = $fileRepo->findBySubmission($subId);
-        
+
         foreach ($files as $file) {
             $path = $file['storage_path'];
             // O path no DB pode ser relativo ou absoluto, dependendo de como foi salvo.
             // Assumindo relativo a 'storage/', mas verificando existência.
-            
+
             $fullPath = $baseDir . $path; // Tenta relativo padrão
             if (!file_exists($fullPath) && file_exists($path)) {
                 $fullPath = $path; // Era absoluto
@@ -96,14 +96,14 @@ try {
     // -------------------------------------------------------------------------
     // 3. (Opcional) Limpeza de Logs de Auditoria Antigos (> 5 Anos)
     // -------------------------------------------------------------------------
-    // Por precaução, não vamos deletar logs de auditoria automaticamente 
+    // Por precaução, não vamos deletar logs de auditoria automaticamente
     // sem um requisito explicito de prazo (ex: 5 anos).
     // Implementar aqui se necessário: DELETE FROM audit_logs WHERE occurred_at < ...
-    
-    echo "[" . date('Y-m-d H:i:s') . "] --- LIMPEZA CONCLUÍDA COM SUCESSO ---\n";
+
+    echo '[' . date('Y-m-d H:i:s') . "] --- LIMPEZA CONCLUÍDA COM SUCESSO ---\n";
 
 } catch (\Throwable $e) {
-    echo "[ERRO CRÍTICO] " . $e->getMessage() . "\n";
+    echo '[ERRO CRÍTICO] ' . $e->getMessage() . "\n";
     echo $e->getTraceAsString() . "\n";
     exit(1);
 }

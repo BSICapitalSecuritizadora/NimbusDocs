@@ -8,7 +8,9 @@ use PDO;
 
 final class MySqlSubmissionReportRepository
 {
-    public function __construct(private PDO $pdo) {}
+    public function __construct(private PDO $pdo)
+    {
+    }
 
     /**
      * Monta WHERE e parâmetros a partir dos filtros.
@@ -17,7 +19,7 @@ final class MySqlSubmissionReportRepository
      */
     private function buildWhere(array $filters): array
     {
-        $where  = [];
+        $where = [];
         $params = [];
 
         if (!empty($filters['status'])) {
@@ -63,7 +65,7 @@ final class MySqlSubmissionReportRepository
         ";
         $stmt = $this->pdo->prepare($sqlTotal);
         $stmt->execute($params);
-        $total = (int)$stmt->fetchColumn();
+        $total = (int) $stmt->fetchColumn();
 
         // por status
         $sqlStatus = "
@@ -79,14 +81,14 @@ final class MySqlSubmissionReportRepository
 
         $byStatus = [];
         foreach ($rows as $r) {
-            $byStatus[$r['status']] = (int)$r['total'];
+            $byStatus[$r['status']] = (int) $r['total'];
         }
 
         return [
-            'total'     => $total,
-            'pending'   => $byStatus['PENDING']   ?? 0,
-            'approved'  => $byStatus['COMPLETED'] ?? 0,
-            'rejected'  => $byStatus['REJECTED']  ?? 0,
+            'total' => $total,
+            'pending' => $byStatus['PENDING'] ?? 0,
+            'approved' => $byStatus['COMPLETED'] ?? 0,
+            'rejected' => $byStatus['REJECTED'] ?? 0,
         ];
     }
 
@@ -112,11 +114,11 @@ final class MySqlSubmissionReportRepository
         $stmt->execute($params);
 
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        $out  = [];
+        $out = [];
         foreach ($rows as $r) {
             $out[] = [
-                'day'   => $r['day'],
-                'total' => (int)$r['total'],
+                'day' => $r['day'],
+                'total' => (int) $r['total'],
             ];
         }
 

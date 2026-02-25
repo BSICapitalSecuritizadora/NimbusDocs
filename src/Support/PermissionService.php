@@ -8,14 +8,16 @@ use PDO;
 
 /**
  * Serviço de Permissões (RBAC)
- * 
+ *
  * Verifica permissões baseadas em role → permission.
  * Cache em memória durante a requisição para evitar queries repetidas.
  */
 final class PermissionService
 {
     private static ?PDO $pdo = null;
+
     private static array $cache = [];
+
     private static array $permissionsCache = [];
 
     /**
@@ -42,7 +44,7 @@ final class PermissionService
         }
 
         $cacheKey = "{$role}:{$resource}:{$action}";
-        
+
         if (isset(self::$cache[$cacheKey])) {
             return self::$cache[$cacheKey];
         }
@@ -51,26 +53,27 @@ final class PermissionService
             // Fallback: Admin e Super_Admin têm tudo, outros só view
             $result = in_array($role, ['ADMIN', 'SUPER_ADMIN']) || $action === 'view';
             self::$cache[$cacheKey] = $result;
+
             return $result;
         }
 
-        $sql = "
+        $sql = '
             SELECT COUNT(*) 
             FROM role_permissions rp
             INNER JOIN permissions p ON rp.permission_id = p.id
             WHERE rp.role = :role 
               AND p.resource = :resource 
               AND p.action = :action
-        ";
+        ';
 
         $stmt = self::$pdo->prepare($sql);
         $stmt->execute([
-            ':role'     => $role,
+            ':role' => $role,
             ':resource' => $resource,
-            ':action'   => $action,
+            ':action' => $action,
         ]);
 
-        $result = (int)$stmt->fetchColumn() > 0;
+        $result = (int) $stmt->fetchColumn() > 0;
         self::$cache[$cacheKey] = $result;
 
         return $result;
@@ -78,7 +81,7 @@ final class PermissionService
 
     /**
      * Retorna todas as permissões de um role.
-     * 
+     *
      * @return array<array{resource: string, action: string}>
      */
     public static function getPermissions(string $role): array
@@ -91,13 +94,13 @@ final class PermissionService
             return [];
         }
 
-        $sql = "
+        $sql = '
             SELECT p.resource, p.action, p.description
             FROM role_permissions rp
             INNER JOIN permissions p ON rp.permission_id = p.id
             WHERE rp.role = :role
             ORDER BY p.resource, p.action
-        ";
+        ';
 
         $stmt = self::$pdo->prepare($sql);
         $stmt->execute([':role' => $role]);
@@ -117,13 +120,14 @@ final class PermissionService
             return [];
         }
 
-        $sql = "SELECT id, resource, action, description FROM permissions ORDER BY resource, action";
+        $sql = 'SELECT id, resource, action, description FROM permissions ORDER BY resource, action';
+
         return self::$pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     /**
      * Atualiza permissões de um role.
-     * 
+     *
      * @param string $role
      * @param int[] $permissionIds
      */
@@ -137,14 +141,14 @@ final class PermissionService
 
         try {
             // Remove permissões atuais
-            $stmt = self::$pdo->prepare("DELETE FROM role_permissions WHERE role = :role");
+            $stmt = self::$pdo->prepare('DELETE FROM role_permissions WHERE role = :role');
             $stmt->execute([':role' => $role]);
 
             // Adiciona novas
-            $insert = self::$pdo->prepare("INSERT INTO role_permissions (role, permission_id) VALUES (:role, :pid)");
-            
+            $insert = self::$pdo->prepare('INSERT INTO role_permissions (role, permission_id) VALUES (:role, :pid)');
+
             foreach ($permissionIds as $pid) {
-                $insert->execute([':role' => $role, ':pid' => (int)$pid]);
+                $insert->execute([':role' => $role, ':pid' => (int) $pid]);
             }
 
             self::$pdo->commit();
@@ -155,6 +159,7 @@ final class PermissionService
 
         } catch (\Throwable $e) {
             self::$pdo->rollBack();
+
             throw $e;
         }
     }

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Infrastructure\Persistence\MySqlAdminUserRepository;
-use App\Infrastructure\Persistence\MySqlPortalUserRepository;
 use App\Infrastructure\Persistence\MySqlPortalAccessTokenRepository;
+use App\Infrastructure\Persistence\MySqlPortalUserRepository;
 use App\Presentation\Controller\Admin\Auth\LoginController;
 use App\Presentation\Controller\Portal\Auth\PortalLoginController;
+use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
 {
@@ -18,12 +18,12 @@ class AuthenticationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Mock config for controllers
         $this->config = [
             'pdo' => $this->pdo,
             'recaptcha_secret' => 'dummy',
-            'branding' => []
+            'branding' => [],
         ];
 
         // Seed an admin user
@@ -33,7 +33,7 @@ class AuthenticationTest extends TestCase
             'email' => 'admin@test.com',
             'password_hash' => password_hash('Admin123!', PASSWORD_ARGON2ID),
             'role' => 'ADMIN',
-            'is_active' => 1
+            'is_active' => 1,
         ]);
 
         // Seed a portal user
@@ -41,21 +41,21 @@ class AuthenticationTest extends TestCase
         $portalUserId = $portalRepo->create([
             'full_name' => 'Portal Test',
             'email' => 'portal@test.com',
-            'status' => 'ACTIVE'
+            'status' => 'ACTIVE',
         ]);
-        
+
         // Create an access token for the portal user
         $tokenRepo = new MySqlPortalAccessTokenRepository($this->pdo);
         $tokenRepo->create([
             'portal_user_id' => $portalUserId,
-            'code'           => 'VALIDCODE',
-            'expires_at'     => date('Y-m-d H:i:s', time() + 3600)
+            'code' => 'VALIDCODE',
+            'expires_at' => date('Y-m-d H:i:s', time() + 3600),
         ]);
 
         // Mock Session
         $this->setSession([
             '_csrf_token' => 'test-csrf-token',
-            '_csrf_token_ts' => time()
+            '_csrf_token_ts' => time(),
         ]);
     }
 
@@ -66,16 +66,16 @@ class AuthenticationTest extends TestCase
         $_POST = [
             '_token' => 'test-csrf-token',
             'email' => 'admin@test.com',
-            'password' => 'Admin123!'
+            'password' => 'Admin123!',
         ];
 
         $controller = new LoginController($this->config);
-        
+
         // Catch redirect exception or output
         try {
             $controller->handleLogin();
         } catch (\Throwable $e) {
-            echo "ADMIN_LOGIN_VALID_ERROR: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+            echo 'ADMIN_LOGIN_VALID_ERROR: ' . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
         }
 
         // Assert session has admin
@@ -89,15 +89,15 @@ class AuthenticationTest extends TestCase
         $_POST = [
             '_token' => 'test-csrf-token',
             'email' => 'admin@test.com',
-            'password' => 'WrongPassword!'
+            'password' => 'WrongPassword!',
         ];
 
         $controller = new LoginController($this->config);
-        
+
         try {
             $controller->handleLogin();
         } catch (\Throwable $e) {
-            echo "ADMIN_LOGIN_INVALID_ERROR: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+            echo 'ADMIN_LOGIN_INVALID_ERROR: ' . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
         }
 
         $this->assertArrayNotHasKey('admin', $_SESSION, 'Admin should NOT be logged in with wrong password');
@@ -109,15 +109,15 @@ class AuthenticationTest extends TestCase
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_POST = [
             '_token' => 'test-csrf-token',
-            'access_code' => 'VALIDCODE'
+            'access_code' => 'VALIDCODE',
         ];
 
         $controller = new PortalLoginController($this->config);
-        
+
         try {
             $controller->handleLogin();
         } catch (\Throwable $e) {
-            echo "PORTAL_LOGIN_VALID_ERROR: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+            echo 'PORTAL_LOGIN_VALID_ERROR: ' . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
         }
 
         $this->assertArrayHasKey('portal_user', $_SESSION, 'Portal user should be logged in');
@@ -129,15 +129,15 @@ class AuthenticationTest extends TestCase
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_POST = [
             '_token' => 'test-csrf-token',
-            'access_code' => 'INVALIDCODE'
+            'access_code' => 'INVALIDCODE',
         ];
 
         $controller = new PortalLoginController($this->config);
-        
+
         try {
             $controller->handleLogin();
         } catch (\Throwable $e) {
-            echo "PORTAL_LOGIN_INVALID_ERROR: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+            echo 'PORTAL_LOGIN_INVALID_ERROR: ' . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
         }
 
         $this->assertArrayNotHasKey('portal_user', $_SESSION, 'Portal user should NOT be logged in');

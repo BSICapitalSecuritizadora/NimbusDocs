@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Support;
 
-use PHPUnit\Framework\TestCase;
 use App\Support\FileMetadataCache;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \App\Support\FileMetadataCache
@@ -13,6 +13,7 @@ use App\Support\FileMetadataCache;
 class FileMetadataCacheTest extends TestCase
 {
     private string $cacheDir;
+
     private FileMetadataCache $cache;
 
     protected function setUp(): void
@@ -51,21 +52,21 @@ class FileMetadataCacheTest extends TestCase
         ];
 
         $this->cache->set('document', 123, $metadata);
-        
+
         $result = $this->cache->get('document', 123);
-        
+
         $this->assertEquals($metadata, $result);
     }
 
     public function testInvalidateRemovesFromCache(): void
     {
         $metadata = ['id' => 123, 'name' => 'test.pdf'];
-        
+
         $this->cache->set('document', 123, $metadata);
         $this->assertNotNull($this->cache->get('document', 123));
 
         $this->cache->invalidate('document', 123);
-        
+
         $this->assertNull($this->cache->get('document', 123));
     }
 
@@ -77,6 +78,7 @@ class FileMetadataCacheTest extends TestCase
         $callbackCalled = false;
         $result = $this->cache->remember('document', 123, function () use (&$callbackCalled) {
             $callbackCalled = true;
+
             return ['id' => 456, 'name' => 'other.pdf'];
         });
 
@@ -89,15 +91,16 @@ class FileMetadataCacheTest extends TestCase
     {
         $callbackCalled = false;
         $metadata = ['id' => 789, 'name' => 'new.pdf'];
-        
+
         $result = $this->cache->remember('document', 789, function () use (&$callbackCalled, $metadata) {
             $callbackCalled = true;
+
             return $metadata;
         });
 
         $this->assertTrue($callbackCalled);
         $this->assertEquals($metadata, $result);
-        
+
         // Deve estar em cache agora
         $this->assertEquals($metadata, $this->cache->get('document', 789));
     }

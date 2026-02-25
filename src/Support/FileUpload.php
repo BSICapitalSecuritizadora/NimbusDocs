@@ -43,7 +43,7 @@ final class FileUpload
     {
         // Configurações mescladas com defaults
         $allowedExt = $options['allowed_extensions'] ?? self::$allowedExtensions;
-        $maxMb      = $options['max_size_mb'] ?? (int)(getenv('MAX_UPLOAD_MB') ?: 100);
+        $maxMb = $options['max_size_mb'] ?? (int) (getenv('MAX_UPLOAD_MB') ?: 100);
 
         // Caso teste: caminho de arquivo
         if (is_string($file)) {
@@ -80,15 +80,15 @@ final class FileUpload
         }
 
         $original = $file['name'] ?? 'arquivo';
-        
+
         // Validação de tamanho do nome
         if (strlen($original) > 255) {
             throw new \RuntimeException('Nome do arquivo muito longo (máximo 255 caracteres).');
         }
 
-        $size = (int)$file['size'];
+        $size = (int) $file['size'];
 
-        $maxB   = $maxMb * 1024 * 1024;
+        $maxB = $maxMb * 1024 * 1024;
         if ($size > $maxB) {
             throw new \RuntimeException('Arquivo excede o limite de ' . $maxMb . 'MB.');
         }
@@ -113,7 +113,7 @@ final class FileUpload
         $allowedMimePrefixes = $options['allowed_mime_prefixes'] ?? self::$allowedMimePrefix;
 
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $mime  = $finfo->file($file['tmp_name']) ?: 'application/octet-stream';
+        $mime = $finfo->file($file['tmp_name']) ?: 'application/octet-stream';
 
         $isAllowedMime = false;
         foreach ($allowedMimePrefixes as $prefix) {
@@ -144,10 +144,10 @@ final class FileUpload
         }
 
         return [
-            'path'          => $target,
+            'path' => $target,
             'original_name' => $original,
-            'size'          => $size,
-            'mime_type'     => $mime,
+            'size' => $size,
+            'mime_type' => $mime,
         ];
     }
 
@@ -176,10 +176,11 @@ final class FileUpload
         }
 
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $mime  = $finfo->file($filePath) ?: 'application/octet-stream';
+        $mime = $finfo->file($filePath) ?: 'application/octet-stream';
         if (!in_array($mime, $allowedMimes, true)) {
             return false;
         }
+
         return true;
     }
 
@@ -192,6 +193,7 @@ final class FileUpload
         $base = basename($filename);
         // Permite apenas [a-zA-Z0-9._-]
         $sanitized = preg_replace('/[^a-zA-Z0-9._-]/', '', $base) ?? '';
+
         return $sanitized;
     }
 
@@ -202,6 +204,7 @@ final class FileUpload
     {
         $ext = strtolower(pathinfo($original, PATHINFO_EXTENSION));
         $name = bin2hex(random_bytes(16));
+
         return $ext ? ($name . '.' . $ext) : $name;
     }
 }

@@ -4,29 +4,30 @@ declare(strict_types=1);
 
 namespace App\Presentation\Controller\Admin;
 
-use App\Infrastructure\Persistence\MySqlPortalUserRepository;
 use App\Infrastructure\Persistence\MySqlPortalAccessTokenRepository;
+use App\Infrastructure\Persistence\MySqlPortalUserRepository;
 use App\Support\AuditLogger;
-use App\Support\Csrf;
-use App\Support\Session;
 use App\Support\Auth;
+use App\Support\Csrf;
 use App\Support\RandomToken;
-use Respect\Validation\Validator as v;
+use App\Support\Session;
 use DateInterval;
 use DateTimeImmutable;
-
+use Respect\Validation\Validator as v;
 
 final class PortalUserController
 {
     private MySqlPortalUserRepository $repo;
+
     private MySqlPortalAccessTokenRepository $tokenRepo;
+
     private AuditLogger $audit;
 
     public function __construct(private array $config)
     {
-        $this->repo      = new MySqlPortalUserRepository($config['pdo']);
+        $this->repo = new MySqlPortalUserRepository($config['pdo']);
         $this->tokenRepo = new MySqlPortalAccessTokenRepository($config['pdo']);
-        $this->audit     = new AuditLogger($config['pdo']);
+        $this->audit = new AuditLogger($config['pdo']);
     }
 
     private function requireAdmin(): array
@@ -38,45 +39,45 @@ final class PortalUserController
     {
         $admin = $this->requireAdmin();
 
-        $page    = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-        $perPage = isset($_GET['perPage']) ? max(1, (int)$_GET['perPage']) : 20;
-        $search  = trim((string)($_GET['search'] ?? ''));
+        $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
+        $perPage = isset($_GET['perPage']) ? max(1, (int) $_GET['perPage']) : 20;
+        $search = trim((string) ($_GET['search'] ?? ''));
 
         // Chama paginação já aplicando o filtro de busca
         $pagination = $this->repo->paginate($page, $perPage, $search);
 
         // Normaliza estrutura para views simples (items/total/totalPages)
         if (is_array($pagination) && array_key_exists('items', $pagination)) {
-            $items      = is_array($pagination['items']) ? $pagination['items'] : [];
+            $items = is_array($pagination['items']) ? $pagination['items'] : [];
             $reportedTotal = $pagination['total'] ?? null;
-            $total     = is_numeric($reportedTotal) ? (int)$reportedTotal : (int)count($items);
+            $total = is_numeric($reportedTotal) ? (int) $reportedTotal : (int) count($items);
             $reportedPer = $pagination['perPage'] ?? $perPage;
-            $perPage  = is_numeric($reportedPer) ? (int)$reportedPer : $perPage;
+            $perPage = is_numeric($reportedPer) ? (int) $reportedPer : $perPage;
             $reportedPages = $pagination['pages'] ?? null;
             $totalPages = is_numeric($reportedPages)
-                ? (int)$reportedPages
-                : (int)max(1, (int)ceil($total / max(1, $perPage)));
+                ? (int) $reportedPages
+                : (int) max(1, (int) ceil($total / max(1, $perPage)));
         } else {
-            $items      = is_array($pagination) ? $pagination : [];
-            $total      = (int)count($items);
-            $totalPages = (int)max(1, (int)ceil($total / max(1, $perPage)));
+            $items = is_array($pagination) ? $pagination : [];
+            $total = (int) count($items);
+            $totalPages = (int) max(1, (int) ceil($total / max(1, $perPage)));
         }
 
-        $pageTitle   = 'Usuários do Portal';
+        $pageTitle = 'Usuários do Portal';
         $contentView = __DIR__ . '/../../View/admin/portal_users/index.php';
-        $viewData    = [
-            'admin'      => $admin,
-            'items'      => $items,
-            'page'       => $page,
-            'perPage'    => $perPage,
-            'total'      => $total,
+        $viewData = [
+            'admin' => $admin,
+            'items' => $items,
+            'page' => $page,
+            'perPage' => $perPage,
+            'total' => $total,
             'totalPages' => $totalPages,
-            'search'     => $search,
+            'search' => $search,
             'pagination' => $pagination,
-            'csrfToken'  => Csrf::token(),
-            'flash'      => [
+            'csrfToken' => Csrf::token(),
+            'flash' => [
                 'success' => Session::getFlash('success'),
-                'error'   => Session::getFlash('error'),
+                'error' => Session::getFlash('error'),
             ],
         ];
 
@@ -87,13 +88,13 @@ final class PortalUserController
     {
         $this->requireAdmin();
 
-        $pageTitle   = 'Novo Usuário';
+        $pageTitle = 'Novo Usuário';
         $contentView = __DIR__ . '/../../View/admin/portal_users/form.php';
-        $viewData    = [
-            'mode'      => 'create',
-            'user'      => null,
-            'errors'    => Session::getFlash('errors') ?? [],
-            'old'       => Session::getFlash('old') ?? [],
+        $viewData = [
+            'mode' => 'create',
+            'user' => null,
+            'errors' => Session::getFlash('errors') ?? [],
+            'old' => Session::getFlash('old') ?? [],
             'csrfToken' => Csrf::token(),
         ];
 
@@ -105,16 +106,16 @@ final class PortalUserController
     {
         $admin = $this->requireAdmin();
 
-        $pageTitle   = 'Novo usuário do portal';
+        $pageTitle = 'Novo usuário do portal';
         // Reusa o mesmo form com modo create
         $contentView = __DIR__ . '/../../View/admin/portal_users/form.php';
-        $viewData    = [
-            'admin'     => $admin,
-            'mode'      => 'create',
-            'user'      => null,
+        $viewData = [
+            'admin' => $admin,
+            'mode' => 'create',
+            'user' => null,
             'csrfToken' => Csrf::token(),
-            'errors'    => Session::getFlash('errors') ?? [],
-            'old'       => Session::getFlash('old') ?? [],
+            'errors' => Session::getFlash('errors') ?? [],
+            'old' => Session::getFlash('old') ?? [],
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -124,7 +125,7 @@ final class PortalUserController
     {
         $admin = $this->requireAdmin();
 
-        $post  = $_POST;
+        $post = $_POST;
         $token = $post['_token'] ?? '';
 
         if (!Csrf::validate($token)) {
@@ -135,18 +136,18 @@ final class PortalUserController
         // Suporta tanto o payload simplificado (full_name, document, is_active)
         // quanto o payload completo atual
         $data = [
-            'full_name'       => trim($post['full_name'] ?? ($post['name'] ?? '')),
-            'email'           => trim($post['email'] ?? ''),
+            'full_name' => trim($post['full_name'] ?? ($post['name'] ?? '')),
+            'email' => trim($post['email'] ?? ''),
             'document_number' => $this->normalizeCpf($post['document_number'] ?? ($post['document'] ?? '')),
-            'phone_number'    => trim($post['phone_number'] ?? ''),
-            'external_id'     => trim($post['external_id'] ?? ''),
-            'notes'           => trim($post['notes'] ?? ''),
+            'phone_number' => trim($post['phone_number'] ?? ''),
+            'external_id' => trim($post['external_id'] ?? ''),
+            'notes' => trim($post['notes'] ?? ''),
             // se vier is_active, converte para ACTIVE/INACTIVE
-            'status'          => isset($post['is_active'])
+            'status' => isset($post['is_active'])
                 ? ($post['is_active'] ? 'ACTIVE' : 'INACTIVE')
                 : ($post['status'] ?? 'INVITED'),
-            'password'        => (string)($post['password'] ?? ''),
-            'password_confirmation' => (string)($post['password_confirmation'] ?? ''),
+            'password' => (string) ($post['password'] ?? ''),
+            'password_confirmation' => (string) ($post['password_confirmation'] ?? ''),
         ];
 
         $errors = $this->validateData($data, true);
@@ -158,16 +159,16 @@ final class PortalUserController
         }
 
         $newId = $this->repo->create([
-            'full_name'       => $data['full_name'],
-            'email'           => $data['email'],
+            'full_name' => $data['full_name'],
+            'email' => $data['email'],
             'document_number' => $data['document_number'],
-            'phone_number'    => $data['phone_number'],
-            'external_id'     => $data['external_id'],
-            'notes'           => $data['notes'],
-            'status'          => $data['status'],
+            'phone_number' => $data['phone_number'],
+            'external_id' => $data['external_id'],
+            'notes' => $data['notes'],
+            'status' => $data['status'],
         ]);
 
-        $this->audit->log('ADMIN', (int)$admin['id'], 'PORTAL_USER_CREATED', 'PORTAL_USER', $newId);
+        $this->audit->log('ADMIN', (int) $admin['id'], 'PORTAL_USER_CREATED', 'PORTAL_USER', $newId);
 
         // Notificação de usuário pré-cadastrado
         try {
@@ -192,23 +193,24 @@ final class PortalUserController
     {
         $admin = $this->requireAdmin();
 
-        $id   = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
         $user = $this->repo->findById($id);
 
         if (!$user) {
             http_response_code(404);
             echo 'Usuário do portal não encontrado.';
+
             return;
         }
 
         $tokens = $this->tokenRepo->listRecentForUser($id, 10);
 
-        $pageTitle   = 'Detalhes do Usuário';
+        $pageTitle = 'Detalhes do Usuário';
         $contentView = __DIR__ . '/../../View/admin/portal_users/show.php';
-        $viewData    = [
-            'admin'     => $admin,
-            'user'      => $user,
-            'tokens'    => $tokens,
+        $viewData = [
+            'admin' => $admin,
+            'user' => $user,
+            'tokens' => $tokens,
             'csrfToken' => Csrf::token(),
         ];
 
@@ -219,7 +221,7 @@ final class PortalUserController
     {
         $admin = $this->requireAdmin();
 
-        $id   = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
         $user = $this->repo->findById($id);
 
         if (!$user) {
@@ -229,14 +231,14 @@ final class PortalUserController
 
         $tokens = $this->tokenRepo->listRecentForUser($id, 10);
 
-        $pageTitle   = 'Editar Usuário';
+        $pageTitle = 'Editar Usuário';
         $contentView = __DIR__ . '/../../View/admin/portal_users/form.php';
-        $viewData    = [
-            'mode'      => 'edit',
-            'user'      => $user,
-            'tokens'    => $tokens,
-            'errors'    => Session::getFlash('errors') ?? [],
-            'old'       => Session::getFlash('old') ?? [],
+        $viewData = [
+            'mode' => 'edit',
+            'user' => $user,
+            'tokens' => $tokens,
+            'errors' => Session::getFlash('errors') ?? [],
+            'old' => Session::getFlash('old') ?? [],
             'csrfToken' => Csrf::token(),
         ];
 
@@ -248,25 +250,26 @@ final class PortalUserController
     {
         $admin = $this->requireAdmin();
 
-        $id   = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
         $user = $this->repo->findById($id);
 
         if (!$user) {
             http_response_code(404);
             echo 'Usuário do portal não encontrado.';
+
             return;
         }
 
-        $pageTitle   = 'Editar usuário do portal';
+        $pageTitle = 'Editar usuário do portal';
         // Reusa o mesmo form com modo edit
         $contentView = __DIR__ . '/../../View/admin/portal_users/form.php';
-        $viewData    = [
-            'admin'     => $admin,
-            'mode'      => 'edit',
-            'user'      => $user,
+        $viewData = [
+            'admin' => $admin,
+            'mode' => 'edit',
+            'user' => $user,
             'csrfToken' => Csrf::token(),
-            'errors'    => Session::getFlash('errors') ?? [],
-            'old'       => Session::getFlash('old') ?? [],
+            'errors' => Session::getFlash('errors') ?? [],
+            'old' => Session::getFlash('old') ?? [],
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -276,8 +279,8 @@ final class PortalUserController
     {
         $admin = $this->requireAdmin();
 
-        $id    = (int)($vars['id'] ?? 0);
-        $post  = $_POST;
+        $id = (int) ($vars['id'] ?? 0);
+        $post = $_POST;
         $token = $post['_token'] ?? '';
 
         if (!Csrf::validate($token)) {
@@ -287,17 +290,17 @@ final class PortalUserController
 
         // Suporta tanto o payload simplificado quanto o atual
         $data = [
-            'full_name'       => trim($post['full_name'] ?? ($post['name'] ?? '')),
-            'email'           => trim($post['email'] ?? ''),
+            'full_name' => trim($post['full_name'] ?? ($post['name'] ?? '')),
+            'email' => trim($post['email'] ?? ''),
             'document_number' => $this->normalizeCpf($post['document_number'] ?? ($post['document'] ?? '')),
-            'phone_number'    => trim($post['phone_number'] ?? ''),
-            'external_id'     => trim($post['external_id'] ?? ''),
-            'notes'           => trim($post['notes'] ?? ''),
-            'status'          => isset($post['is_active'])
+            'phone_number' => trim($post['phone_number'] ?? ''),
+            'external_id' => trim($post['external_id'] ?? ''),
+            'notes' => trim($post['notes'] ?? ''),
+            'status' => isset($post['is_active'])
                 ? ($post['is_active'] ? 'ACTIVE' : 'INACTIVE')
                 : ($post['status'] ?? 'INVITED'),
-            'password'        => (string)($post['password'] ?? ''),
-            'password_confirmation' => (string)($post['password_confirmation'] ?? ''),
+            'password' => (string) ($post['password'] ?? ''),
+            'password_confirmation' => (string) ($post['password_confirmation'] ?? ''),
         ];
 
         $errors = $this->validateData($data, false);
@@ -309,17 +312,17 @@ final class PortalUserController
         }
 
         $update = [
-            'full_name'       => $data['full_name'],
-            'email'           => $data['email'],
+            'full_name' => $data['full_name'],
+            'email' => $data['email'],
             'document_number' => $data['document_number'],
-            'phone_number'    => $data['phone_number'],
-            'external_id'     => $data['external_id'],
-            'notes'           => $data['notes'],
-            'status'          => $data['status'],
+            'phone_number' => $data['phone_number'],
+            'external_id' => $data['external_id'],
+            'notes' => $data['notes'],
+            'status' => $data['status'],
         ];
 
         $this->repo->update($id, $update);
-        $this->audit->log('ADMIN', (int)$admin['id'], 'PORTAL_USER_UPDATED', 'PORTAL_USER', $id);
+        $this->audit->log('ADMIN', (int) $admin['id'], 'PORTAL_USER_UPDATED', 'PORTAL_USER', $id);
 
         Session::flash('success', 'Usuário final atualizado com sucesso.');
         $this->redirect('/admin/portal-users');
@@ -329,8 +332,8 @@ final class PortalUserController
     {
         $admin = $this->requireAdmin();
 
-        $id    = (int)($vars['id'] ?? 0);
-        $post  = $_POST;
+        $id = (int) ($vars['id'] ?? 0);
+        $post = $_POST;
         $token = $post['_token'] ?? '';
 
         if (!Csrf::validate($token)) {
@@ -339,7 +342,7 @@ final class PortalUserController
         }
 
         $this->repo->deactivate($id);
-        $this->audit->log('ADMIN', (int)$admin['id'], 'PORTAL_USER_DEACTIVATED', 'PORTAL_USER', $id);
+        $this->audit->log('ADMIN', (int) $admin['id'], 'PORTAL_USER_DEACTIVATED', 'PORTAL_USER', $id);
 
         Session::flash('success', 'Usuário final desativado com sucesso.');
         $this->redirect('/admin/portal-users');
@@ -386,10 +389,10 @@ final class PortalUserController
         for ($t = 9; $t < 11; $t++) {
             $sum = 0;
             for ($i = 0; $i < $t; $i++) {
-                $sum += (int)$cpf[$i] * (($t + 1) - $i);
+                $sum += (int) $cpf[$i] * (($t + 1) - $i);
             }
             $digit = ((10 * $sum) % 11) % 10;
-            if ((int)$cpf[$t] !== $digit) {
+            if ((int) $cpf[$t] !== $digit) {
                 return false;
             }
         }
@@ -407,8 +410,8 @@ final class PortalUserController
     {
         $admin = $this->requireAdmin();
 
-        $id    = (int)($vars['id'] ?? 0);
-        $post  = $_POST;
+        $id = (int) ($vars['id'] ?? 0);
+        $post = $_POST;
         $token = $post['_token'] ?? '';
 
         if (!Csrf::validate($token)) {
@@ -425,15 +428,15 @@ final class PortalUserController
         // validade escolhida no formulário
         $validity = $post['validity'] ?? '24h';
         $intervalSpec = match ($validity) {
-            '1h'  => 'PT1H',
+            '1h' => 'PT1H',
             '24h' => 'P1D',
-            '7d'  => 'P7D',
+            '7d' => 'P7D',
             default => 'P1D',
         };
 
-        $now       = new DateTimeImmutable('now');
+        $now = new DateTimeImmutable('now');
         $expiresAt = $now->add(new DateInterval($intervalSpec));
-        $code      = RandomToken::shortCode(12); // 12 caracteres, será o "token"
+        $code = RandomToken::shortCode(12); // 12 caracteres, será o "token"
 
         // 1) revoga tokens válidos anteriores (pendentes, não usados, não expirados)
         $this->tokenRepo->revokePreviousValidTokensForUser($id);
@@ -441,24 +444,23 @@ final class PortalUserController
         // 2) cria o novo registro
         $tokenId = $this->tokenRepo->create([
             'portal_user_id' => $id,
-            'code'           => $code,
-            'expires_at'     => $expiresAt->format('Y-m-d H:i:s'),
+            'code' => $code,
+            'expires_at' => $expiresAt->format('Y-m-d H:i:s'),
         ]);
 
         // 3) registra no audit log
         $this->config['audit']->adminAction([
-            'actor_id'    => (int)$admin['id'],
-            'actor_name'  => $admin['name'] ?? null,
-            'action'      => 'PORTAL_ACCESS_LINK_GENERATED',
-            'summary'     => 'Link de acesso único gerado para usuário do portal.',
+            'actor_id' => (int) $admin['id'],
+            'actor_name' => $admin['name'] ?? null,
+            'action' => 'PORTAL_ACCESS_LINK_GENERATED',
+            'summary' => 'Link de acesso único gerado para usuário do portal.',
             'context_type' => 'portal_user',
-            'context_id'  => $id,
-            'details'     => [
+            'context_id' => $id,
+            'details' => [
                 'portal_user_email' => $user['email'],
-                'token_expires_at'  => $expiresAt,
+                'token_expires_at' => $expiresAt,
             ],
         ]);
-
 
         // 4) (opcional) envia link por e-mail via Graph, se configurado e habilitado nas configurações
         $settings = $this->config['settings_repo']->getAll();
@@ -468,7 +470,7 @@ final class PortalUserController
         if ($notifyAccessLink && isset($this->config['notification'])) {
             // Busca o token criado
             $token = $this->tokenRepo->findById($tokenId);
-            
+
             // Envia notificação via NotificationService
             if ($token) {
                 $this->config['notification']->notifyTokenCreated($user, $token);
@@ -476,8 +478,8 @@ final class PortalUserController
             }
         } elseif ($notifyAccessLink && isset($this->config['mail']) && !empty($user['email'])) {
             $nomeUsuario = $user['full_name'] ?? $user['name'] ?? 'Cliente';
-            $baseUrl     = rtrim($this->config['app']['url'] ?? '', '/');
-            $link        = $baseUrl . '/portal/access/' . $code;
+            $baseUrl = rtrim($this->config['app']['url'] ?? '', '/');
+            $link = $baseUrl . '/portal/access/' . $code;
 
             $body = sprintf(
                 '<p>Olá %s,</p>
@@ -492,7 +494,7 @@ final class PortalUserController
             );
 
             $mailer = $this->config['mail'];
-            $emailSent = (bool)$mailer->sendMail(
+            $emailSent = (bool) $mailer->sendMail(
                 $user['email'],
                 'Seu link de acesso ao NimbusDocs Portal',
                 $body

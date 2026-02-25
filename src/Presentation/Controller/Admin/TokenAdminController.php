@@ -6,8 +6,8 @@ namespace App\Presentation\Controller\Admin;
 
 use App\Infrastructure\Persistence\MySqlPortalAccessTokenRepository;
 use App\Support\Auth;
-use App\Support\Session;
 use App\Support\Csrf;
+use App\Support\Session;
 
 final class TokenAdminController
 {
@@ -33,7 +33,7 @@ final class TokenAdminController
     {
         $admin = $this->requireAdmin();
 
-        $page    = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
         $perPage = 25;
 
         $filters = [
@@ -42,23 +42,23 @@ final class TokenAdminController
         ];
 
         $result = $this->tokenRepo->paginate($page, $perPage, $filters);
-        $total  = $result['total'];
-        $items  = $result['items'];
+        $total = $result['total'];
+        $items = $result['items'];
 
-        $totalPages = (int)max(1, ceil($total / $perPage));
+        $totalPages = (int) max(1, ceil($total / $perPage));
 
-        $pageTitle   = 'Tokens de acesso do portal';
+        $pageTitle = 'Tokens de acesso do portal';
         $contentView = __DIR__ . '/../../View/admin/tokens/index.php';
 
         $viewData = [
-            'admin'      => $admin,
-            'items'      => $items,
-            'page'       => $page,
-            'perPage'    => $perPage,
-            'total'      => $total,
+            'admin' => $admin,
+            'items' => $items,
+            'page' => $page,
+            'perPage' => $perPage,
+            'total' => $total,
             'totalPages' => $totalPages,
-            'filters'    => $filters,
-            'csrfToken'  => Csrf::token(),
+            'filters' => $filters,
+            'csrfToken' => Csrf::token(),
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -68,16 +68,17 @@ final class TokenAdminController
     {
         $admin = $this->requireAdmin();
 
-        $id    = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
         $token = $this->tokenRepo->findById($id);
 
         if (!$token) {
             http_response_code(404);
             echo 'Token não encontrado.';
+
             return;
         }
 
-        $pageTitle   = 'Detalhes do token';
+        $pageTitle = 'Detalhes do token';
         $contentView = __DIR__ . '/../../View/admin/tokens/show.php';
 
         $viewData = [
@@ -92,8 +93,8 @@ final class TokenAdminController
     {
         $this->requireAdmin();
 
-        $id    = (int)($vars['id'] ?? 0);
-        $post  = $_POST;
+        $id = (int) ($vars['id'] ?? 0);
+        $post = $_POST;
         $token = $post['_token'] ?? '';
 
         if (!Csrf::validate($token)) {

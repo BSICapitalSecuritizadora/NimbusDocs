@@ -4,28 +4,28 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Infrastructure\Logging;
 
-use PHPUnit\Framework\TestCase;
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-use Psr\Log\LoggerInterface;
 use App\Infrastructure\Logging\RequestLogger;
+use Monolog\Logger;
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 class RequestLoggerTest extends TestCase
 {
     private $logger;
+
     private $requestLogger;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Initialize superglobals BEFORE creating RequestLogger
         $_SESSION = ['admin_user' => ['id' => 1, 'name' => 'Test Admin']];
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/test/path';
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
         $_SERVER['HTTP_USER_AGENT'] = 'PHPUnit Test';
-        
+
         // Now create the logger
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->requestLogger = new RequestLogger($this->logger);
@@ -41,14 +41,14 @@ class RequestLoggerTest extends TestCase
     public function testGetClientIpDirect(): void
     {
         $_SERVER['REMOTE_ADDR'] = '192.168.1.100';
-        
+
         $logger = new RequestLogger($this->logger);
         $reflection = new \ReflectionClass($logger);
         $method = $reflection->getMethod('getClientIp');
         $method->setAccessible(true);
-        
+
         $ip = $method->invoke($logger);
-        
+
         $this->assertEquals('192.168.1.100', $ip);
     }
 
@@ -56,14 +56,14 @@ class RequestLoggerTest extends TestCase
     {
         $_SERVER['REMOTE_ADDR'] = '10.0.0.1';
         $_SERVER['HTTP_CF_CONNECTING_IP'] = '203.0.113.1';
-        
+
         $logger = new RequestLogger($this->logger);
         $reflection = new \ReflectionClass($logger);
         $method = $reflection->getMethod('getClientIp');
         $method->setAccessible(true);
-        
+
         $ip = $method->invoke($logger);
-        
+
         $this->assertEquals('203.0.113.1', $ip);
     }
 
@@ -71,14 +71,14 @@ class RequestLoggerTest extends TestCase
     {
         $_SERVER['REMOTE_ADDR'] = '10.0.0.1';
         $_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.5, 10.0.0.2';
-        
+
         $logger = new RequestLogger($this->logger);
         $reflection = new \ReflectionClass($logger);
         $method = $reflection->getMethod('getClientIp');
         $method->setAccessible(true);
-        
+
         $ip = $method->invoke($logger);
-        
+
         $this->assertEquals('203.0.113.5', $ip);
     }
 
@@ -134,7 +134,7 @@ class RequestLoggerTest extends TestCase
         for ($i = 0; $i < 5; $i++) {
             $this->requestLogger->logSuccess(200);
         }
-        
+
         $recent = RequestLogger::getRecentRequests(3);
         $this->assertIsArray($recent);
     }

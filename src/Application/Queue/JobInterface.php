@@ -11,7 +11,7 @@ interface JobInterface
 {
     /**
      * Execute the job logic.
-     * 
+     *
      * @return void
      */
     public function handle(): void;

@@ -9,6 +9,7 @@ use TheNetworg\OAuth2\Client\Provider\Azure;
 final class AzureAdminAuthClient
 {
     private Azure $provider;
+
     private ?string $allowedDomain;
 
     /**
@@ -23,11 +24,11 @@ final class AzureAdminAuthClient
     public function __construct(array $azureConfig)
     {
         $this->provider = new Azure([
-            'clientId'                => $azureConfig['client_id'] ?? '',
-            'clientSecret'            => $azureConfig['client_secret'] ?? '',
-            'redirectUri'             => $azureConfig['redirect_uri'] ?? '',
-            'tenant'                  => $azureConfig['tenant_id'] ?? '',
-            'defaultEndPointVersion'  => '2.0',
+            'clientId' => $azureConfig['client_id'] ?? '',
+            'clientSecret' => $azureConfig['client_secret'] ?? '',
+            'redirectUri' => $azureConfig['redirect_uri'] ?? '',
+            'tenant' => $azureConfig['tenant_id'] ?? '',
+            'defaultEndPointVersion' => '2.0',
         ]);
 
         $this->allowedDomain = $azureConfig['allowed_domain'] ?? null;

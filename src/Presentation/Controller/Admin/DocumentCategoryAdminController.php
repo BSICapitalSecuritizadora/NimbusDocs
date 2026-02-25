@@ -7,12 +7,13 @@ namespace App\Presentation\Controller\Admin;
 use App\Infrastructure\Persistence\MySqlDocumentCategoryRepository;
 use App\Infrastructure\Persistence\MySqlGeneralDocumentRepository;
 use App\Support\Auth;
-use App\Support\Session;
 use App\Support\Csrf;
+use App\Support\Session;
 
 final class DocumentCategoryAdminController
 {
     private MySqlDocumentCategoryRepository $repo;
+
     private MySqlGeneralDocumentRepository $docsRepo;
 
     public function __construct(private array $config)
@@ -27,14 +28,14 @@ final class DocumentCategoryAdminController
 
         $categories = $this->repo->all();
 
-        $pageTitle   = 'Categorias de documentos gerais';
+        $pageTitle = 'Categorias de documentos gerais';
         $contentView = __DIR__ . '/../../View/admin/document_categories/index.php';
 
         $viewData = [
             'categories' => $categories,
-            'csrfToken'  => Csrf::token(),
-            'success'    => Session::getFlash('success'),
-            'error'      => Session::getFlash('error'),
+            'csrfToken' => Csrf::token(),
+            'success' => Session::getFlash('success'),
+            'error' => Session::getFlash('error'),
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -44,12 +45,12 @@ final class DocumentCategoryAdminController
     {
         Auth::requireRole('ADMIN', 'SUPER_ADMIN');
 
-        $pageTitle   = 'Nova categoria de documento';
+        $pageTitle = 'Nova categoria de documento';
         $contentView = __DIR__ . '/../../View/admin/document_categories/create.php';
 
         $viewData = [
-            'mode'     => 'create',
-            'data'     => ['name' => '', 'description' => '', 'sort_order' => 0],
+            'mode' => 'create',
+            'data' => ['name' => '', 'description' => '', 'sort_order' => 0],
             'csrfToken' => Csrf::token(),
         ];
 
@@ -60,8 +61,8 @@ final class DocumentCategoryAdminController
     {
         Auth::requireRole('ADMIN', 'SUPER_ADMIN');
 
-        $id   = (int)($vars['id'] ?? 0);
-        $cat  = $this->repo->find($id);
+        $id = (int) ($vars['id'] ?? 0);
+        $cat = $this->repo->find($id);
 
         if (!$cat) {
             Session::flash('error', 'Categoria não encontrada.');
@@ -69,11 +70,11 @@ final class DocumentCategoryAdminController
             exit;
         }
 
-        $pageTitle   = 'Editar categoria de documento';
+        $pageTitle = 'Editar categoria de documento';
         $contentView = __DIR__ . '/../../View/admin/document_categories/edit.php';
 
         $viewData = [
-            'mode'     => 'edit',
+            'mode' => 'edit',
             'category' => $cat,
             'csrfToken' => Csrf::token(),
         ];
@@ -91,9 +92,9 @@ final class DocumentCategoryAdminController
             exit;
         }
 
-        $name       = trim($_POST['name'] ?? '');
+        $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
-        $sortOrder  = (int)($_POST['sort_order'] ?? 0);
+        $sortOrder = (int) ($_POST['sort_order'] ?? 0);
 
         if ($name === '') {
             Session::flash('error', 'Nome é obrigatório.');
@@ -102,9 +103,9 @@ final class DocumentCategoryAdminController
         }
 
         $this->repo->create([
-            'name'        => $name,
+            'name' => $name,
             'description' => $description,
-            'sort_order'  => $sortOrder,
+            'sort_order' => $sortOrder,
         ]);
 
         Session::flash('success', 'Categoria criada com sucesso.');
@@ -122,17 +123,17 @@ final class DocumentCategoryAdminController
             exit;
         }
 
-        $id   = (int)($vars['id'] ?? 0);
-        $cat  = $this->repo->find($id);
+        $id = (int) ($vars['id'] ?? 0);
+        $cat = $this->repo->find($id);
         if (!$cat) {
             Session::flash('error', 'Categoria não encontrada.');
             header('Location: /admin/document-categories');
             exit;
         }
 
-        $name       = trim($_POST['name'] ?? '');
+        $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
-        $sortOrder  = (int)($_POST['sort_order'] ?? 0);
+        $sortOrder = (int) ($_POST['sort_order'] ?? 0);
 
         if ($name === '') {
             Session::flash('error', 'Nome é obrigatório.');
@@ -141,9 +142,9 @@ final class DocumentCategoryAdminController
         }
 
         $this->repo->update($id, [
-            'name'        => $name,
+            'name' => $name,
             'description' => $description,
-            'sort_order'  => $sortOrder,
+            'sort_order' => $sortOrder,
         ]);
 
         Session::flash('success', 'Categoria atualizada com sucesso.');
@@ -154,33 +155,33 @@ final class DocumentCategoryAdminController
     public function delete(array $vars): void
     {
         $admin = Auth::requireRole('ADMIN', 'SUPER_ADMIN');
-        error_log("Delete Category requested. User: " . $admin['id'] . " Role: " . $admin['role']);
+        error_log('Delete Category requested. User: ' . $admin['id'] . ' Role: ' . $admin['role']);
 
         if (!Csrf::validate($_POST['_token'] ?? '')) {
-            error_log("CSRF Validation failed for delete category.");
+            error_log('CSRF Validation failed for delete category.');
             Session::flash('error', 'Sessão expirada.');
             header('Location: /admin/document-categories');
             exit;
         }
 
-        $id = (int)($vars['id'] ?? 0);
-        error_log("Attempting to delete category ID: " . $id);
+        $id = (int) ($vars['id'] ?? 0);
+        error_log('Attempting to delete category ID: ' . $id);
 
         // Check for dependencies
         $count = $this->docsRepo->countByCategory($id);
-        error_log("Category dependency count: " . $count);
+        error_log('Category dependency count: ' . $count);
 
         if ($count > 0) {
-             error_log("Found $count documents. Cleaning them up before category deletion (User requested fix).");
-             $this->docsRepo->deleteByCategoryId($id);
+            error_log("Found $count documents. Cleaning them up before category deletion (User requested fix).");
+            $this->docsRepo->deleteByCategoryId($id);
         }
 
         try {
             $this->repo->delete($id);
-            error_log("Category deletion successful in DB.");
+            error_log('Category deletion successful in DB.');
             Session::flash('success', 'Categoria removida.');
         } catch (\Exception $e) {
-            error_log("DB Error during category delete: " . $e->getMessage());
+            error_log('DB Error during category delete: ' . $e->getMessage());
             Session::flash('error', 'Erro ao excluir categoria.');
         }
 

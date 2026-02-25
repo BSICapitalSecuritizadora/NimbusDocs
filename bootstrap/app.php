@@ -2,25 +2,24 @@
 
 declare(strict_types=1);
 
-use Dotenv\Dotenv;
-use Monolog\Logger;
-use Monolog\Handler\RotatingFileHandler;
-use App\Infrastructure\Persistence\Connection;
-use App\Infrastructure\Notification\GraphMailService;
 use App\Application\Service\NotificationService;
-use App\Infrastructure\Logging\AdminAuditLogger;
-use App\Domain\Repository\AuditLogRepository;
-use App\Infrastructure\Persistence\MySqlAuditLogRepository;
 use App\Infrastructure\Audit\AuditLogger;
-use App\Infrastructure\Persistence\MySqlSettingsRepository;
-use App\Infrastructure\Persistence\MySqlAdminUserRepository;
-use App\Infrastructure\Persistence\MySqlPortalUserRepository;
-use App\Infrastructure\Persistence\MySqlNotificationOutboxRepository;
 use App\Infrastructure\Auth\AzureAdminAuthClient;
+use App\Infrastructure\ErrorHandler;
+use App\Infrastructure\Logging\AdminAuditLogger;
 use App\Infrastructure\Logging\PortalAccessLogger;
 use App\Infrastructure\Logging\RequestLogger;
+use App\Infrastructure\Notification\GraphMailService;
+use App\Infrastructure\Persistence\Connection;
+use App\Infrastructure\Persistence\MySqlAdminUserRepository;
+use App\Infrastructure\Persistence\MySqlAuditLogRepository;
+use App\Infrastructure\Persistence\MySqlNotificationOutboxRepository;
+use App\Infrastructure\Persistence\MySqlPortalUserRepository;
+use App\Infrastructure\Persistence\MySqlSettingsRepository;
 use App\Support\Translator;
-use App\Infrastructure\ErrorHandler;
+use Dotenv\Dotenv;
+use Monolog\Handler\RotatingFileHandler;
+use Monolog\Logger;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -43,7 +42,7 @@ $appUrlHost = $appUrlParts['host'] ?? '';
 // This allows the same code to work in both HTTP local dev and HTTPS production
 $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
     || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
-    || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443);
+    || (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443);
 
 $sessionName = $_ENV['SESSION_NAME'] ?? 'nimbusdocs_session';
 session_name($sessionName);
@@ -83,16 +82,16 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 // Security Headers
 // -------------------------------------------------------------------------
 if (!headers_sent()) {
-    header("X-Frame-Options: SAMEORIGIN");
-    header("X-Content-Type-Options: nosniff");
-    header("Referrer-Policy: strict-origin-when-cross-origin");
-    header("Permissions-Policy: geolocation=(), camera=(), microphone=()");
-    
+    header('X-Frame-Options: SAMEORIGIN');
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: geolocation=(), camera=(), microphone=()');
+
     // CSP: Allow 'self', data: images, and unsafe-inline for styles/scripts (compatibility)
     header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self';");
 
     if ($isHttps) {
-        header("Strict-Transport-Security: max-age=31536000; includeSubDomains");
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
     }
 }
 
@@ -118,7 +117,7 @@ $config = require __DIR__ . '/../config/config.php';
 
 // Detect Base URL for Assets
 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
-$basePath   = dirname($scriptName);
+$basePath = dirname($scriptName);
 // If running from root, basePath is / or \. If not, it's /subdir.
 // We want to remove the script filename (admin.php) from the path if meaningful.
 // But wait, dirname of /sub/public/admin.php is /sub/public.
@@ -198,17 +197,16 @@ $config['cnpj_service'] = $cachedCnpjService;
 $requestLogger = new RequestLogger($logger);
 $config['request_logger'] = $requestLogger;
 
-
 // -------------------------------------------------------------------------
 // Serviço de e-mail via Microsoft Graph
 // -------------------------------------------------------------------------
 // Passa explicitamente as credenciais do .env para o serviço
 $graphMailCfg = [
-    'GRAPH_TENANT_ID'    => $_ENV['GRAPH_TENANT_ID']    ?? '',
-    'GRAPH_CLIENT_ID'    => $_ENV['GRAPH_CLIENT_ID']    ?? '',
+    'GRAPH_TENANT_ID' => $_ENV['GRAPH_TENANT_ID'] ?? '',
+    'GRAPH_CLIENT_ID' => $_ENV['GRAPH_CLIENT_ID'] ?? '',
     'GRAPH_CLIENT_SECRET' => $_ENV['GRAPH_CLIENT_SECRET'] ?? '',
-    'MAIL_FROM'          => $_ENV['MAIL_FROM']          ?? '',
-    'MAIL_FROM_NAME'     => $_ENV['MAIL_FROM_NAME']     ?? 'NimbusDocs',
+    'MAIL_FROM' => $_ENV['MAIL_FROM'] ?? '',
+    'MAIL_FROM_NAME' => $_ENV['MAIL_FROM_NAME'] ?? 'NimbusDocs',
 ];
 
 $config['mail'] = new GraphMailService($graphMailCfg, $logger);
@@ -236,10 +234,10 @@ $settingsRepo = $config['settings_repo'];
 $settings = method_exists($settingsRepo, 'getAll') ? $settingsRepo->getAll() : [];
 
 $branding = [
-    'app_name'      => $settings['app.name'] ?? ($config['app']['name'] ?? 'NimbusDocs'),
-    'app_subtitle'  => $settings['app.subtitle'] ?? 'Portal de documentos',
+    'app_name' => $settings['app.name'] ?? ($config['app']['name'] ?? 'NimbusDocs'),
+    'app_subtitle' => $settings['app.subtitle'] ?? 'Portal de documentos',
     'primary_color' => $settings['branding.primary_color'] ?? '#00205b',
-    'accent_color'  => $settings['branding.accent_color'] ?? '#ffc20e',
+    'accent_color' => $settings['branding.accent_color'] ?? '#ffc20e',
     'admin_logo_url' => $settings['branding.admin_logo_url'] ?? '',
     'portal_logo_url' => $settings['branding.portal_logo_url'] ?? '',
 ];
@@ -259,11 +257,11 @@ $adminUserRepo = new MySqlAdminUserRepository($pdo);
 $portalUserRepo = new MySqlPortalUserRepository($pdo);
 
 $graphMailConfig = [
-    'GRAPH_TENANT_ID'      => $_ENV['GRAPH_TENANT_ID'] ?? '',
-    'GRAPH_CLIENT_ID'      => $_ENV['GRAPH_CLIENT_ID'] ?? '',
-    'GRAPH_CLIENT_SECRET'  => $_ENV['GRAPH_CLIENT_SECRET'] ?? '',
-    'MAIL_FROM'            => $_ENV['GRAPH_SENDER_EMAIL'] ?? '',
-    'MAIL_FROM_NAME'       => 'NimbusDocs'
+    'GRAPH_TENANT_ID' => $_ENV['GRAPH_TENANT_ID'] ?? '',
+    'GRAPH_CLIENT_ID' => $_ENV['GRAPH_CLIENT_ID'] ?? '',
+    'GRAPH_CLIENT_SECRET' => $_ENV['GRAPH_CLIENT_SECRET'] ?? '',
+    'MAIL_FROM' => $_ENV['GRAPH_SENDER_EMAIL'] ?? '',
+    'MAIL_FROM_NAME' => 'NimbusDocs',
 ];
 
 $mailLogger = new Logger('mail');

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Presentation\Controller\Admin;
 
-use App\Support\Auth;
 use App\Infrastructure\Persistence\MySqlReportScheduleRepository;
+use App\Support\Auth;
 
 final class ReportScheduleAdminController
 {
@@ -28,10 +28,10 @@ final class ReportScheduleAdminController
 
         $pageTitle = 'Relatórios Agendados';
         $contentView = __DIR__ . '/../../View/admin/reports/schedules/index.php';
-        
+
         $viewData = [
-            'admin'     => $admin,
-            'schedules' => $schedules
+            'admin' => $admin,
+            'schedules' => $schedules,
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -53,7 +53,7 @@ final class ReportScheduleAdminController
 
         // Clean and validate emails
         $emailList = array_map('trim', explode(',', $emailsRaw));
-        $validEmails = array_filter($emailList, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+        $validEmails = array_filter($emailList, fn ($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
 
         if (empty($validEmails)) {
             $_SESSION['flash_error'] = 'Forneça pelo menos um email válido.';
@@ -66,11 +66,11 @@ final class ReportScheduleAdminController
         $nextRunAt = date('Y-m-d 08:00:00', strtotime('tomorrow'));
 
         $this->scheduleRepo->create([
-            'report_type'      => $reportType,
-            'frequency'        => $frequency,
+            'report_type' => $reportType,
+            'frequency' => $frequency,
             'recipient_emails' => json_encode(array_values($validEmails), JSON_UNESCAPED_UNICODE),
-            'next_run_at'      => $nextRunAt,
-            'is_active'        => 1
+            'next_run_at' => $nextRunAt,
+            'is_active' => 1,
         ]);
 
         $_SESSION['flash_success'] = 'Agendamento criado com sucesso!';
@@ -81,7 +81,7 @@ final class ReportScheduleAdminController
     public function toggleActive(int $id): void
     {
         $admin = $this->requireAdmin();
-        
+
         $schedule = $this->scheduleRepo->findById($id);
         if ($schedule) {
             $newStatus = $schedule['is_active'] ? false : true;
@@ -96,7 +96,7 @@ final class ReportScheduleAdminController
     public function delete(int $id): void
     {
         $admin = $this->requireAdmin();
-        
+
         $schedule = $this->scheduleRepo->findById($id);
         if ($schedule) {
             $this->scheduleRepo->delete($id);

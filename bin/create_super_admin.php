@@ -15,9 +15,13 @@ if (!file_exists($envFile)) {
 $env = [];
 foreach (file($envFile) as $line) {
     $line = trim($line);
-    if (empty($line) || $line[0] === '#') continue;
-    if (strpos($line, '=') === false) continue;
-    
+    if (empty($line) || $line[0] === '#') {
+        continue;
+    }
+    if (strpos($line, '=') === false) {
+        continue;
+    }
+
     [$key, $val] = explode('=', $line, 2);
     $env[trim($key)] = trim($val, '\'"');
 }
@@ -26,7 +30,7 @@ $host = $env['DB_HOST'] ?? 'localhost';
 $user = $env['DB_USER'] ?? 'root';
 $pass = $env['DB_PASS'] ?? '';
 $database = $env['DB_NAME'] ?? 'nimbusdocs';
-$port = (int)($env['DB_PORT'] ?? 3306);
+$port = (int) ($env['DB_PORT'] ?? 3306);
 
 try {
     $pdo = new PDO(
@@ -51,7 +55,7 @@ try {
     // Verifica se email já existe
     $check = $pdo->prepare('SELECT id FROM admin_users WHERE email = ?');
     $check->execute([$adminData['email']]);
-    
+
     if ($check->fetch()) {
         echo "✗ Super Admin com este e-mail já existe.\n";
         exit(1);
@@ -85,6 +89,6 @@ try {
     echo "Acesse: http://nimbusdocs.local/admin/login\n";
 
 } catch (Exception $e) {
-    echo "✗ Erro: " . $e->getMessage() . "\n";
+    echo '✗ Erro: ' . $e->getMessage() . "\n";
     exit(1);
 }

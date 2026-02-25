@@ -13,7 +13,7 @@ class SubmissionsApiTest extends ApiTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->controller = new SubmissionsApiController($this->getApiConfig());
 
         // Setup test data
@@ -24,7 +24,7 @@ class SubmissionsApiTest extends ApiTestCase
     public function testListRequiresAuthentication(): void
     {
         $response = $this->controller->list([]);
-        
+
         $this->assertIsArray($response);
         $this->assertArrayHasKey('error', $response);
         $this->assertEquals('Unauthorized', $response['error']);
@@ -34,37 +34,37 @@ class SubmissionsApiTest extends ApiTestCase
     public function testCreateSubmissionWithAuthentication(): void
     {
         $this->authenticateAs(999, 'api@test.com');
-        
+
         $payload = [
             'portal_user_id' => 888,
             'title' => 'API Submission Test',
-            'message' => 'This was sent via automated integration test'
+            'message' => 'This was sent via automated integration test',
         ];
 
         $response = $this->controller->create($payload);
-        
+
         $this->assertIsArray($response);
         $this->assertArrayHasKey('success', $response);
         $this->assertTrue($response['success']);
-        
+
         $this->assertArrayHasKey('data', $response);
         $this->assertArrayHasKey('id', $response['data']);
         $this->assertArrayHasKey('reference_code', $response['data']);
-        
+
         $this->assertEquals(201, http_response_code());
     }
 
     public function testCreateSubmissionMissingFields(): void
     {
         $this->authenticateAs(999, 'api@test.com');
-        
+
         // Missing title
         $payload = [
             'portal_user_id' => 888,
         ];
 
         $response = $this->controller->create($payload);
-        
+
         $this->assertIsArray($response);
         $this->assertArrayHasKey('error', $response);
         $this->assertEquals('Bad Request', $response['error']);
@@ -74,18 +74,18 @@ class SubmissionsApiTest extends ApiTestCase
     public function testUpdateStatusWithAuthentication(): void
     {
         $this->authenticateAs(999, 'api@test.com');
-        
+
         // Setup a submission directly in DB to update
         $this->pdo->exec("INSERT INTO portal_submissions (id, portal_user_id, reference_code, title, status) VALUES (555, 888, 'REF123', 'Update Me', 'PENDING')");
-        
+
         $payload = [
             'id' => 555,
-            'status' => 'COMPLETED'
+            'status' => 'COMPLETED',
         ];
-        
+
         // Note: For actual GET parms mock, we inject to payload as modified in the controller
         $response = $this->controller->updateStatus($payload);
-        
+
         $this->assertIsArray($response);
         $this->assertArrayHasKey('success', $response);
         $this->assertTrue($response['success']);

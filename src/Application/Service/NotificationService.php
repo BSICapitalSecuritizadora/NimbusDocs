@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Application\Service;
 
 use App\Infrastructure\Notification\GraphMailService;
-use App\Infrastructure\Persistence\MySqlSettingsRepository;
 use App\Infrastructure\Persistence\MySqlAdminUserRepository;
-use App\Infrastructure\Persistence\MySqlPortalUserRepository;
 use App\Infrastructure\Persistence\MySqlNotificationOutboxRepository;
+use App\Infrastructure\Persistence\MySqlPortalUserRepository;
+use App\Infrastructure\Persistence\MySqlSettingsRepository;
 
 final class NotificationService
 {
@@ -18,7 +18,8 @@ final class NotificationService
         private MySqlAdminUserRepository $adminUsers,
         private MySqlPortalUserRepository $portalUsers,
         private MySqlNotificationOutboxRepository $outbox,
-    ) {}
+    ) {
+    }
 
     private function isEnabled(string $key, bool $default = true): bool
     {
@@ -26,7 +27,8 @@ final class NotificationService
         if ($value === null) {
             return $default;
         }
-        return $value === '1' || strtolower((string)$value) === 'true';
+
+        return $value === '1' || strtolower((string) $value) === 'true';
     }
 
     private function renderTemplate(string $name, array $data): string
@@ -34,6 +36,7 @@ final class NotificationService
         ob_start();
         extract($data);
         require __DIR__ . "/../../Presentation/Email/{$name}.php";
+
         return (string) ob_get_clean();
     }
 
@@ -57,13 +60,13 @@ final class NotificationService
 
         foreach ($users as $user) {
             $this->outbox->enqueue([
-                'type'            => 'NEW_GENERAL_DOCUMENT',
+                'type' => 'NEW_GENERAL_DOCUMENT',
                 'recipient_email' => $user['email'],
-                'recipient_name'  => $user['full_name'] ?? $user['name'] ?? null,
-                'subject'         => 'Novo documento disponível: ' . ($doc['title'] ?? ''),
-                'template'        => 'new_general_document',
-                'payload_json'    => json_encode(['doc' => $doc, 'user' => $user], JSON_UNESCAPED_UNICODE),
-                'max_attempts'    => 5,
+                'recipient_name' => $user['full_name'] ?? $user['name'] ?? null,
+                'subject' => 'Novo documento disponível: ' . ($doc['title'] ?? ''),
+                'template' => 'new_general_document',
+                'payload_json' => json_encode(['doc' => $doc, 'user' => $user], JSON_UNESCAPED_UNICODE),
+                'max_attempts' => 5,
             ]);
         }
     }
@@ -84,13 +87,13 @@ final class NotificationService
 
         foreach ($users as $user) {
             $this->outbox->enqueue([
-                'type'            => 'NEW_ANNOUNCEMENT',
+                'type' => 'NEW_ANNOUNCEMENT',
                 'recipient_email' => $user['email'],
-                'recipient_name'  => $user['full_name'] ?? $user['name'] ?? null,
-                'subject'         => '[NimbusDocs] Novo comunicado: ' . ($announcement['title'] ?? ''),
-                'template'        => 'new_announcement',
-                'payload_json'    => json_encode(['announcement' => $announcement, 'user' => $user], JSON_UNESCAPED_UNICODE),
-                'max_attempts'    => 5,
+                'recipient_name' => $user['full_name'] ?? $user['name'] ?? null,
+                'subject' => '[NimbusDocs] Novo comunicado: ' . ($announcement['title'] ?? ''),
+                'template' => 'new_announcement',
+                'payload_json' => json_encode(['announcement' => $announcement, 'user' => $user], JSON_UNESCAPED_UNICODE),
+                'max_attempts' => 5,
             ]);
         }
     }
@@ -111,18 +114,18 @@ final class NotificationService
         }
 
         // Gera correlation_id baseado na submissão
-        $correlationId = $this->generateCorrelationId('sub', (int)($submission['id'] ?? 0));
+        $correlationId = $this->generateCorrelationId('sub', (int) ($submission['id'] ?? 0));
 
         foreach ($admins as $admin) {
             $this->outbox->enqueue([
-                'type'            => 'SUBMISSION_RECEIVED',
+                'type' => 'SUBMISSION_RECEIVED',
                 'recipient_email' => $admin['email'],
-                'recipient_name'  => $admin['full_name'] ?? $admin['name'] ?? null,
-                'subject'         => '[NimbusDocs] Nova submissão recebida',
-                'template'        => 'submission_received',
-                'payload_json'    => json_encode(['submission' => $submission, 'user' => $portalUser, 'admin' => $admin], JSON_UNESCAPED_UNICODE),
-                'correlation_id'  => $correlationId,
-                'max_attempts'    => 5,
+                'recipient_name' => $admin['full_name'] ?? $admin['name'] ?? null,
+                'subject' => '[NimbusDocs] Nova submissão recebida',
+                'template' => 'submission_received',
+                'payload_json' => json_encode(['submission' => $submission, 'user' => $portalUser, 'admin' => $admin], JSON_UNESCAPED_UNICODE),
+                'correlation_id' => $correlationId,
+                'max_attempts' => 5,
             ]);
         }
     }
@@ -158,9 +161,9 @@ final class NotificationService
 
         $html = $this->renderTemplate('submission_status_changed', [
             'submission' => $submission,
-            'user'       => $portalUser,
-            'oldStatus'  => $oldStatus,
-            'newStatus'  => $newStatus,
+            'user' => $portalUser,
+            'oldStatus' => $oldStatus,
+            'newStatus' => $newStatus,
         ]);
 
         $subject = sprintf(
@@ -171,18 +174,18 @@ final class NotificationService
         );
 
         $this->outbox->enqueue([
-            'type'            => 'SUBMISSION_STATUS_CHANGED',
+            'type' => 'SUBMISSION_STATUS_CHANGED',
             'recipient_email' => $portalUser['email'],
-            'recipient_name'  => $portalUser['full_name'] ?? $portalUser['name'] ?? null,
-            'subject'         => $subject,
-            'template'        => 'submission_status_changed',
-            'payload_json'    => json_encode([
+            'recipient_name' => $portalUser['full_name'] ?? $portalUser['name'] ?? null,
+            'subject' => $subject,
+            'template' => 'submission_status_changed',
+            'payload_json' => json_encode([
                 'submission' => $submission,
-                'user'       => $portalUser,
-                'oldStatus'  => $oldStatus,
-                'newStatus'  => $newStatus,
+                'user' => $portalUser,
+                'oldStatus' => $oldStatus,
+                'newStatus' => $newStatus,
             ], JSON_UNESCAPED_UNICODE),
-            'max_attempts'    => 5,
+            'max_attempts' => 5,
         ]);
     }
 
@@ -196,18 +199,18 @@ final class NotificationService
         }
 
         $html = $this->renderTemplate('token_created', [
-            'user'  => $portalUser,
+            'user' => $portalUser,
             'token' => $token,
         ]);
 
         $this->outbox->enqueue([
-            'type'            => 'TOKEN_CREATED',
+            'type' => 'TOKEN_CREATED',
             'recipient_email' => $portalUser['email'],
-            'recipient_name'  => $portalUser['full_name'] ?? $portalUser['name'] ?? null,
-            'subject'         => '[NimbusDocs] Seu link de acesso ao portal',
-            'template'        => 'token_created',
-            'payload_json'    => json_encode(['user' => $portalUser, 'token' => $token], JSON_UNESCAPED_UNICODE),
-            'max_attempts'    => 5,
+            'recipient_name' => $portalUser['full_name'] ?? $portalUser['name'] ?? null,
+            'subject' => '[NimbusDocs] Seu link de acesso ao portal',
+            'template' => 'token_created',
+            'payload_json' => json_encode(['user' => $portalUser, 'token' => $token], JSON_UNESCAPED_UNICODE),
+            'max_attempts' => 5,
         ]);
     }
 
@@ -221,25 +224,25 @@ final class NotificationService
         }
 
         // Evita duplicidade: não enfileira se já houver notificação para este token e destinatário
-        $tokenId = isset($token['id']) ? (int)$token['id'] : null;
-        $windowHours = (int)($_ENV['OUTBOX_DUPLICATE_WINDOW_HOURS'] ?? 24);
-        if ($tokenId && $this->outbox->existsTokenExpiredFor($tokenId, (string)$portalUser['email'], $windowHours)) {
+        $tokenId = isset($token['id']) ? (int) $token['id'] : null;
+        $windowHours = (int) ($_ENV['OUTBOX_DUPLICATE_WINDOW_HOURS'] ?? 24);
+        if ($tokenId && $this->outbox->existsTokenExpiredFor($tokenId, (string) $portalUser['email'], $windowHours)) {
             return;
         }
 
         $html = $this->renderTemplate('token_expired', [
-            'user'  => $portalUser,
+            'user' => $portalUser,
             'token' => $token,
         ]);
 
         $this->outbox->enqueue([
-            'type'            => 'TOKEN_EXPIRED',
+            'type' => 'TOKEN_EXPIRED',
             'recipient_email' => $portalUser['email'],
-            'recipient_name'  => $portalUser['full_name'] ?? $portalUser['name'] ?? null,
-            'subject'         => '[NimbusDocs] Link de acesso expirado',
-            'template'        => 'token_expired',
-            'payload_json'    => json_encode(['user' => $portalUser, 'token' => $token], JSON_UNESCAPED_UNICODE),
-            'max_attempts'    => 5,
+            'recipient_name' => $portalUser['full_name'] ?? $portalUser['name'] ?? null,
+            'subject' => '[NimbusDocs] Link de acesso expirado',
+            'template' => 'token_expired',
+            'payload_json' => json_encode(['user' => $portalUser, 'token' => $token], JSON_UNESCAPED_UNICODE),
+            'max_attempts' => 5,
         ]);
     }
 
@@ -253,18 +256,18 @@ final class NotificationService
         }
 
         $html = $this->renderTemplate('user_precreated', [
-            'user'  => $portalUser,
+            'user' => $portalUser,
             'token' => $token,
         ]);
 
         $this->outbox->enqueue([
-            'type'            => 'USER_PRECREATED',
+            'type' => 'USER_PRECREATED',
             'recipient_email' => $portalUser['email'],
-            'recipient_name'  => $portalUser['full_name'] ?? $portalUser['name'] ?? null,
-            'subject'         => '[NimbusDocs] Acesso ao portal NimbusDocs',
-            'template'        => 'user_precreated',
-            'payload_json'    => json_encode(['user' => $portalUser, 'token' => $token], JSON_UNESCAPED_UNICODE),
-            'max_attempts'    => 5,
+            'recipient_name' => $portalUser['full_name'] ?? $portalUser['name'] ?? null,
+            'subject' => '[NimbusDocs] Acesso ao portal NimbusDocs',
+            'template' => 'user_precreated',
+            'payload_json' => json_encode(['user' => $portalUser, 'token' => $token], JSON_UNESCAPED_UNICODE),
+            'max_attempts' => 5,
         ]);
     }
 }

@@ -10,7 +10,9 @@ namespace App\Support;
 class Translator
 {
     private static string $locale = 'pt-BR';
+
     private static array $translations = [];
+
     private static string $langPath = '';
 
     /**
@@ -28,7 +30,7 @@ class Translator
     public static function setLocale(string $locale): void
     {
         $validLocales = ['pt-BR', 'en', 'es'];
-        
+
         if (in_array($locale, $validLocales)) {
             self::$locale = $locale;
             self::loadTranslations($locale);
@@ -61,7 +63,7 @@ class Translator
     private static function loadTranslations(string $locale): void
     {
         $file = self::$langPath . '/' . $locale . '/messages.php';
-        
+
         if (file_exists($file)) {
             self::$translations[$locale] = require $file;
         } else {
@@ -71,7 +73,7 @@ class Translator
 
     /**
      * Translate a key
-     * 
+     *
      * @param string $key Translation key (supports dot notation: 'auth.login')
      * @param array $params Parameters to replace in the translation
      * @return string Translated string or key if not found
@@ -79,7 +81,7 @@ class Translator
     public static function trans(string $key, array $params = []): string
     {
         $locale = self::$locale;
-        
+
         // Ensure translations are loaded
         if (!isset(self::$translations[$locale])) {
             self::loadTranslations($locale);

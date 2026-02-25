@@ -20,23 +20,23 @@ final class MySqlSubmissionCommentRepository
      */
     public function add(array $data): int
     {
-        $sql = "
+        $sql = '
             INSERT INTO submission_comments 
             (submission_id, author_type, author_id, comment, is_internal, requires_action)
             VALUES (:submission_id, :author_type, :author_id, :comment, :is_internal, :requires_action)
-        ";
+        ';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':submission_id'  => $data['submission_id'],
-            ':author_type'    => $data['author_type'],    // 'ADMIN' ou 'PORTAL_USER'
-            ':author_id'      => $data['author_id'],
-            ':comment'        => $data['comment'],
-            ':is_internal'    => (int)($data['is_internal'] ?? false),
-            ':requires_action'=> (int)($data['requires_action'] ?? false),
+            ':submission_id' => $data['submission_id'],
+            ':author_type' => $data['author_type'],    // 'ADMIN' ou 'PORTAL_USER'
+            ':author_id' => $data['author_id'],
+            ':comment' => $data['comment'],
+            ':is_internal' => (int) ($data['is_internal'] ?? false),
+            ':requires_action' => (int) ($data['requires_action'] ?? false),
         ]);
 
-        return (int)$this->pdo->lastInsertId();
+        return (int) $this->pdo->lastInsertId();
     }
 
     /**
@@ -60,10 +60,10 @@ final class MySqlSubmissionCommentRepository
         ";
 
         if (!$includeInternal) {
-            $sql .= " AND sc.is_internal = 0";
+            $sql .= ' AND sc.is_internal = 0';
         }
 
-        $sql .= " ORDER BY sc.created_at ASC";
+        $sql .= ' ORDER BY sc.created_at ASC';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':submission_id' => $submissionId]);
@@ -76,23 +76,23 @@ final class MySqlSubmissionCommentRepository
      */
     public function addStatusHistory(array $data): int
     {
-        $sql = "
+        $sql = '
             INSERT INTO submission_status_history 
             (submission_id, old_status, new_status, changed_by_type, changed_by_id, reason)
             VALUES (:submission_id, :old_status, :new_status, :changed_by_type, :changed_by_id, :reason)
-        ";
+        ';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':submission_id'   => $data['submission_id'],
-            ':old_status'      => $data['old_status'] ?? null,
-            ':new_status'      => $data['new_status'],
+            ':submission_id' => $data['submission_id'],
+            ':old_status' => $data['old_status'] ?? null,
+            ':new_status' => $data['new_status'],
             ':changed_by_type' => $data['changed_by_type'] ?? 'SYSTEM',
-            ':changed_by_id'   => $data['changed_by_id'] ?? null,
-            ':reason'          => $data['reason'] ?? null,
+            ':changed_by_id' => $data['changed_by_id'] ?? null,
+            ':reason' => $data['reason'] ?? null,
         ]);
 
-        return (int)$this->pdo->lastInsertId();
+        return (int) $this->pdo->lastInsertId();
     }
 
     /**
@@ -132,37 +132,37 @@ final class MySqlSubmissionCommentRepository
         ?int $correctionDays = null
     ): bool {
         // Pega status atual
-        $stmt = $this->pdo->prepare("SELECT status FROM portal_submissions WHERE id = :id");
+        $stmt = $this->pdo->prepare('SELECT status FROM portal_submissions WHERE id = :id');
         $stmt->execute([':id' => $submissionId]);
         $current = $stmt->fetch(PDO::FETCH_ASSOC);
         $oldStatus = $current['status'] ?? null;
 
         // Atualiza submissão
-        $sql = "UPDATE portal_submissions SET status = :status";
+        $sql = 'UPDATE portal_submissions SET status = :status';
         $params = [':status' => $newStatus, ':id' => $submissionId];
 
         if ($newStatus === 'NEEDS_CORRECTION') {
-            $sql .= ", correction_count = correction_count + 1, last_correction_request_at = NOW()";
-            
+            $sql .= ', correction_count = correction_count + 1, last_correction_request_at = NOW()';
+
             if ($correctionDays) {
-                $sql .= ", correction_deadline = DATE_ADD(NOW(), INTERVAL :days DAY)";
+                $sql .= ', correction_deadline = DATE_ADD(NOW(), INTERVAL :days DAY)';
                 $params[':days'] = $correctionDays;
             }
         }
 
-        $sql .= " WHERE id = :id";
-        
+        $sql .= ' WHERE id = :id';
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
 
         // Registra histórico
         $this->addStatusHistory([
-            'submission_id'   => $submissionId,
-            'old_status'      => $oldStatus,
-            'new_status'      => $newStatus,
+            'submission_id' => $submissionId,
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
             'changed_by_type' => $changedByType,
-            'changed_by_id'   => $changedById,
-            'reason'          => $reason,
+            'changed_by_id' => $changedById,
+            'reason' => $reason,
         ]);
 
         return $stmt->rowCount() > 0;

@@ -15,7 +15,9 @@ use App\Support\Session;
 class TwoFactorController
 {
     private array $config;
+
     private TwoFactorAuthService $twoFactorService;
+
     private MySqlAdminUserRepository $userRepo;
 
     public function __construct(array $config)
@@ -37,7 +39,7 @@ class TwoFactorController
         }
 
         $user = $this->userRepo->findById((int) $admin['id']);
-        
+
         // Generate new secret if not exists or not enabled
         $secret = $user['two_factor_secret'] ?? null;
         if (!$secret || !($user['two_factor_enabled'] ?? false)) {
@@ -62,7 +64,7 @@ class TwoFactorController
         // Standard Layout Pattern
         $pageTitle = 'Autenticação em Dois Fatores';
         $contentView = __DIR__ . '/../../View/admin/settings/two_factor.php';
-        
+
         $otpAuthUrl = $this->twoFactorService->getOtpAuthUrl(
             $secret,
             $user['email'],
@@ -70,15 +72,15 @@ class TwoFactorController
         );
 
         $viewData = [
-            'admin'     => $admin,
+            'admin' => $admin,
             'csrfToken' => $csrfToken,
             'qrCodeUrl' => $qrCodeUrl,
             'otpAuthUrl' => $otpAuthUrl,
-            'secret'    => $secret,
+            'secret' => $secret,
             'isEnabled' => $isEnabled,
-            'branding'  => $branding,
-            'error'     => $error,
-            'success'   => $success
+            'branding' => $branding,
+            'error' => $error,
+            'success' => $success,
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -118,12 +120,12 @@ class TwoFactorController
         // Log the action
         if (isset($this->config['audit'])) {
             $this->config['audit']->log([
-                'actor_type'   => 'ADMIN',
-                'actor_id'     => (int) $admin['id'],
-                'action'       => '2FA_ENABLED',
+                'actor_type' => 'ADMIN',
+                'actor_id' => (int) $admin['id'],
+                'action' => '2FA_ENABLED',
                 'context_type' => 'admin_user',
-                'context_id'   => (int) $admin['id'],
-                'details'      => [],
+                'context_id' => (int) $admin['id'],
+                'details' => [],
             ]);
         }
 
@@ -165,12 +167,12 @@ class TwoFactorController
         // Log the action
         if (isset($this->config['audit'])) {
             $this->config['audit']->log([
-                'actor_type'   => 'ADMIN',
-                'actor_id'     => (int) $admin['id'],
-                'action'       => '2FA_DISABLED',
+                'actor_type' => 'ADMIN',
+                'actor_id' => (int) $admin['id'],
+                'action' => '2FA_DISABLED',
                 'context_type' => 'admin_user',
-                'context_id'   => (int) $admin['id'],
-                'details'      => [],
+                'context_id' => (int) $admin['id'],
+                'details' => [],
             ]);
         }
 
@@ -191,10 +193,10 @@ class TwoFactorController
         }
 
         $viewData = [
-            'branding'  => $this->config['branding'] ?? [],
-            'config'    => $this->config,
+            'branding' => $this->config['branding'] ?? [],
+            'config' => $this->config,
             'csrfToken' => Csrf::token(),
-            'error'     => Session::getFlash('error'),
+            'error' => Session::getFlash('error'),
         ];
         extract($viewData);
 
@@ -240,12 +242,12 @@ class TwoFactorController
         // Log the action
         if (isset($this->config['audit'])) {
             $this->config['audit']->log([
-                'actor_type'   => 'ADMIN',
-                'actor_id'     => (int) $pendingAdmin['id'],
-                'action'       => '2FA_VERIFIED',
+                'actor_type' => 'ADMIN',
+                'actor_id' => (int) $pendingAdmin['id'],
+                'action' => '2FA_VERIFIED',
                 'context_type' => 'admin_user',
-                'context_id'   => (int) $pendingAdmin['id'],
-                'details'      => [],
+                'context_id' => (int) $pendingAdmin['id'],
+                'details' => [],
             ]);
         }
 

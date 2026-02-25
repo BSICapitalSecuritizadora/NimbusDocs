@@ -9,7 +9,9 @@ use PDO;
 
 final class MySqlPortalSubmissionRepository implements PortalSubmissionRepository
 {
-    public function __construct(private PDO $pdo) {}
+    public function __construct(private PDO $pdo)
+    {
+    }
 
     // --------- PORTAL (usuário final) ---------
 
@@ -17,19 +19,19 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
     {
         $offset = max(0, ($page - 1) * $perPage);
         $search = $search ? trim($search) : null;
-        
-        $where = "WHERE portal_user_id = :uid";
+
+        $where = 'WHERE portal_user_id = :uid';
         $params = [':uid' => $portalUserId];
-        
+
         if ($search) {
-            $where .= " AND (reference_code LIKE :search OR title LIKE :search2 OR company_name LIKE :search3)";
+            $where .= ' AND (reference_code LIKE :search OR title LIKE :search2 OR company_name LIKE :search3)';
             $params[':search'] = '%' . $search . '%';
             $params[':search2'] = '%' . $search . '%';
             $params[':search3'] = '%' . $search . '%';
         }
 
         if ($status) {
-            $where .= " AND status = :status";
+            $where .= ' AND status = :status';
             $params[':status'] = $status;
         }
 
@@ -37,7 +39,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             "SELECT COUNT(*) FROM portal_submissions $where"
         );
         $stmtTotal->execute($params);
-        $total = (int)$stmtTotal->fetchColumn();
+        $total = (int) $stmtTotal->fetchColumn();
 
         $sql = "SELECT *
                 FROM portal_submissions
@@ -57,36 +59,39 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $items = $this->attachTags($items);
 
         return [
-            'items'   => $items,
-            'total'   => $total,
-            'page'    => $page,
+            'items' => $items,
+            'total' => $total,
+            'page' => $page,
             'perPage' => $perPage,
-            'pages'   => (int)ceil($total / $perPage),
-            'search'  => $search,
-            'status'  => $status
+            'pages' => (int) ceil($total / $perPage),
+            'search' => $search,
+            'status' => $status,
         ];
     }
 
     public function findByIdForUser(int $id, int $portalUserId): ?array
     {
-        $sql = "SELECT *
+        $sql = 'SELECT *
                 FROM portal_submissions
                 WHERE id = :id AND portal_user_id = :uid
-                LIMIT 1";
+                LIMIT 1';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $id, ':uid' => $portalUserId]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row) return null;
-        
+        if (!$row) {
+            return null;
+        }
+
         $rows = $this->attachTags([$row]);
+
         return $rows[0];
     }
 
     public function createForUser(int $portalUserId, array $data): int
     {
-        $sql = "INSERT INTO portal_submissions
+        $sql = 'INSERT INTO portal_submissions
                 (portal_user_id, reference_code, title, message, status, created_ip, created_user_agent,
                  responsible_name, company_cnpj, company_name, main_activity, phone, website,
                  net_worth, annual_revenue, is_us_person, is_pep, submission_type,
@@ -94,60 +99,61 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
                 VALUES (:portal_user_id, :reference_code, :title, :message, :status, :created_ip, :created_user_agent,
                  :responsible_name, :company_cnpj, :company_name, :main_activity, :phone, :website,
                  :net_worth, :annual_revenue, :is_us_person, :is_pep, :submission_type,
-                 :registrant_name, :registrant_position, :registrant_rg, :registrant_cpf)";
+                 :registrant_name, :registrant_position, :registrant_rg, :registrant_cpf)';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':portal_user_id'      => $portalUserId,
-            ':reference_code'      => $data['reference_code'],
-            ':title'               => $data['title'],
-            ':message'             => $data['message'] ?? null,
-            ':status'              => $data['status'] ?? 'PENDING',
-            ':created_ip'          => $data['created_ip'] ?? null,
-            ':created_user_agent'  => $data['created_user_agent'] ?? null,
-            ':responsible_name'    => $data['responsible_name'] ?? null,
-            ':company_cnpj'        => $data['company_cnpj'] ?? null,
-            ':company_name'        => $data['company_name'] ?? null,
-            ':main_activity'       => $data['main_activity'] ?? null,
-            ':phone'               => $data['phone'] ?? null,
-            ':website'             => $data['website'] ?? null,
-            ':net_worth'           => $data['net_worth'] ?? null,
-            ':annual_revenue'      => $data['annual_revenue'] ?? null,
-            ':is_us_person'        => $data['is_us_person'] ?? 0,
-            ':is_pep'              => $data['is_pep'] ?? 0,
-            ':registrant_name'     => $data['registrant_name'] ?? null,
+            ':portal_user_id' => $portalUserId,
+            ':reference_code' => $data['reference_code'],
+            ':title' => $data['title'],
+            ':message' => $data['message'] ?? null,
+            ':status' => $data['status'] ?? 'PENDING',
+            ':created_ip' => $data['created_ip'] ?? null,
+            ':created_user_agent' => $data['created_user_agent'] ?? null,
+            ':responsible_name' => $data['responsible_name'] ?? null,
+            ':company_cnpj' => $data['company_cnpj'] ?? null,
+            ':company_name' => $data['company_name'] ?? null,
+            ':main_activity' => $data['main_activity'] ?? null,
+            ':phone' => $data['phone'] ?? null,
+            ':website' => $data['website'] ?? null,
+            ':net_worth' => $data['net_worth'] ?? null,
+            ':annual_revenue' => $data['annual_revenue'] ?? null,
+            ':is_us_person' => $data['is_us_person'] ?? 0,
+            ':is_pep' => $data['is_pep'] ?? 0,
+            ':registrant_name' => $data['registrant_name'] ?? null,
             ':registrant_position' => $data['registrant_position'] ?? null,
-            ':registrant_rg'       => $data['registrant_rg'] ?? null,
-            ':registrant_cpf'      => $data['registrant_cpf'] ?? null,
-            ':submission_type'     => $data['submission_type'] ?? 'REGISTRATION',
+            ':registrant_rg' => $data['registrant_rg'] ?? null,
+            ':registrant_cpf' => $data['registrant_cpf'] ?? null,
+            ':submission_type' => $data['submission_type'] ?? 'REGISTRATION',
         ]);
 
-        return (int)$this->pdo->lastInsertId();
+        return (int) $this->pdo->lastInsertId();
     }
 
     // --------- ADMIN ---------
 
     public function findById(int $id): ?array
     {
-        $sql = "SELECT * FROM portal_submissions WHERE id = :id LIMIT 1";
+        $sql = 'SELECT * FROM portal_submissions WHERE id = :id LIMIT 1';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $row ?: null;
     }
 
     public function paginateAll(array $filters, int $page, int $perPage): array
     {
-        $where  = [];
+        $where = [];
         $params = [];
 
         if (!empty($filters['status'])) {
-            $where[]           = 's.status = :status';
+            $where[] = 's.status = :status';
             $params[':status'] = $filters['status'];
         }
 
         if (!empty($filters['user_name'])) {
-            $where[]          = 'u.full_name LIKE :user_name';
+            $where[] = 'u.full_name LIKE :user_name';
             $params[':user_name'] = '%' . $filters['user_name'] . '%';
         }
 
@@ -193,7 +199,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
 
         $stmtTotal = $this->pdo->prepare($sqlTotal);
         $stmtTotal->execute($params);
-        $total = (int)$stmtTotal->fetchColumn();
+        $total = (int) $stmtTotal->fetchColumn();
 
         $offset = max(0, ($page - 1) * $perPage);
 
@@ -218,23 +224,23 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $stmt->execute();
 
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        
+
         // Attach tags
         $items = $this->attachTags($items);
 
         return [
-            'items'   => $items,
-            'total'   => $total,
-            'page'    => $page,
+            'items' => $items,
+            'total' => $total,
+            'page' => $page,
             'perPage' => $perPage,
-            'pages'   => (int)ceil($total / $perPage),
+            'pages' => (int) ceil($total / $perPage),
             'filters' => $filters,
         ];
     }
 
     public function findWithUserById(int $id): ?array
     {
-        $sql = "SELECT 
+        $sql = 'SELECT 
                     s.*,
                     u.full_name AS user_full_name,
                     u.email     AS user_email,
@@ -243,7 +249,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
                 FROM portal_submissions s
                 JOIN portal_users u ON u.id = s.portal_user_id
                 WHERE s.id = :id
-                LIMIT 1";
+                LIMIT 1';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $id]);
@@ -252,37 +258,39 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         if (!$row) {
             return null;
         }
-        
+
         $rowsWithTags = $this->attachTags([$row]);
+
         return $rowsWithTags[0];
     }
 
     public function updateStatus(int $id, string $status, ?int $adminUserId): void
     {
-        $sql = "UPDATE portal_submissions
+        $sql = 'UPDATE portal_submissions
             SET status = :status,
                 status_updated_at = NOW(),
                 status_updated_by = :admin_user_id
-            WHERE id = :id";
+            WHERE id = :id';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':status'        => $status,
+            ':status' => $status,
             ':admin_user_id' => $adminUserId,
-            ':id'            => $id,
+            ':id' => $id,
         ]);
     }
 
     public function countAll(): int
     {
-        return (int)$this->pdo->query("SELECT COUNT(*) FROM portal_submissions")->fetchColumn();
+        return (int) $this->pdo->query('SELECT COUNT(*) FROM portal_submissions')->fetchColumn();
     }
 
     public function countByStatus(string $status): int
     {
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM portal_submissions WHERE status = :s");
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM portal_submissions WHERE status = :s');
         $stmt->execute([':s' => $status]);
-        return (int)$stmt->fetchColumn();
+
+        return (int) $stmt->fetchColumn();
     }
 
     /**
@@ -308,8 +316,9 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
         $out = array_fill_keys($statuses, 0);
         foreach ($rows as $r) {
-            $out[$r['status']] = (int)$r['total'];
+            $out[$r['status']] = (int) $r['total'];
         }
+
         return $out;
     }
 
@@ -319,16 +328,17 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
      */
     public function countsPerDay(int $days = 30): array
     {
-        $sql = "SELECT DATE(submitted_at) AS d, COUNT(*) AS total
+        $sql = 'SELECT DATE(submitted_at) AS d, COUNT(*) AS total
                 FROM portal_submissions
                 WHERE submitted_at >= DATE_SUB(CURDATE(), INTERVAL :days DAY)
                 GROUP BY d
-                ORDER BY d ASC";
+                ORDER BY d ASC';
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':days', $days, PDO::PARAM_INT);
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        return array_map(fn($r) => ['date' => $r['d'], 'total' => (int)$r['total']], $rows);
+
+        return array_map(fn ($r) => ['date' => $r['d'], 'total' => (int) $r['total']], $rows);
     }
 
     public function countOlderPending(int $days = 7): int
@@ -340,47 +350,49 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':days', $days, PDO::PARAM_INT);
         $stmt->execute();
-        return (int)$stmt->fetchColumn();
+
+        return (int) $stmt->fetchColumn();
     }
 
     public function latest(int $limit = 5): array
     {
         $stmt = $this->pdo->prepare(
-            "SELECT s.*, u.full_name AS user_name, u.email AS user_email
+            'SELECT s.*, u.full_name AS user_name, u.email AS user_email
          FROM portal_submissions s
          JOIN portal_users u ON u.id = s.portal_user_id
          ORDER BY s.submitted_at DESC
-         LIMIT :l"
+         LIMIT :l'
         );
         $stmt->bindValue(':l', $limit, \PDO::PARAM_INT);
         $stmt->execute();
         $items = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+
         return $this->attachTags($items);
     }
 
     public function countForUser(int $userId): int
     {
         $stmt = $this->pdo->prepare(
-            "SELECT COUNT(*) FROM portal_submissions WHERE portal_user_id = :uid"
+            'SELECT COUNT(*) FROM portal_submissions WHERE portal_user_id = :uid'
         );
         $stmt->execute([':uid' => $userId]);
 
-        return (int)$stmt->fetchColumn();
+        return (int) $stmt->fetchColumn();
     }
 
     public function countForUserByStatus(int $userId, string $status): int
     {
         $stmt = $this->pdo->prepare(
-            "SELECT COUNT(*) 
+            'SELECT COUNT(*) 
          FROM portal_submissions 
-         WHERE portal_user_id = :uid AND status = :status"
+         WHERE portal_user_id = :uid AND status = :status'
         );
         $stmt->execute([
-            ':uid'    => $userId,
+            ':uid' => $userId,
             ':status' => $status,
         ]);
 
-        return (int)$stmt->fetchColumn();
+        return (int) $stmt->fetchColumn();
     }
 
     /**
@@ -390,36 +402,40 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
     public function latestForUser(int $userId, int $limit = 10): array
     {
         $stmt = $this->pdo->prepare(
-            "SELECT *
+            'SELECT *
          FROM portal_submissions
          WHERE portal_user_id = :uid
          ORDER BY submitted_at DESC
-         LIMIT :lim"
+         LIMIT :lim'
         );
         $stmt->bindValue(':uid', $userId, \PDO::PARAM_INT);
         $stmt->bindValue(':lim', $limit, \PDO::PARAM_INT);
         $stmt->execute();
         $items = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+
         return $this->attachTags($items);
     }
 
     public function findForUser(int $id, int $userId): ?array
     {
-        $sql = "SELECT *
+        $sql = 'SELECT *
             FROM portal_submissions
             WHERE id = :id AND portal_user_id = :uid
-            LIMIT 1";
+            LIMIT 1';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':id'  => $id,
+            ':id' => $id,
             ':uid' => $userId,
         ]);
 
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-        if (!$row) return null;
-        
+        if (!$row) {
+            return null;
+        }
+
         $rows = $this->attachTags([$row]);
+
         return $rows[0];
     }
 
@@ -453,10 +469,10 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
         // Uses unbuffered query if possible or just yields row by row (PDO default buffers unless set otherwise)
-        // For true low memory on MySQL, we need MYSQL_ATTR_USE_BUFFERED_QUERY = false, 
+        // For true low memory on MySQL, we need MYSQL_ATTR_USE_BUFFERED_QUERY = false,
         // but that blocks other queries on same connection.
         // For now, simpler generator approach is already better than fetchAll().
-        
+
         $sql = "SELECT
             s.id,
             s.reference_code,
@@ -496,6 +512,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
     {
         // Simple fetchAll wrapper for backwards compatibility
         $generator = $this->getExportCursor($filters);
+
         return iterator_to_array($generator);
     }
 
@@ -508,17 +525,18 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
                 FROM portal_submissions 
                 WHERE status = 'PENDING' 
                   AND submitted_at < DATE_SUB(NOW(), INTERVAL :days DAY)";
-        
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':days', $days, PDO::PARAM_INT);
         $stmt->execute();
-        
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     public function delete(int $id): bool
     {
-        $stmt = $this->pdo->prepare("DELETE FROM portal_submissions WHERE id = :id");
+        $stmt = $this->pdo->prepare('DELETE FROM portal_submissions WHERE id = :id');
+
         return $stmt->execute([':id' => $id]);
     }
 
@@ -537,13 +555,13 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
         }
 
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        
+
         $sql = "SELECT st.submission_id, t.id, t.name, t.color
                 FROM submission_tags st
                 JOIN tags t ON t.id = st.tag_id
                 WHERE st.submission_id IN ($placeholders)
                 ORDER BY t.name ASC";
-        
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($ids);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -554,7 +572,7 @@ final class MySqlPortalSubmissionRepository implements PortalSubmissionRepositor
             $tagsBySubmission[$r['submission_id']][] = [
                 'id' => $r['id'],
                 'name' => $r['name'],
-                'color' => $r['color']
+                'color' => $r['color'],
             ];
         }
 

@@ -18,7 +18,7 @@ final class StreamingFileDownloader
 
     /**
      * Faz streaming de um arquivo para o cliente.
-     * 
+     *
      * @param string $filePath Caminho absoluto do arquivo
      * @param string $mimeType MIME type do arquivo
      * @param string $fileName Nome do arquivo para o cliente
@@ -104,7 +104,7 @@ final class StreamingFileDownloader
 
     /**
      * Faz streaming do arquivo em chunks.
-     * 
+     *
      * @param resource $handle Handle do arquivo aberto
      */
     private function streamChunks($handle): void
@@ -113,7 +113,7 @@ final class StreamingFileDownloader
         while (!feof($handle) && connection_status() === CONNECTION_NORMAL) {
             // Lê chunk do arquivo
             $chunk = fread($handle, self::CHUNK_SIZE);
-            
+
             if ($chunk === false) {
                 break;
             }
@@ -137,7 +137,7 @@ final class StreamingFileDownloader
     {
         // Remove caracteres de controle e aspas duplas
         $safe = preg_replace('/[\x00-\x1f\x7f"]/', '', $fileName);
-        
+
         // Fallback se ficou vazio
         if (empty($safe)) {
             $safe = 'download';

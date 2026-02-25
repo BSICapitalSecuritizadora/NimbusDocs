@@ -19,14 +19,14 @@ final class AdminMicrosoftLinkController
 
     public function showForm(array $vars = []): void
     {
-        $pageTitle   = 'Vincular Conta Microsoft ao Admin';
+        $pageTitle = 'Vincular Conta Microsoft ao Admin';
         $contentView = __DIR__ . '/../../View/admin/ms_link/form.php';
 
         $viewData = [
             'csrfToken' => Csrf::token(),
-            'error'     => Session::getFlash('error'),
-            'success'   => Session::getFlash('success'),
-            'old'       => Session::getFlash('old') ?? [],
+            'error' => Session::getFlash('error'),
+            'success' => Session::getFlash('success'),
+            'old' => Session::getFlash('old') ?? [],
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -44,10 +44,10 @@ final class AdminMicrosoftLinkController
             exit;
         }
 
-        $email = trim((string)($post['email'] ?? ''));
-        $oid   = trim((string)($post['oid'] ?? ''));
-        $tenant= trim((string)($post['tenant'] ?? ''));
-        $upn   = trim((string)($post['upn'] ?? ''));
+        $email = trim((string) ($post['email'] ?? ''));
+        $oid = trim((string) ($post['oid'] ?? ''));
+        $tenant = trim((string) ($post['tenant'] ?? ''));
+        $upn = trim((string) ($post['upn'] ?? ''));
 
         if ($email === '' || $oid === '') {
             Session::flash('error', 'Informe ao menos e-mail e OID.');
@@ -64,13 +64,13 @@ final class AdminMicrosoftLinkController
             exit;
         }
 
-        $this->repo->update((int)$user['id'], [
+        $this->repo->update((int) $user['id'], [
             'ms_object_id' => $oid,
-            'azure_oid'    => $oid,
+            'azure_oid' => $oid,
             'ms_tenant_id' => $tenant !== '' ? $tenant : null,
             'azure_tenant_id' => $tenant !== '' ? $tenant : null,
-            'ms_upn'       => $upn !== '' ? $upn : null,
-            'azure_upn'    => $upn !== '' ? $upn : null,
+            'ms_upn' => $upn !== '' ? $upn : null,
+            'azure_upn' => $upn !== '' ? $upn : null,
         ]);
 
         Session::flash('success', 'Conta Microsoft vinculada com sucesso.');

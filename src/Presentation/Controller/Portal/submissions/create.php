@@ -4,7 +4,7 @@
 /** @var array $errors */
 /** @var array $old */
 
-$title   = $old['title']   ?? '';
+$title = $old['title'] ?? '';
 $message = $old['message'] ?? '';
 ?>
 <div class="row justify-content-center">

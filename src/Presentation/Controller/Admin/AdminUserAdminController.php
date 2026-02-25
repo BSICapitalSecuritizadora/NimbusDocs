@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Presentation\Controller\Admin;
 
 use App\Infrastructure\Persistence\MySqlAdminUserRepository;
-use App\Support\Session;
 use App\Support\Csrf;
 use App\Support\PasswordValidator;
+use App\Support\Session;
 use Respect\Validation\Validator as v;
 
 final class AdminUserAdminController
@@ -32,6 +32,7 @@ final class AdminUserAdminController
             echo 'Acesso restrito a super administradores.';
             exit;
         }
+
         return $admin;
     }
 
@@ -39,39 +40,39 @@ final class AdminUserAdminController
     {
         $this->requireSuperAdmin();
 
-        $page    = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
         $perPage = 20;
 
-        $rows  = $this->repo->paginate($page, $perPage);
+        $rows = $this->repo->paginate($page, $perPage);
         $total = $this->repo->countAll();
-        $pages = (int)ceil($total / $perPage);
+        $pages = (int) ceil($total / $perPage);
 
         // Normaliza campos para a view
         $items = array_map(function (array $r) {
             return [
-                'id'             => $r['id'],
-                'name'           => $r['name'] ?? '',
-                'email'          => $r['email'] ?? '',
-                'role'           => $r['role'] ?? 'ADMIN',
-                'status'         => $r['status'] ?? 'ACTIVE',
-                'last_login_at'  => $r['last_login_at'] ?? null,
+                'id' => $r['id'],
+                'name' => $r['name'] ?? '',
+                'email' => $r['email'] ?? '',
+                'role' => $r['role'] ?? 'ADMIN',
+                'status' => $r['status'] ?? 'ACTIVE',
+                'last_login_at' => $r['last_login_at'] ?? null,
             ];
         }, $rows);
 
         $pagination = [
             'items' => $items,
-            'page'  => $page,
+            'page' => $page,
             'pages' => $pages,
         ];
 
-        $pageTitle   = 'Administradores do sistema';
+        $pageTitle = 'Administradores do sistema';
         $contentView = __DIR__ . '/../../View/admin/admin_users/index.php';
-        $viewData    = [
+        $viewData = [
             'pagination' => $pagination,
-            'csrfToken'  => Csrf::token(),
-            'flash'      => [
+            'csrfToken' => Csrf::token(),
+            'flash' => [
                 'success' => Session::getFlash('success'),
-                'error'   => Session::getFlash('error'),
+                'error' => Session::getFlash('error'),
             ],
         ];
 
@@ -82,12 +83,12 @@ final class AdminUserAdminController
     {
         $this->requireSuperAdmin();
 
-        $pageTitle   = 'Novo administrador';
+        $pageTitle = 'Novo administrador';
         $contentView = __DIR__ . '/../../View/admin/admin_users/create.php';
-        $viewData    = [
+        $viewData = [
             'csrfToken' => Csrf::token(),
-            'errors'    => Session::getFlash('errors', []),
-            'old'       => Session::getFlash('old', []),
+            'errors' => Session::getFlash('errors', []),
+            'old' => Session::getFlash('old', []),
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -97,7 +98,7 @@ final class AdminUserAdminController
     {
         $this->requireSuperAdmin();
 
-        $post  = $_POST;
+        $post = $_POST;
         $token = $post['_token'] ?? '';
 
         if (!Csrf::validate($token)) {
@@ -106,11 +107,11 @@ final class AdminUserAdminController
         }
 
         $data = [
-            'name'       => trim($post['full_name'] ?? ''), // mantém campo do formulário
-            'email'      => trim($post['email'] ?? ''),
-            'role'       => $post['role'] ?? 'ADMIN',
-            'status'     => isset($post['is_active']) ? 'ACTIVE' : 'INACTIVE',
-            'auth_mode'  => 'LOCAL_ONLY',
+            'name' => trim($post['full_name'] ?? ''), // mantém campo do formulário
+            'email' => trim($post['email'] ?? ''),
+            'role' => $post['role'] ?? 'ADMIN',
+            'status' => isset($post['is_active']) ? 'ACTIVE' : 'INACTIVE',
+            'auth_mode' => 'LOCAL_ONLY',
         ];
         $password = $post['password'] ?? '';
         $passwordConfirm = $post['password_confirmation'] ?? '';
@@ -157,21 +158,22 @@ final class AdminUserAdminController
     {
         $this->requireSuperAdmin();
 
-        $id   = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
         $user = $this->repo->findById($id);
 
         if (!$user) {
             http_response_code(404);
             echo 'Administrador não encontrado.';
+
             return;
         }
 
-        $pageTitle   = 'Editar administrador';
+        $pageTitle = 'Editar administrador';
         $contentView = __DIR__ . '/../../View/admin/admin_users/edit.php';
-        $viewData    = [
-            'user'      => $user,
+        $viewData = [
+            'user' => $user,
             'csrfToken' => Csrf::token(),
-            'errors'    => Session::getFlash('errors', []),
+            'errors' => Session::getFlash('errors', []),
         ];
 
         require __DIR__ . '/../../View/admin/layouts/base.php';
@@ -181,16 +183,17 @@ final class AdminUserAdminController
     {
         $this->requireSuperAdmin();
 
-        $id   = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
         $user = $this->repo->findById($id);
 
         if (!$user) {
             http_response_code(404);
             echo 'Administrador não encontrado.';
+
             return;
         }
 
-        $post  = $_POST;
+        $post = $_POST;
         $token = $post['_token'] ?? '';
 
         if (!Csrf::validate($token)) {
@@ -199,10 +202,10 @@ final class AdminUserAdminController
         }
 
         $data = [
-            'name'      => trim($post['full_name'] ?? ''),
-            'email'     => trim($post['email'] ?? ''),
-            'role'      => $post['role'] ?? $user['role'],
-            'status'    => isset($post['is_active']) ? 'ACTIVE' : 'INACTIVE',
+            'name' => trim($post['full_name'] ?? ''),
+            'email' => trim($post['email'] ?? ''),
+            'role' => $post['role'] ?? $user['role'],
+            'status' => isset($post['is_active']) ? 'ACTIVE' : 'INACTIVE',
         ];
         $password = $post['password'] ?? '';
         $passwordConfirm = $post['password_confirmation'] ?? '';
@@ -255,7 +258,7 @@ final class AdminUserAdminController
     {
         $this->requireSuperAdmin();
 
-        $id = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
 
         // Se vier por GET (ex.: link direto), apenas redireciona com aviso
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
@@ -273,6 +276,7 @@ final class AdminUserAdminController
         if (!$user) {
             http_response_code(404);
             echo 'Administrador não encontrado.';
+
             return;
         }
 

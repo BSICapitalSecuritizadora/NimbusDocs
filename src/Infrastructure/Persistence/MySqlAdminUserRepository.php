@@ -9,13 +9,16 @@ use PDO;
 
 final class MySqlAdminUserRepository implements AdminUserRepository
 {
-    public function __construct(private PDO $pdo) {}
+    public function __construct(private PDO $pdo)
+    {
+    }
 
     public function findById(int $id): ?array
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM admin_users WHERE id = :id LIMIT 1");
+        $stmt = $this->pdo->prepare('SELECT * FROM admin_users WHERE id = :id LIMIT 1');
         $stmt->execute([':id' => $id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $row ?: null;
     }
 
@@ -27,6 +30,7 @@ final class MySqlAdminUserRepository implements AdminUserRepository
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':email' => $email]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $row ?: null;
     }
 
@@ -46,7 +50,7 @@ final class MySqlAdminUserRepository implements AdminUserRepository
 
     public function countAll(): int
     {
-        return (int)$this->pdo->query("SELECT COUNT(*) FROM admin_users")->fetchColumn();
+        return (int) $this->pdo->query('SELECT COUNT(*) FROM admin_users')->fetchColumn();
     }
 
     public function allActiveAdmins(): array
@@ -54,39 +58,41 @@ final class MySqlAdminUserRepository implements AdminUserRepository
         $sql = "SELECT * FROM admin_users WHERE status = 'ACTIVE' AND role IN ('ADMIN', 'SUPER_ADMIN') ORDER BY role = 'SUPER_ADMIN' DESC, name ASC";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute();
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     public function create(array $data): int
     {
-        $sql = "INSERT INTO admin_users (name, email, full_name, password_hash, auth_mode, role, is_active, status, azure_oid, azure_tenant_id, azure_upn, ms_object_id, ms_tenant_id, ms_upn) VALUES (:name, :email, :full_name, :password_hash, :auth_mode, :role, :is_active, :status, :azure_oid, :azure_tenant_id, :azure_upn, :ms_object_id, :ms_tenant_id, :ms_upn)";
+        $sql = 'INSERT INTO admin_users (name, email, full_name, password_hash, auth_mode, role, is_active, status, azure_oid, azure_tenant_id, azure_upn, ms_object_id, ms_tenant_id, ms_upn) VALUES (:name, :email, :full_name, :password_hash, :auth_mode, :role, :is_active, :status, :azure_oid, :azure_tenant_id, :azure_upn, :ms_object_id, :ms_tenant_id, :ms_upn)';
 
         $name = $data['name'] ?? $data['full_name'] ?? '';
         $isActive = ($data['status'] ?? 'ACTIVE') === 'ACTIVE' ? 1 : 0;
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':name'            => $name,
-            ':email'           => $data['email'],
-            ':full_name'       => $name,
-            ':password_hash'   => $data['password_hash'] ?? null,
-            ':auth_mode'       => $data['auth_mode'] ?? 'LOCAL_ONLY',
-            ':role'            => $data['role'] ?? 'ADMIN',
-            ':is_active'       => $isActive,
-            ':status'          => $data['status'] ?? 'ACTIVE',
-            ':azure_oid'       => $data['azure_oid'] ?? $data['ms_object_id'] ?? null,
+            ':name' => $name,
+            ':email' => $data['email'],
+            ':full_name' => $name,
+            ':password_hash' => $data['password_hash'] ?? null,
+            ':auth_mode' => $data['auth_mode'] ?? 'LOCAL_ONLY',
+            ':role' => $data['role'] ?? 'ADMIN',
+            ':is_active' => $isActive,
+            ':status' => $data['status'] ?? 'ACTIVE',
+            ':azure_oid' => $data['azure_oid'] ?? $data['ms_object_id'] ?? null,
             ':azure_tenant_id' => $data['azure_tenant_id'] ?? $data['ms_tenant_id'] ?? null,
-            ':azure_upn'       => $data['azure_upn'] ?? $data['ms_upn'] ?? null,
-            ':ms_object_id'    => $data['ms_object_id'] ?? $data['azure_oid'] ?? null,
-            ':ms_tenant_id'    => $data['ms_tenant_id'] ?? $data['azure_tenant_id'] ?? null,
-            ':ms_upn'          => $data['ms_upn'] ?? $data['azure_upn'] ?? null,
+            ':azure_upn' => $data['azure_upn'] ?? $data['ms_upn'] ?? null,
+            ':ms_object_id' => $data['ms_object_id'] ?? $data['azure_oid'] ?? null,
+            ':ms_tenant_id' => $data['ms_tenant_id'] ?? $data['azure_tenant_id'] ?? null,
+            ':ms_upn' => $data['ms_upn'] ?? $data['azure_upn'] ?? null,
         ]);
-        return (int)$this->pdo->lastInsertId();
+
+        return (int) $this->pdo->lastInsertId();
     }
 
     public function update(int $id, array $data): void
     {
-        $parts  = [];
+        $parts = [];
         $params = [':id' => $id];
 
         // Sync name/full_name
@@ -147,14 +153,14 @@ final class MySqlAdminUserRepository implements AdminUserRepository
             return;
         }
 
-        $sql = "UPDATE admin_users SET " . implode(', ', $parts) . ", updated_at = NOW() WHERE id = :id";
+        $sql = 'UPDATE admin_users SET ' . implode(', ', $parts) . ', updated_at = NOW() WHERE id = :id';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
     }
 
     public function updateLastLogin(int $id, string $provider): void
     {
-        $sql = "UPDATE admin_users SET last_login_at = NOW(), last_login_provider = :provider WHERE id = :id";
+        $sql = 'UPDATE admin_users SET last_login_at = NOW(), last_login_provider = :provider WHERE id = :id';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':provider' => $provider, ':id' => $id]);
     }
@@ -171,10 +177,11 @@ final class MySqlAdminUserRepository implements AdminUserRepository
      */
     public function findByEmail(string $email): ?array
     {
-        $sql = "SELECT * FROM admin_users WHERE email = :email LIMIT 1";
+        $sql = 'SELECT * FROM admin_users WHERE email = :email LIMIT 1';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':email' => $email]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $row ?: null;
     }
 
@@ -183,7 +190,7 @@ final class MySqlAdminUserRepository implements AdminUserRepository
      */
     public function updatePassword(int $id, string $passwordHash): void
     {
-        $sql = "UPDATE admin_users SET password_hash = :password_hash, updated_at = NOW() WHERE id = :id";
+        $sql = 'UPDATE admin_users SET password_hash = :password_hash, updated_at = NOW() WHERE id = :id';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':password_hash' => $passwordHash, ':id' => $id]);
     }
@@ -193,9 +200,9 @@ final class MySqlAdminUserRepository implements AdminUserRepository
      */
     public function update2FA(int $id, ?string $secret, bool $enabled): void
     {
-        $sql = "UPDATE admin_users SET two_factor_secret = :secret, two_factor_enabled = :enabled, updated_at = NOW() WHERE id = :id";
+        $sql = 'UPDATE admin_users SET two_factor_secret = :secret, two_factor_enabled = :enabled, updated_at = NOW() WHERE id = :id';
         $stmt = $this->pdo->prepare($sql);
-        
+
         if ($secret === null) {
             $stmt->bindValue(':secret', null, PDO::PARAM_NULL);
         } else {
@@ -203,7 +210,7 @@ final class MySqlAdminUserRepository implements AdminUserRepository
         }
         $stmt->bindValue(':enabled', $enabled ? 1 : 0, PDO::PARAM_INT);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-        
+
         $stmt->execute();
     }
 
@@ -212,7 +219,7 @@ final class MySqlAdminUserRepository implements AdminUserRepository
      */
     public function confirm2FA(int $id): void
     {
-        $sql = "UPDATE admin_users SET two_factor_confirmed_at = NOW(), updated_at = NOW() WHERE id = :id";
+        $sql = 'UPDATE admin_users SET two_factor_confirmed_at = NOW(), updated_at = NOW() WHERE id = :id';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $id]);
     }

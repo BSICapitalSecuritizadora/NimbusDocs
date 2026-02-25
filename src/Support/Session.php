@@ -17,6 +17,7 @@ final class Session
         if (isset($_SESSION['_flash'][$key])) {
             unset($_SESSION['_flash'][$key]);
         }
+
         return $val;
     }
 

@@ -8,27 +8,29 @@ use PDO;
 
 final class MySqlPortalSubmissionShareholderRepository
 {
-    public function __construct(private PDO $pdo) {}
+    public function __construct(private PDO $pdo)
+    {
+    }
 
     /**
      * Cria um sócio para uma submissão
      */
     public function create(int $submissionId, array $data): int
     {
-        $sql = "INSERT INTO portal_submission_shareholders
+        $sql = 'INSERT INTO portal_submission_shareholders
                 (submission_id, name, document_rg, document_cnpj, percentage)
-                VALUES (:submission_id, :name, :document_rg, :document_cnpj, :percentage)";
+                VALUES (:submission_id, :name, :document_rg, :document_cnpj, :percentage)';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
             ':submission_id' => $submissionId,
-            ':name'          => $data['name'],
-            ':document_rg'   => $data['document_rg'] ?? null,
+            ':name' => $data['name'],
+            ':document_rg' => $data['document_rg'] ?? null,
             ':document_cnpj' => $data['document_cnpj'] ?? null,
-            ':percentage'    => $data['percentage'],
+            ':percentage' => $data['percentage'],
         ]);
 
-        return (int)$this->pdo->lastInsertId();
+        return (int) $this->pdo->lastInsertId();
     }
 
     /**
@@ -37,9 +39,9 @@ final class MySqlPortalSubmissionShareholderRepository
      */
     public function findBySubmission(int $submissionId): array
     {
-        $sql = "SELECT * FROM portal_submission_shareholders
+        $sql = 'SELECT * FROM portal_submission_shareholders
                 WHERE submission_id = :submission_id
-                ORDER BY percentage DESC, name ASC";
+                ORDER BY percentage DESC, name ASC';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':submission_id' => $submissionId]);
@@ -52,15 +54,16 @@ final class MySqlPortalSubmissionShareholderRepository
      */
     public function getTotalPercentage(int $submissionId): float
     {
-        $sql = "SELECT COALESCE(SUM(percentage), 0) AS total
+        $sql = 'SELECT COALESCE(SUM(percentage), 0) AS total
                 FROM portal_submission_shareholders
-                WHERE submission_id = :submission_id";
+                WHERE submission_id = :submission_id';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':submission_id' => $submissionId]);
 
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return (float)($result['total'] ?? 0);
+
+        return (float) ($result['total'] ?? 0);
     }
 
     /**
@@ -68,7 +71,7 @@ final class MySqlPortalSubmissionShareholderRepository
      */
     public function deleteBySubmission(int $submissionId): void
     {
-        $sql = "DELETE FROM portal_submission_shareholders WHERE submission_id = :submission_id";
+        $sql = 'DELETE FROM portal_submission_shareholders WHERE submission_id = :submission_id';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':submission_id' => $submissionId]);
     }
@@ -78,7 +81,7 @@ final class MySqlPortalSubmissionShareholderRepository
      */
     public function delete(int $id): void
     {
-        $sql = "DELETE FROM portal_submission_shareholders WHERE id = :id";
+        $sql = 'DELETE FROM portal_submission_shareholders WHERE id = :id';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $id]);
     }

@@ -4,19 +4,23 @@ declare(strict_types=1);
 
 namespace App\Presentation\Controller\Portal;
 
-use App\Infrastructure\Persistence\MySqlGeneralDocumentRepository;
 use App\Infrastructure\Logging\PortalAccessLogger;
+use App\Infrastructure\Persistence\MySqlGeneralDocumentRepository;
 use App\Support\Auth;
-use App\Support\StreamingFileDownloader;
 use App\Support\DownloadConcurrencyGuard;
 use App\Support\FileMetadataCache;
+use App\Support\StreamingFileDownloader;
 
 final class PortalGeneralDocumentsViewerController
 {
     private MySqlGeneralDocumentRepository $docs;
+
     private ?PortalAccessLogger $logger;
+
     private StreamingFileDownloader $downloader;
+
     private DownloadConcurrencyGuard $concurrencyGuard;
+
     private FileMetadataCache $metadataCache;
 
     public function __construct(private array $config)
@@ -33,22 +37,23 @@ final class PortalGeneralDocumentsViewerController
     {
         $user = Auth::requirePortalUser();
 
-        $id = (int)($vars['id'] ?? 0);
-        
+        $id = (int) ($vars['id'] ?? 0);
+
         // Busca metadata com cache
         $doc = $this->metadataCache->remember(
             'general_document',
             $id,
-            fn() => $this->docs->find($id)
+            fn () => $this->docs->find($id)
         );
 
         if (!$doc || $doc['is_active'] != 1) {
             http_response_code(404);
-            echo "Documento não encontrado.";
+            echo 'Documento não encontrado.';
+
             return;
         }
 
-        $pageTitle   = "Visualizar documento";
+        $pageTitle = 'Visualizar documento';
         $contentView = __DIR__ . '/../../View/portal/general_documents/viewer.php';
 
         $viewData = [
@@ -64,12 +69,13 @@ final class PortalGeneralDocumentsViewerController
         $userId = $user['id'];
         $clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 
-        $id = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
 
         // Controle de concorrência
         if (!$this->concurrencyGuard->acquire($clientIp)) {
             http_response_code(429);
             echo 'Limite de downloads simultâneos atingido. Aguarde um download terminar.';
+
             return;
         }
 
@@ -78,12 +84,13 @@ final class PortalGeneralDocumentsViewerController
             $doc = $this->metadataCache->remember(
                 'general_document',
                 $id,
-                fn() => $this->docs->find($id)
+                fn () => $this->docs->find($id)
             );
 
             if (!$doc || $doc['is_active'] != 1) {
                 http_response_code(404);
-                echo "Documento não encontrado.";
+                echo 'Documento não encontrado.';
+
                 return;
             }
 
@@ -94,7 +101,8 @@ final class PortalGeneralDocumentsViewerController
 
             if (!is_file($doc['file_path'])) {
                 http_response_code(404);
-                echo "Arquivo não encontrado.";
+                echo 'Arquivo não encontrado.';
+
                 return;
             }
 
@@ -104,7 +112,7 @@ final class PortalGeneralDocumentsViewerController
                 $doc['file_mime'],
                 $doc['file_original_name'],
                 'inline',
-                (int)$doc['file_size']
+                (int) $doc['file_size']
             );
 
             if (!$success) {

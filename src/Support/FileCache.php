@@ -11,6 +11,7 @@ namespace App\Support;
 class FileCache
 {
     private string $cacheDir;
+
     private int $defaultTtl;
 
     /**
@@ -43,7 +44,7 @@ class FileCache
         }
 
         $content = file_get_contents($file);
-        
+
         if ($content === false) {
             return $default;
         }
@@ -53,6 +54,7 @@ class FileCache
         // Verifica se expirou
         if ($data['expires_at'] !== null && $data['expires_at'] < time()) {
             $this->delete($key);
+
             return $default;
         }
 
@@ -117,7 +119,7 @@ class FileCache
     public function clear(): bool
     {
         $files = glob($this->cacheDir . '/*.cache');
-        
+
         if ($files === false) {
             return false;
         }
@@ -145,13 +147,13 @@ class FileCache
 
         foreach ($files as $file) {
             $content = file_get_contents($file);
-            
+
             if ($content === false) {
                 continue;
             }
 
             $data = @unserialize($content);
-            
+
             if ($data && isset($data['expires_at']) && $data['expires_at'] !== null && $data['expires_at'] < time()) {
                 unlink($file);
                 $removed++;
@@ -189,7 +191,7 @@ class FileCache
     /**
      * Incrementa o valor de um item no cache.
      * Se não existir, cria com o valor inicial.
-     * 
+     *
      * @param string $key Chave do cache
      * @param int $amount Quantidade a incrementar
      * @param int|null $ttl Tempo de vida em segundos (apenas se criar novo)
@@ -198,15 +200,16 @@ class FileCache
     public function increment(string $key, int $amount = 1, ?int $ttl = null): int
     {
         $file = $this->getFilePath($key);
-        
+
         // Bloqueio exclusivo para garantir atomicidade
         $fp = fopen($file, 'c+');
         if (!$fp) {
             return 0; // Falha ao abrir
         }
-        
+
         if (!flock($fp, LOCK_EX)) {
             fclose($fp);
+
             return 0; // Falha ao bloquear
         }
 
@@ -214,7 +217,7 @@ class FileCache
         while (!feof($fp)) {
             $content .= fread($fp, 8192);
         }
-        
+
         $data = $content ? @unserialize($content) : null;
         $currentValue = 0;
         $expiresAt = null;
@@ -225,13 +228,13 @@ class FileCache
                 // Expirou, reseta
                 $data = null;
             } else {
-                $currentValue = (int)($data['value'] ?? 0);
+                $currentValue = (int) ($data['value'] ?? 0);
                 $expiresAt = $data['expires_at'] ?? null;
             }
         }
 
         $newValue = $currentValue + $amount;
-        
+
         // Se criou agora ou resetou, define novo expire
         if ($data === null) {
             $ttl = $ttl ?? $this->defaultTtl;
@@ -261,6 +264,7 @@ class FileCache
     {
         // Sanitiza a chave para uso como nome de arquivo
         $safeKey = preg_replace('/[^a-zA-Z0-9_-]/', '_', $key);
+
         return $this->cacheDir . '/' . $safeKey . '.cache';
     }
 }

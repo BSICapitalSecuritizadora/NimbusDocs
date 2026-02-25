@@ -9,19 +9,22 @@ use PHPUnit\Framework\TestCase;
 class BackupSystemTest extends TestCase
 {
     private string $projectRoot;
+
     private string $backupScript;
+
     private string $validateScript;
+
     private string $testBackupDir;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->projectRoot = dirname(__DIR__, 2);
         $this->backupScript = $this->projectRoot . '/bin/scripts/backup.sh';
         $this->validateScript = $this->projectRoot . '/bin/scripts/validate-backup.sh';
         $this->testBackupDir = sys_get_temp_dir() . '/test_backups_' . uniqid();
-        
+
         mkdir($this->testBackupDir, 0777, true);
     }
 
@@ -38,10 +41,10 @@ class BackupSystemTest extends TestCase
         if (!is_dir($dir)) {
             return;
         }
-        
+
         $objects = scandir($dir);
         foreach ($objects as $object) {
-            if ($object != "." && $object != "..") {
+            if ($object != '.' && $object != '..') {
                 $path = $dir . DIRECTORY_SEPARATOR . $object;
                 if (is_dir($path)) {
                     $this->rrmdir($path);
@@ -86,7 +89,7 @@ class BackupSystemTest extends TestCase
     public function testValidateScriptHasValidationSteps(): void
     {
         $content = file_get_contents($this->validateScript);
-        
+
         $this->assertStringContainsString('checksum', strtolower($content), 'Should validate checksum');
         $this->assertStringContainsString('metadata', strtolower($content), 'Should validate metadata');
         $this->assertStringContainsString('tar', strtolower($content), 'Should test tar extraction');
@@ -95,13 +98,13 @@ class BackupSystemTest extends TestCase
     public function testBackupDirectoryStructure(): void
     {
         $backupsDir = $this->projectRoot . '/backups';
-        
+
         // If backups dir doesn't exist, that's okay (might not have run backup yet)
         // But if it does, it should be writable
         if (is_dir($backupsDir)) {
             $this->assertTrue(is_writable($backupsDir), 'backups/ should be writable');
         }
-        
+
         $this->assertTrue(true, 'Backup directory check passed');
     }
 
@@ -127,7 +130,7 @@ class BackupSystemTest extends TestCase
     {
         $drPlan = $this->projectRoot . '/docs/PLANO_RECUPERACAO_DESASTRES.md';
         $content = file_get_contents($drPlan);
-        
+
         $this->assertStringContainsString('RTO', $content, 'Should define RTO');
         $this->assertStringContainsString('RPO', $content, 'Should define RPO');
         $this->assertStringContainsString('restore', strtolower($content), 'Should contain restore procedures');
@@ -158,7 +161,7 @@ class BackupSystemTest extends TestCase
             'test-restore.sh',
             'backup-alert.sh',
         ];
-        
+
         foreach ($scripts as $script) {
             $path = $this->projectRoot . '/bin/scripts/' . $script;
             if (file_exists($path)) {
@@ -178,7 +181,7 @@ class BackupSystemTest extends TestCase
             'docs/ENTREGA_BACKUP_VALIDATION.md',
             'docs/PLANO_RECUPERACAO_DESASTRES.md',
         ];
-        
+
         foreach ($docs as $doc) {
             $path = $this->projectRoot . '/' . $doc;
             $this->assertFileExists($path, "{$doc} should exist");
@@ -188,7 +191,7 @@ class BackupSystemTest extends TestCase
     public function testStorageLogsDirectory(): void
     {
         $logsDir = $this->projectRoot . '/storage/logs';
-        
+
         if (is_dir($logsDir)) {
             $this->assertTrue(is_writable($logsDir), 'storage/logs should be writable for backup alerts');
         } else {

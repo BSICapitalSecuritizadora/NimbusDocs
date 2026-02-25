@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Support\Session;
-
 final class Auth
 {
     public static function admin(): ?array
     {
         /** @var array|null $admin */
         $admin = Session::get('admin');
+
         return $admin ?: null;
     }
 
@@ -44,7 +43,7 @@ final class Auth
         }
 
         // bloqueia admin inativo
-        if (!empty($admin['is_active']) && (int)$admin['is_active'] === 0) {
+        if (!empty($admin['is_active']) && (int) $admin['is_active'] === 0) {
             Session::destroy();
             http_response_code(403);
             echo 'Conta administrativa desativada.';
@@ -57,7 +56,7 @@ final class Auth
     public static function requireRole(string ...$roles): array
     {
         $admin = self::requireAdmin();
-        $role  = $admin['role'] ?? 'ADMIN';
+        $role = $admin['role'] ?? 'ADMIN';
 
         if (!in_array($role, $roles, true)) {
             http_response_code(403);
@@ -78,6 +77,7 @@ final class Auth
             return false;
         }
         $role = $admin['role'] ?? 'OPERATOR';
+
         return in_array($role, $roles, true);
     }
 
@@ -87,6 +87,7 @@ final class Auth
     public static function getRole(): string
     {
         $admin = self::admin();
+
         return $admin['role'] ?? 'OPERATOR';
     }
 
@@ -102,8 +103,9 @@ final class Auth
         if (!$admin) {
             return false;
         }
-        
+
         $role = $admin['role'] ?? 'OPERATOR';
+
         return PermissionService::can($role, $resource, $action);
     }
 
@@ -113,7 +115,7 @@ final class Auth
     public static function requirePermission(string $resource, string $action): array
     {
         $admin = self::requireAdmin();
-        
+
         if (!self::can($resource, $action)) {
             http_response_code(403);
             echo 'Você não tem permissão para esta ação.';
@@ -127,6 +129,7 @@ final class Auth
     {
         /** @var array|null $user */
         $user = Session::get('portal_user');
+
         return $user ?: null;
     }
 
@@ -158,7 +161,7 @@ final class Auth
             exit;
         }
 
-        if (!empty($user['is_active']) && (int)$user['is_active'] === 0) {
+        if (!empty($user['is_active']) && (int) $user['is_active'] === 0) {
             Session::destroy();
             http_response_code(403);
             echo 'Seu acesso ao portal foi desativado, entre em contato com o administrador.';
@@ -177,7 +180,7 @@ final class Auth
     private static function checkInactivity(int $timeoutMinutes = 30): void
     {
         $lastActivity = Session::get('last_activity');
-        
+
         if ($lastActivity && (time() - $lastActivity > ($timeoutMinutes * 60))) {
             Session::destroy();
             Session::flash('error', 'Sessão expirada por inatividade.');
@@ -196,7 +199,7 @@ final class Auth
     public static function requireRecentLogin(int $minutes = 10): void
     {
         $loginTime = Session::get('login_time');
-        
+
         // Se nunca logou (ou não tem timestamp), ou se passou do tempo
         if (!$loginTime || (time() - $loginTime > ($minutes * 60))) {
             // Em uma implementação completa, redirecionaria para tela de "Confirm Password"

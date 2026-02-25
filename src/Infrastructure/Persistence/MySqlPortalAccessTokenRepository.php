@@ -6,12 +6,13 @@ namespace App\Infrastructure\Persistence;
 
 use App\Domain\Repository\PortalAccessTokenRepository;
 use App\Support\Encrypter;
-use DateTimeInterface;
 use PDO;
 
 final class MySqlPortalAccessTokenRepository implements PortalAccessTokenRepository
 {
-    public function __construct(private PDO $pdo) {}
+    public function __construct(private PDO $pdo)
+    {
+    }
 
     public function create(array $data): int
     {
@@ -20,12 +21,12 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
 
             // Garante unicidade lógica: antes de criar um novo token, revoga os válidos anteriores
             if (isset($data['portal_user_id'])) {
-                $this->revokePreviousValidTokensForUser((int)$data['portal_user_id']);
+                $this->revokePreviousValidTokensForUser((int) $data['portal_user_id']);
             }
 
-            $sql = "INSERT INTO portal_access_tokens
+            $sql = 'INSERT INTO portal_access_tokens
                     (portal_user_id, code, expires_at, status)
-                    VALUES (:portal_user_id, :code, :expires_at, :status)";
+                    VALUES (:portal_user_id, :code, :expires_at, :status)';
 
             $stmt = $this->pdo->prepare($sql);
             // Aceita tanto 'code' (nome da coluna) quanto 'token' (nome antigo na camada de cima)
@@ -34,20 +35,21 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
 
             $stmt->execute([
                 ':portal_user_id' => $data['portal_user_id'],
-                ':code'           => $hashedCode,
-                ':expires_at'     => $data['expires_at'],
-                ':status'         => 'PENDING',
+                ':code' => $hashedCode,
+                ':expires_at' => $data['expires_at'],
+                ':status' => 'PENDING',
             ]);
 
-            $id = (int)$this->pdo->lastInsertId();
-            
+            $id = (int) $this->pdo->lastInsertId();
+
             $this->pdo->commit();
-            
+
             return $id;
         } catch (\Throwable $e) {
             if ($this->pdo->inTransaction()) {
                 $this->pdo->rollBack();
             }
+
             throw $e;
         }
     }
@@ -65,6 +67,7 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
         $stmt->execute([':code' => Encrypter::hash($token)]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $row ?: null;
     }
 
@@ -96,6 +99,7 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
         $stmt->execute([':code' => Encrypter::hash($code)]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $row ?: null;
     }
 
@@ -106,10 +110,11 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
      */
     public function findByCode(string $code): ?array
     {
-        $sql = "SELECT * FROM portal_access_tokens WHERE code = :code ORDER BY created_at DESC LIMIT 1";
+        $sql = 'SELECT * FROM portal_access_tokens WHERE code = :code ORDER BY created_at DESC LIMIT 1';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':code' => Encrypter::hash($code)]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $row ?: null;
     }
 
@@ -132,11 +137,11 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
 
     public function listRecentForUser(int $portalUserId, int $limit = 10): array
     {
-        $sql = "SELECT *
+        $sql = 'SELECT *
             FROM portal_access_tokens
             WHERE portal_user_id = :uid
             ORDER BY created_at DESC
-            LIMIT :limit";
+            LIMIT :limit';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':uid', $portalUserId, PDO::PARAM_INT);
@@ -171,35 +176,36 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
 
     public function countValid(): int
     {
-        return (int)$this->pdo->query(
-            "SELECT COUNT(*) 
+        return (int) $this->pdo->query(
+            'SELECT COUNT(*) 
          FROM portal_access_tokens 
          WHERE used_at IS NULL 
-           AND expires_at >= NOW()"
+           AND expires_at >= NOW()'
         )->fetchColumn();
     }
 
     public function countExpired(): int
     {
-        return (int)$this->pdo->query(
-            "SELECT COUNT(*) 
+        return (int) $this->pdo->query(
+            'SELECT COUNT(*) 
          FROM portal_access_tokens 
-         WHERE expires_at < NOW()"
+         WHERE expires_at < NOW()'
         )->fetchColumn();
     }
 
     public function findById(int $id): ?array
     {
-        $sql = "SELECT t.*, u.full_name AS user_name, u.email AS user_email
+        $sql = 'SELECT t.*, u.full_name AS user_name, u.email AS user_email
             FROM portal_access_tokens t
             LEFT JOIN portal_users u ON u.id = t.portal_user_id
             WHERE t.id = :id
-            LIMIT 1";
+            LIMIT 1';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $id]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $row ?: null;
     }
 
@@ -209,7 +215,7 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
     public function paginate(int $page, int $perPage, ?array $filters = null): array
     {
         $filters ??= [];
-        $where  = [];
+        $where = [];
         $params = [];
 
         if (!empty($filters['status'])) {
@@ -235,7 +241,7 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
                  {$whereSql}";
         $stmt = $this->pdo->prepare($sqlCount);
         $stmt->execute($params);
-        $total = (int)$stmt->fetchColumn();
+        $total = (int) $stmt->fetchColumn();
 
         $offset = ($page - 1) * $perPage;
 
@@ -264,9 +270,9 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
 
     public function revoke(int $id): void
     {
-        $sql = "UPDATE portal_access_tokens
+        $sql = 'UPDATE portal_access_tokens
             SET used_at = IF(used_at IS NULL, NOW(), used_at)
-            WHERE id = :id";
+            WHERE id = :id';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $id]);
@@ -280,11 +286,11 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
         $sql = "DELETE FROM portal_access_tokens 
                 WHERE (status = 'REVOKED' OR expires_at < NOW())
                   AND created_at < DATE_SUB(NOW(), INTERVAL :days DAY)";
-        
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':days', $days, PDO::PARAM_INT);
         $stmt->execute();
-        
+
         return $stmt->rowCount();
     }
 }

@@ -14,24 +14,24 @@ $pdo = $config['pdo'];
 
 use App\Support\Encrypter;
 
-echo "[" . date('Y-m-d H:i:s') . "] --- INICIANDO CRIPTOGRAFIA DE DADOS (LGPD) ---\n";
+echo '[' . date('Y-m-d H:i:s') . "] --- INICIANDO CRIPTOGRAFIA DE DADOS (LGPD) ---\n";
 
 try {
-    // Busca todos os usuários (sem usar o Repository para pegar dados raw, 
+    // Busca todos os usuários (sem usar o Repository para pegar dados raw,
     // mas o Repository já desencripta... então podemos usar ele mesmo para normalizar!)
     // Se usarmos PDO direto, pegamos "123" ou "ENC_123".
     // Se usarmos Repo->all(), não vem esses campos.
     // Vamos usar PDO direto para ter controle total.
 
-    $stmt = $pdo->query("SELECT id, full_name, document_number, phone_number FROM portal_users");
+    $stmt = $pdo->query('SELECT id, full_name, document_number, phone_number FROM portal_users');
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo "Encontrados " . count($users) . " usuários.\n";
+    echo 'Encontrados ' . count($users) . " usuários.\n";
 
     $updated = 0;
-    
+
     foreach ($users as $user) {
-        $id = (int)$user['id'];
+        $id = (int) $user['id'];
         $doc = $user['document_number'];
         $phone = $user['phone_number'];
 
@@ -49,17 +49,17 @@ try {
             // Verifica se houve erro (convertido para null?) ou se o decrypt retornou o proprio payload
             // Encrypter::decrypt retorna null se falhar integridade, ou o payload se não for json.
             // Se for null, algo corrompeu. Se for igual, era plain text.
-            
+
             if ($plainDoc === null) {
                 echo "   [AVISO] Falha ao decifrar CPF do usuário $id. Mantendo original.\n";
             } else {
-                 $encrypted = Encrypter::encrypt($plainDoc);
-                 // Só marca update se mudou (mas sempre muda por causa do IV rs)
-                 // Para evitar loop infinito de re-encriptação se rodar toda hora,
-                 // poderiamos checar se $doc JÁ é valido JSON/Base64.
-                 // Mas vamos forçar a garantia.
-                 $newDoc = $encrypted;
-                 $needsUpdate = true;
+                $encrypted = Encrypter::encrypt($plainDoc);
+                // Só marca update se mudou (mas sempre muda por causa do IV rs)
+                // Para evitar loop infinito de re-encriptação se rodar toda hora,
+                // poderiamos checar se $doc JÁ é valido JSON/Base64.
+                // Mas vamos forçar a garantia.
+                $newDoc = $encrypted;
+                $needsUpdate = true;
             }
         }
 
@@ -68,8 +68,8 @@ try {
             if ($plainPhone === null) {
                 echo "   [AVISO] Falha ao decifrar Telefone do usuário $id. Mantendo original.\n";
             } else {
-                 $newPhone = Encrypter::encrypt($plainPhone);
-                 $needsUpdate = true;
+                $newPhone = Encrypter::encrypt($plainPhone);
+                $needsUpdate = true;
             }
         }
 
@@ -77,17 +77,17 @@ try {
             // Update manual para não passar pelo repository (que faria encrypt duplo se estivesse mal configurado,
             // mas o repository já trata envio de plain text.
             // Aqui vamos fazer SQL direto para performance e certeza.
-            
-            $upd = $pdo->prepare("UPDATE portal_users SET document_number = :doc, phone_number = :phone, updated_at = NOW() WHERE id = :id");
+
+            $upd = $pdo->prepare('UPDATE portal_users SET document_number = :doc, phone_number = :phone, updated_at = NOW() WHERE id = :id');
             $upd->execute([
-                ':doc'   => $newDoc ?? $doc,     // Se foi calculado novo, usa. Senão mantem o old (que pode ser null ou o original)
+                ':doc' => $newDoc ?? $doc,     // Se foi calculado novo, usa. Senão mantem o old (que pode ser null ou o original)
                 ':phone' => $newPhone ?? $phone,
-                ':id'    => $id
+                ':id' => $id,
             ]);
             $updated++;
-            
+
             if ($updated % 10 === 0) {
-                echo ".";
+                echo '.';
             }
         }
     }

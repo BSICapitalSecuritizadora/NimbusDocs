@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Presentation\Controller\Admin;
 
-use App\Infrastructure\Persistence\MySqlPasswordResetRepository;
 use App\Infrastructure\Persistence\MySqlAdminUserRepository;
-use App\Support\Csrf;
-use App\Support\Session;
-use App\Support\PasswordValidator;
+use App\Infrastructure\Persistence\MySqlPasswordResetRepository;
 use App\Infrastructure\Security\DbRateLimiter;
+use App\Support\Csrf;
+use App\Support\PasswordValidator;
+use App\Support\Session;
 
 /**
  * Controller for admin password recovery
@@ -17,8 +17,11 @@ use App\Infrastructure\Security\DbRateLimiter;
 class PasswordResetController
 {
     private array $config;
+
     private MySqlPasswordResetRepository $resetRepo;
+
     private MySqlAdminUserRepository $userRepo;
+
     private DbRateLimiter $limiter;
 
     public function __construct(array $config)
@@ -35,11 +38,11 @@ class PasswordResetController
     public function showForgotForm(): void
     {
         $viewData = [
-            'branding'  => $this->config['branding'] ?? [],
-            'config'    => $this->config,
+            'branding' => $this->config['branding'] ?? [],
+            'config' => $this->config,
             'csrfToken' => Csrf::token(),
-            'error'     => Session::getFlash('error'),
-            'success'   => Session::getFlash('success'),
+            'error' => Session::getFlash('error'),
+            'success' => Session::getFlash('success'),
         ];
         extract($viewData);
 
@@ -63,7 +66,7 @@ class PasswordResetController
         // Rate limiting - 3 attempts per 15 minutes per IP
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $scope = 'password_reset';
-        
+
         if ($this->limiter->check($scope, $ip, 'ip_global', 3, 15)) {
             Session::flash('error', 'Muitas tentativas. Aguarde alguns minutos.');
             header('Location: /admin/forgot-password');
@@ -128,11 +131,11 @@ class PasswordResetController
         }
 
         $viewData = [
-            'branding'  => $this->config['branding'] ?? [],
-            'config'    => $this->config,
+            'branding' => $this->config['branding'] ?? [],
+            'config' => $this->config,
             'csrfToken' => Csrf::token(),
-            'error'     => Session::getFlash('error'),
-            'token'     => $token,
+            'error' => Session::getFlash('error'),
+            'token' => $token,
         ];
         extract($viewData);
 
@@ -251,4 +254,3 @@ class PasswordResetController
         }
     }
 }
-

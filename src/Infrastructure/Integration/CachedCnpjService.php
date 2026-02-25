@@ -14,8 +14,11 @@ use Psr\Log\LoggerInterface;
 final class CachedCnpjService
 {
     private CnpjWsService $api;
+
     private FileCache $cache;
+
     private LoggerInterface $logger;
+
     private int $cacheTtl;
 
     /**
@@ -60,6 +63,7 @@ final class CachedCnpjService
             $this->logger->debug('CNPJ obtido do cache', [
                 'cnpj' => $normalizedCnpj,
             ]);
+
             return $cached;
         }
 
@@ -73,7 +77,7 @@ final class CachedCnpjService
         // Só armazena em cache se houver dados válidos
         if ($data !== null) {
             $this->cache->set($cacheKey, $data, $this->cacheTtl);
-            
+
             $this->logger->debug('CNPJ armazenado em cache', [
                 'cnpj' => $normalizedCnpj,
                 'ttl' => $this->cacheTtl,
@@ -110,11 +114,12 @@ final class CachedCnpjService
     public function refresh(string $cnpj): ?array
     {
         $this->invalidate($cnpj);
+
         return $this->getCompanyData($cnpj);
     }
 
     // Proxy para métodos estáticos do serviço original
-    
+
     public static function formatCnpj(string $cnpj): string
     {
         return CnpjWsService::formatCnpj($cnpj);

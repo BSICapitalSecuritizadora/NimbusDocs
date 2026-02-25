@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Support;
 
-use PHPUnit\Framework\TestCase;
 use App\Support\DownloadConcurrencyGuard;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \App\Support\DownloadConcurrencyGuard
@@ -13,6 +13,7 @@ use App\Support\DownloadConcurrencyGuard;
 class DownloadConcurrencyGuardTest extends TestCase
 {
     private string $cacheDir;
+
     private DownloadConcurrencyGuard $guard;
 
     protected function setUp(): void
@@ -100,7 +101,7 @@ class DownloadConcurrencyGuardTest extends TestCase
 
         $customGuard = new DownloadConcurrencyGuard($this->cacheDir . '_custom', 5, 60);
         $this->assertEquals(5, $customGuard->getMaxConcurrent());
-        
+
         // Cleanup
         if (is_dir($this->cacheDir . '_custom')) {
             rmdir($this->cacheDir . '_custom');
@@ -116,7 +117,7 @@ class DownloadConcurrencyGuardTest extends TestCase
 
         // IP2 ainda pode adquirir
         $this->assertTrue($this->guard->acquire('ip2'));
-        
+
         // IP1 não pode
         $this->assertFalse($this->guard->acquire('ip1'));
     }

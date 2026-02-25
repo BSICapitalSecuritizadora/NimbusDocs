@@ -14,8 +14,11 @@ use PDO;
 class AuthApiController
 {
     private array $config;
+
     private PDO $pdo;
+
     private JwtService $jwt;
+
     private MySqlAdminUserRepository $userRepo;
 
     public function __construct(array $config)
@@ -33,12 +36,13 @@ class AuthApiController
     {
         // Use injected payload (for tests) or read JSON payload from request
         $input = $payload ?? json_decode(file_get_contents('php://input'), true) ?? [];
-        
+
         $email = trim($input['email'] ?? '');
         $password = $input['password'] ?? '';
 
         if (empty($email) || empty($password)) {
             http_response_code(400);
+
             return [
                 'error' => 'Bad Request',
                 'message' => 'Email and password are required.',
@@ -50,6 +54,7 @@ class AuthApiController
 
         if (!$user) {
             http_response_code(401);
+
             return [
                 'error' => 'Unauthorized',
                 'message' => 'Invalid credentials.',
@@ -59,6 +64,7 @@ class AuthApiController
         // Check auth mode
         if (!in_array($user['auth_mode'], ['LOCAL_ONLY', 'LOCAL_AND_MS'], true)) {
             http_response_code(401);
+
             return [
                 'error' => 'Unauthorized',
                 'message' => 'This account uses Microsoft authentication only.',
@@ -68,6 +74,7 @@ class AuthApiController
         // Verify password
         if (empty($user['password_hash']) || !password_verify($password, $user['password_hash'])) {
             http_response_code(401);
+
             return [
                 'error' => 'Unauthorized',
                 'message' => 'Invalid credentials.',
@@ -105,9 +112,10 @@ class AuthApiController
     public function createToken(?array $payload = null): array
     {
         $user = $this->authenticateRequest();
-        
+
         if (!$user) {
             http_response_code(401);
+
             return ['error' => 'Unauthorized', 'message' => 'Invalid or expired token.'];
         }
 
@@ -120,7 +128,7 @@ class AuthApiController
         $last4 = substr($token, -4);
 
         // Store in database
-        $sql = "INSERT INTO api_tokens (admin_user_id, name, token_hash, last_4) VALUES (:uid, :name, :hash, :last4)";
+        $sql = 'INSERT INTO api_tokens (admin_user_id, name, token_hash, last_4) VALUES (:uid, :name, :hash, :last4)';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
             'uid' => $user['sub'],
@@ -143,9 +151,10 @@ class AuthApiController
     public function revokeToken(?array $payload = null): array
     {
         $user = $this->authenticateRequest();
-        
+
         if (!$user) {
             http_response_code(401);
+
             return ['error' => 'Unauthorized', 'message' => 'Invalid or expired token.'];
         }
 
@@ -154,10 +163,11 @@ class AuthApiController
 
         if ($tokenId <= 0) {
             http_response_code(400);
+
             return ['error' => 'Bad Request', 'message' => 'Token ID is required.'];
         }
 
-        $sql = "UPDATE api_tokens SET revoked_at = NOW() WHERE id = :id AND admin_user_id = :uid";
+        $sql = 'UPDATE api_tokens SET revoked_at = NOW() WHERE id = :id AND admin_user_id = :uid';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['id' => $tokenId, 'uid' => $user['sub']]);
 
@@ -173,33 +183,33 @@ class AuthApiController
     private function authenticateRequest(): ?array
     {
         $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-        
+
         if (preg_match('/^Bearer\s+(.+)$/i', $authHeader, $matches)) {
             $token = $matches[1];
-            
+
             // Try JWT first
             $payload = $this->jwt->verify($token);
             if ($payload) {
                 return $payload;
             }
-            
+
             // Try API token
             $tokenHash = hash('sha256', $token);
-            $sql = "SELECT at.*, au.email, au.role 
+            $sql = 'SELECT at.*, au.email, au.role 
                     FROM api_tokens at 
                     JOIN admin_users au ON au.id = at.admin_user_id 
                     WHERE at.token_hash = :hash 
                       AND at.revoked_at IS NULL 
-                      AND (at.expires_at IS NULL OR at.expires_at > NOW())";
+                      AND (at.expires_at IS NULL OR at.expires_at > NOW())';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute(['hash' => $tokenHash]);
             $apiToken = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             if ($apiToken) {
                 // Update last used
-                $this->pdo->prepare("UPDATE api_tokens SET last_used_at = NOW() WHERE id = :id")
+                $this->pdo->prepare('UPDATE api_tokens SET last_used_at = NOW() WHERE id = :id')
                     ->execute(['id' => $apiToken['id']]);
-                
+
                 return [
                     'sub' => $apiToken['admin_user_id'],
                     'email' => $apiToken['email'],
@@ -207,7 +217,7 @@ class AuthApiController
                 ];
             }
         }
-        
+
         return null;
     }
 }

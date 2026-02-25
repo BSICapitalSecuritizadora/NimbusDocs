@@ -13,6 +13,7 @@ use App\Support\Session;
 class InAppNotificationController
 {
     private array $config;
+
     private MySqlAdminNotificationRepository $notificationRepo;
 
     public function __construct(array $config)
@@ -32,6 +33,7 @@ class InAppNotificationController
         if (!$admin) {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);
+
             return;
         }
 
@@ -56,14 +58,16 @@ class InAppNotificationController
         if (!$admin) {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);
+
             return;
         }
 
         $id = (int) ($params['id'] ?? 0);
-        
+
         if ($id <= 0) {
             http_response_code(400);
             echo json_encode(['error' => 'Invalid notification ID']);
+
             return;
         }
 
@@ -85,6 +89,7 @@ class InAppNotificationController
         if (!$admin) {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);
+
             return;
         }
 

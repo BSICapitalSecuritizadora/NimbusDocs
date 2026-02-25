@@ -6,28 +6,29 @@ namespace App\Presentation\Controller\Admin;
 
 use App\Infrastructure\Persistence\MySqlPortalDocumentRepository;
 use App\Infrastructure\Persistence\MySqlPortalUserRepository;
-use App\Support\FileUpload;
 use App\Support\Auth;
-use App\Support\Session;
 use App\Support\Csrf;
+use App\Support\FileUpload;
+use App\Support\Session;
 
 final class DocumentAdminController
 {
     private MySqlPortalDocumentRepository $documents;
+
     private MySqlPortalUserRepository $users;
 
     public function __construct(private array $config)
     {
         $pdo = $config['pdo'];
         $this->documents = new MySqlPortalDocumentRepository($pdo);
-        $this->users     = new MySqlPortalUserRepository($pdo);
+        $this->users = new MySqlPortalUserRepository($pdo);
     }
 
     public function index(): void
     {
         Auth::requireRole('ADMIN', 'SUPER_ADMIN');
 
-        $pageTitle   = 'Documentos do Portal';
+        $pageTitle = 'Documentos do Portal';
         $contentView = __DIR__ . '/../../View/admin/documents/index.php';
 
         $allDocuments = $this->documents->getAll(); // você cria esse método se quiser
@@ -44,7 +45,7 @@ final class DocumentAdminController
     {
         Auth::requireRole('ADMIN', 'SUPER_ADMIN');
 
-        $id = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
         $document = $this->documents->find($id);
 
         if (!$document) {
@@ -54,14 +55,14 @@ final class DocumentAdminController
         }
 
         // Get user info
-        $user = $this->users->findById((int)$document['portal_user_id']);
+        $user = $this->users->findById((int) $document['portal_user_id']);
 
-        $pageTitle   = 'Detalhes do Documento';
+        $pageTitle = 'Detalhes do Documento';
         $contentView = __DIR__ . '/../../View/admin/documents/show.php';
 
         $viewData = [
-            'document'  => $document,
-            'user'      => $user,
+            'document' => $document,
+            'user' => $user,
             'csrfToken' => Csrf::token(),
         ];
 
@@ -72,11 +73,11 @@ final class DocumentAdminController
     {
         Auth::requireRole('ADMIN', 'SUPER_ADMIN');
 
-        $pageTitle   = 'Enviar documento';
+        $pageTitle = 'Enviar documento';
         $contentView = __DIR__ . '/../../View/admin/documents/create.php';
 
         $viewData = [
-            'users'     => $this->users->all(),
+            'users' => $this->users->all(),
             'csrfToken' => Csrf::token(),
         ];
 
@@ -93,9 +94,9 @@ final class DocumentAdminController
             exit;
         }
 
-        $portalUserId = (int)$_POST['portal_user_id'];
-        $title        = trim($_POST['title'] ?? '');
-        $description  = trim($_POST['description'] ?? '');
+        $portalUserId = (int) $_POST['portal_user_id'];
+        $title = trim($_POST['title'] ?? '');
+        $description = trim($_POST['description'] ?? '');
 
         // upload seguro (garante diretório base)
         $uploadBase = dirname(__DIR__, 4) . '/storage/documents/' . $portalUserId . '/';
@@ -107,14 +108,14 @@ final class DocumentAdminController
         $storedFile = FileUpload::store($_FILES['file'], $uploadBase);
 
         $id = $this->documents->create([
-            'portal_user_id'      => $portalUserId,
-            'title'               => $title,
-            'description'         => $description,
-            'file_path'           => $storedFile['path'],
-            'file_original_name'  => $storedFile['original_name'],
-            'file_size'           => $storedFile['size'],
-            'file_mime'           => $storedFile['mime_type'],
-            'created_by_admin'    => $admin['id'],
+            'portal_user_id' => $portalUserId,
+            'title' => $title,
+            'description' => $description,
+            'file_path' => $storedFile['path'],
+            'file_original_name' => $storedFile['original_name'],
+            'file_size' => $storedFile['size'],
+            'file_mime' => $storedFile['mime_type'],
+            'created_by_admin' => $admin['id'],
         ]);
 
         // notificar usuário (se ativado)
@@ -141,7 +142,7 @@ final class DocumentAdminController
             exit;
         }
 
-        $id = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
         $doc = $this->documents->find($id);
         if ($doc) {
             // Remove arquivo do disco (best-effort)

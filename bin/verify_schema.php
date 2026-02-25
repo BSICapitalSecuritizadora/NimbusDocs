@@ -5,7 +5,7 @@ require __DIR__ . '/../bootstrap/app.php';
 echo "Verifying Schema...\n";
 
 // Check portal_submissions columns
-$stmt = $pdo->query("DESCRIBE portal_submissions");
+$stmt = $pdo->query('DESCRIBE portal_submissions');
 $cols = $stmt->fetchAll(PDO::FETCH_COLUMN);
 if (in_array('submission_type', $cols)) {
     echo "[OK] 'submission_type' column found in portal_submissions.\n";

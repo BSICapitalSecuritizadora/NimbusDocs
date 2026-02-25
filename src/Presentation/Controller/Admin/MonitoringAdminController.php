@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Presentation\Controller\Admin;
 
-use App\Support\Auth;
 use App\Infrastructure\Logging\RequestLogger;
-use App\Support\Session;
+use App\Support\Auth;
 
 /**
  * Dashboard de Monitoramento Avançado
@@ -34,11 +33,11 @@ final class MonitoringAdminController
         // Filtra por tipo de alerta (opcional)
         $filter = $_GET['filter'] ?? 'all';
         if ($filter === 'errors') {
-            $alerts = array_filter($alerts, fn($a) => $a['type'] === 'error');
+            $alerts = array_filter($alerts, fn ($a) => $a['type'] === 'error');
         } elseif ($filter === 'unauthorized') {
-            $alerts = array_filter($alerts, fn($a) => $a['type'] === 'unauthorized');
+            $alerts = array_filter($alerts, fn ($a) => $a['type'] === 'unauthorized');
         } elseif ($filter === 'slow') {
-            $alerts = array_filter($alerts, fn($a) => ($a['duration_ms'] ?? 0) > 5000);
+            $alerts = array_filter($alerts, fn ($a) => ($a['duration_ms'] ?? 0) > 5000);
         }
 
         // Calcula taxa de sucesso
@@ -61,7 +60,7 @@ final class MonitoringAdminController
                 'successRate' => $successRate,
                 'errorRate' => $errorRate,
                 'filter' => $filter,
-            ]
+            ],
         ];
 
         $contentView = __DIR__ . '/../../View/admin/monitoring/index.php';
@@ -75,6 +74,7 @@ final class MonitoringAdminController
     {
         if (!Auth::hasRole('ADMIN', 'SUPER_ADMIN')) {
             http_response_code(401);
+
             return json_encode(['error' => 'Unauthorized']);
         }
 
@@ -82,6 +82,7 @@ final class MonitoringAdminController
         $stats = RequestLogger::getStatistics($hours);
 
         header('Content-Type: application/json');
+
         return json_encode($stats);
     }
 
@@ -92,12 +93,14 @@ final class MonitoringAdminController
     {
         if (!Auth::hasRole('ADMIN', 'SUPER_ADMIN')) {
             http_response_code(401);
+
             return json_encode(['error' => 'Unauthorized']);
         }
 
         $alerts = RequestLogger::getAlerts(100);
 
         header('Content-Type: application/json');
+
         return json_encode($alerts);
     }
 
@@ -108,6 +111,7 @@ final class MonitoringAdminController
     {
         if (!Auth::hasRole('ADMIN', 'SUPER_ADMIN')) {
             http_response_code(401);
+
             return json_encode(['error' => 'Unauthorized']);
         }
 
@@ -115,6 +119,7 @@ final class MonitoringAdminController
         $requests = RequestLogger::getRecentRequests($limit);
 
         header('Content-Type: application/json');
+
         return json_encode($requests);
     }
 

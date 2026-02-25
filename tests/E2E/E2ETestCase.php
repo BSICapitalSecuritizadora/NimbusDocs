@@ -31,15 +31,15 @@ abstract class E2ETestCase extends PantherTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Load .env so APP_SECRET is available to Encrypter::hash() in the test process
         // (phpunit.xml bootstraps with vendor/autoload.php, which does NOT load .env)
         $dotenv = \Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
         $dotenv->safeLoad();
-        
+
         // Setup E2E Secure Override Token
         $this->setupE2EDatabaseOverride();
-        
+
         $this->setUpDatabase();
         $this->cleanDatabase();
     }
@@ -56,23 +56,25 @@ abstract class E2ETestCase extends PantherTestCase
         @unlink(__DIR__ . '/../../storage/e2e_db_override.flag');
         $this->cleanDatabase();
         $this->pdo = null;
-        
+
         parent::tearDown();
     }
 
     private function cleanDatabase(): void
     {
-        if (!$this->pdo) return;
-        
+        if (!$this->pdo) {
+            return;
+        }
+
         $this->pdo->exec('SET FOREIGN_KEY_CHECKS=0;');
-        
-        $tables = $this->pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+
+        $tables = $this->pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
         foreach ($tables as $table) {
             if ($table !== 'migrations') {
                 $this->pdo->exec("TRUNCATE TABLE `{$table}`");
             }
         }
-        
+
         $this->pdo->exec('SET FOREIGN_KEY_CHECKS=1;');
     }
 
@@ -87,9 +89,9 @@ abstract class E2ETestCase extends PantherTestCase
         $pdoInit = new PDO("mysql:host={$host};port={$port};charset=utf8mb4", $user, $pass, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         ]);
-        
+
         $pdoInit->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;");
-        
+
         $this->pdo = new PDO("mysql:host={$host};port={$port};dbname={$dbName};charset=utf8mb4", $user, $pass, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

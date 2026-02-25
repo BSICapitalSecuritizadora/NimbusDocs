@@ -8,7 +8,7 @@ use PDO;
 
 /**
  * Serviço de Conformidade LGPD
- * 
+ *
  * Gerencia consentimentos, retenção de dados, anonimização e direitos do titular.
  */
 final class LgpdService
@@ -31,24 +31,24 @@ final class LgpdService
         string $version,
         string $action = 'GRANTED'
     ): int {
-        $sql = "
+        $sql = '
             INSERT INTO consent_logs 
             (user_type, user_id, consent_type, version, action, ip_address, user_agent)
             VALUES (:user_type, :user_id, :consent_type, :version, :action, :ip, :ua)
-        ";
+        ';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':user_type'    => $userType,
-            ':user_id'      => $userId,
+            ':user_type' => $userType,
+            ':user_id' => $userId,
             ':consent_type' => $consentType,
-            ':version'      => $version,
-            ':action'       => $action,
-            ':ip'           => $_SERVER['REMOTE_ADDR'] ?? null,
-            ':ua'           => mb_substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255),
+            ':version' => $version,
+            ':action' => $action,
+            ':ip' => $_SERVER['REMOTE_ADDR'] ?? null,
+            ':ua' => mb_substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255),
         ]);
 
-        return (int)$this->pdo->lastInsertId();
+        return (int) $this->pdo->lastInsertId();
     }
 
     /**
@@ -75,10 +75,10 @@ final class LgpdService
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':user_type'    => $userType,
-            ':user_id'      => $userId,
+            ':user_type' => $userType,
+            ':user_id' => $userId,
             ':consent_type' => $consentType,
-            ':version'      => $activeVersion,
+            ':version' => $activeVersion,
         ]);
 
         return $stmt->fetch() !== false;
@@ -89,13 +89,14 @@ final class LgpdService
      */
     public function getActiveDocumentVersion(string $type): ?string
     {
-        $stmt = $this->pdo->prepare("
+        $stmt = $this->pdo->prepare('
             SELECT version FROM legal_documents 
             WHERE type = :type AND is_active = 1 
             LIMIT 1
-        ");
+        ');
         $stmt->execute([':type' => $type]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $row['version'] ?? null;
     }
 
@@ -104,12 +105,13 @@ final class LgpdService
      */
     public function getActiveDocument(string $type): ?array
     {
-        $stmt = $this->pdo->prepare("
+        $stmt = $this->pdo->prepare('
             SELECT * FROM legal_documents 
             WHERE type = :type AND is_active = 1 
             LIMIT 1
-        ");
+        ');
         $stmt->execute([':type' => $type]);
+
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
@@ -155,7 +157,7 @@ final class LgpdService
             $changes['audit_logs'] = $stmt->rowCount();
 
             // Remove tokens
-            $stmt = $this->pdo->prepare("DELETE FROM portal_user_tokens WHERE user_id = :user_id");
+            $stmt = $this->pdo->prepare('DELETE FROM portal_user_tokens WHERE user_id = :user_id');
             $stmt->execute([':user_id' => $userId]);
             $changes['tokens_deleted'] = $stmt->rowCount();
 
@@ -165,16 +167,17 @@ final class LgpdService
             $this->recordConsent('PORTAL_USER', $userId, 'anonymization', '1.0', 'GRANTED');
 
             return [
-                'success'      => true,
-                'anonymized_id'=> $anonymizedId,
-                'changes'      => $changes,
+                'success' => true,
+                'anonymized_id' => $anonymizedId,
+                'changes' => $changes,
             ];
 
         } catch (\Throwable $e) {
             $this->pdo->rollBack();
+
             return [
                 'success' => false,
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
             ];
         }
     }
@@ -187,18 +190,18 @@ final class LgpdService
         $data = [];
 
         // Dados do usuário
-        $stmt = $this->pdo->prepare("
+        $stmt = $this->pdo->prepare('
             SELECT id, email, full_name, created_at, terms_accepted_at
             FROM portal_users WHERE id = :id
-        ");
+        ');
         $stmt->execute([':id' => $userId]);
         $data['user'] = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Submissões
-        $stmt = $this->pdo->prepare("
+        $stmt = $this->pdo->prepare('
             SELECT id, reference_code, status, submitted_at, created_at
             FROM portal_submissions WHERE user_id = :id
-        ");
+        ');
         $stmt->execute([':id' => $userId]);
         $data['submissions'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -235,12 +238,12 @@ final class LgpdService
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':user_id'      => $userId,
+            ':user_id' => $userId,
             ':request_type' => $requestType,
-            ':reason'       => $reason,
+            ':reason' => $reason,
         ]);
 
-        return (int)$this->pdo->lastInsertId();
+        return (int) $this->pdo->lastInsertId();
     }
 
     /**
@@ -252,20 +255,20 @@ final class LgpdService
         string $status,
         ?string $notes = null
     ): bool {
-        $stmt = $this->pdo->prepare("
+        $stmt = $this->pdo->prepare('
             UPDATE data_subject_requests SET
                 status = :status,
                 processed_by = :admin_id,
                 processed_at = NOW(),
                 notes = :notes
             WHERE id = :id
-        ");
+        ');
 
         return $stmt->execute([
-            ':id'       => $requestId,
-            ':status'   => $status,
+            ':id' => $requestId,
+            ':status' => $status,
             ':admin_id' => $adminId,
-            ':notes'    => $notes,
+            ':notes' => $notes,
         ]);
     }
 
@@ -297,13 +300,13 @@ final class LgpdService
     {
         $results = [];
 
-        $policies = $this->pdo->query("
+        $policies = $this->pdo->query('
             SELECT * FROM data_retention_policies WHERE is_active = 1
-        ")->fetchAll(PDO::FETCH_ASSOC);
+        ')->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($policies as $policy) {
             $dataType = $policy['data_type'];
-            $days = (int)$policy['retention_days'];
+            $days = (int) $policy['retention_days'];
             $action = $policy['action_type'];
 
             $affected = match ($dataType) {
@@ -314,15 +317,15 @@ final class LgpdService
             };
 
             $results[$dataType] = [
-                'action'   => $action,
-                'days'     => $days,
+                'action' => $action,
+                'days' => $days,
                 'affected' => $affected,
             ];
 
             // Atualiza last_executed_at
-            $this->pdo->prepare("
+            $this->pdo->prepare('
                 UPDATE data_retention_policies SET last_executed_at = NOW() WHERE id = :id
-            ")->execute([':id' => $policy['id']]);
+            ')->execute([':id' => $policy['id']]);
         }
 
         return $results;
@@ -348,6 +351,7 @@ final class LgpdService
               AND created_at < DATE_SUB(NOW(), INTERVAL :days DAY)
         ");
         $stmt->execute([':days' => $days]);
+
         return $stmt->rowCount();
     }
 }

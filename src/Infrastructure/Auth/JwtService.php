@@ -11,7 +11,9 @@ namespace App\Infrastructure\Auth;
 class JwtService
 {
     private string $secret;
+
     private int $expiresIn;
+
     private string $issuer;
 
     public function __construct(string $secret, int $expiresIn = 3600, string $issuer = 'nimbusdocs')
@@ -23,7 +25,7 @@ class JwtService
 
     /**
      * Generate a JWT token
-     * 
+     *
      * @param array $payload Custom payload data
      * @return string JWT token
      */
@@ -54,7 +56,7 @@ class JwtService
 
     /**
      * Verify and decode a JWT token
-     * 
+     *
      * @param string $token JWT token
      * @return array|null Payload if valid, null if invalid
      */
@@ -112,7 +114,8 @@ class JwtService
             return null;
         }
 
-        [, $payloadEncoded,] = $parts;
+        [, $payloadEncoded] = $parts;
+
         return json_decode($this->base64UrlDecode($payloadEncoded), true);
     }
 

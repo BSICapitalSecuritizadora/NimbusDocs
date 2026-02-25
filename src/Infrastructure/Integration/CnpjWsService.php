@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 final class CnpjWsService
 {
     private Client $client;
+
     private LoggerInterface $logger;
 
     public function __construct(LoggerInterface $logger)
@@ -17,7 +18,7 @@ final class CnpjWsService
         $this->logger = $logger;
         $this->client = new Client([
             'base_uri' => 'https://www.receitaws.com.br/v1/',
-            'timeout'  => 10,
+            'timeout' => 10,
             'http_errors' => false,
         ]);
     }
@@ -34,13 +35,14 @@ final class CnpjWsService
 
         if (strlen($cnpj) !== 14) {
             $this->logger->warning('CNPJ inválido', ['cnpj' => $cnpj]);
+
             return null;
         }
 
         try {
             $response = $this->client->get("cnpj/{$cnpj}");
             $statusCode = $response->getStatusCode();
-            $body = (string)$response->getBody();
+            $body = (string) $response->getBody();
 
             if ($statusCode !== 200) {
                 $this->logger->error('Erro ao buscar CNPJ', [
@@ -48,6 +50,7 @@ final class CnpjWsService
                     'status' => $statusCode,
                     'body' => $body,
                 ]);
+
                 return null;
             }
 
@@ -58,38 +61,40 @@ final class CnpjWsService
                     'cnpj' => $cnpj,
                     'response' => $data,
                 ]);
+
                 return null;
             }
 
             // Mapeia dados importantes
             return [
-                'cnpj'           => $data['cnpj'] ?? null,
-                'name'           => $data['nome'] ?? null,
-                'trade_name'     => $data['fantasia'] ?? null,
-                'main_activity'  => $data['atividade_principal'][0]['text'] ?? null,
-                'phone'          => $data['telefone'] ?? null,
-                'email'          => $data['email'] ?? null,
-                'address'        => [
-                    'street'      => $data['logradouro'] ?? null,
-                    'number'      => $data['numero'] ?? null,
-                    'complement'  => $data['complemento'] ?? null,
-                    'neighborhood'=> $data['bairro'] ?? null,
-                    'city'        => $data['municipio'] ?? null,
-                    'state'       => $data['uf'] ?? null,
-                    'zip_code'    => $data['cep'] ?? null,
+                'cnpj' => $data['cnpj'] ?? null,
+                'name' => $data['nome'] ?? null,
+                'trade_name' => $data['fantasia'] ?? null,
+                'main_activity' => $data['atividade_principal'][0]['text'] ?? null,
+                'phone' => $data['telefone'] ?? null,
+                'email' => $data['email'] ?? null,
+                'address' => [
+                    'street' => $data['logradouro'] ?? null,
+                    'number' => $data['numero'] ?? null,
+                    'complement' => $data['complemento'] ?? null,
+                    'neighborhood' => $data['bairro'] ?? null,
+                    'city' => $data['municipio'] ?? null,
+                    'state' => $data['uf'] ?? null,
+                    'zip_code' => $data['cep'] ?? null,
                 ],
-                'status'         => $data['situacao'] ?? null,
-                'opening_date'   => $data['abertura'] ?? null,
-                'capital'        => $data['capital_social'] ?? null,
-                'legal_nature'   => $data['natureza_juridica'] ?? null,
-                'partners'       => $data['qsa'] ?? [],
-                'raw_data'       => $data,
+                'status' => $data['situacao'] ?? null,
+                'opening_date' => $data['abertura'] ?? null,
+                'capital' => $data['capital_social'] ?? null,
+                'legal_nature' => $data['natureza_juridica'] ?? null,
+                'partners' => $data['qsa'] ?? [],
+                'raw_data' => $data,
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Exceção ao buscar CNPJ', [
                 'cnpj' => $cnpj,
                 'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -100,7 +105,7 @@ final class CnpjWsService
     public static function formatCnpj(string $cnpj): string
     {
         $cnpj = preg_replace('/\D/', '', $cnpj);
-        
+
         if (strlen($cnpj) !== 14) {
             return $cnpj;
         }
@@ -134,14 +139,14 @@ final class CnpjWsService
         // Valida primeiro dígito verificador
         $sum = 0;
         $weights = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-        
+
         for ($i = 0; $i < 12; $i++) {
-            $sum += (int)$cnpj[$i] * $weights[$i];
+            $sum += (int) $cnpj[$i] * $weights[$i];
         }
-        
+
         $remainder = $sum % 11;
         $digit1 = $remainder < 2 ? 0 : 11 - $remainder;
-        
+
         if ($cnpj[12] != $digit1) {
             return false;
         }
@@ -149,14 +154,14 @@ final class CnpjWsService
         // Valida segundo dígito verificador
         $sum = 0;
         $weights = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-        
+
         for ($i = 0; $i < 13; $i++) {
-            $sum += (int)$cnpj[$i] * $weights[$i];
+            $sum += (int) $cnpj[$i] * $weights[$i];
         }
-        
+
         $remainder = $sum % 11;
         $digit2 = $remainder < 2 ? 0 : 11 - $remainder;
-        
+
         return $cnpj[13] == $digit2;
     }
 }

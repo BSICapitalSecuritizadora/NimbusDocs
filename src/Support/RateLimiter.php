@@ -15,6 +15,7 @@ class RateLimiter
             $cacheDir = dirname(__DIR__, 2) . '/var/cache/rate_limiter';
             self::$cache = new FileCache($cacheDir);
         }
+
         return self::$cache;
     }
 
@@ -24,7 +25,8 @@ class RateLimiter
      */
     public static function isAllowed(string $key, int $maxAttempts, int $decaySeconds): bool
     {
-        $tries = (int)self::getCache()->get('limit:' . $key, 0);
+        $tries = (int) self::getCache()->get('limit:' . $key, 0);
+
         return $tries < $maxAttempts;
     }
 
@@ -51,6 +53,6 @@ class RateLimiter
     public static function getTimeRemaining(string $key): int
     {
         // Default to 15 minutes as used in controller
-        return 900; 
+        return 900;
     }
 }

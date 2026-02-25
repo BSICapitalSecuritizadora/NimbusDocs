@@ -14,8 +14,11 @@ use PDO;
 class UsersApiController
 {
     private array $config;
+
     private PDO $pdo;
+
     private JwtService $jwt;
+
     private MySqlPortalUserRepository $userRepo;
 
     public function __construct(array $config)
@@ -32,9 +35,10 @@ class UsersApiController
     public function list(array $params): array
     {
         $user = $this->authenticateRequest();
-        
+
         if (!$user) {
             http_response_code(401);
+
             return ['error' => 'Unauthorized', 'message' => 'Invalid or expired token.'];
         }
 
@@ -61,9 +65,10 @@ class UsersApiController
     public function show(array $params): array
     {
         $user = $this->authenticateRequest();
-        
+
         if (!$user) {
             http_response_code(401);
+
             return ['error' => 'Unauthorized', 'message' => 'Invalid or expired token.'];
         }
 
@@ -72,6 +77,7 @@ class UsersApiController
 
         if (!$portalUser) {
             http_response_code(404);
+
             return ['error' => 'Not Found', 'message' => 'User not found.'];
         }
 
@@ -87,9 +93,10 @@ class UsersApiController
     public function create(?array $payload = null): array
     {
         $user = $this->authenticateRequest();
-        
+
         if (!$user) {
             http_response_code(401);
+
             return ['error' => 'Unauthorized', 'message' => 'Invalid or expired token.'];
         }
 
@@ -98,6 +105,7 @@ class UsersApiController
         // Validate required fields
         if (empty($input['full_name'])) {
             http_response_code(400);
+
             return ['error' => 'Bad Request', 'message' => 'Field \'full_name\' is required.'];
         }
 
@@ -114,6 +122,7 @@ class UsersApiController
         $id = $this->userRepo->create($data);
 
         http_response_code(201);
+
         return [
             'success' => true,
             'message' => 'User created successfully.',
@@ -130,9 +139,10 @@ class UsersApiController
     public function update(?array $payload = null): array
     {
         $user = $this->authenticateRequest();
-        
+
         if (!$user) {
             http_response_code(401);
+
             return ['error' => 'Unauthorized', 'message' => 'Invalid or expired token.'];
         }
 
@@ -140,15 +150,16 @@ class UsersApiController
         $input = $payload ?? json_decode(file_get_contents('php://input'), true) ?? [];
 
         $portalUser = $this->userRepo->findById($id);
-        
+
         if (!$portalUser) {
             http_response_code(404);
+
             return ['error' => 'Not Found', 'message' => 'User not found.'];
         }
 
         $data = [];
         $allowedFields = ['full_name', 'email', 'document_number', 'phone_number', 'external_id', 'notes', 'status'];
-        
+
         foreach ($allowedFields as $field) {
             if (array_key_exists($field, $input)) {
                 $data[$field] = $input[$field];
@@ -171,27 +182,27 @@ class UsersApiController
     private function authenticateRequest(): ?array
     {
         $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-        
+
         if (preg_match('/^Bearer\s+(.+)$/i', $authHeader, $matches)) {
             $token = $matches[1];
-            
+
             // Try JWT first
             $payload = $this->jwt->verify($token);
             if ($payload) {
                 return $payload;
             }
-            
+
             // Try API token
             $tokenHash = hash('sha256', $token);
-            $sql = "SELECT at.*, au.email, au.role 
+            $sql = 'SELECT at.*, au.email, au.role 
                     FROM api_tokens at 
                     JOIN admin_users au ON au.id = at.admin_user_id 
                     WHERE at.token_hash = :hash 
-                      AND at.revoked_at IS NULL";
+                      AND at.revoked_at IS NULL';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute(['hash' => $tokenHash]);
             $apiToken = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             if ($apiToken) {
                 return [
                     'sub' => $apiToken['admin_user_id'],
@@ -200,7 +211,7 @@ class UsersApiController
                 ];
             }
         }
-        
+
         return null;
     }
 }

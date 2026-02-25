@@ -11,6 +11,7 @@ use TheNetworg\OAuth2\Client\Provider\Azure;
 final class AdminMicrosoftAuthController
 {
     private Azure $provider;
+
     private MySqlAdminUserRepository $adminRepo;
 
     public function __construct(private array $config)
@@ -18,10 +19,10 @@ final class AdminMicrosoftAuthController
         $ms = $config['ms_admin_auth'];
 
         $this->provider = new Azure([
-            'clientId'          => $ms['client_id'],
-            'clientSecret'      => $ms['client_secret'],
-            'redirectUri'       => $ms['redirect_uri'],
-            'tenant'            => $ms['tenant_id'],
+            'clientId' => $ms['client_id'],
+            'clientSecret' => $ms['client_secret'],
+            'redirectUri' => $ms['redirect_uri'],
+            'tenant' => $ms['tenant_id'],
             'defaultEndPointVersion' => '2.0',
         ]);
 
@@ -68,7 +69,7 @@ final class AdminMicrosoftAuthController
         $this->requireMsConfigured();
 
         $state = $_GET['state'] ?? '';
-        $code  = $_GET['code']  ?? null;
+        $code = $_GET['code'] ?? null;
 
         $savedState = Session::get('ms_oauth_state');
         Session::forget('ms_oauth_state');
@@ -76,6 +77,7 @@ final class AdminMicrosoftAuthController
         if (!$code || !$savedState || $state !== $savedState) {
             http_response_code(400);
             echo 'Requisição inválida (state mismatch ou código ausente).';
+
             return;
         }
 
@@ -89,11 +91,12 @@ final class AdminMicrosoftAuthController
 
             // Dependendo da conta, o email pode vir em "mail" ou "userPrincipalName"
             $email = $data['mail'] ?? $data['userPrincipalName'] ?? null;
-            $name  = $data['displayName'] ?? '';
+            $name = $data['displayName'] ?? '';
 
             if (!$email) {
                 http_response_code(403);
                 echo 'Não foi possível obter o e-mail da conta Microsoft.';
+
                 return;
             }
 
@@ -101,11 +104,12 @@ final class AdminMicrosoftAuthController
             $allowedDomains = $this->config['ms_admin_auth']['allowed_domains'] ?? '';
             if ($allowedDomains) {
                 $domains = array_map('trim', explode(',', $allowedDomains));
-                $emailDomain = substr(strrchr($email, "@"), 1);
+                $emailDomain = substr(strrchr($email, '@'), 1);
 
                 if (!in_array($emailDomain, $domains, true)) {
                     http_response_code(403);
                     echo 'Domínio não autorizado para acesso administrativo.';
+
                     return;
                 }
             }
@@ -115,14 +119,15 @@ final class AdminMicrosoftAuthController
             if (!$adminUser) {
                 http_response_code(403);
                 echo 'Você não possui permissão administrativa no NimbusDocs.';
+
                 return;
             }
 
             // Cria sessão admin
             Session::put('admin', [
-                'id'          => $adminUser['id'],
-                'name'        => $adminUser['full_name'] ?? $adminUser['name'] ?? $name,
-                'email'       => $adminUser['email'],
+                'id' => $adminUser['id'],
+                'name' => $adminUser['full_name'] ?? $adminUser['name'] ?? $name,
+                'email' => $adminUser['email'],
                 'auth_driver' => 'microsoft',
             ]);
 

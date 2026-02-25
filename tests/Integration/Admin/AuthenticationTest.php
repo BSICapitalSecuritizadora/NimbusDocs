@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Admin;
 
-use PHPUnit\Framework\TestCase;
 use App\Support\Auth;
 use App\Support\Session;
+use PHPUnit\Framework\TestCase;
 
 class AuthenticationTest extends TestCase
 {
@@ -34,7 +34,7 @@ class AuthenticationTest extends TestCase
             'email' => 'admin@test.com',
             'name' => 'Test Admin',
         ]);
-        
+
         $this->assertTrue(Auth::isAdmin());
     }
 
@@ -45,11 +45,11 @@ class AuthenticationTest extends TestCase
             'email' => 'admin@test.com',
             'name' => 'Test Admin',
         ];
-        
+
         Session::set('admin', $adminData);
-        
+
         $admin = Auth::getAdmin();
-        
+
         $this->assertIsArray($admin);
         $this->assertEquals(1, $admin['id']);
         $this->assertEquals('admin@test.com', $admin['email']);
@@ -68,9 +68,9 @@ class AuthenticationTest extends TestCase
             'name' => 'John Doe',
             'role' => 'ADMIN',
         ];
-        
+
         Auth::loginAdmin($adminData);
-        
+
         $this->assertTrue(Auth::isAdmin());
         $this->assertEquals($adminData, Auth::getAdmin());
     }
@@ -81,11 +81,11 @@ class AuthenticationTest extends TestCase
             'id' => 1,
             'email' => 'admin@test.com',
         ]);
-        
+
         $this->assertTrue(Auth::isAdmin());
-        
+
         Auth::logoutAdmin();
-        
+
         $this->assertFalse(Auth::isAdmin());
         $this->assertNull(Auth::getAdmin());
     }
@@ -101,7 +101,7 @@ class AuthenticationTest extends TestCase
             'id' => 10,
             'email' => 'user@test.com',
         ]);
-        
+
         $this->assertTrue(Auth::isPortalUser());
     }
 
@@ -112,11 +112,11 @@ class AuthenticationTest extends TestCase
             'email' => 'portal@test.com',
             'name' => 'Portal User',
         ];
-        
+
         Session::set('portal_user', $userData);
-        
+
         $user = Auth::getPortalUser();
-        
+
         $this->assertIsArray($user);
         $this->assertEquals(10, $user['id']);
         $this->assertEquals('portal@test.com', $user['email']);
@@ -129,9 +129,9 @@ class AuthenticationTest extends TestCase
             'email' => 'portal@example.com',
             'name' => 'Jane Smith',
         ];
-        
+
         Auth::loginPortalUser($userData);
-        
+
         $this->assertTrue(Auth::isPortalUser());
         $this->assertEquals($userData, Auth::getPortalUser());
     }
@@ -142,11 +142,11 @@ class AuthenticationTest extends TestCase
             'id' => 10,
             'email' => 'user@test.com',
         ]);
-        
+
         $this->assertTrue(Auth::isPortalUser());
-        
+
         Auth::logoutPortalUser();
-        
+
         $this->assertFalse(Auth::isPortalUser());
         $this->assertNull(Auth::getPortalUser());
     }
@@ -155,17 +155,17 @@ class AuthenticationTest extends TestCase
     {
         $adminData = ['id' => 1, 'email' => 'admin@test.com'];
         $portalData = ['id' => 10, 'email' => 'portal@test.com'];
-        
+
         Auth::loginAdmin($adminData);
         Auth::loginPortalUser($portalData);
-        
+
         $this->assertTrue(Auth::isAdmin());
         $this->assertTrue(Auth::isPortalUser());
         $this->assertEquals($adminData, Auth::getAdmin());
         $this->assertEquals($portalData, Auth::getPortalUser());
-        
+
         Auth::logoutAdmin();
-        
+
         $this->assertFalse(Auth::isAdmin());
         $this->assertTrue(Auth::isPortalUser(), 'Portal user should still be logged in');
     }
@@ -173,22 +173,22 @@ class AuthenticationTest extends TestCase
     public function testSessionPersistence(): void
     {
         $adminData = ['id' => 1, 'name' => 'Admin'];
-        
+
         Auth::loginAdmin($adminData);
-        
+
         // Simulate new request with same session
         $admin = Auth::getAdmin();
-        
+
         $this->assertEquals($adminData, $admin);
     }
 
     public function testMultipleLogoutCalls(): void
     {
         Auth::loginAdmin(['id' => 1]);
-        
+
         Auth::logoutAdmin();
         Auth::logoutAdmin(); // Should not throw error
-        
+
         $this->assertFalse(Auth::isAdmin());
     }
 
@@ -196,9 +196,9 @@ class AuthenticationTest extends TestCase
     {
         Auth::loginAdmin(['id' => 1, 'name' => 'First Admin']);
         Auth::loginAdmin(['id' => 2, 'name' => 'Second Admin']);
-        
+
         $admin = Auth::getAdmin();
-        
+
         $this->assertEquals(2, $admin['id']);
         $this->assertEquals('Second Admin', $admin['name']);
     }

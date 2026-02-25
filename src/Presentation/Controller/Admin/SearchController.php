@@ -13,6 +13,7 @@ use App\Support\Session;
 class SearchController
 {
     private array $config;
+
     private GlobalSearchService $searchService;
 
     public function __construct(array $config)
@@ -30,6 +31,7 @@ class SearchController
         if (!$admin) {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);
+
             return;
         }
 
@@ -54,6 +56,7 @@ class SearchController
         if (!$admin) {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);
+
             return;
         }
 
@@ -82,12 +85,12 @@ class SearchController
 
         $query = trim($_GET['q'] ?? '');
         $results = $this->searchService->search($query, 50);
-        
+
         $pageTitle = 'Busca Global';
         $viewData = [
             'query' => $query,
             'results' => $results,
-            'branding' => $this->config['branding'] ?? []
+            'branding' => $this->config['branding'] ?? [],
         ];
         $contentView = __DIR__ . '/../../View/admin/search/results.php';
 

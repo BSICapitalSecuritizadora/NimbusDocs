@@ -4,10 +4,10 @@
 /** @var array $flash */
 
 $items = $pagination['items'] ?? [];
-$page  = $pagination['page'] ?? 1;
+$page = $pagination['page'] ?? 1;
 $pages = $pagination['pages'] ?? 1;
 $success = $flash['success'] ?? null;
-$error   = $flash['error']   ?? null;
+$error = $flash['error'] ?? null;
 ?>
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h4 mb-0">Minhas submissões</h1>
@@ -54,7 +54,7 @@ $error   = $flash['error']   ?? null;
                                 <td><?= htmlspecialchars($s['status'], ENT_QUOTES, 'UTF-8') ?></td>
                                 <td><?= htmlspecialchars($s['submitted_at'], ENT_QUOTES, 'UTF-8') ?></td>
                                 <td class="text-end">
-                                    <a href="/portal/submissions/<?= (int)$s['id'] ?>" class="btn btn-sm btn-outline-secondary">
+                                    <a href="/portal/submissions/<?= (int) $s['id'] ?>" class="btn btn-sm btn-outline-secondary">
                                         Ver
                                     </a>
                                 </td>

@@ -11,12 +11,13 @@ final class AuditLogger
     public function __construct(
         private AuditLogRepository $repo,
         private array $config
-    ) {}
+    ) {
+    }
 
     public function log(array $data): void
     {
-        $ip  = $_SERVER['REMOTE_ADDR']     ?? null;
-        $ua  = $_SERVER['HTTP_USER_AGENT'] ?? null;
+        $ip = $_SERVER['REMOTE_ADDR'] ?? null;
+        $ua = $_SERVER['HTTP_USER_AGENT'] ?? null;
 
         // --- ANONIMIZAÇÃO (LGPD) ---
         if (isset($data['details']) && is_array($data['details'])) {
@@ -38,9 +39,9 @@ final class AuditLogger
     private function redactDetails(array $context): array
     {
         $sensitiveKeys = [
-            'password', 'password_confirmation', 'senha', 
+            'password', 'password_confirmation', 'senha',
             'secret', 'token', 'access_code', 'code', 'auth_token',
-            'cpf', 'rg', 'credit_card', 'card_number', 'cvv'
+            'cpf', 'rg', 'credit_card', 'card_number', 'cvv',
         ];
 
         foreach ($context as $key => $value) {
@@ -84,11 +85,11 @@ final class AuditLogger
     public function diff(string $action, $target, ?string $summary, array $oldData, array $newData): void
     {
         $diff = \App\Support\DiffCalculator::compute($oldData, $newData);
-        
+
         $data = [
             'action' => $action,
             'summary' => $summary,
-            'details' => $diff
+            'details' => $diff,
         ];
 
         // Determine target type/id from object if possible, or pass explicitly

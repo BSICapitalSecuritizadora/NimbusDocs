@@ -6,15 +6,16 @@ namespace App\Presentation\Controller\Admin;
 
 use App\Infrastructure\Persistence\MySqlAdminUserRepository;
 use App\Support\AuditLogger;
-use App\Support\Csrf;
-use App\Support\Session;
 use App\Support\Auth;
+use App\Support\Csrf;
 use App\Support\PasswordValidator;
+use App\Support\Session;
 use Respect\Validation\Validator as v;
 
 final class AdminUserController
 {
     private MySqlAdminUserRepository $repo;
+
     private AuditLogger $audit;
 
     public function __construct(private array $config)
@@ -32,19 +33,19 @@ final class AdminUserController
     {
         $this->requireSuperAdmin();
 
-        $page    = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
         $perPage = 10;
 
         $pagination = $this->repo->paginate($page, $perPage);
 
-        $pageTitle   = 'Administradores - NimbusDocs';
+        $pageTitle = 'Administradores - NimbusDocs';
         $contentView = __DIR__ . '/../../../View/admin/admin_users/index.php';
-        $viewData    = [
+        $viewData = [
             'pagination' => $pagination,
-            'csrfToken'  => Csrf::token(),
-            'flash'      => [
+            'csrfToken' => Csrf::token(),
+            'flash' => [
                 'success' => Session::getFlash('success'),
-                'error'   => Session::getFlash('error'),
+                'error' => Session::getFlash('error'),
             ],
         ];
 
@@ -55,13 +56,13 @@ final class AdminUserController
     {
         $this->requireSuperAdmin();
 
-        $pageTitle   = 'Novo Administrador';
+        $pageTitle = 'Novo Administrador';
         $contentView = __DIR__ . '/../../../View/admin/admin_users/form.php';
-        $viewData    = [
-            'mode'      => 'create',
-            'user'      => null,
-            'errors'    => Session::getFlash('errors') ?? [],
-            'old'       => Session::getFlash('old') ?? [],
+        $viewData = [
+            'mode' => 'create',
+            'user' => null,
+            'errors' => Session::getFlash('errors') ?? [],
+            'old' => Session::getFlash('old') ?? [],
             'csrfToken' => Csrf::token(),
         ];
 
@@ -81,13 +82,13 @@ final class AdminUserController
         }
 
         $data = [
-            'name'      => trim($post['name'] ?? ''),
-            'email'     => trim($post['email'] ?? ''),
+            'name' => trim($post['name'] ?? ''),
+            'email' => trim($post['email'] ?? ''),
             'auth_mode' => $post['auth_mode'] ?? 'LOCAL_ONLY',
-            'role'      => $post['role'] ?? 'ADMIN',
-            'status'    => $post['status'] ?? 'ACTIVE',
-            'password'  => (string)($post['password'] ?? ''),
-            'password_confirmation' => (string)($post['password_confirmation'] ?? ''),
+            'role' => $post['role'] ?? 'ADMIN',
+            'status' => $post['status'] ?? 'ACTIVE',
+            'password' => (string) ($post['password'] ?? ''),
+            'password_confirmation' => (string) ($post['password_confirmation'] ?? ''),
         ];
 
         $errors = $this->validateData($data, true);
@@ -103,15 +104,15 @@ final class AdminUserController
             : null;
 
         $newId = $this->repo->create([
-            'name'          => $data['name'],
-            'email'         => $data['email'],
-            'auth_mode'     => $data['auth_mode'],
-            'role'          => $data['role'],
-            'status'        => $data['status'],
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'auth_mode' => $data['auth_mode'],
+            'role' => $data['role'],
+            'status' => $data['status'],
             'password_hash' => $passwordHash,
         ]);
 
-        $this->audit->log('ADMIN', (int)Auth::requireAdmin()['id'], 'ADMIN_USER_CREATED', 'ADMIN_USER', $newId);
+        $this->audit->log('ADMIN', (int) Auth::requireAdmin()['id'], 'ADMIN_USER_CREATED', 'ADMIN_USER', $newId);
 
         Session::flash('success', 'Administrador criado com sucesso.');
         $this->redirect('/admin/users');
@@ -121,7 +122,7 @@ final class AdminUserController
     {
         $this->requireSuperAdmin();
 
-        $id = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
         $user = $this->repo->findById($id);
 
         if (!$user) {
@@ -129,13 +130,13 @@ final class AdminUserController
             $this->redirect('/admin/users');
         }
 
-        $pageTitle   = 'Editar Administrador';
+        $pageTitle = 'Editar Administrador';
         $contentView = __DIR__ . '/../../../View/admin/admin_users/form.php';
-        $viewData    = [
-            'mode'      => 'edit',
-            'user'      => $user,
-            'errors'    => Session::getFlash('errors') ?? [],
-            'old'       => Session::getFlash('old') ?? [],
+        $viewData = [
+            'mode' => 'edit',
+            'user' => $user,
+            'errors' => Session::getFlash('errors') ?? [],
+            'old' => Session::getFlash('old') ?? [],
             'csrfToken' => Csrf::token(),
         ];
 
@@ -146,7 +147,7 @@ final class AdminUserController
     {
         $this->requireSuperAdmin();
 
-        $id   = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
         $post = $_POST;
         $token = $post['_token'] ?? '';
 
@@ -156,13 +157,13 @@ final class AdminUserController
         }
 
         $data = [
-            'name'      => trim($post['name'] ?? ''),
-            'email'     => trim($post['email'] ?? ''),
+            'name' => trim($post['name'] ?? ''),
+            'email' => trim($post['email'] ?? ''),
             'auth_mode' => $post['auth_mode'] ?? 'LOCAL_ONLY',
-            'role'      => $post['role'] ?? 'ADMIN',
-            'status'    => $post['status'] ?? 'ACTIVE',
-            'password'  => (string)($post['password'] ?? ''),
-            'password_confirmation' => (string)($post['password_confirmation'] ?? ''),
+            'role' => $post['role'] ?? 'ADMIN',
+            'status' => $post['status'] ?? 'ACTIVE',
+            'password' => (string) ($post['password'] ?? ''),
+            'password_confirmation' => (string) ($post['password_confirmation'] ?? ''),
         ];
 
         $errors = $this->validateData($data, false);
@@ -174,11 +175,11 @@ final class AdminUserController
         }
 
         $update = [
-            'name'      => $data['name'],
-            'email'     => $data['email'],
+            'name' => $data['name'],
+            'email' => $data['email'],
             'auth_mode' => $data['auth_mode'],
-            'role'      => $data['role'],
-            'status'    => $data['status'],
+            'role' => $data['role'],
+            'status' => $data['status'],
         ];
 
         if (!empty($data['password'])) {
@@ -186,7 +187,7 @@ final class AdminUserController
         }
 
         $this->repo->update($id, $update);
-        $this->audit->log('ADMIN', (int)Auth::requireAdmin()['id'], 'ADMIN_USER_UPDATED', 'ADMIN_USER', $id);
+        $this->audit->log('ADMIN', (int) Auth::requireAdmin()['id'], 'ADMIN_USER_UPDATED', 'ADMIN_USER', $id);
 
         Session::flash('success', 'Administrador atualizado com sucesso.');
         $this->redirect('/admin/users');
@@ -196,7 +197,7 @@ final class AdminUserController
     {
         $this->requireSuperAdmin();
 
-        $id   = (int)($vars['id'] ?? 0);
+        $id = (int) ($vars['id'] ?? 0);
         $post = $_POST;
         $token = $post['_token'] ?? '';
 
@@ -206,7 +207,7 @@ final class AdminUserController
         }
 
         $this->repo->deactivate($id);
-        $this->audit->log('ADMIN', (int)Auth::requireAdmin()['id'], 'ADMIN_USER_DEACTIVATED', 'ADMIN_USER', $id);
+        $this->audit->log('ADMIN', (int) Auth::requireAdmin()['id'], 'ADMIN_USER_DEACTIVATED', 'ADMIN_USER', $id);
 
         Session::flash('success', 'Administrador desativado com sucesso.');
         $this->redirect('/admin/users');

@@ -11,14 +11,18 @@ $errors = 0;
 $checked = 0;
 
 foreach ($dirs as $dir) {
-    if (!is_dir($dir)) continue;
+    if (!is_dir($dir)) {
+        continue;
+    }
 
     $iterator = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS)
     );
 
     foreach ($iterator as $file) {
-        if ($file->getExtension() !== 'php') continue;
+        if ($file->getExtension() !== 'php') {
+            continue;
+        }
 
         $path = $file->getRealPath();
         $output = [];
@@ -28,7 +32,7 @@ foreach ($dirs as $dir) {
         $checked++;
 
         if ($exitCode !== 0) {
-            echo "❌ " . implode(PHP_EOL, $output) . PHP_EOL;
+            echo '❌ ' . implode(PHP_EOL, $output) . PHP_EOL;
             $errors++;
         }
     }

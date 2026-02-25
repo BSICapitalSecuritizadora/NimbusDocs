@@ -19,24 +19,24 @@ final class PortalHomeController
     public function index(array $vars = []): void
     {
         $user = Auth::requirePortalUser();
-        $userId = (int)$user['id'];
+        $userId = (int) $user['id'];
 
         // KPIs do usuário
-        $total       = $this->submissionRepo->countForUser($userId);
-        $pendentes   = $this->submissionRepo->countForUserByStatus($userId, 'PENDENTE');
-        $concluidas  = $this->submissionRepo->countForUserByStatus($userId, 'FINALIZADA');
+        $total = $this->submissionRepo->countForUser($userId);
+        $pendentes = $this->submissionRepo->countForUserByStatus($userId, 'PENDENTE');
+        $concluidas = $this->submissionRepo->countForUserByStatus($userId, 'FINALIZADA');
 
         // Últimas submissões
         $submissions = $this->submissionRepo->latestForUser($userId, 10);
 
-        $pageTitle   = 'Minhas informações';
+        $pageTitle = 'Minhas informações';
         $contentView = __DIR__ . '/../../View/portal/dashboard/index.php';
 
         $viewData = [
-            'user'        => $user,
-            'total'       => $total,
-            'pendentes'   => $pendentes,
-            'concluidas'  => $concluidas,
+            'user' => $user,
+            'total' => $total,
+            'pendentes' => $pendentes,
+            'concluidas' => $concluidas,
             'submissions' => $submissions,
         ];
 

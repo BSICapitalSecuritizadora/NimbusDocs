@@ -40,6 +40,7 @@ certs/
 # Build & CI Caches
 .phpunit.cache/
 .phpstan-cache/
+.php-cs-fixer.cache
 build/
 phpstan-baseline.neon
 
