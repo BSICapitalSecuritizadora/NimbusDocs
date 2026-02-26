@@ -22,9 +22,32 @@ services:
     networks:
       - nimbus-network
     ports:
-      - "8080:80"
+      - "8082:80"
     depends_on:
       - db
+
+  # Background Worker (Processa a fila de e-mails)
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nimbusdocs-app
+    container_name: nimbusdocs-worker
+    restart: unless-stopped
+    environment:
+      SERVICE_NAME: worker
+      SERVICE_TAGS: dev
+      DB_HOST: db
+      DB_PASSWORD: root
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - nimbus-network
+    depends_on:
+      - db
+    command: ["php", "bin/notifications-worker.php"]
 
   # Database Service
   db:
