@@ -210,8 +210,15 @@
                                             </div>
                                             
                                             <div class="d-flex gap-1 position-relative" style="z-index: 2;">
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-light text-dark hover-dark border rounded-circle d-flex align-items-center justify-content-center shadow-sm transition-fast" 
+                                                        style="width: 34px; height: 34px;"
+                                                        onclick="openPreview(<?= $doc['id'] ?>, '<?= htmlspecialchars($doc['title'], ENT_QUOTES) ?>', '/portal/documents')"
+                                                        title="Visualizar">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
                                                 <a href="/portal/documents/<?= $doc['id'] ?>" 
-                                                class="btn btn-sm btn-dark text-white hover-dark border rounded-circle d-flex align-items-center justify-content-center shadow-sm transition-fast"
+                                                class="btn btn-sm btn-light text-dark hover-dark border rounded-circle d-flex align-items-center justify-content-center shadow-sm transition-fast"
                                                 style="width: 34px; height: 34px;" 
                                                 title="Baixar">
                                                     <i class="bi bi-download"></i>
@@ -259,7 +266,7 @@
 </div>
 
 <script>
-function openPreview(id, title) {
+function openPreview(id, title, baseUrl = '/portal/documents/general') {
     const modal = new bootstrap.Modal(document.getElementById('previewModal'));
     const frame = document.getElementById('previewFrame');
     const label = document.getElementById('previewModalLabel');
@@ -272,7 +279,7 @@ function openPreview(id, title) {
     
     // Set Data
     label.textContent = title;
-    const url = '/portal/documents/general/' + id;
+    const url = baseUrl + '/' + id;
     
     frame.src = url + '?preview=1';
     download.href = url;

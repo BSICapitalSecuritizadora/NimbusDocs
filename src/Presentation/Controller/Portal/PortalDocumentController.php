@@ -118,12 +118,31 @@ final class PortalDocumentController
                 return;
             }
 
+            $disposition = isset($_GET['preview']) ? 'inline' : 'attachment';
+            $mime = $doc['file_mime'];
+
+            // Force correct mime type if previewing
+            if (isset($_GET['preview'])) {
+                $ext = strtolower(pathinfo($doc['file_original_name'], PATHINFO_EXTENSION));
+                if ($ext === 'pdf') {
+                    $mime = 'application/pdf';
+                } elseif (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                    $mime = match ($ext) {
+                        'jpg', 'jpeg' => 'image/jpeg',
+                        'png' => 'image/png',
+                        'gif' => 'image/gif',
+                        'webp' => 'image/webp',
+                        default => $mime
+                    };
+                }
+            }
+
             // Usa streaming em chunks
             $success = $this->downloader->stream(
                 $doc['file_path'],
-                $doc['file_mime'],
+                $mime,
                 $doc['file_original_name'],
-                'attachment',
+                $disposition,
                 (int) $doc['file_size']
             );
 
