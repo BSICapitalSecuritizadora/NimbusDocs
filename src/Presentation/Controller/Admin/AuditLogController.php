@@ -52,8 +52,11 @@ final class AuditLogController
         if (!empty($_GET['search'])) {
             $term = '%' . $_GET['search'] . '%';
             // Search in details JSON, actor_id, or IP
-            $where[] = '(details LIKE :search OR ip_address LIKE :search OR actor_id LIKE :search OR target_id LIKE :search)';
-            $params[':search'] = $term;
+            $where[] = '(details LIKE :search_details OR ip_address LIKE :search_ip OR actor_id LIKE :search_actor OR target_id LIKE :search_target)';
+            $params[':search_details'] = $term;
+            $params[':search_ip']      = $term;
+            $params[':search_actor']   = $term;
+            $params[':search_target']  = $term;
         }
 
         $whereSql = '';
@@ -117,8 +120,11 @@ final class AuditLogController
         }
         if (!empty($_GET['search'])) {
             $term = '%' . $_GET['search'] . '%';
-            $where[] = '(details LIKE :search OR ip_address LIKE :search OR actor_id LIKE :search OR target_id LIKE :search)';
-            $params[':search'] = $term;
+            $where[] = '(details LIKE :search_details OR ip_address LIKE :search_ip OR actor_id LIKE :search_actor OR target_id LIKE :search_target)';
+            $params[':search_details'] = $term;
+            $params[':search_ip']      = $term;
+            $params[':search_actor']   = $term;
+            $params[':search_target']  = $term;
         }
 
         $whereSql = '';

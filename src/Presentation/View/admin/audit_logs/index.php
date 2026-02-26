@@ -4,16 +4,23 @@
 $items = $pagination['items'] ?? [];
 
 $actionMap = [
-    'LOGIN_SUCCESS' => 'Autenticação concluída com êxito',
-    'LOGIN_FAILED' => 'Falha no processo de autenticação',
-    'PORTAL_USER_CREATED' => 'Usuário do portal criado',
-    'PORTAL_USER_UPDATED' => 'Dados do usuário do portal atualizados',
-    'PORTAL_ACCESS_LINK_GENERATED' => 'Link de acesso ao portal gerado',
-    'PORTAL_LOGIN_CODE_FAILED' => 'Falha na validação do código de acesso ao portal',
-    'PORTAL_LOGIN_SUCCESS_CODE' => 'Autenticação via código de acesso ao portal concluída',
+    'SUBMISSION_STATUS_CHANGED' => 'Alteração de status',
     'SUBMISSION_RESPONSE_FILES_UPLOADED' => 'Arquivos de resposta da submissão enviados',
+    'USER_UPLOADED_CORRECTION_FILE' => 'Arquivo de correção enviado',
+    'LOGIN_SUCCESS' => 'Autenticação concluída com êxito',
+    'PORTAL_LOGIN_SUCCESS_CODE' => 'Autenticação via código de acesso ao portal concluída',
+    'USER_SUBMITTED_CORRECTIONS' => 'Correções enviadas',
+    'PORTAL_USER_UPDATED' => 'Dados do usuário do portal atualizados',
+    'FILE_DOWNLOAD' => 'Download de arquivo',
+    'PORTAL_LOGIN_CODE_FAILED' => 'Falha na validação do código de acesso ao portal',
+    'LOGIN_FAILED' => 'Falha no processo de autenticação',
+    'PORTAL_ACCESS_LINK_GENERATED' => 'Link de acesso ao portal gerado',
+    'SUBMISSION_NOTIFICATION_RESENT' => 'Notificação reenviada',
+    'LOGOUT' => 'Saída do sistema',
+    'SUBMISSION_CREATED' => 'Submissão criada',
     'PORTAL_SUBMISSION_CREATED' => 'Submissão criada no portal',
-    'SUBMISSION_CREATED' => 'Submissão criada'
+    'PORTAL_USER_CREATED' => 'Usuário do portal criado',
+    'FILE_PREVIEW' => 'Visualização de arquivo'
 ];
 ?>
 
@@ -138,7 +145,8 @@ $actionMap = [
                                             $action === 'LOGOUT'                     => ['Logout do Sistema',         'nd-badge-secondary', 'bi-box-arrow-left'],
                                             
                                             // Portal Users
-                                            $action === 'PORTAL_USER_CREATED'        => ['Usuário Portal Criado',     'nd-badge-primary',   'bi-person-plus-fill'],
+                                            // Portal Users
+                                            $action === 'PORTAL_USER_CREATED'        => ['Usuário Portal Criado',     'bg-success text-white border-0',   'bi-person-plus-fill'],
                                             $action === 'PORTAL_USER_UPDATED'        => ['Dados de Usuário Atualizados', 'nd-badge-info',   'bi-person-lines-fill'],
                                             $action === 'PORTAL_ACCESS_LINK_GENERATED' => ['Link de Acesso Gerado',    'bg-secondary text-white', 'bi-link-45deg'],
                                             $action === 'PORTAL_LOGIN_SUCCESS_CODE'  => ['Acesso via Token (Portal)', 'nd-badge-success',   'bi-key-fill'],
@@ -147,12 +155,15 @@ $actionMap = [
                                             // Submissions
                                             $action === 'SUBMISSION_CREATED'         => ['Nova Submissão',            'nd-badge-success',   'bi-file-earmark-plus'],
                                             $action === 'PORTAL_SUBMISSION_CREATED'  => ['Submissão Enviada (Portal)', 'nd-badge-success',  'bi-file-earmark-arrow-up'],
-                                            $action === 'SUBMISSION_STATUS_CHANGED'  => ['Alteração de Status',       'nd-badge-info',      'bi-arrow-repeat'],
+                                            $action === 'SUBMISSION_STATUS_CHANGED'  => ['Alteração de Status', 'bg-primary text-white border-0', 'bi-arrow-repeat'],
                                             $action === 'SUBMISSION_RESPONSE_FILES_UPLOADED' => ['Resposta Anexada',         'nd-badge-warning',   'bi-paperclip'],
+                                            $action === 'USER_SUBMITTED_CORRECTIONS' => ['Correções Enviadas', 'bg-primary text-white border-0', 'bi-check-circle'],
+                                            $action === 'USER_UPLOADED_CORRECTION_FILE' => ['Arquivo de Correção Env.', 'bg-info text-dark border-0', 'bi-file-earmark-upload'],
+                                            $action === 'SUBMISSION_NOTIFICATION_RESENT' => ['Notificação Reenviada', 'bg-warning text-dark border-0', 'bi-envelope-paper'],
                                             
                                             // Documents & Files
-                                            $action === 'FILE_PREVIEW'               => ['Visualização de Arquivo',   'nd-badge-primary',   'bi-eye-fill'],
-                                            $action === 'FILE_DOWNLOAD'              => ['Download de Arquivo',       'bg-info text-white', 'bi-download'],
+                                            $action === 'FILE_PREVIEW' || str_contains($action, 'Visualização') => ['Visualização de Arquivo',   'bg-secondary text-white border-0',   'bi-eye-fill'],
+                                            $action === 'FILE_DOWNLOAD'              => ['Download de Arquivo',       'bg-info text-white border-0', 'bi-download'],
                                             
                                             // Default Fallback with Text Translation
                                             default => (function() use ($action, $normalize) {
@@ -253,24 +264,34 @@ $actionMap = [
                                             $targetStyle = '';
                                             $targetClass = 'bg-light text-dark border'; // Default
 
-                                            switch ($targetType) {
-                                                case 'ADMIN_USER':
+                                            switch (mb_strtolower($targetType, 'UTF-8')) {
+                                                case 'admin_user':
+                                                case 'administrador':
                                                     $targetLabel = 'Administrador';
-                                                    $targetClass = 'bg-primary text-white';
+                                                    $targetClass = 'bg-primary text-white border-0';
                                                     break;
-                                                case 'PORTAL_USER':
+                                                case 'portal_user':
+                                                case 'usuário do portal':
+                                                case 'usuário':
                                                     $targetLabel = 'Usuário do Portal';
-                                                    $targetClass = 'bg-info text-dark bg-opacity-25 border border-info border-opacity-25';
+                                                    $targetClass = 'bg-info text-dark border-0';
                                                     break;
-                                                case 'PORTAL_ACCESS_TOKEN':
+                                                case 'portal_access_token':
+                                                case 'token de acesso':
                                                     $targetLabel = 'Token de Acesso';
-                                                    $targetClass = 'bg-dark text-white';
+                                                    $targetClass = 'bg-dark text-white border-0';
                                                     break;
-                                                case 'PORTAL_SUBMISSION':
-                                                case 'SUBMISSION':
+                                                case 'portal_submission':
+                                                case 'submission':
+                                                case 'submissão':
                                                     $targetLabel = 'Submissão';
-                                                    $targetClass = 'text-white';
+                                                    $targetClass = 'text-white border-0';
                                                     $targetStyle = 'background-color: #6610f2;'; // Indigo
+                                                    break;
+                                                case 'portal_submission_file':
+                                                case 'arquivo de submissão':
+                                                    $targetLabel = 'Arquivo de Submissão';
+                                                    $targetClass = 'bg-secondary text-white border-0';
                                                     break;
                                             }
                                          ?>
