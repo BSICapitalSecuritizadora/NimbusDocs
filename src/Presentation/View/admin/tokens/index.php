@@ -30,9 +30,9 @@ $search = $filters['search'] ?? '';
                 <div class="nd-input-group">
                     <select name="status" class="nd-input form-select" style="padding-left: 2.5rem;">
                         <option value="">Todas as situações</option>
-                        <option value="valid" <?= $status === 'valid' ? 'selected' : '' ?>>Válidos</option>
                         <option value="expired" <?= $status === 'expired' ? 'selected' : '' ?>>Expirados</option>
                         <option value="used" <?= $status === 'used' ? 'selected' : '' ?>>Utilizados/Revogados</option>
+                        <option value="valid" <?= $status === 'valid' ? 'selected' : '' ?>>Válidos</option>
                     </select>
                     <i class="bi bi-filter nd-input-icon"></i>
                 </div>
@@ -130,7 +130,7 @@ $search = $filters['search'] ?? '';
                                             <span>Utilizado</span>
                                         </div>
                                     <?php elseif ($isExpired): ?>
-                                        <span class="nd-badge nd-badge-secondary">Expirado</span>
+                                        <span class="nd-badge nd-badge-danger">Expirado</span>
                                     <?php else: ?>
                                         <span class="nd-badge nd-badge-warning">Válido</span>
                                     <?php endif; ?>

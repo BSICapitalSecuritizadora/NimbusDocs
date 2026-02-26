@@ -229,8 +229,9 @@ final class MySqlPortalAccessTokenRepository implements PortalAccessTokenReposit
         }
 
         if (!empty($filters['search'])) {
-            $where[] = '(u.full_name LIKE :search OR u.email LIKE :search)';
-            $params[':search'] = '%' . $filters['search'] . '%';
+            $where[] = '(u.full_name LIKE :search_name OR u.email LIKE :search_email)';
+            $params[':search_name'] = '%' . $filters['search'] . '%';
+            $params[':search_email'] = '%' . $filters['search'] . '%';
         }
 
         $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
