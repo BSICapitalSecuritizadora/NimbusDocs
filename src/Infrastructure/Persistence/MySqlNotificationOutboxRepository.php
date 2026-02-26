@@ -331,7 +331,9 @@ final class MySqlNotificationOutboxRepository
     {
         $stmt = $this->pdo->prepare("
             UPDATE notification_outbox
-            SET status = 'SENT', sent_at = NOW()
+            SET status = 'SENT', 
+                sent_at = NOW(),
+                attempts = attempts + 1
             WHERE id = :id
         ");
         $stmt->execute([':id' => $id]);

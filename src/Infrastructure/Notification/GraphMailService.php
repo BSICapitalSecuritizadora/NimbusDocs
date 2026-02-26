@@ -160,7 +160,7 @@ final class GraphMailService
                         ],
                     ],
                 ],
-                'saveToSentItems' => false,
+                'saveToSentItems' => true,
             ];
 
             $response = $this->http->post($url, [
