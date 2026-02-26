@@ -59,10 +59,11 @@ $queryExport = http_build_query([
                 <select name="status" class="nd-input form-select bg-light border-0">
                     <?php
                     $statusOptions = [
-                        ''           => 'Todas',
-                        'PENDENTE'   => 'Pendente',
-                        'FINALIZADA' => 'Concluída',
-                        'REJEITADA'  => 'Rejeitada',
+                        ''             => 'Todas',
+                        'PENDING'      => 'Pendente',
+                        'UNDER_REVIEW' => 'Em Análise',
+                        'APPROVED'     => 'Concluída',
+                        'REJECTED'     => 'Rejeitada',
                     ];
                     foreach ($statusOptions as $value => $label):
                         $selected = ($filters['status'] ?? '') === $value ? 'selected' : '';

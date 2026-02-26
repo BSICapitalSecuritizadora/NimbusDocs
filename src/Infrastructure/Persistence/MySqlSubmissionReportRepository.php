@@ -86,9 +86,9 @@ final class MySqlSubmissionReportRepository
 
         return [
             'total' => $total,
-            'pending' => $byStatus['PENDING'] ?? 0,
-            'approved' => $byStatus['COMPLETED'] ?? 0,
-            'rejected' => $byStatus['REJECTED'] ?? 0,
+            'pending' => ($byStatus['PENDING'] ?? 0) + ($byStatus['UNDER_REVIEW'] ?? 0) + ($byStatus['IN_REVIEW'] ?? 0),
+            'approved' => ($byStatus['APPROVED'] ?? 0) + ($byStatus['COMPLETED'] ?? 0) + ($byStatus['FINALIZADA'] ?? 0),
+            'rejected' => ($byStatus['REJECTED'] ?? 0) + ($byStatus['REJEITADA'] ?? 0),
         ];
     }
 
