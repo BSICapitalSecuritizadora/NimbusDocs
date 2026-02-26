@@ -197,7 +197,7 @@ if ($catFilter) {
                                             <?php if ((int)$doc['is_active'] === 1): ?>
                                                 <span class="nd-badge nd-badge-success">Publicado</span>
                                             <?php else: ?>
-                                                <span class="nd-badge nd-badge-secondary">Arquivado</span>
+                                                <span class="nd-badge nd-badge-neutral">Arquivado</span>
                                             <?php endif; ?>
                                         </div>
                                         <div class="small text-muted d-flex align-items-center gap-1">
