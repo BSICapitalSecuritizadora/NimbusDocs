@@ -112,12 +112,12 @@
                                 </td>
                                 <td>
                                     <?php
-                                    $statusClass = match ($u['status'] ?? '') {
-                                        'ACTIVE' => 'success',
-                                        'INVITED' => 'info',
-                                        'BLOCKED' => 'danger',
-                                        'INACTIVE' => 'secondary',
-                                        default => 'secondary'
+                                    $statusClasses = match ($u['status'] ?? '') {
+                                        'ACTIVE' => 'nd-badge nd-badge-success',
+                                        'INVITED' => 'nd-badge nd-badge-info',
+                                        'BLOCKED' => 'nd-badge nd-badge-danger',
+                                        'INACTIVE' => 'nd-badge nd-badge-neutral',
+                                        default => 'nd-badge nd-badge-neutral'
                                     };
                                     $statusLabel = match ($u['status'] ?? '') {
                                         'ACTIVE' => 'Ativo',
@@ -127,7 +127,7 @@
                                         default => 'Inativo'
                                     };
                                     ?>
-                                    <span class="nd-badge nd-badge-<?= $statusClass ?>">
+                                    <span class="<?= $statusClasses ?>">
                                         <?= $statusLabel ?>
                                     </span>
                                 </td>
