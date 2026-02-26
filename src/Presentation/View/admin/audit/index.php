@@ -139,6 +139,32 @@ $totalPages = max(1, (int)ceil($total / $perPage));
                                             $badgeClass = 'nd-badge-secondary';
                                             $label = 'Saída do Sistema';
                                         }
+                                        // Specific user requested mappings
+                                        elseif ($action === 'Usuário Submitted Corrections' || str_contains($action, 'Submitted Corrections')) {
+                                            $badgeClass = 'bg-primary text-white border-0';
+                                            $label = 'Correções Enviadas';
+                                        }
+                                        elseif ($action === 'Usuário Uploaded Correction Arquivo' || str_contains($action, 'Uploaded Correction')) {
+                                            $badgeClass = 'bg-info text-dark border-0';
+                                            $label = 'Arquivo de Correção Env.';
+                                        }
+                                        elseif ($action === 'Submissão Notification Resent' || str_contains($action, 'Notification Resent')) {
+                                            $badgeClass = 'bg-warning text-dark border-0';
+                                            $label = 'Notificação Reenviada';
+                                        }
+                                        elseif ($action === 'Visualização de Arquivo' || str_contains($action, 'Visualização')) {
+                                            $badgeClass = 'bg-secondary text-white border-0';
+                                            $label = 'Visualização de Arquivo';
+                                        }
+                                        elseif ($action === 'Usuário Portal Criado' || str_contains($action, 'Portal Criado')) {
+                                            $badgeClass = 'bg-success text-white border-0';
+                                            $label = 'Usuário Portal Criado';
+                                        }
+                                        elseif ($action === 'Alteração de Status') {
+                                            $badgeClass = 'nd-badge-primary border-0';
+                                            $label = 'Alteração de Status';
+                                        }
+                                        // General mappings fallback
                                         elseif (str_contains($action, 'CREATE') || str_contains($action, 'STORE')) {
                                             $badgeClass = 'bg-success text-white';
                                             $label = 'Criação';
@@ -181,10 +207,38 @@ $totalPages = max(1, (int)ceil($total / $perPage));
                                 </td>
                                 <td>
                                     <?php if ($log['context_type']): ?>
-                                        <span class="badge bg-light text-secondary border fw-normal small">
-                                            <?= htmlspecialchars($log['context_type'], ENT_QUOTES, 'UTF-8') ?>
-                                            <span class="text-dark fw-bold ms-1">#<?= (int)$log['context_id'] ?></span>
-                                        </span>
+                                        <?php
+                                            $ct = $log['context_type'];
+                                            $ctLabel = $ct;
+                                            $ctBadge = 'bg-light text-secondary border';
+                                            $ctIdClass = 'text-dark fw-bold ms-1';
+                                            
+                                            // Unify submission labels and colors
+                                            if (strtolower($ct) === 'submission' || mb_strtolower($ct) === 'submissão') {
+                                                $ctLabel = 'Submissão';
+                                                $ctBadge = 'text-white border-0';
+                                                $ctIdClass = 'text-white-50 ms-1 fw-bold';
+                                            } elseif (strtolower($ct) === 'admin_user' || strtolower($ct) === 'administrador') {
+                                                $ctLabel = 'Administrador';
+                                                $ctBadge = 'bg-primary text-white border-0';
+                                                $ctIdClass = 'text-white-50 ms-1 fw-bold';
+                                            } elseif (strtolower($ct) === 'portal_user' || strtolower($ct) === 'usuário') {
+                                                $ctLabel = 'Usuário Portal';
+                                                $ctBadge = 'bg-info text-dark border-0';
+                                                $ctIdClass = 'text-black-50 ms-1 fw-bold';
+                                            }
+                                        ?>
+                                        <?php if ($ctLabel === 'Submissão'): ?>
+                                            <span class="badge <?= $ctBadge ?> fw-normal small" style="background-color: #6610f2;">
+                                                <?= htmlspecialchars($ctLabel, ENT_QUOTES, 'UTF-8') ?>
+                                                <span class="<?= $ctIdClass ?>">#<?= (int)$log['context_id'] ?></span>
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge <?= $ctBadge ?> fw-normal small">
+                                                <?= htmlspecialchars($ctLabel, ENT_QUOTES, 'UTF-8') ?>
+                                                <span class="<?= $ctIdClass ?>">#<?= (int)$log['context_id'] ?></span>
+                                            </span>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <span class="text-muted small">–</span>
                                     <?php endif; ?>
