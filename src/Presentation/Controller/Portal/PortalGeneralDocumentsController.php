@@ -39,26 +39,13 @@ final class PortalGeneralDocumentsController
 
     public function index(): void
     {
-        $user = Auth::requirePortalUser();
-
-        $categoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
-        $term = trim($_GET['q'] ?? '');
-
-        $categories = $this->categories->all();
-        $documents = $this->docs->listForPortal($categoryId, $term);
-
-        $pageTitle = 'Documentos gerais';
-        $contentView = __DIR__ . '/../../View/portal/general_documents/index.php';
-
-        $viewData = [
-            'user' => $user,
-            'categories' => $categories,
-            'documents' => $documents,
-            'currentCategory' => $categoryId,
-            'term' => $term,
-        ];
-
-        require __DIR__ . '/../../View/portal/layouts/base.php';
+        $queryString = $_SERVER['QUERY_STRING'] ?? '';
+        $redirectUrl = '/portal/documents';
+        if ($queryString) {
+            $redirectUrl .= '?' . $queryString;
+        }
+        header('Location: ' . $redirectUrl);
+        exit;
     }
 
     public function download(array $vars): void

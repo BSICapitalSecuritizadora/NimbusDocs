@@ -60,8 +60,8 @@ $isNewSubmission = $_SERVER['REQUEST_URI'] === '/portal/submissions/new';
                     </a>
                 </li>
                 <li class="nav-item">
-                     <a class="nav-link portal-nav-link <?= $isActive('/portal/documents/general') ? 'active' : '' ?>" href="/portal/documents/general">
-                        <i class="bi bi-folder<?= $isActive('/portal/documents/general') ? '-fill' : '' ?>"></i>
+                     <a class="nav-link portal-nav-link <?= $isActive('/portal/documents') ? 'active' : '' ?>" href="/portal/documents">
+                        <i class="bi bi-folder<?= $isActive('/portal/documents') ? '-fill' : '' ?>"></i>
                         <span>Documentos</span>
                     </a>
                 </li>

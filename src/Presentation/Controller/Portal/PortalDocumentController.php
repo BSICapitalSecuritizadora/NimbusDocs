@@ -13,6 +13,8 @@ use App\Support\StreamingFileDownloader;
 final class PortalDocumentController
 {
     private MySqlPortalDocumentRepository $repo;
+    private \App\Infrastructure\Persistence\MySqlDocumentCategoryRepository $categoriesRepo;
+    private \App\Infrastructure\Persistence\MySqlGeneralDocumentRepository $generalDocsRepo;
 
     private StreamingFileDownloader $downloader;
 
@@ -23,6 +25,9 @@ final class PortalDocumentController
     public function __construct(private array $config)
     {
         $this->repo = new MySqlPortalDocumentRepository($config['pdo']);
+        $this->categoriesRepo = new \App\Infrastructure\Persistence\MySqlDocumentCategoryRepository($config['pdo']);
+        $this->generalDocsRepo = new \App\Infrastructure\Persistence\MySqlGeneralDocumentRepository($config['pdo']);
+        
         $this->downloader = new StreamingFileDownloader();
         $this->concurrencyGuard = new DownloadConcurrencyGuard();
         $this->metadataCache = new FileMetadataCache();
@@ -32,14 +37,40 @@ final class PortalDocumentController
     {
         $user = Auth::requirePortalUser();
 
-        $docs = $this->repo->findByUser((int) $user['id']);
+        $categoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
+        $term = trim($_GET['q'] ?? '');
 
-        $pageTitle = 'Meus Documentos';
-        $contentView = __DIR__ . '/../../View/portal/documents/index.php';
+        // Fetch generalized documents and categories
+        $categories = $this->categoriesRepo->all();
+        $generalDocs = $this->generalDocsRepo->listForPortal($categoryId, $term);
+        
+        // Fetch private user documents (filtered by search term as well)
+        $userDocsAll = $this->repo->findByUser((int) $user['id']);
+        $userDocs = [];
+        if (!empty($term)) {
+            $termLower = mb_strtolower($term, 'UTF-8');
+            foreach ($userDocsAll as $doc) {
+                if (str_contains(mb_strtolower($doc['title'] ?? '', 'UTF-8'), $termLower) || 
+                    str_contains(mb_strtolower($doc['description'] ?? '', 'UTF-8'), $termLower) ||
+                    str_contains(mb_strtolower($doc['file_original_name'] ?? '', 'UTF-8'), $termLower)) {
+                    $userDocs[] = $doc;
+                }
+            }
+        } else {
+            $userDocs = $userDocsAll;
+        }
+
+        $pageTitle = 'Documentos';
+        // We will repurpose the general documents view since it has the preferred layout
+        $contentView = __DIR__ . '/../../View/portal/general_documents/index.php';
 
         $viewData = [
             'user' => $user,
-            'docs' => $docs,
+            'categories' => $categories,
+            'documents' => $generalDocs, // general documents
+            'userDocs' => $userDocs,     // private user documents
+            'currentCategory' => $categoryId,
+            'term' => $term,
         ];
 
         require __DIR__ . '/../../View/portal/layouts/base.php';
