@@ -179,6 +179,7 @@ final class AdminAuthController
             header('Location: /admin/dashboard');
             exit;
         } catch (\Throwable $e) {
+            error_log('Azure AD Callback Error: ' . $e->getMessage());
             Session::flash('error', 'Erro ao autenticar com a Microsoft: ' . $e->getMessage());
             header('Location: /admin/login');
             exit;
