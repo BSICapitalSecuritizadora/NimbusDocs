@@ -152,9 +152,21 @@ $dateFormatted = !empty($submission['submitted_at'])
                                 <label class="nd-label" for="comment">Resposta / Comentário</label>
                                 <textarea name="comment" id="comment" rows="2" class="nd-input" placeholder="Descreva as correções feitas..."></textarea>
                             </div>
-                            <div class="mb-3">
-                                <label class="nd-label" for="file">Anexar Arquivo Corrigido (Opcional)</label>
-                                <input type="file" name="file" id="file" class="nd-input" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx">
+                            <div class="mb-4">
+                                <label class="nd-label fw-medium mb-2 d-block">Documento Corrigido <span class="text-muted fw-normal">(Opcional)</span></label>
+                                <div class="position-relative">
+                                    <input type="file" name="file" id="file" class="d-none" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx" onchange="document.getElementById('file-name').textContent = this.files[0] ? this.files[0].name : 'Nenhum arquivo selecionado'">
+                                    <label for="file" class="d-flex align-items-center gap-3 p-3 border rounded-3 bg-white" style="cursor: pointer; border-style: dashed !important; border-width: 2px !important; border-color: #dee2e6 !important; transition: all 0.2s; hover: border-color: var(--nd-primary) !important;">
+                                        <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                                            <i class="bi bi-cloud-arrow-up-fill fs-4"></i>
+                                        </div>
+                                        <div class="flex-grow-1 overflow-hidden">
+                                            <div class="text-dark fw-semibold mb-0">Clique para anexar um documento</div>
+                                            <div class="text-muted small text-truncate mt-1" id="file-name">Nenhum arquivo selecionado</div>
+                                        </div>
+                                        <div class="text-primary fw-medium small px-3 py-1 rounded-pill" style="background-color: rgba(13, 110, 253, 0.1);">Procurar</div>
+                                    </label>
+                                </div>
                             </div>
                             <button type="submit" class="nd-btn nd-btn-primary">
                                 <i class="bi bi-send me-2"></i> Enviar Correção
