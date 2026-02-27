@@ -160,6 +160,10 @@ $totalPages = max(1, (int)ceil($total / $perPage));
                                             $badgeClass = 'bg-success text-white border-0';
                                             $label = 'Usuário Portal Criado';
                                         }
+                                        elseif ($action === 'Visualizou Submissão' || str_contains($action, 'Visualizou Submissão')) {
+                                            $badgeClass = 'bg-secondary text-white border-0';
+                                            $icon = 'bi-eye';
+                                        }
                                         elseif ($action === 'Alteração de Status') {
                                             $badgeClass = 'nd-badge-primary border-0';
                                             $label = 'Alteração de Status';
