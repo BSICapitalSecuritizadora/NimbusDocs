@@ -99,8 +99,9 @@ final class MySqlGeneralDocumentRepository
         }
 
         if ($term !== null && $term !== '') {
-            $where[] = '(d.title LIKE :term OR d.description LIKE :term)';
-            $params[':term'] = '%' . $term . '%';
+            $where[] = '(d.title LIKE :term1 OR d.description LIKE :term2)';
+            $params[':term1'] = '%' . $term . '%';
+            $params[':term2'] = '%' . $term . '%';
         }
 
         $whereSql = 'WHERE ' . implode(' AND ', $where);

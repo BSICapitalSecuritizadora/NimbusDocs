@@ -18,23 +18,10 @@ $isNewSubmission = $_SERVER['REQUEST_URI'] === '/portal/submissions/new';
     <div class="container-xxl">
         <!-- Brand -->
         <a class="navbar-brand d-flex align-items-center gap-3" href="/portal">
-            <?php if ($logoUrl): ?>
-                <img src="<?= htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8') ?>"
-                     alt="Logo"
-                     class="navbar-logo"
-                     style="height: 40px; width: auto;">
-            <?php else: ?>
-                <!-- Logo Premium -->
-                <div class="d-flex align-items-center gap-2">
-                    <div class="portal-logo-icon">
-                        <i class="bi bi-shield-check"></i>
-                    </div>
-                    <div class="d-flex flex-column lh-1">
-                        <span class="portal-logo-title"><?= htmlspecialchars(explode(' ', $appName)[0]) ?></span>
-                        <span class="portal-logo-subtitle">Securitizadora</span>
-                    </div>
-                </div>
-            <?php endif; ?>
+            <img src="/assets/images/logo-bsi.png"
+                 alt="BSI Capital Securitizadora"
+                 class="navbar-logo"
+                 style="height: 36px; width: auto; object-fit: contain;">
         </a>
 
         <!-- Toggler -->

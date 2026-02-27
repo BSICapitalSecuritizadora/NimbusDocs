@@ -66,8 +66,9 @@ final class MySqlAuditLogRepository implements AuditLogRepository
         }
 
         if (!empty($filters['search'])) {
-            $where[] = '(summary LIKE :search OR actor_name LIKE :search)';
-            $params[':search'] = '%' . $filters['search'] . '%';
+            $where[] = '(summary LIKE :search1 OR actor_name LIKE :search2)';
+            $params[':search1'] = '%' . $filters['search'] . '%';
+            $params[':search2'] = '%' . $filters['search'] . '%';
         }
 
         $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';

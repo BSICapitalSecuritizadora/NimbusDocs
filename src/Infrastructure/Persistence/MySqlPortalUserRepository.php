@@ -66,8 +66,9 @@ final class MySqlPortalUserRepository
 
         $where = '';
         if ($search !== null && $search !== '') {
-            $where = 'WHERE (full_name LIKE :s OR email LIKE :s)';
-            $params[':s'] = '%' . $search . '%';
+            $where = 'WHERE (full_name LIKE :s1 OR email LIKE :s2)';
+            $params[':s1'] = '%' . $search . '%';
+            $params[':s2'] = '%' . $search . '%';
         }
 
         // Count total

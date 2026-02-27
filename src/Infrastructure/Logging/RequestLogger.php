@@ -234,11 +234,15 @@ final class RequestLogger
             return;
         }
 
-        $lines = file($logFile);
-        if (count($lines) > 10000) {
-            // Remove os primeiros 2000 logs
-            $lines = array_slice($lines, 2000);
-            file_put_contents($logFile, implode('', $lines));
+        // Check file size first instead of loading lines into memory
+        // 10000 lines * ~250 chars per line is roughly 2.5MB
+        if (filesize($logFile) > 2.5 * 1024 * 1024) {
+            $lines = file($logFile);
+            if (count($lines) > 10000) {
+                // Remove os primeiros 2000 logs
+                $lines = array_slice($lines, 2000);
+                file_put_contents($logFile, implode('', $lines));
+            }
         }
     }
 
@@ -256,14 +260,13 @@ final class RequestLogger
         $lines = file($logFile);
         $requests = [];
 
-        // Lê de trás para frente (mais recentes primeiro)
-        foreach (array_reverse($lines) as $line) {
-            if (trim($line) === '') {
-                continue;
-            }
+        // Lê de trás para frente (mais recentes primeiro) sem clonar o array
+        for ($i = count($lines) - 1; $i >= 0; $i--) {
+            $line = trim($lines[$i]);
+            if ($line === '') continue;
 
             try {
-                $data = json_decode(trim($line), true, 512, JSON_THROW_ON_ERROR);
+                $data = json_decode($line, true, 512, JSON_THROW_ON_ERROR);
                 $requests[] = $data;
 
                 if (count($requests) >= $limit) {
@@ -312,17 +315,17 @@ final class RequestLogger
             'ips' => [],
         ];
 
-        foreach ($lines as $line) {
-            if (trim($line) === '') {
-                continue;
-            }
+        // Lê de trás para frente para parar na janela de tempo sem analisar todo o histórico
+        for ($i = count($lines) - 1; $i >= 0; $i--) {
+            $line = trim($lines[$i]);
+            if ($line === '') continue;
 
             try {
-                $data = json_decode(trim($line), true, JSON_THROW_ON_ERROR);
+                $data = json_decode($line, true, 512, JSON_THROW_ON_ERROR);
 
-                // Verifica se está dentro da janela de tempo
+                // Verifica se está dentro da janela de tempo. Paramos ao achar logs mais antigos
                 if (strtotime($data['timestamp'] ?? 'now') < $timeWindow) {
-                    continue;
+                    break;
                 }
 
                 $stats['total_requests']++;
@@ -393,17 +396,16 @@ final class RequestLogger
         $lines = file($logFile);
         $alerts = [];
 
-        // Lê de trás para frente (mais recentes primeiro)
-        foreach (array_reverse($lines) as $line) {
-            if (trim($line) === '') {
-                continue;
-            }
+        // Lê de trás para frente (mais recentes primeiro) sem clonar array
+        for ($i = count($lines) - 1; $i >= 0; $i--) {
+            $line = trim($lines[$i]);
+            if ($line === '') continue;
 
             try {
-                $data = json_decode(trim($line), true, JSON_THROW_ON_ERROR);
+                $data = json_decode($line, true, 512, JSON_THROW_ON_ERROR);
 
                 // Considera alerta se for erro ou muito lento
-                if ($data['type'] === 'error' || $data['type'] === 'unauthorized' || ($data['duration_ms'] ?? 0) > 5000) {
+                if (($data['type'] ?? '') === 'error' || ($data['type'] ?? '') === 'unauthorized' || ($data['duration_ms'] ?? 0) > 5000) {
                     $alerts[] = $data;
 
                     if (count($alerts) >= $limit) {

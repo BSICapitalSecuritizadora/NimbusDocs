@@ -161,6 +161,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute('GET', '/admin/api/search/quick', [\App\Presentation\Controller\Admin\SearchController::class, 'quickSearch']);
 
     // In-App Notifications
+    $r->addRoute('GET',  '/admin/notifications', [\App\Presentation\Controller\Admin\InAppNotificationController::class, 'index']);
     $r->addRoute('GET',  '/admin/api/notifications', [\App\Presentation\Controller\Admin\InAppNotificationController::class, 'getUnread']);
     $r->addRoute('POST', '/admin/api/notifications/{id:\d+}/read', [\App\Presentation\Controller\Admin\InAppNotificationController::class, 'markAsRead']);
     $r->addRoute('POST', '/admin/api/notifications/read-all', [\App\Presentation\Controller\Admin\InAppNotificationController::class, 'markAllAsRead']);

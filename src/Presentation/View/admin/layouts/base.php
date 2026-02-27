@@ -95,13 +95,18 @@ if (class_exists(\App\Support\ColorUtils::class)) {
                             style="width: 38px; height: 38px;">
                         <i class="bi bi-bell" style="font-size: 1.1rem;"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white" 
-                              style="font-size: 0.6rem; padding: 0.25em 0.4em;" 
+                              style="font-size: 0.6rem; padding: 0.25em 0.4em; display: none;" 
                               id="notificationBadge">0</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" style="min-width: 300px;">
-                        <li><h6 class="dropdown-header text-uppercase small fw-bold">Notificações</h6></li>
-                        <li><hr class="dropdown-divider my-1"></li>
-                        <li><span class="dropdown-item-text text-muted small py-3 text-center d-block">Nenhuma notificação recente</span></li>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-0" style="width: 320px; max-height: 400px; overflow-y: auto;" id="notificationList">
+                        <li class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light sticky-top">
+                            <h6 class="dropdown-header text-uppercase small fw-bold p-0 m-0 text-dark">Notificações</h6>
+                            <button id="markAllReadBtn" class="btn btn-link btn-sm p-0 text-decoration-none text-primary" style="font-size: 0.75rem; display: none;">Marcar lidas</button>
+                        </li>
+                        <div id="notificationItems">
+                            <li><span class="dropdown-item-text text-muted small py-4 text-center d-block">Carregando...</span></li>
+                        </div>
+                        <li class="border-top sticky-bottom bg-white"><a class="dropdown-item text-center small py-2 text-primary fw-medium" href="/admin/notifications">Ver todas</a></li>
                     </ul>
                 </div>
                 
@@ -156,21 +161,80 @@ if (class_exists(\App\Support\ColorUtils::class)) {
     
     <script>
     (function() {
-        // Simple badge updater
+        // Simple badge and list updater
         async function updateNotificationBadge() {
             try {
                 const response = await fetch('/admin/api/notifications');
                 if (!response.ok) return;
                 const data = await response.json();
+                
+                // Update Badge
                 const badge = document.getElementById('notificationBadge');
                 if (badge && data.count !== undefined) {
                     badge.textContent = data.count > 9 ? '9+' : data.count;
                     badge.style.display = data.count > 0 ? 'inline-block' : 'none';
                 }
+                
+                // Update List
+                const listContainer = document.getElementById('notificationItems');
+                const markAllBtn = document.getElementById('markAllReadBtn');
+                
+                if (listContainer && data.notifications) {
+                    if (data.notifications.length === 0) {
+                        listContainer.innerHTML = '<li><span class="dropdown-item-text text-muted small py-4 text-center d-block">Nenhuma notificação recente</span></li>';
+                        if (markAllBtn) markAllBtn.style.display = 'none';
+                    } else {
+                        if (markAllBtn) markAllBtn.style.display = 'block';
+                        let html = '';
+                        data.notifications.forEach(notif => {
+                            // Format date roughly (could use better date formatting)
+                            let dateStr = new Date(notif.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit' });
+                            let icon = notif.type === 'system' ? 'bi-info-circle' : 'bi-bell';
+                            let iconColor = notif.type === 'system' ? 'text-primary' : 'text-warning';
+                            
+                            html += `
+                                <li>
+                                    <a class="dropdown-item py-3 border-bottom d-flex gap-3 align-items-start ${notif.read_at ? 'bg-transparent' : 'bg-light'}" 
+                                       href="${notif.link_url || '#'}" 
+                                       onclick="markNotificationRead(${notif.id})">
+                                        <div class="mt-1"><i class="bi ${icon} ${iconColor} fs-5"></i></div>
+                                        <div class="flex-grow-1 text-wrap">
+                                            <div class="fw-bold text-dark" style="font-size: 0.85rem; line-height: 1.2;">${notif.title}</div>
+                                            <div class="text-secondary mt-1" style="font-size: 0.8rem; line-height: 1.3;">${notif.message}</div>
+                                            <div class="text-muted mt-2" style="font-size: 0.7rem;">${dateStr}</div>
+                                        </div>
+                                    </a>
+                                </li>
+                            `;
+                        });
+                        listContainer.innerHTML = html;
+                    }
+                }
             } catch (e) {
                 // Silent fail
             }
         }
+        
+        // Expose functions globally foronclick
+        window.markNotificationRead = async function(id) {
+            try {
+                await fetch(`/admin/api/notifications/${id}/read`, { method: 'POST' });
+                // We don't await because the user is navigating away usually
+            } catch (e) {}
+        };
+        
+        const markAllBtn = document.getElementById('markAllReadBtn');
+        if (markAllBtn) {
+            markAllBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                e.stopPropagation(); // Keep dropdown open
+                try {
+                    await fetch('/admin/api/notifications/read-all', { method: 'POST' });
+                    updateNotificationBadge();
+                } catch (e) {}
+            });
+        }
+
         updateNotificationBadge();
         setInterval(updateNotificationBadge, 60000);
     })();
