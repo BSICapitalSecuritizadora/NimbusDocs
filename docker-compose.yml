@@ -47,6 +47,7 @@ services:
       - nimbus-network
     depends_on:
       - db
+    user: "www-data"
     command: ["php", "bin/notifications-worker.php"]
 
   # Database Service
