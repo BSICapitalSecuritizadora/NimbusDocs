@@ -32,13 +32,13 @@ final class MySqlPortalAccessLogRepository
         }
 
         if (!empty($filters['action'])) {
-            $where[] = 'l.action = :action';
-            $params[':action'] = $filters['action'];
+            $where[] = 'l.action LIKE :action';
+            $params[':action'] = '%' . $filters['action'] . '%';
         }
 
         if (!empty($filters['resource_type'])) {
-            $where[] = 'l.resource_type = :rtype';
-            $params[':rtype'] = $filters['resource_type'];
+            $where[] = 'l.resource_type LIKE :rtype';
+            $params[':rtype'] = '%' . $filters['resource_type'] . '%';
         }
 
         if (!empty($filters['from_date'])) {
