@@ -24,13 +24,16 @@ final class MySqlPortalAnnouncementRepository
             SELECT id, title, body, level, starts_at, ends_at
             FROM portal_announcements
             WHERE is_active = 1
-              AND (starts_at IS NULL OR starts_at <= :now)
-              AND (ends_at   IS NULL OR ends_at   >= :now)
+              AND (starts_at IS NULL OR starts_at <= :now1)
+              AND (ends_at   IS NULL OR ends_at   >= :now2)
             ORDER BY created_at DESC
         ';
 
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':now' => $now]);
+        $stmt->execute([
+            ':now1' => $now,
+            ':now2' => $now,
+        ]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }

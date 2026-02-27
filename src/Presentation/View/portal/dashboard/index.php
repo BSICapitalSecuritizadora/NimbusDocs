@@ -39,7 +39,7 @@ $firstName = explode(' ', $user['full_name'] ?? $user['email'])[0];
                     </div>
                     <div class="nd-announcement-content">
                         <h6 class="nd-announcement-title"><?= htmlspecialchars($ann['title'] ?? 'Aviso', ENT_QUOTES) ?></h6>
-                        <p class="nd-announcement-text"><?= htmlspecialchars($ann['content'] ?? '', ENT_QUOTES) ?></p>
+                        <p class="nd-announcement-text"><?= htmlspecialchars($ann['body'] ?? '', ENT_QUOTES) ?></p>
                     </div>
                     <small class="nd-announcement-date">
                         <?= date('d/m/Y', strtotime($ann['created_at'] ?? 'now')) ?>
