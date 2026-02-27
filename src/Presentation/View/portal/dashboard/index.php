@@ -32,21 +32,52 @@ $firstName = explode(' ', $user['full_name'] ?? $user['email'])[0];
     <!-- Announcements (if any) -->
     <?php if (!empty($announcements)): ?>
         <div class="nd-announcements mb-4">
-            <?php foreach (array_slice($announcements, 0, 2) as $ann): ?>
-                <div class="nd-announcement-card">
-                    <div class="nd-announcement-icon">
-                        <i class="bi bi-megaphone-fill"></i>
+            <?php foreach ($announcements as $ann): ?>
+                <?php
+                $level = $ann['level'] ?? 'info';
+                $config = match(strtolower($level)) {
+                    'danger', 'urgente' => ['class' => 'danger', 'icon' => 'bi-exclamation-octagon-fill', 'label' => 'Urgente', 'color' => '#dc2626', 'bg' => '#fef2f2'],
+                    'warning', 'atenção', 'atencao' => ['class' => 'warning', 'icon' => 'bi-exclamation-triangle-fill', 'label' => 'Atenção', 'color' => '#d97706', 'bg' => '#fffbeb'],
+                    'success', 'positivo' => ['class' => 'success', 'icon' => 'bi-check-circle-fill', 'label' => 'Positivo', 'color' => '#059669', 'bg' => '#ecfdf5'],
+                    default => ['class' => 'info', 'icon' => 'bi-info-circle-fill', 'label' => 'Informativo', 'color' => '#0284c7', 'bg' => '#f0f9ff'],
+                };
+                ?>
+                <div class="nd-announcement-card" id="ann-<?= $ann['id'] ?>" style="border-left: 4px solid <?= $config['color'] ?>;">
+                    <div class="nd-announcement-icon" style="background: <?= $config['bg'] ?>; color: <?= $config['color'] ?>;">
+                        <i class="bi <?= $config['icon'] ?>"></i>
                     </div>
-                    <div class="nd-announcement-content">
-                        <h6 class="nd-announcement-title"><?= htmlspecialchars($ann['title'] ?? 'Aviso', ENT_QUOTES) ?></h6>
-                        <p class="nd-announcement-text"><?= htmlspecialchars($ann['body'] ?? '', ENT_QUOTES) ?></p>
+                    <div class="nd-announcement-content" style="flex: 1;">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge" style="background: <?= $config['color'] ?>; font-weight: 600; font-size: 0.65rem; padding: 0.35em 0.65em; border-radius: 4px;"><?= mb_strtoupper($config['label']) ?></span>
+                            <h6 class="nd-announcement-title mb-0"><?= htmlspecialchars($ann['title'] ?? 'Aviso', ENT_QUOTES) ?></h6>
+                        </div>
+                        <p class="nd-announcement-text mt-1"><?= htmlspecialchars($ann['body'] ?? '', ENT_QUOTES) ?></p>
                     </div>
-                    <small class="nd-announcement-date">
-                        <?= date('d/m/Y', strtotime($ann['created_at'] ?? 'now')) ?>
-                    </small>
+                    <div class="d-flex flex-column align-items-end ms-3">
+                        <button type="button" class="btn-close mb-auto" aria-label="Close" onclick="dismissAnnouncement(<?= $ann['id'] ?>)" style="font-size: 0.75rem; opacity: 0.6;" title="Fechar aviso"></button>
+                        <small class="nd-announcement-date mt-3">
+                            <?= date('d/m/Y', strtotime($ann['created_at'] ?? 'now')) ?>
+                        </small>
+                    </div>
                 </div>
+                <script>
+                    if (localStorage.getItem('nd_ann_dismissed_' + <?= $ann['id'] ?>)) {
+                        document.getElementById('ann-<?= $ann['id'] ?>').style.display = 'none';
+                    }
+                </script>
             <?php endforeach; ?>
         </div>
+        <script>
+            function dismissAnnouncement(id) {
+                localStorage.setItem('nd_ann_dismissed_' + id, 'true');
+                const el = document.getElementById('ann-' + id);
+                if (el) {
+                    el.style.opacity = '0';
+                    el.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => el.style.display = 'none', 300);
+                }
+            }
+        </script>
     <?php endif; ?>
 
     <!-- Stats Cards -->
